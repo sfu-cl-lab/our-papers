@@ -1,0 +1,94 @@
+create table nhl_jeffery_tree.sum_avg_2007_2008 select A.PlayerId, SUM(A.avga) as Impact from (select AVG(ActionValue) as avga, PlayerId, FromNodeId from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2007 group by PlayerId, FromNodeId) as A group by PlayerId;
+
+create table nhl_jeffery_tree.sum_avg_2008_2009 select A.PlayerId, SUM(A.avga) as Impact from (select AVG(ActionValue) as avga, PlayerId, FromNodeId from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2008 group by PlayerId, FromNodeId) as A group by PlayerId;
+create table nhl_jeffery_tree.sum_avg_2009_2010 select A.PlayerId, SUM(A.avga) as Impact from (select AVG(ActionValue) as avga, PlayerId, FromNodeId from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2009 group by PlayerId, FromNodeId) as A group by PlayerId;
+create table nhl_jeffery_tree.sum_avg_2010_2011 select A.PlayerId, SUM(A.avga) as Impact from (select AVG(ActionValue) as avga, PlayerId, FromNodeId from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2010 group by PlayerId, FromNodeId) as A group by PlayerId;
+create table nhl_jeffery_tree.sum_avg_2011_2012 select A.PlayerId, SUM(A.avga) as Impact from (select AVG(ActionValue) as avga, PlayerId, FromNodeId from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2011 group by PlayerId, FromNodeId) as A group by PlayerId;
+create table nhl_jeffery_tree.sum_avg_2012_2013 select A.PlayerId, SUM(A.avga) as Impact from (select AVG(ActionValue) as avga, PlayerId, FromNodeId from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2012 group by PlayerId, FromNodeId) as A group by PlayerId;
+create table nhl_jeffery_tree.sum_avg_2013_2014 select A.PlayerId, SUM(A.avga) as Impact from (select AVG(ActionValue) as avga, PlayerId, FromNodeId from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2013 group by PlayerId, FromNodeId) as A group by PlayerId;
+create table nhl_jeffery_tree.sum_avg_2014_2015 select A.PlayerId, SUM(A.avga) as Impact from (select AVG(ActionValue) as avga, PlayerId, FromNodeId from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2014 group by PlayerId, FromNodeId) as A group by PlayerId;
+
+
+
+
+
+
+
+
+
+create table nhl_player_valuation_temp.TOI_2007 select PlayerId, Impact/TOI as Impact_TOI from nhl_final_player_valuations.player_impact_statistics_2007_2008_regular_season;
+create table nhl_player_valuation_temp.TOI_2008 select PlayerId, Impact/TOI as Impact_TOI from nhl_final_player_valuations.player_impact_statistics_2008_2009_regular_season;
+create table nhl_player_valuation_temp.TOI_2009 select PlayerId, Impact/TOI as Impact_TOI from nhl_final_player_valuations.player_impact_statistics_2009_2010_regular_season;
+create table nhl_player_valuation_temp.TOI_2010 select PlayerId, Impact/TOI as Impact_TOI from nhl_final_player_valuations.player_impact_statistics_2010_2011_regular_season;
+create table nhl_player_valuation_temp.TOI_2011 select PlayerId, Impact/TOI as Impact_TOI from nhl_final_player_valuations.player_impact_statistics_2011_2012_regular_season;
+create table nhl_player_valuation_temp.TOI_2012 select PlayerId, Impact/TOI as Impact_TOI from nhl_final_player_valuations.player_impact_statistics_2012_2013_regular_season;
+create table nhl_player_valuation_temp.TOI_2013 select PlayerId, Impact/TOI as Impact_TOI from nhl_final_player_valuations.player_impact_statistics_2013_2014_regular_season;
+create table nhl_player_valuation_temp.TOI_2014 select PlayerId, Impact/TOI as Impact_TOI from nhl_final_player_valuations.player_impact_statistics_2014_2015_regular_season;
+
+
+
+create table nhl_player_valuation_temp.game_played_2007 select PlayerId, Impact/GamesPlayed as Impact_game_played from nhl_final_player_valuations.player_impact_statistics_2007_2008_regular_season;
+create table nhl_player_valuation_temp.game_played_2008 select PlayerId, Impact/GamesPlayed as Impact_game_played from nhl_final_player_valuations.player_impact_statistics_2008_2009_regular_season;
+create table nhl_player_valuation_temp.game_played_2009 select PlayerId, Impact/GamesPlayed as Impact_game_played from nhl_final_player_valuations.player_impact_statistics_2009_2010_regular_season;
+create table nhl_player_valuation_temp.game_played_2010 select PlayerId, Impact/GamesPlayed as Impact_game_played from nhl_final_player_valuations.player_impact_statistics_2010_2011_regular_season;
+create table nhl_player_valuation_temp.game_played_2011 select PlayerId, Impact/GamesPlayed as Impact_game_played from nhl_final_player_valuations.player_impact_statistics_2011_2012_regular_season;
+create table nhl_player_valuation_temp.game_played_2012 select PlayerId, Impact/GamesPlayed as Impact_game_played from nhl_final_player_valuations.player_impact_statistics_2012_2013_regular_season;
+create table nhl_player_valuation_temp.game_played_2013 select A.PlayerId, A.Impact/B.GamesPlayed as Impact_game_played from nhl_final_player_valuations.player_impact_statistics_2013_2014_regular_season as A, nhl_player_valuations_win.player_impact_statistics_2013_2014_regular_season as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.game_played_2014 select PlayerId, Impact/GamesPlayed as Impact_game_played from nhl_final_player_valuations.player_impact_statistics_2014_2015_regular_season;
+
+
+create TEMPORARY table nhl_player_valuation_temp.gamecount_2007 select PlayerId, count(*) as event_count from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2007 group by PlayerId;
+create table nhl_player_valuation_temp.event_played_2007 select A.PlayerId, A.Impact/B.event_count as Impact_event_played from nhl_final_player_valuations.player_impact_statistics_2007_2008_regular_season as A, nhl_player_valuation_temp.gamecount_2007 as B where A.PlayerId=B.PlayerId;
+
+create TEMPORARY table nhl_player_valuation_temp.gamecount_2008 select PlayerId, count(*) as event_count from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2008 group by PlayerId;
+create table nhl_player_valuation_temp.event_played_2008 select A.PlayerId, A.Impact/B.event_count as Impact_event_played from nhl_final_player_valuations.player_impact_statistics_2008_2009_regular_season as A, nhl_player_valuation_temp.gamecount_2008 as B where A.PlayerId=B.PlayerId;
+
+create TEMPORARY table nhl_player_valuation_temp.gamecount_2009 select PlayerId, count(*) as event_count from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2009 group by PlayerId;
+create table nhl_player_valuation_temp.event_played_2009 select A.PlayerId, A.Impact/B.event_count as Impact_event_played from nhl_final_player_valuations.player_impact_statistics_2009_2010_regular_season as A, nhl_player_valuation_temp.gamecount_2009 as B where A.PlayerId=B.PlayerId;
+
+create TEMPORARY table nhl_player_valuation_temp.gamecount_2010 select PlayerId, count(*) as event_count from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2010 group by PlayerId;
+create table nhl_player_valuation_temp.event_played_2010 select A.PlayerId, A.Impact/B.event_count as Impact_event_played from nhl_final_player_valuations.player_impact_statistics_2010_2011_regular_season as A, nhl_player_valuation_temp.gamecount_2010 as B where A.PlayerId=B.PlayerId;
+
+create TEMPORARY table nhl_player_valuation_temp.gamecount_2011 select PlayerId, count(*) as event_count from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2011 group by PlayerId;
+create table nhl_player_valuation_temp.event_played_2011 select A.PlayerId, A.Impact/B.event_count as Impact_event_played from nhl_final_player_valuations.player_impact_statistics_2011_2012_regular_season as A, nhl_player_valuation_temp.gamecount_2011 as B where A.PlayerId=B.PlayerId;
+
+create TEMPORARY table nhl_player_valuation_temp.gamecount_2012 select PlayerId, count(*) as event_count from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2012 group by PlayerId;
+create table nhl_player_valuation_temp.event_played_2012 select A.PlayerId, A.Impact/B.event_count as Impact_event_played from nhl_final_player_valuations.player_impact_statistics_2012_2013_regular_season as A, nhl_player_valuation_temp.gamecount_2012 as B where A.PlayerId=B.PlayerId;
+
+create TEMPORARY table nhl_player_valuation_temp.gamecount_2013 select PlayerId, count(*) as event_count from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2013 group by PlayerId;
+create table nhl_player_valuation_temp.event_played_2013 select A.PlayerId, A.Impact/B.event_count as Impact_event_played from nhl_final_player_valuations.player_impact_statistics_2013_2014_regular_season as A, nhl_player_valuation_temp.gamecount_2013 as B where A.PlayerId=B.PlayerId;
+
+create TEMPORARY table nhl_player_valuation_temp.gamecount_2014 select PlayerId, count(*) as event_count from nhl_final_player_valuations.playervaluations where Floor(GameId/1000000)=2014 group by PlayerId;
+create table nhl_player_valuation_temp.event_played_2014 select A.PlayerId, A.Impact/B.event_count as Impact_event_played from nhl_final_player_valuations.player_impact_statistics_2014_2015_regular_season as A, nhl_player_valuation_temp.gamecount_2014 as B where A.PlayerId=B.PlayerId;
+
+
+
+create table nhl_player_valuation_temp.TOI_2007_2008 select A.PlayerId, A.Impact_TOI as Impact1, B.Impact_TOI as Impact2 from nhl_player_valuation_temp.TOI_2007 as A, nhl_player_valuation_temp.TOI_2008 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.TOI_2008_2009 select A.PlayerId, A.Impact_TOI as Impact1, B.Impact_TOI as Impact2 from nhl_player_valuation_temp.TOI_2008 as A, nhl_player_valuation_temp.TOI_2009 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.TOI_2009_2010 select A.PlayerId, A.Impact_TOI as Impact1, B.Impact_TOI as Impact2 from nhl_player_valuation_temp.TOI_2009 as A, nhl_player_valuation_temp.TOI_2010 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.TOI_2010_2011 select A.PlayerId, A.Impact_TOI as Impact1, B.Impact_TOI as Impact2 from nhl_player_valuation_temp.TOI_2010 as A, nhl_player_valuation_temp.TOI_2011 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.TOI_2011_2012 select A.PlayerId, A.Impact_TOI as Impact1, B.Impact_TOI as Impact2 from nhl_player_valuation_temp.TOI_2011 as A, nhl_player_valuation_temp.TOI_2012 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.TOI_2012_2013 select A.PlayerId, A.Impact_TOI as Impact1, B.Impact_TOI as Impact2 from nhl_player_valuation_temp.TOI_2012 as A, nhl_player_valuation_temp.TOI_2013 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.TOI_2013_2014 select A.PlayerId, A.Impact_TOI as Impact1, B.Impact_TOI as Impact2 from nhl_player_valuation_temp.TOI_2013 as A, nhl_player_valuation_temp.TOI_2014 as B where A.PlayerId=B.PlayerId;
+
+
+
+create table nhl_player_valuation_temp.game_played_2007_2008 select A.PlayerId, A.Impact_game_played as Impact1, B.Impact_game_played as Impact2 from nhl_player_valuation_temp.game_played_2007 as A, nhl_player_valuation_temp.game_played_2008 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.game_played_2008_2009 select A.PlayerId, A.Impact_game_played as Impact1, B.Impact_game_played as Impact2 from nhl_player_valuation_temp.game_played_2008 as A, nhl_player_valuation_temp.game_played_2009 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.game_played_2009_2010 select A.PlayerId, A.Impact_game_played as Impact1, B.Impact_game_played as Impact2 from nhl_player_valuation_temp.game_played_2009 as A, nhl_player_valuation_temp.game_played_2010 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.game_played_2010_2011 select A.PlayerId, A.Impact_game_played as Impact1, B.Impact_game_played as Impact2 from nhl_player_valuation_temp.game_played_2010 as A, nhl_player_valuation_temp.game_played_2011 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.game_played_2011_2012 select A.PlayerId, A.Impact_game_played as Impact1, B.Impact_game_played as Impact2 from nhl_player_valuation_temp.game_played_2011 as A, nhl_player_valuation_temp.game_played_2012 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.game_played_2012_2013 select A.PlayerId, A.Impact_game_played as Impact1, B.Impact_game_played as Impact2 from nhl_player_valuation_temp.game_played_2012 as A, nhl_player_valuation_temp.game_played_2013 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.game_played_2013_2014 select A.PlayerId, A.Impact_game_played as Impact1, B.Impact_game_played as Impact2 from nhl_player_valuation_temp.game_played_2013 as A, nhl_player_valuation_temp.game_played_2014 as B where A.PlayerId=B.PlayerId;
+
+
+create table nhl_player_valuation_temp.event_played_2007_2008 select A.PlayerId, A.Impact_event_played as Impact1, B.Impact_event_played as Impact2 from nhl_player_valuation_temp.event_played_2007 as A, nhl_player_valuation_temp.event_played_2008 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.event_played_2008_2009 select A.PlayerId, A.Impact_event_played as Impact1, B.Impact_event_played as Impact2 from nhl_player_valuation_temp.event_played_2008 as A, nhl_player_valuation_temp.event_played_2009 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.event_played_2009_2010 select A.PlayerId, A.Impact_event_played as Impact1, B.Impact_event_played as Impact2 from nhl_player_valuation_temp.event_played_2009 as A, nhl_player_valuation_temp.event_played_2010 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.event_played_2010_2011 select A.PlayerId, A.Impact_event_played as Impact1, B.Impact_event_played as Impact2 from nhl_player_valuation_temp.event_played_2010 as A, nhl_player_valuation_temp.event_played_2011 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.event_played_2011_2012 select A.PlayerId, A.Impact_event_played as Impact1, B.Impact_event_played as Impact2 from nhl_player_valuation_temp.event_played_2011 as A, nhl_player_valuation_temp.event_played_2012 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.event_played_2012_2013 select A.PlayerId, A.Impact_event_played as Impact1, B.Impact_event_played as Impact2 from nhl_player_valuation_temp.event_played_2012 as A, nhl_player_valuation_temp.event_played_2013 as B where A.PlayerId=B.PlayerId;
+create table nhl_player_valuation_temp.event_played_2013_2014 select A.PlayerId, A.Impact_event_played as Impact1, B.Impact_event_played as Impact2 from nhl_player_valuation_temp.event_played_2013 as A, nhl_player_valuation_temp.event_played_2014 as B where A.PlayerId=B.PlayerId;
+
+
+

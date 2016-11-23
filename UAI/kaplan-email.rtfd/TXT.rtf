@@ -1,0 +1,149 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red16\green73\blue188;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f0\fs36 \cf2 From: "Kaplan, Edward H" <edward.kaplan@yale.edu>\
+Subject: Hamilton-Jacobi, Pettigrew, hockey, and terrorism!\
+Date: July 12, 2015 at 17:30:59 GMT+2\
+To: "oschulte@cs.sfu.ca" <oschulte@cs.sfu.ca>\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\fs24 \cf2 \
+\pard\pardeftab720
+
+\fs32 \cf2 Hi Oliver. \'a0This is fun. \'a0I took a look at the Pettigrew paper (and also sent him a copy of mine, mentioning your referral). \'a0He does have a similar state structure, and similar data -- empirical win probabilities given goal and manpower differential. \'a0But his model for win probabilities is not derived from the Markov state-transition equations (Chapman-Kolmogorov) -- rather, he fits polynomial functions to the observed win probabilities to obtain smooth curves, and then uses those as the basis for computing WPA. \'a0While numerically the results are probably close to what we have (assuming the curves are well-fit, which they appear to be), the nice thing about the direct Markov approach is that the observed win probabilities are not used anywhere to calibrate the model -- only the observed state transition rates are used to deduce the win probabilities. \'a0In this way, I would argue that we have a better test of the Markov assumptions (as covered in the appendix to our paper). \'a0Also, not clear how curve fitting would handle overtime properly without putting in explicit conditions that tie games at the end of overtime must yield a 50% win probability (or empirical equivalent if not exactly 50%).\
+\
+As for Hamilton- Jacobi, yes, I know about these sorts of models in other contexts -- a recent paper on optimal control and terrorism is attached. \'a0The only application in hockey I know of is the optimal time to pull the goalie papers -- the paper by Al Washburn at the Naval Postgraduate School from several years ago is a very nice example. \'a0I will go back to your paper to see just how you are using this. \'a0I confess complete ignorance of machine learning, which might be a good reason to collaborate as I could learn from you!\
+\
+Hope you are enjoying yourself! \'a0Best, Ed K.\
+\
+Edward H. Kaplan, Ph.D.\
+William N. and Marie A. Beach Professor of Operations Research\
+Professor of Public Health\
+Professor of Engineering\
+Yale School of Management\
+Box 208200\
+New Haven, Connecticut 06520-8200\
+\
+Phone: \'a0203-432-6031\
+e-mail: edward.kaplan@yale.edu\
+\
+http://faculty.som.yale.edu/EdKaplan/\
+\
+==============================================================================================================================================\
+\
+\
+Hi Ed,\
+\
+thank you for the quick reply. \
+\
+Very interesting hypotheses about the goal scoring rates. To some extent we can check them against our data, as you suggest. I really appreciate your suggestions here, like about shot quality. I will ask my colleague Tim Swartz about this, he has great intuitions about sports.\
+\
+Pettigrew also presents a continuous Poission model and uses second-by-second discretization. In Markov game theory the basic approach is to solve the differential equation (the Hamilton-Jacobi equation https://en.wikipedia.org/wiki/Hamilton%E2%80%93Jacobi%E2%80%93Bellman_equation). I think I saw a solution given for the special case of Poisson transitions models somewhere. Solving for optimal actions isn\'92t the same thing as solving for w(x,y,t), but the existing mathematics could be a starting point. If you are interested in discussing or even collaborating on this, we could use the help :-) But I understand that you are busy.\
+\
+Great idea about comparing win probability added with independent quality measures. We\'92ve looked at salary so far. The UAI reviewers also suggested using WPA to make predictions, perhaps about which players will score points next season, or about which teams will win. Pettigrew emphasizes consistency of win probability added across seasons as an important desideratum. \
+\
+Thank you for the insightful comments, and taking the time to write them down, it\'92s very helpful!\
+\
+Regards,\
+\
+Oliver \
+\
+-----------------------------------------------------------------------------------------------------\
+\
+Oliver Schulte E-mail: oschulte@cs.sfu.ca\
+Simon Fraser University Phone: (778) 782-3390\
+Associate Professor Fax: (778) 782-3045\
+School of Computing Science\
+Web: http://www.cs.sfu.ca/~oschulte\
+TASC Building 9021\
+Work Schedule: see home page\
+Burnaby, B.C. V5A 1S6\
+Canada\
+\
+On Jul 11, 2015, at 19:14, Kaplan, Edward H <edward.kaplan@yale.edu> wrote:\
+\
+\pard\pardeftab720
+\cf3 Hi Oliver, and thanks for your kind note. \'a0Thanks also for the Pettigrew reference that I have not seen but will soon check out!\
+\
+RE: home ice advantage, I don\'92t really have an explanation for why the goal scoring rates are higher for the home team after adjusting for penalties. \'a0However, Toby Moskowitz, an economist and co-author of Scorecasting where the referee-bias argument is explained in some detail, is visiting Yale, and I asked him about this. \'a0He suggested that in addition to penalties, referees could exercise home ice bias by calling faceoffs in more advantageous ways (e.g. whether to stop play at all, or whether a faceoff is inside or outside the blue line, etc.). \'a0That seems to be something that you could check with your richer event data. \'a0Another economist here had a more game theoretic explanation that I find bizarre but apparently many of the economists find plausible, and that is that the visiting team players are cognizant of the *threat* of penalties being called more liberally against them as compared to the home team, and this causes them to play more cautiously, which in turn leads to lower goal scoring rates. \'a0Now, having grown up with hockey (I grew up in Saskatoon, Saskatchewan), I just have a hard time thinking that in the heat of a game, players could be occupied with such second order thinking. \'a0But, if you have a way of judging shot quality, then perhaps you can show that after adjusting for manpower differential, the home team has higher shot quality (either per shot, or perhaps at a higher rate; both presumably would lead to higher goal scoring rates).\
+\
+Finally, while I appreciate your excitement for the continuous model, I have to confess that the numerical solution resorts to discretization at a second-by-second level, but it just seemed much more natural to me to formulate the problem as a continuous process. \'a0This is also stated in the paper. \'a0Nonetheless I am also excited by the actual graph of w(x,y,t), especially when x=0 and t puts you in overtime \'96 that gives the comet-looking \'93swoosh\'94 at the end of the graph, and I love how everything converges back to \'bd if the game remains tied at the end of overtime regardless of manpower difference (due of course to the ensuing shootout).\
+\
+Anyway, thanks again for your note. \'a0We are hoping to get out a second paper that focuses on evaluating the win probability added for NHL players over four years, and comparing these results to other quality measures \'96 e.g. to the \'93three stars\'94 selected each game collectively have a distribution of win probability added that dominates the non-stars, does WPA match well with All Star or MVP selections, etc. \'a0But all that remains work in progress.\
+\
+Best, Ed K.\
+\
+From: Oliver Schulte [mailto:oschulte@cs.sfu.ca] \
+Sent: Saturday, July 11, 2015 12:42 PM\
+To: Kaplan, Edward H\
+Cc: kdr4@sfu.ca\
+Subject: Re: Markov hockey model\
+\
+Dear Ed,\
+\
+thank you for getting in touch and sending your paper. I think it\'92s very exciting! I think the general approach is on the same wavelength as ours, but there are many interesting differences as well that I will try to understand. In the UAI paper we presented results about scoring-next-goal-probability-added. In his thesis Kurt also gave results for win probability added. We\'92re working on a paper that compares our results about win probability added to previous work, so your paper is most welcome.\
+\
+I should really take my time to read through your paper carefully, but just a couple of quick comments on two things that caught my eye.\
+\
+1. Section 5: "Using the estimated transition rates reported in Table 1, we numerically solved equations (3)-(8) to obtain w(x,y,t),\'94\
+\
+I think solving for w(x,y,t) is a really nice contribution. We worked only with discrete transitions, partly because solving for w(x,y,t) in the continuous time Markov game model was an open item on the todo list. I except we can adapt \'a0your solution. Impressive that you\'92ve done it already. I also wonder if you\'92ve seen Pettigrew\'92s 2015 Sloan paper on win probability added in ice hockey. \
+\
+http://www.sloansportsconference.com/wp-content/uploads/2015/02/SSAC15-RP-Finalist-Assessing-the-offensive-productivity-of-NHL-players2.pdf \
+\
+He incorporates manpower and goal differential in the state as well. But if remember right, he does not solve for w(x,y,t) explicitly.\
+\
+2. Abstract: "The data reveal that even after control- ling for the home edge afforded by visiting teams being penalized more frequently than home teams, the goal scoring rate for the home team is higher than for visiting teams at most equivalent manpower differential levels.\'94\
+\
+We noticed the home ice advantage too (Table 4 in our paper) in fact you can control for period as well. What I don\'92t know who is how to explain the home ice advantage if it\'92s not referee bias. I\'92ll check your paper for possible explanations, I\'92d love to have an explanation that we can check in our dataset.\
+\
+Thank you again for sending the paper, it\'92s great to see such substantive work in the same spirit.\
+\
+Regards,\
+\
+Oliver \
+\
+-----------------------------------------------------------------------------------------------------\
+\
+Oliver Schulte \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0E-mail: oschulte@cs.sfu.ca\
+Simon Fraser University \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Phone: (778) 782-3390\
+Associate Professor \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Fax: (778) 782-3045\
+School of Computing Science \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Web: http://www.cs.sfu.ca/~oschulte\
+TASC Building \'a0\'a0\'a0\'a0\'a09021 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Work Schedule: see home page\
+Burnaby, B.C. V5A 1S6\
+Canada\
+\
+On Jul 11, 2015, at 1:45, Kaplan, Edward H <edward.kaplan@yale.edu> wrote:\
+\
+\
+Dear Kurt and Oliver,\
+\
+\'a0\'a0\'a0I just came across your Markov game model of hockey as summarized in the Proceedings of the upcoming UAI conference next week. \'a0My colleagues and I have just published a paper, attached, that models/applies win probability added (as deduced via a Markov model of hockey with a similar state-space as yours -- goal differential, score differential, and remaining game time, including overtime). \'a0We do not consider all the different hockey events that you have studied, nor do we use learning functions. \'a0Anyway, your paper looks very interesting (I have not yet had a chance to read it closely as I literally just found it moments ago), and I also thought you might enjoy seeing ours.\
+\
+\'a0\'a0\'a0Enjoy Amsterdam!\
+\
+Best, Ed K.\
+\
+Edward H. Kaplan, Ph.D.\
+William N. and Marie A. Beach Professor of Operations Research\
+Professor of Public Health\
+Professor of Engineering\
+Yale School of Management\
+Box 208200\
+New Haven, Connecticut 06520-8200\
+\
+Phone: \'a0203-432-6031\
+e-mail: edward.kaplan@yale.edu\
+\
+http://faculty.som.yale.edu/EdKaplan/\
+\
+<INFOR_Markov_Hockey_published.pdf>\
+\pard\pardeftab720
+\cf2 \
+\
+	\
+	\
+	Previous Item	Next Item	\
+}

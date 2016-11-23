@@ -1,0 +1,332 @@
+% Sample LaTeX file for creating a paper in the Morgan Kaufmannn two
+%9 pages without refs
+% column, 8 1/2 by 11 inch proceedings format.
+% May 15: make boxplot for entropy?
+% change introduction heading.
+% Thoughts on methodology
+% 1. Evaluate action in local context (sequence).
+% examples: shot is worth more in powerplay, second shot is worth more
+% 2. Evaluate action with transition to penalty. Evaluates path from local context to penalty.
+% 3. Evaluate action with arbitrary transition.
+% to evaluate predictive power: instead of log-likelihood, could compute entropy.
+% to replicate Shuckers: try using the average conditional probability difference over all states where an action is taken. don't see context = marginalize over context.
+% convergence condition: update converges if the difference between player value increases goes to 0 as k goes to infinity. This expresses a certain symmetry in the game.
+% questions for tim/Sloan
+%1. predict performance from one season to the next. E.g., does sum of impact predict next season
+%1a. What about evaluating action with respect to line? What about with respect to both players (e.g. in a hit).
+%2. run regression on context for each action.
+%3. evaluate what contributes to a penalty.
+%4. evaluate special players. Compare model for each player vs. adding a player weight.
+% interesting relational model: we actually know which two players are involved in an interaction. The way to model this is that both teams move, but the outcome is different depending on which team won. So you move to a different state.
+%Also, we could study autocorrelation among players on the same team.
+% Do we have to worry about substitutions (see Thomas?)
+
+\documentclass[]{article}
+\usepackage{proceed2e}
+
+% Set the typeface to Times Roman
+\usepackage{times}
+\usepackage{url}
+\usepackage[square]{natbib}
+\usepackage{varwidth}
+\input{preamble-stuff}
+
+\title{Supplementary Material for ``A Markov Game Model for Valuing Player Actions in Ice Hockey''}
+
+%Markov Games, see http://www.powershow.com/view/3d53a5-YmRmY/Game_Theory_Markov_Game_and_Markov_Decision_Processes_A_Concise_Survey_powerpoint_ppt_presentation
+% https://students.cs.byu.edu/~cs670ta/Fall2009/MinimaxQLearning.pdf
+% let's discuss if we want that terminology.
+
+%\author{} % LEAVE BLANK FOR ORIGINAL SUBMISSION.
+          % UAI  reviewing is double-blind.
+
+% The author names and affiliations should appear only in the accepted paper.
+%
+%\author{ {\bf Harry Q.~Bovik\thanks{Footnote for author to give an
+%alternate address.}} \\
+%Computer Science Dept. \\
+%Cranberry University\\
+%Pittsburgh, PA 15213 \\
+%\And
+%{\bf Coauthor}  \\
+%Affiliation          \\
+%Address \\
+%\And
+%{\bf Coauthor}   \\
+%Affiliation \\
+%Address    \\
+%(if needed)\\
+%}
+
+\author{ {\bf Kurt Routley}\\School of Computing Science\\Simon Fraser University\\Vancouver, BC, Canada\\kdr4@sfu.ca\\
+\And
+{\bf Oliver Schulte}\\School of Computing Science\\Simon Fraser University\\Vancouver, BC, Canada\\oschulte@cs.sfu.ca}
+
+\begin{document}
+
+\maketitle
+
+\section{LESION STUDY}
+\label{sec:lesion}
+
+We evaluate the components of our full model by considering simpler  models.
+
+\subsection{USING AVERAGE ACTION VALUES}
+
+We  compare context-aware action values vs. fixed action values (as in THoR) in terms of   the entropy of the Next Goal conditional probabilities. This quantifies the information lost by ignoring context.
+Table~\ref{table:entropy} shows the average entropy for context-aware and context-unaware probabilities.
+%
+%For each action-state pair, the compute the entropy of the corresponding Next Goal probability.
+%The average of these entropies is the action-state average.
+The {\em context-unaware} Next Goal probability for an action event, is the marginal probability obtained from action-state probabilities by averaging over all states where the action is taken. %For all action events, this marginal probability of Next Goal Away is between 47\% and 48\%.
+The marginal probability of the next goal leads to an average context-unaware entropy of 0.9971. The average of the context-aware entropies is 0.9540. The entropy improvement is statistically significant according to the paired t-test (p $=2.8\times10^{-8}$).
+Moreover, the variance of the context-aware entropy is considerable, which means that Next Goal predictions are in many states even more informative than the average entropy shown in Table~\ref{table:entropy}.%\footnote{can we add the standard deviation for context-aware entropy?}]
+%
+%, which is a lower uncertainty than the context-unaware model; but  these entropies show considerable variance, ranging smoothly from 0 to 1, with a large standard deviation of 0.1482.
+%The large standard deviation demonstrates that including context in the model causes the predictive uncertainty of each state to vary more than a context-unaware model, however, it tends to create higher predictive accuracy with a lower average entropy.
+
+
+\begin{table*}[htb]
+\caption{Context-Aware vs. Context-Unaware Entropies.}
+\label{table:entropy}
+\begin{center}
+%\resizebox{1\columnwidth}{!}{
+%\begin{tabular}{|r|r|r|r|}\hline
+%\bf{Context-Aware Average} & \bf{Standard Dev.} & \bf{Context-Unaware Average} & \bf{Standard Dev.}\\
+%0.9582 & 0.1482 & 0.9741 & 0.0012
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\bf{Action} & \begin{tabular}{c} \bf{Context-Unaware} \\ \textbf{Probability}\\ \bf{Of Next Goal} \end{tabular}
+& \begin{tabular}{c} \bf{Context-Unaware} \\ \textbf{Entropy} \end{tabular} & \begin{tabular}{c} \bf{Average} \\ \textbf{Context-Aware} \\ \textbf{Entropy} \end{tabular} & \begin{tabular}{c} \textbf{Context-Aware} \\ \textbf{Standard} \\ \textbf{Deviation} \end{tabular}\\ \hline
+Blocked Shot & 0.4840 & 0.9993 & \bf{0.9455} & 0.1981 \\ \hline
+Faceoff (Defensive) & 0.4828 & 0.9991 & \bf{0.9913} & 0.0539 \\ \hline
+Faceoff (Neutral) & 0.5025 & 1.0000 & \bf{0.9944} & 0.0541 \\ \hline
+Faceoff (Offensive) & 0.5335 & 0.9968 & \bf{0.9876} & 0.0578 \\ \hline
+Giveaway & 0.4907 & 0.9997 & \bf{0.9271} & 0.0283 \\ \hline
+Hit & 0.4985 & 1.0000 & \bf{0.9462} & 0.0233 \\ \hline
+Missed Shot & 0.5178 & 0.9991 & \bf{0.9413} & 0.0280 \\ \hline
+Penalty & 0.4442 & 0.9910 & \bf{0.9833} & 0.0219 \\ \hline
+Shot & 0.5673 & 0.9869 & \bf{0.8951} & 0.0386 \\ \hline
+Takeaway & 0.5125 & 0.9995 & \bf{0.9279} & 0.0276 \\ \hline
+\hline
+\multicolumn{2}{|c|}{Average Entropy Over Actions} & 0.9971 & \bf{0.9540} & \\ \hline
+\end{tabular}
+%}
+\end{center}
+\end{table*}
+
+
+
+\subsection{EXAMING PROPAGATION EFFECTS}
+\label{subsec:lesion-study}
+
+
+The transition graph construction algorithm facilitates changing the possible state transitions. We utilize this in our experiments to study how different propagation models affect the impact of actions on Next Goal Scored. Specifically, we consider three different transitions graphs of increasing density, their sizes shown in Table~\ref{table:size-of-graphs}. The number of states/nodes 1,325,809 is the same for all graphs.
+
+\begin{description}
+\item[Local Transitions Only]  State transitions occur only within a play sequence, not across play sequences.
+\item[Penalty Transitions] State transitions occur from penalty leaf nodes to successor context nodes.
+\item[Full Transition Graph] Includes loopback edges from all leaf nodes to context nodes, as defined in Section 4.2. of the main paper.
+%Section~\ref{subsec:play-sequences}.
+\end{description}
+
+\begin{table}[htbp]
+\caption{Size of State Transition Graphs}
+\label{table:size-of-graphs}
+\begin{center}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|l|c|c|c|}
+\hline
+& \bf{Local} & \bf{Penalty} & \bf{Full} \\ \hline
+%\bf{Number of Nodes} & 1,325,809 & 1,325,809 & 1,325,809 \\ \hline
+\bf{Number of Edges} & 1,325,808 & 1,382,780 & 1,662,504 \\ \hline
+\end{tabular}
+}
+\end{center}
+\end{table}
+
+
+%Three different state transition graphs were used in our experiments as outlined in Section~\ref{subsec:mdp-construction}.
+Action impact changes value depending on the state transition graph. The average differences in action values of the same states across different transition graphs, as well as the standard deviation of the differences, are shown in Table~\ref{table:change-in-action-values}. The table shows that the estimated impact on who scores the next goal changes as more information is propagated between states.
+
+
+{\em Penalty vs. Local.}
+With the local transition graph, value iteration computes the impact of an action on the current play sequence only. This means that the next play sequence is not considered during look-ahead. In hockey terms, with the local transition graph, the model is not aware that a penalty is followed by a powerplay.
+The local Q-value differential for context states, with the initial empty play sequence, can be obtained from Table 4 of the main paper
+%Table~\ref{table:context-statistics} 
+(last two columns).
+The penalty transition graph propagates to the next sequence the effect of penalties only. This means that the next play sequence is considered during look-ahead only if the current sequence ends with a penalty.
+Propagating the effect of penalties changes most the estimation of the impact of penalties. This change reflects that receiving a penalty lowers the chances of scoring the next goal.
+Less obviously, winning a faceoff in the offensive zone has a relatively high positive indirect impact on scoring the next goal, via increasing the probability of a penalty against the opposing team.
+The effect of winning an offensive zone faceoff can also be seen in Figure 2.
+%Figure~\ref{fig:penalty-impact}.
+
+{\em Full vs. Penalty.} In hockey terms, with the penalty transition graph, the model is aware that a penalty is followed by a {\em single} powerplay sequence. But if more than one sequence occurs in the same powerplay, the second sequence is ignored in the lookahead (unless it also ends in a penalty). The full transition graph propagates the information about the manpower advantage to the next sequence.
+% (until the context features are updated when the dynamics reaches a new context state.
+Comparing the full transition graph with penalty propagation only, we still find the strongest average impact change for penalties. The simplest explanation of this result is that in hockey, the effect of penalties often goes beyond a single play sequence, and the full transition graph captures more of this medium-term effect.
+%This shows that penalties have ripple effects on goals via events other than penalties.
+%Scoring a goal also has a long-term effect of increasing the change of a penalty, as shown in Figure~\ref{fig:penalty-impact}.
+%This indirect impact is shared by Offensive Zone Faceoff Wins. %, via their impact on Penalties.
+
+While the aggregate differential effects show that more propagation leads to more informative results on average, the variance of the impact differentials show that in many states, propagation provides even more information than the averages in Table~\ref{table:change-in-action-values} suggest.
+%they do not reflect the considerable context dependence  of the impact differentials shown by the standard deviations.
+
+\begin{table}[htbp]
+\caption{Action Impact {\em Differences} For The Next Goal Depending on Propagation Model.}
+\label{table:change-in-action-values}
+\begin{center}
+\resizebox{1\columnwidth}{!}{
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+& \multicolumn{2}{|c|}{\bf{Full vs. Penalty}} & \multicolumn{2}{|c|}{\bf{Penalty vs. Local}} \\ \cline{2-5}
+\bf{Action} & \bf{Average} & \bf{Std. Dev.} & \bf{Average} & \bf{Std. Dev.}\\ \hline
+Blocked Shot & 0.0001 & 0.0210 & -0.0003 & 0.0126 \\ \hline
+Faceoff (Defensive) & -0.0030 & 0.0455 & -0.0018 & 0.0225 \\ \hline
+Faceoff (Neutral) & 0.0013 & 0.0464 & 0.0006 & 0.0203 \\ \hline
+Faceoff (Offensive) & 0.0038 & 0.0432 & 0.0024 & 0.0260 \\ \hline
+Giveaway & -0.0003 & 0.0245 & -0.0001 & 0.0142 \\ \hline
+Hit & 0.0000 & 0.0194 & -0.0001 & 0.0126 \\ \hline
+Missed Shot & -0.0001 & 0.0218 & 0.0003 & 0.0130 \\ \hline
+Penalty & \bf{-0.0190} & 0.0278 & \bf{-0.0235} & 0.0337 \\ \hline
+Shot & 0.0002 & 0.0191 & 0.0002 & 0.0103 \\ \hline
+Takeaway & 0.0006 & 0.0245 & 0.0003 & 0.0146 \\ \hline
+\end{tabular}
+}
+\end{center}
+\end{table}
+
+%\begin{table}[htb]
+%\caption{Difference In Action Impact Values for Next Goal Scored, for different transition graphs.}
+%\label{table:change-in-action-values}
+%\begin{center}
+%\resizebox{1\columnwidth}{!}{
+%\begin{tabular}{|l|r|r|r|r|}
+%\hline
+%\bf{Action} & \bf{Full - Local} & \bf{Full - Penalty} & \bf{Penalty - Local} \\ \hline
+%Blocked Shot & -0.0002 & 0.0001 & -0.0003 \\ \hline
+%Faceoff (Defensive) & -0.0048 & -0.0030 & -0.0018 \\ \hline
+%Faceoff (Neutral) & 0.0018 & 0.0013 & 0.0006 \\ \hline
+%Faceoff (Offensive) & 0.0062 & 0.0038 & 0.0024 \\ \hline
+%Giveaway & -0.0004 & -0.0003 & -0.0001 \\ \hline
+%Hit & 0.0000 & 0.0000 & -0.0001 \\ \hline
+%Missed Shot & 0.0002 & -0.0001 & 0.0003 \\ \hline
+%Penalty & -0.0425 & -0.0190 & -0.0235 \\ \hline
+%Shot & 0.0005 & 0.0002 & 0.0002 \\ \hline
+%Takeaway & 0.0008 & 0.0006 & 0.0003 \\ \hline
+% & \multicolumn{2}{|c|}{\bf{Full vs. Local}} & \multicolumn{2}{|c|}{\bf{Full vs. Penalty}} \\ \hline
+%\bf{Action} & \bf{Average} & \bf{Std. Dev.} & \bf{Average} & \bf{Std. Dev.}\\ \hline
+%Blocked Shot & -0.0002 & 0.0386 & 0.0001 & 0.0210 \\ \hline
+%Faceoff (Defensive) & -0.0048 & 0.0554 & -0.0030 & 0.0455 \\ \hline
+%Faceoff (Neutral) & 0.0018 & 0.0538 & 0.0013 & 0.0464 \\ \hline
+%Faceoff (Offensive) & {\em 0.0062} & 0.0555 & {\em 0.0038} & 0.0432 \\ \hline
+%Giveaway & -0.0004 & 0.0331 & -0.0003 & 0.0245 \\ \hline
+%Hit & 0.0000 & 0.0279 & 0.0000 & 0.0194 \\ \hline
+%Missed Shot & 0.0002 & 0.0297 & -0.0001 & 0.0218 \\ \hline
+%Penalty & \bf{-0.0425} & 0.0609 & \bf{-0.0190} & 0.0278 \\ \hline
+%Shot & 0.0005 & 0.0248 & 0.0002 & 0.0191 \\ \hline
+%Takeaway & 0.0008 & 0.0333 & 0.0006 & 0.0245 \\ \hline
+%\end{tabular}
+%}
+%\end{center}
+%\end{table}
+
+%\paragraph{Entropy Difference.} Maybe it's too complicated doing this for the three graphs. Apples to apples: i) local transition graph vs. context states only (Table~\ref{table:context-statistics}). ii) Base Entropy vs. context state entropy vs. full propagation. Or maybe iii) for each action, aggregate prob of next goal over all states, weighting by frequency of state. Then compare the resulting entropy for each action to average entropy over all states, weighting each state-action entropy by frequency of state.
+
+%The entropy of the three state transition graphs is shown in Table~\ref{table:model-entropy}. The entropy of the Markov Game Model is lowest in the full model containing all loopback edges, showing that the full model is a more informative model. The entropy is still close to 1, as the probability of goal scoring is approximately even, with a slight home team advantage, as shown in Table~\ref{table:context-statistics}.
+
+%
+%\begin{table}[htb]
+%\caption{Model Entropy}
+%\label{table:model-entropy}
+%\begin{center}
+%\resizebox{1\columnwidth}{!}{
+%\begin{tabular}{|l|c|c|}
+%\hline
+%\bf{Model} & \bf{Entropy} & \bf{Change In Entropy From Local} \\ \hline
+%Local & 0.99816 & N/A \\ \hline
+%Penalty & 0.99795 & -0.00021 \\ \hline
+%Full & 0.99789 & -0.00027 \\ \hline
+%\end{tabular}
+%}
+%\end{center}
+%\end{table}
+
+
+%\subsection{VALUE ITERATION}
+%
+%\subsection{REWARD FUNCTION = WIN}
+%
+%Back up wins. Show that after conditioning, agrees with observed frequency. [maybe other interesting states as well.]
+
+%\subsection{REWARD FUNCTION = GOAL}
+%
+%Back up computes expected goals. How to evaluate?
+%
+%\subsection{REWARD FUNCTION = NEXT GOAL}
+%
+%When a goal is scored, finish process. Interpretation: probability that next goal is scored by team. Evaluate using a separate tree for data counts.
+
+%\section{APPLICATIONS}
+
+
+
+%\subsection{HYPOTHESES}
+
+%A nice way to structure this section and to engage the referees is to give a list of what you want to establish through your experiments, before you give the details of your experiments. This usually also clarifies things for yourself. Hopefully you have more interesting hypotheses to test than ``I can find some datasets on which the predictive accuracy of my system is higher than that of some previous methods.''
+
+%Describe briefly your set-up, e.g. RAM, Processor, programming language.
+
+%\subsection{DATASETS}
+
+
+
+%\begin{table}[htb]
+%\caption{Size of Markov Decision Process Graph}
+%\label{table:size-of-mdp}
+%\begin{center}
+%\resizebox{\columnwidth}{!}{
+%\begin{tabular}{|l|c|c|c|}
+%\hline
+%& \bf{No Manpower Differential} & \bf{With Manpower Differential} \\ \hline
+%\bf{Number of Nodes} & 1,208,623 & 1,325,813 \\ \hline
+%\bf{Number of Edges} & 1,508,247 & 1,662,509 \\ \hline
+%\end{tabular}
+%}
+%\end{center}
+%\end{table}
+
+%Outline the datasets that you are using. Highlight interesting aspects. Give summary statistics (e.g., data set sizes). Are they real-world or synthetic?
+
+%It can be a good idea to present your data in terms of sample training and test sets.
+
+%\subsection{METHODS COMPARED}
+
+%List all of the methods. Make sure you explain which methods are yours and which were proposed by other researchers. Explain settings of methods, and why you chose them.
+
+%\subsection{PERFORMANCE MEASURES}
+
+%Explain what you are measuring (e.g., runtime, accuracy) etc. More is better. How are you computing the numbers? E.g., with cross-validation, taking averages? Usually referees like you to add error bars or standard deviations.
+
+%\subsection{RESULTS}
+
+%You need to report results for triples of (method, datasets, metric). This kind of three-dimensional setting is not easy to translate into graphs but you should try. It's best to try and find graphs that support your points; refer back to the hypotheses listed above. I suggest importing  your data into a spreadsheet program, which allows you to produce many charts. Also, there are macros that convert Excel tables into latex tables. This saves you a lot of the pain of producing Latex tables. Avoid color graphs because referees may be printing on black and white, and in any case the conference proceedings won't be in color.
+
+
+%NOTE: NEED TO USE CORRECT REFERENCES HEADER
+\bibliographystyle{apalike}
+\renewcommand\bibsection{\subsubsection*{\refname}}
+%\bibliography{master}
+
+
+%J.~Alspector, B.~Gupta, and R.~B.~Allen  (1989). Performance of a
+%stochastic learning microchip.  In D. S. Touretzky (ed.), {\it Advances
+%in Neural Information Processing Systems 1}, 748-760.  San Mateo, Calif.:
+%Morgan Kaufmann.
+
+%F.~Rosenblatt (1962). {\it Principles of Neurodynamics.} Washington,
+%D.C.: Spartan Books.
+
+%G.~Tesauro (1989). Neurogammon wins computer Olympiad.  {\it Neural
+%Computation} {\bf 1}(3):321-323.
+
+\end{document}

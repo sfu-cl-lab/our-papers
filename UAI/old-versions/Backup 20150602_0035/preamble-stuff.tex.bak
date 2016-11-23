@@ -1,0 +1,292 @@
+%Example for automatically rescaling equations.
+% This is very tricky.
+%\begin{equation}
+%\label{eq:pimax}
+%\resizebox{.55\textwidth}{!}{$
+%\begin{split}
+%P(\jtable_{2}|\set{E},\ttable) \propto &
+%P(\keys = [jack,101],\it{Gr} = A, \it{Sat} = 1|\it{Int} = \class, \it{Rank} = 1, \it{Rat} = 3, \it{Diff}=1)\\
+%\times & P(\keys = [jack,102],\it{Gr} = B, \it{Sat} = 2|\it{Int} = \class, \it{Rank} = 1, \it{Rat} = 2, \it{Diff}=2).
+%\end{split}$
+%}
+%\end{equation}
+
+%\usepackage{times}
+%\usepackage[normaltitle,normalbib,normalmargins,normalindent]{savetrees}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{subfigure}
+\usepackage{epstopdf}
+\setcounter{MaxMatrixCols}{30}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{subfigure}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\graphicspath{{../}{figures/}}
+%\newtheorem{theorem}[theorem]{Theorem}
+%\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+
+
+
+
+
+
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+%\DeclareMathOperator{\pattern}{\pi}
+\DeclareMathOperator{\Poly}{\mathbf{\mathrm{P}}}
+\DeclareMathOperator{\RP}{\mathbf{\mathrm{RP}}}
+%\DeclareMathOperator{\FP}{\mathbf{\mathrm{FP}}}
+\DeclareMathOperator{\NP}{\mathbf{\mathrm{NP}}}
+%\DeclareMathOperator{\E}{\mathbb{E}}
+\renewcommand{\d}{\mathbf{d}}
+
+
+
+\newcommand{\ZZ}{\mathbf{Z}}
+\newcommand{\mstate}{s}
+\newcommand{\mfeatures}{\set{x}}
+\newcommand{\impact}{\it{impact}}
+\newcommand{\reward}{\it{R}}
+\newcommand{\action}{a}
+\newcommand{\actions}{A}
+%\newcommand{\endmarker}{e}
+\newcommand{\mstates}{S} % Markov states
+\newcommand{\home}{H}
+\newcommand{\away}{A}
+\newcommand{\GD}{\it{GD}}
+\newcommand{\MD}{\it{MD}}
+\newcommand{\period}{\it{P}}
+\newcommand{\zone}{\it{Z}}
+\newcommand{\team}{T}
+\newcommand{\neutral}{\it{Neutral}}
+\newcommand{\history}{\it{h}}
+%
+\newcommand{\indep}{\ensuremath{\perp{}\!\!\!\!\!\!\!\perp{}}}
+\newcommand{\dep}{\ensuremath{{\perp{}\!\!\!\!\!\!\!\not  \perp{}}}}
+%\renewcommand{\L}{\mathcal{L}}
+% variables denoting sets of nodes
+\newcommand{\V}{V}
+\newcommand{\partC}{\mathcal{C}}
+\newcommand{\pattern}{\pi}
+% variables denoting nodes
+\newcommand{\B}{B}
+\renewcommand{\P}{P}
+\newcommand{\R}{R}
+\newcommand{\X}{X}
+\newcommand{\Y}{Y}
+\newcommand{\Z}{Z}
+\newcommand{\F}{F}
+\newcommand{\U}{U}
+\newcommand{\W}{W}
+\renewcommand{\S}{S}
+\newcommand{\C}{C}
+%variables for values
+%\newcommand{\u}{u}
+\renewcommand{\a}{a}
+\renewcommand{\b}{b}
+\newcommand{\z}{z}
+\renewcommand{\v}{v}
+\newcommand{\x}{x}
+\newcommand{\y}{y}
+\newcommand{\p}{p}
+\newcommand{\s}{s}
+\newcommand{\w}{w} % weights
+
+
+%statistics
+\newcommand{\score}{S}
+\newcommand{\parameters}{\mathit{par}}
+\newcommand{\bic}{\mathit{BIC}}
+%random variables and graphical models
+% number of values in the domain of a random variable
+% variables for BNs
+\newcommand{\domvals}{k}
+\newcommand{\nodevalue}{\a}
+\newcommand{\parvalue}{\mathbf{\pi}} % a single assignment of values to a set of
+%parents
+\newcommand{\parvals}{l} % number of values of parent state.
+\renewcommand{\r}{r} % CP-table row
+\newcommand{\nbhd}{{\mathsf {nbdh}}}
+\newcommand{\child}{\mathit{child}}
+\newcommand{\parent}{\mathit{pa}}
+\newcommand{\parents}{\mathbf{pa}}
+\newcommand{\Parents}{\mathbf{PA}}
+\newcommand{\family}{F} % families, family formulas
+\newcommand{\vpi}{\mathbf{pa}} % for vectors of variable assignments
+\renewcommand{\l}{\ell} % class label
+\newcommand{\states}{r} % number of states of a variable
+\newcommand{\mb}{\set{mb}} % markov blanket of a variable, vector-valued
+\newcommand{\ssize}{N} % number of rows in join table; size of sample
+\newcommand{\mbstates}{m} % number of states in Markov blanket
+\newcommand{\frequency}{fr}
+\newcommand{\pseudo}{\ast}
+\newcommand{\counts}{+}
+\newcommand{\weighted}{\ast}
+\newcommand{\halpern}{H}
+\newcommand{\instance}{I}
+
+%logic notation
+\newcommand{\predicate}{\phi}
+\newcommand{\functor}{f}
+\newcommand{\outdomain}{V}
+\newcommand{\indomain}{\Omega}
+\newcommand{\variable}{X} % first-order variable
+\newcommand{\population}{\mathcal{P}}
+\newcommand{\entity}{x}
+\newcommand{\formula}{\phi}
+\newcommand{\formulas}{\mathcal{\phi}}
+\newcommand{\literal}{l}
+\newcommand{\conjunction}{\set{C}} % conjunction of literals
+\newcommand{\fterm}{\f} % open function term
+\newcommand{\fterms}{F} % set of function terms, also nodes in JBN
+\newcommand{\term}{\sigma}
+\newcommand{\terms}{\bs{\sigma}}
+\newcommand{\constant}{a}
+\newcommand{\constants}{\bs{\constant}}
+\newcommand{\gterm}{g} % ground term
+\newcommand{\gterms}{\bs{\gterm}} %list of ground terms
+\newcommand{\vterm}{x} % variable term
+\newcommand{\vterms}{\bs{\vterm}} % list of variable terms
+\newcommand{\assign}{A} % assignment of values to Bayes net
+\newcommand{\resultset}{\mathbb{R}}
+\newcommand{\grounds}{\#}
+\newcommand{\grounding}{\gamma}
+\newcommand{\groundall}{\Gamma}
+\newcommand{\vars}{\mathit{Var}} % variables in a conjunction
+\newcommand{\igraph}{I} % instance-level dependency graph.
+\newcommand{\assignment}{\set{a}}
+\newcommand{\atom}{\ell}
+\newcommand{\gnode}{\alpha}
+\newcommand{\gfamily}{\ground{f}}
+\newcommand{\numformulas}{m}
+\newcommand{\structure}{\mathcal{S}}
+% logic programs
+\newcommand{\program}{\mathcal{B}}
+\newcommand{\clause}{\mathcal{c}}
+\newcommand{\head}{\mathit{head}}
+\newcommand{\body}{\mathit{body}}
+\newcommand{\crule}{\mathit{cr}} % combining rule
+\newcommand{\level}{\mathit{level}} % rank of function symbols in LP
+
+%datbase schema
+\newcommand{\rcolumns}{R}
+\newcommand{\ecolumns}{E}
+\newcommand{\dtable}{T} % can't use \table. Generic database table
+\newcommand{\datatable}{D} % generic data table, not necessarily part of database.
+\newcommand{\jtable}{J} % join table
+\newcommand{\Ejoin}{$J^{+}$}
+\newcommand{\jtables}{m}
+\newcommand{\rtable}{R} % relationship table
+\newcommand{\etable}{E} % entity table.
+\newcommand{\ttable}{X} % target table
+\newcommand{\nextended}{n}
+\newcommand{\row}{r}
+\newcommand{\rows}{\mathit{rows}}
+\newcommand{\col}{j}
+\newcommand{\cols}{\mathit{cols}}
+\newcommand{\unary}{\f} % to denote a unary or attribute function
+\newcommand{\numatts}{u} % to denote the number of unary or attribute functions.
+\newcommand{\g}{g} % alternative for function
+\newcommand{\relational}{\mathbf{r}} % denotes a generic relational functors, can be both relationship or descriptive attribute of relationship
+\newcommand{\Relation}{R} % denotes a generic boolean relation
+% a special type of literal conjunction that assigns a value %to each variable
+\newcommand{\class}{c} % the class attribute
+\newcommand{\classifier}{\mathcal{C}}
+\newcommand{\target}{t} % target object
+\newcommand{\feature}{f} % feature or desc attribute of object or link
+\newcommand{\features}{\bs{f}} % features
+\newcommand{\attribute}{a} % nonclass attribute of target object
+\newcommand{\attributes}{\bs{a}}
+\newcommand{\rels}{\bs{R}} % chain of relationships.
+\newcommand{\maxpath}{\rho}
+
+%special functions
+\newcommand{\AVG}{\it{AVG}}
+\newcommand{\instances}{n} % counts number of occurrences in DB
+\newcommand{\prob}{p} % frequency of formula true in in DB
+
+%variables denoting graphs or models
+\newcommand{\mln}{M}
+\newcommand{\G}{G}
+\newcommand{\node}{v}
+\newcommand{\nodes}{V}
+\newcommand{\edges}{E}
+\newcommand{\clique}{C}
+\newcommand{\cliques}{\mathcal{\clique}}
+\newcommand{\cliquevalue}{c}
+\newcommand{\graph}{G}
+\newcommand{\M}{M}
+\newcommand{\J}{J}
+\renewcommand{\H}{H}
+\newcommand{\K}{K} % component
+\renewcommand{\O}{O} % oracle
+\renewcommand{\path}{\rho} % path, also foreignkey path
+% Markov nets
+\newcommand{\potential}{\Psi}
+% database schema
+\newcommand{\type}{\tau} % to denote a generic type
+\newcommand{\E}{E} % for entity tables
+\newcommand{\e}{e} % for specific entities
+\newcommand{\f}{f}
+\newcommand{\new}{\it{new}}
+\renewcommand{\c}{c}
+\renewcommand{\R}{R} % for relationship tables
+\newcommand{\A}{A} % for attributes
+\newcommand{\T}{T} % for tables generically
+\newcommand{\New}{N}
+\newcommand{\D}{\mathcal{D}} % for database instance
+\newcommand{\databases}{\set{D}} % the number of databases
+\newcommand{\vocab}{\mathcal{\L}} % for logical vocabulary associated with database
+\newcommand{\name}{\mathit{name}} % generic attribute
+\newcommand{\dom}{\mathit{dom}} % domain of attributes
+\newcommand{\etables}{\alpha} % entity tables
+\newcommand{\rtables}{\beta} % relationship table number
+% specific constructs for examples
+\newcommand{\student}{\mathit{Student}}
+\newcommand{\I}{\mathit{I}}
+\newcommand{\course}{\mathit{Course}}
+\newcommand{\prof}{\mathit{Professor}}
+\newcommand{\person}{\mathit{Person}}
+\newcommand{\TA}{\mathit{TA}}
+\newcommand{\actor}{\mathit{Actor}}
+\newcommand{\age}{\mathit{age}}
+\newcommand{\intelligence}{\mathit{intelligence}}
+\newcommand{\diff}{\mathit{difficulty}}
+\newcommand{\reg}{\mathit{Registered}}
+\newcommand{\ra}{\mathit{RA}}
+\newcommand{\bt}{\mathit{blood type}}
+\newcommand{\grade}{\mathit{grade}}
+\newcommand{\gpa}{\mathit{gpa}}
+\newcommand{\jack}{\mathit{Jack}}
+\newcommand{\jill}{\mathit{Jill}}
+\newcommand{\smith}{\mathit{Smith}}
+\newcommand{\cmpt}{\mathit{CMPT120}}
+\newcommand{\hi}{\mathit{Hi}}
+% various constants
+\newcommand{\true}{\mathit{T}}
+\newcommand{\false}{\mathit{F}}
+\newcommand{\normalconstant}{Z} % the normalization constant
+
+% orderings
+\newcommand{\pred}{\mathit{pred}}
+%procedure names and such
+\newcommand{\join}{\textsc{Join-Frequencies}}
+\newcommand{\linus}{\textsc{Linus }}
+\newcommand{\foil}{\textsc{Foil }}
+\newcommand{\MLN}{\textsc{MLN}}
+\newcommand{\treetilde}{\textsc{TILDE }}
+
+%%%
+%undirected models
+\newcommand{\pot}{\phi} % potential function
+%\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\newcommand{\test}{test}
+\def\set#1{\mathbf{#1}}
+\def\bs#1{\boldsymbol{#1}}
+\def\ground#1{\overline{#1}}
