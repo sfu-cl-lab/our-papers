@@ -1,0 +1,138 @@
+%% Copyright 1998 Pepe Kubon
+%%
+%% `thes-full.tex' --- the example thesis, FULL version, used
+%%                     with  the `csthesis' package 
+%% Use: latex thes-full to generate the DVI output, then 
+%%      bibtex thes-full to generate the bibliography
+%%      makeindex thes-full to get the index, and
+%%      latex thes-full (2x) 
+%%
+%% You are allowed to distribute this file together with all files
+%% mentioned in READ.ME.
+%%
+%% You are not allowed to modify its contents.
+%%
+
+\documentclass[11pt]{report}
+%\documentclass[11pt,twoside]{report}%% for two-sided printing
+\usepackage{csthesis}
+\usepackage{eurosym}
+\usepackage{makeidx}  %%% standard INDEX
+\input{files/preamble-stuff}
+\newcommand{\MLNA}{\textsc{MSL}}
+\newcommand{\MLNConst}{\textsc{MSLc}}
+\newcommand{\LHL}{\textsc{LHL}}
+\newcommand{\LHLConst}{\textsc{LHLc}}
+\newcommand{\BUSL}{\textsc{BUSL}}
+\newcommand{\LSM}{\textsc{LSM}}
+\usepackage{amsthm}
+\usepackage{rotating}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\makeindex  
+
+%%% The following code demonstrates the ``other list'' facility. A new
+%%% command \otherlist is defined for the List of Programs. Programs
+%%% are defined as floating environments of type 3 (1 is used for figures,
+%%% 2 for tables) and the information about them is stored in an
+%%% auxiliary file with .lop extension. You can use this method to
+%%% define several types of ``other lists,'' but in that case you'll
+%%% need to add appropriate code to \lists in the csthesis.sty
+%%% package.
+%%% Note: It's better to move this code into your own mythesis.sty
+%%% package. If you do that, you should get rid of the \makeatletter,
+%%% \makeatother commands.
+\makeatletter
+\newcommand\otherlist{%
+    \addcontentsline{toc}{chapter}{\otherlistname}
+    \if@twocolumn
+      \@restonecoltrue\onecolumn
+    \else
+      \@restonecolfalse
+    \fi
+    \chapter*{\otherlistname
+      \@mkboth{\MakeUppercase\otherlistname}%
+              {\MakeUppercase\otherlistname}}%
+    \@starttoc{lop}%
+    \if@restonecol\twocolumn\fi
+    }
+\newcommand*\l@program{\@dottedtocline{1}{1.5em}{2.3em}}
+\newcommand\otherlistname{List of Programs}
+\newcommand\programname{Program}
+\newcounter{program}[chapter]
+\renewcommand\theprogram{\thechapter.\@arabic\c@program}
+\def\fps@program{tbp}
+\def\ftype@program{3}
+\def\ext@program{lop}
+\def\fnum@program{\programname~\theprogram}
+\newenvironment{program}
+               {\@float{program}}
+               {\end@float}
+\newenvironment{program*}
+               {\@dblfloat{program}}
+               {\end@dblfloat}
+\makeatother
+%%% end of ``other list'' code
+
+\begin{document}
+
+
+%%% set switches
+\contentspagetrue 
+
+%
+\figurespagetrue 
+\tablespagetrue
+\dedicationpagetrue
+\quotationpagetrue
+\otherlistpagefalse
+
+%% front matter 
+
+\include{files/titapp} %% title, approval
+\include{files/abstract} %% abstract
+\include{files/dedquot} %% dedication and quotation, if any 
+\include{files/ack} %%  acknowledgments
+
+%%  generate contents, lists of figures, etc.
+\lists
+
+% preface (foreword), if any
+%\include{files/preface} 
+
+%% prepare main section
+\beforetext
+
+%%% main matter
+\include{files/one} 
+\include{files/two}
+\include{files/three}
+\include{files/four}
+\include{files/five}
+%\include{files/six}
+\include{files/six}
+\include{files/seven}
+%%%  appendices, if any
+%\appendix
+%\include{files/appone}
+%\include{files/apptwo}
+
+%%%%%%  bibliography
+
+\include{files/bibl}
+%%%%%%  index
+\include{files/ind}
+
+
+\end{document}
+
+
+
+
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
