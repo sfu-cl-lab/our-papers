@@ -1,0 +1,312 @@
+%editors: changed title, change order of authors.
+
+\documentclass[oribibl]{llncs}%
+%TCIDATA{OutputFilter=latex2.dll}
+%TCIDATA{LastRevised=Monday, November 27, 2000 11:35:04}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+
+
+%\usepackage{geometry}                % See geometry.eps to learn the layout options. There are lots.
+%\geometry{letterpaper}                   % ... or a4paper or a5paper or ...
+\usepackage{amsmath}
+%\usepackage{amsfonts}
+%\usepackage{amssymb}
+%\geometry{landscape}                % Activate for for rotated page geometry
+    % Activate to begin paragraphs with an empty line rather than an indent. gets overruled by savestree unless savestree is modified.
+\usepackage{graphicx}
+%\usepackage{graphics}
+%\usepackage{epstopdf}
+%\usepackage{psfig}
+%\usepackage[ruled]{algorithmic2e} should we try this?
+
+\input{preamble-stuff}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+%\usepackage{icml2008}
+%\usepackage{mlapa}
+\usepackage{url}
+%\usepackage{caption}
+%\usepackage{subfigure}
+%\usepackage[normaltitle,normalmargins]{savetrees}
+% don't mess with the bibliography
+%\usepackage{setspace}
+% for bibliography spacing. doesn't work for some reason
+% the following shrinks space in bibliography, instead of the spacing command.
+\let\oldthebibliography=\thebibliography
+  \let\endoldthebibliography=\endthebibliography
+  \renewenvironment{thebibliography}[1]{%
+    \begin{oldthebibliography}{#1}%
+      \setlength{\parskip}{0ex}%
+      \setlength{\itemsep}{0.1ex}%
+  }%
+  {%
+    \end{oldthebibliography}%
+  }
+% nodes
+
+
+\newcommand{\team}{T}
+\newcommand{\player}{P}
+\newcommand{\match}{M}
+\newcommand{\plusminus}{\mbox{+/-}}
+%\newcommand{\true}{\mathrm{T}}
+%\newcommand{\false}{\mathrm{F}}
+
+%\newcommand{\functor}{f}
+\newcommand{\aggregate}{\it{agg}}
+
+\newtheorem{observation}{Observation}
+
+%\def\sitem{\vspace{-1.2em} \item} % to shrink space between items
+\def\seq#1{\langle#1\rangle} % only in math
+\def\here#1{{\bf $\langle\langle$HERE:\ #1$\rangle\rangle$}}
+\def\ie{{\em i.e.},\ }
+\def\eg{{\em e.g.},\ }
+\def\set#1{\mathbf{#1}}
+%% try to get rid of paragraphs ending in single words
+%\looseness = -1
+
+%%reduce space between paragraphs
+%\addtolength{\parskip}{-1.5mm}
+
+%%reduce space around floats. Problem seems to be the first figure
+%\addtolength{\intextsep}{-1mm}
+
+%\vskip 0.3in
+
+
+
+\institute{School of Computing Science,   Simon Fraser University,\\ Burnaby,
+B.C.,   Canada~V5A~1S6,   \email{oschulte@cs.sfu.ca,kdr4@sfu.ca}   }
+\newtheorem{axiom}[theorem]{Axiom}
+
+\begin{document}
+
+\title{Aggregating Predictions vs. Aggregating Features for Relational Classification: A Comparison}
+\author{Oliver Schulte\inst{1}
+\and Kurt Routley\inst{1}}
+\maketitle
+
+
+\begin{abstract} \vskip 0.1in Relational classification: no fixed set of features. Two main approaches: aggregate predictions (combining rules), aggregate features (average, max etc.). Compare the two approaches with continuous features. Using real-world sports data. We find that aggregating predictions far outperforms  aggregating features. Among methods for aggregating predictions, the best performance is obtained by a log-linear model based on Halpern and Bacchus classic random selection semantics for probabilistic 1st-order logic. The random selection classification provides a simple, fast, and effective method for relational classification.
+\end{abstract}
+
+
+\section{Introduction} Most real-world structured data are stored in the relational format, with different types of entities and information about their attributes and links between the entities.
+Relational data classification is the problem of predicting a {\em class label} of a target entity given information about features (attributes) of the entity, of the related entities, or neighbors, and of the links. This paper presents a fast, principled, and accurate method for leveraging standard machine learning classifiers for relational classification.
+
+A key challenge for relational classification is that the number of links of the target entity is not uniformly bounded. Since the features of each neighbor potentially carry information about the target class label, the number of predictive features for classification is thus a function of the size of the target entities neighborhood, rather than a fixed dimensionality $d$. Relational classifiers therefore aggregate the information from the target entity's neighborhood. There are two fundamental options for aggregation: 1) First aggregate the neighbors' features into a single aggregate feature vector, then classify based on the aggregate vector. 2) First derive a classification score based on a single neighbor, then aggregate the scores. Figure~\ref{fig:classify} illustrates these options schematically.
+
+In this paper we compare the two approaches empirically on data sets with continuous features. Since the standard relational benchmark datasets contain discrete features mainly or only, we use two real-world datasets that summarize players' actions in ice hockey and in soccer. The ice hockey dataset was obtained by a web crawler and has not been analyzed before.
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width = 1 \textwidth]{figures/classify}
+\caption{Two different approaches to relational classification. FV = feature vector. The problem is to predict a class label for a target entity. The data provide a feature vector for each entity related to the target entity (neighbors $1,\ldots,n$). (We omit features of the target entity for simplicity.) Top: aggregating features combines the $n$ feature vectors into a single one, then applies a standard nonrelational classifier to predict a class label. Bottom: aggregating predictions applies a standard nonrelational classifier to each feature vector to obtain $n$ classification scores (e.g. positive class probabilities). A combining rule aggregates the $n$ scores to predict a class label.}
+\label{fig:classify}
+\end{center}
+\end{figure}
+
+In addition to evaluating standard methods for aggregating features and predictions, we propose a new log-linear method for aggregating predicted class probabilities, using their geometric mean. This aggregation method is equivalent to computing the expected log-class probability given a {\em randomly chosen} neighbour of the target entity. Random selection classification is consistent  with the classic random selection semantics of probabilistic 1st-order logic due to Halpern and Bacchus [cite]. Within a loss-minimization framework, training a classifier for random selection classification can be done by minimizing the expected classifier loss, defined as the expected loss from randomly selecting a neighbour predicting the class label based on the selected neighbour. Computionally, classifier training can be done very simply by forming a data table such that one row contains the features of one neighbor, and applying a regular non-relational learning algorithm to this table.\footnote{If the neighbourhood sizes of different target entities differ, a simple adjustment of the classifier loss for neighborhood size is necessary, see details below.} %Justifies ignoring dependencies.
+
+
+\paragraph{Evaluation.}
+We use standard aggregation functions to aggregate continuous features (arithmetic mean, sum, min, max, midrange, geometric mean). Once features have been aggregated, any standard single-table machine learning classifier can be applied for classification. In this paper we compare logistic regression and support vector machines (SVMs).
+
+Both logistic regression and SVMs return a continuous classification score. We apply the single-table classifier to the features of each neighbor to obtain a classification score for the neighbor, then aggregate the scores. For aggregating scores, we use the same functions as for aggregating features.  In addition we apply noisy-or, a standard rule for combining a list of probabilities into a single probability.
+
+The basic task is to predict the result of a given target team in a given target match (win or not). The training set contains data from one season and the test set data from the next. We experiment with two different feature sets: First, summary statistics from the previous season for each player (e.g., number of goals scored by the player). Second, in addition, the action counts for each player on the target team in the target match. For the first feature set, last-season player statistics turn out to be a poor predictor of future team results: none of the relational classifiers score above 60\% accuracy. Our novel geometric mean method for aggregating probabilities achieved the best result at ??? For the second data set, the player statistics in the target match are highly informative about the their team's result: again our geometric mean probability aggregator scores best at ???. Aggregating target match player features loses much of this information: the top performance with aggregated features was achieved by an SVM at ???
+
+\paragraph{Contributions.}
+
+Our main contributions may be summarized as follows.
+
+\begin{enumerate}
+\item The first direct comparison of feature aggregation vs. score aggregation methods for relational classification.
+\item A new score aggregation method that uses the expected classification score from a random selection of the target node's neighbour. Training a classifier for this classification score can be done using the same techniques as for nonrelational classification.
+\item A new real-world dataset in relational database format with play summaries from 3,857 NHL matches.
+\end{enumerate}
+
+
+\section{Related Work} Because of the importance of relational data, there has been much work on link-based classification. For overviews please see \cite{han2009,Bina2012}. We provide a high-level description of the work most relevant to the question of feature vs. score aggregation.
+
+\paragraph{Aggregating Classifier Scores.} Most approaches that aggregate classification scores use a function that maps a list of probabilities to a single probability. Following the terminology of Bayes nets \cite{Pearl1988}, such functions are referred to as {\em combining rules} \cite{Pearl1988,Kersting2007}. In our terminology, a combining rule is a special kind of classifier score aggregation. We use the more general concept, because some of our experiments aggregate scores that are not probabilities (e.g., the outputs of SVMs), and some aggregate probabilities but map them to a number that is not itself a probability (e.g, the geometric mean is not normalized). While the arithmetic mean has been considered for aggregating probabilities in relational learning \cite{Natarajan2008}, the geometric mean is a new proposal motivated by the random selection semantics. The random selection semantics is a classic concept from AI research that combines 1st-order logic with probabilities \cite{Halpern90,Bacchus90}. The key idea is to interpret a free 1st-order variable as a random variable that randomly selects an element from its domain. The random selection semantics was previously applied for learning generative Bayes net models \cite{Schulte2011}. To our knowledge we present the first application to relational discriminative learning.\footnote{A related previous paper was presented at the 2012 UAI-StarAI workshop \cite{Schulte2012d}. The nonarchival workshop did not publish proceedings. This paper used the random selection semantics to define a Gibbs conditional probability of a target node conditional on its Markov blanket. Differences with the current paper include: (i) Only discrete features were considered, and no feature aggregation. (ii) Only Bayes net models were considered. (iii) The learning problem as parameter learning for Bayes nets, not general relational classification.}
+
+\paragraph{Propositionalization.} The majority of work on relational classification has adopted the strategy of aggregating the features of a target entity's neighbor into a single feature vector of the target entity. This approach of ``flattening'' the relational structure is generally known as {\em propositionalization} \cite{Kramer2000}. To our knowledge, ours is the first comparison of the approach of using classifier score aggregation or combining rules vs. propositionalization.
+
+For continuous features, propositionalization methods use the same standard aggregate functions that we use in this paper \cite{Krogel2002,C.Vens2004}. For discrete data, a common approach is to use a {\em feature function}. A feature function maps a relational neighbourhood to a single value for the given feature. For instance, if the feature is ``student's grade is A'', the count feature function returns the number of A's achieved by the student. If the feature function returns a continuous or integer value, the values of the feature functions are used as inputs to a log-linear model (conditional random field) for prediction \cite{Sutton2007,Taskar2002,Domingos2009,Lu2003}. A feature function may also return a discrete value; a commonly used binary feature function is existential quantification, for example using a 1 in classifier if the student has achieved an A in some course, and a 0 otherwise.
+
+\paragraph{Complex Features.} The most expressive propositionalization models apply feature functions to combinations of the discrete features given in the data (e.g., \cite{Kuzelka2011}). For instance, to predict the ranking of a student, we may distinguish the number of A grades achieved in higher-level course from those achieved in lower-level courses. Complex discrete features may be combined with aggregation functions for continuous variables as aggregation conditions \cite{C.Vens2004,Popescul2007}. For example, to predict the age of a user in a social network, we may consider the average age of her friends who have the same gender and live in the same city.
+
+Several researchers discuss advantages and disadvantages of  propositionalization for link-based classification \cite{DavidJensen2002,han2009}. Propositionalization has the advantages and disadvantages of general predicate invention approaches. The main advantage is expressiveness: feature generation methods search a large space of potentially useful features. If an informative new complex feature or aggregate feature can be found, it improves classification performance and informs the user. The disadvantages are problems with both statistical and computational efficiency. Aggregation loses information in the data, which increases the variance of classifier estimates and causes problems with both type 1 and type 2 errors in feature selection \cite{Jensen2002a}. Searching a large space of potential features presents considerable computational challenges. For an example, generating 100,000 features on the standard CiteSeer dataset, can take several CPU days
+\cite[Ch.16.1.2]{Popescul2007}). Compared to feature generation, the score aggregation approaches we describe in this paper provide a simple and fast baseline for link-based classification. At the end of the paper we describe possibilities for combining score-based aggregation with feature generation.
+
+\paragraph{Sports Statistics.} The problem of predicting the results of sports matches has received considerable attention for different sports. For an overview please see \cite{Schumaker2010}. We do not claim that the methods in this paper are competitive for predicting the match results. For instance, the goal is usually to predict the result of a match before the game is played, so  the action counts of players in the target game are not available. We use the NHL data as a real-world dataset in an interesting domain with interpretable features for comparing aggregating features vs. aggregating predictions.
+
+\section{Notation} We introduce notation to discuss relational features and data and to support theoretical analysis. We follow the functor-based notation for combining statistical and relational concepts due to Poole \cite{Poole2003}.
+
+A \textbf{population} is a set of individuals, corresponding to a domain or type in logic. A parametrized random variable is of the form $f(t_{1},\ldots,t_{k})$ where $f$ is a \textbf{functor} (either a function symbol or a predicate symbol) and each $t_{i}$ is a first-order variable or a constant. Each functor has a set of values (constants) called the \textbf{range} of the functor. A functor whose range are the truth values $\{\true,\false\}$ is a \textbf{predicate}. Predicates are usually written with uppercase Roman letters, other functors with lowercase letters.
+A \textbf{grounding} replaces each 1st-order variable in the functor by a constant; the result is a ground functor. A grounding may be applied simultaneously to a set of functors.
+
+\paragraph{Examples.} In our datasets the basic populations are teams, players, matches, with corresponding first-order variables $\team, \player, \match$. Examples of functors include the following.
+
+\begin{itemize}
+\item $\it{result}(\team,\match)$ denotes the result of a team in a match (win or lose).
+\item $\it{PlaysFor}(\player,\team,\match)$ is a predicate that is true if player $\player$ plays for team $\team$ in match $\match$.
+\item $\it{goals}(\team,\player,\match)$ is the number of goals scored by a player of a given team in a match.
+\item $\plusminus(\player,\match)$ is the $\plusminus$ score of a player in a match. This is a  common measure of the player's performance; for precise definition see $\cite{Schumaker2010}$.
+\item The ground functor $\it{result}(Canucks,1)$ denotes the result of the Canucks in match 1.
+\end{itemize}
+
+\paragraph{Aggregation.} Given a functor $\functor$, an aggregate function $\aggregate$ applies to one of the argument variables of $\functor$. We use the subscript notation $\aggregate_{X}$ to indicate that variable $X$ is the object of aggregation \cite{Popescul2007}. The result is a functor with one less argument. Examples include the following.
+
+\begin{itemize}
+\item $\it{goals}(\team,\match) \equiv \sum_{\player} \it{goals}(\team, \player,\match)$ is the number of goals scored by a team in a match.
+\item $\it{Past}\plusminus(\player) \equiv \sum_{\match \mbox{in past season}} \plusminus(\player,\match)$ denotes the sum of a player's $\plusminus$ scores in the past season.
+\end{itemize}
+
+The aggregation functions that we use in this paper are max, min, sum, average (arithmetic mean), geometric mean. The geometric mean of $x_{1},\ldots,x_{n}$ is $(\prod_{i} x_{i})^{1/n}$.
+
+Suppose that we fix a \textbf{target functor} for prediction, e.g. $\it{result}(\team,\match)$. A set of functors is propositionalized if only the 1st-order variables in the target functor appearing in the functors in the set. For instance, $\it{goals}(\team,\match)$ is propositionalized, whereas $\it{Past}\plusminus(\player)$ is not.
+
+The simple Bayes net of Figure~\ref{fig:bn} illustrates link-based classification using the functor notation. (Bayes net with child = result, parents = plusminus(player), goals(team,match), goals(team,match,player), plays for). The random selection semantics for Bayes nets with functors views each 1st-order variable as a \cite{Schulte2013} random selection from its domain. Since a function of a random variable is also a random variable, this means that the functors in the Bayes net are also random variables. For instance, suppose that the Bayes net parameters specify the conditional probability [come up with example]. In the random selection semantics, this probability statement can be interpreted as ``[spell out]''.
+
+\section{Score Aggregation} For simplicity, we discuss score aggregation for a single relationship, which defines a neighborhood for each grounding of the target functor. Our discussion applies equally to classification scores obtained with different types of neighbourhoods. Score aggregation can be visualized in terms of the \textbf{groundings data table}, or data table for short. The data table has one column for each functor feature. \marginpar{define functor feature} It has one row for each simultaneous grounding of all functor features where the instances of the nonclass features are in the neighborhood of the instance of the target feature. Thus if the target functor feature is instantiated with ground instance $\target$, the data table contains a row listing the attributes of each neighbor $\neighbor$ of $\target$. Table~\ref{table:datatable} shows an example of a groundings data table.
+
+
+\paragraph{Score Aggregation Methods} Suppose that we have trained a classifier model $\classifier$ that returns a classification score for a given target label $\classlabel$ and feature vector $\features$. We can apply this classifier to each row in the groundings data table to derive a classification score for the features of each neighbour of a given target instance $\target$.
+
+Given a list of classification scores, one for each neighbor, we can apply the standard aggregation functions to obtain an overall classification score. When the classification scores represent probabilities, a common way to combine them is to use the ``noisy-or'' rule: [give definition]
+
+Intuitively noisy-or is a soft version of the disjunctive truth function: if any one of the probabilities is above 0.5, the combined probability is likely to be above 0.5.
+
+The random selection semantics suggests using the arithmetic mean for score aggregation for the following reason. On the random selection semantics, the classification scores of the classifier $\classifier$ can be interpreted as follows: (if we were to randomly select target and feature,...).
+
+for each ground target feature, and for each neighbor of the
+
+
+
+\section{Evaluation} Each method is evaluated by its ability to correctly classify the result based on the features supplied. For feature aggregation, this involves aggregating the supplied features and using these aggregated features to train a SVM or Logistic Ridge Regression model and return a result (win or loss) classification for each team per match. The maximum classification accuracy of each feature aggregation model is recorded in Table~\ref{table:feture-aggregation-results}.
+
+For score aggregation, all features are first used to train a SVM or Logistic Ridge Regression model to learn a score for each row of features for a player in a given match. These player scores are then grouped for each team in a match, and the scores are aggregated to generate a team score and result classification.
+
+The precision, negative prediction value, sensitivity, and specificity are also recorded to evaluate each model.
+
+\subsection{Hypotheses} A nice way to structure this section and to engage the referees is to give a list of what you want to establish through your experiments, before you give the details of your experiments. This usually also clarifies things for yourself. Hopefully you have more interesting hypotheses to test than ``I can find some datasets on which the predictive accuracy of my system is higher than that of some previous methods.'' The following conjecture will be evaluated:
+\begin{enumerate}
+\item Score aggregation will perform better than feature aggregation. The intuition is that aggregating features loses the information from individual player performance. By first evaluating players individually and then aggregating player scores, an improved measure of team scores can be obtained.
+\end{enumerate}
+SELF NOTE: May need to add more conjectures to this section.
+
+\subsection{Hardware} Logistic Ridge Regression tests were completed using Java and Weka on CentOs 6.4 with 4GB RAM and an Intel Core 2 Duo CPU E6550 2.33GHz processor. Logistic Ridge Regression and SVM tests were also performed using Matlab and code from Mark Schmidt on 64-bit Windows 7 with 12GB RAM and an Intel Core i7 2670QM CPU 2.2GHz processor.
+
+\subsection{Datasets}
+
+Table~\ref{table:nhl-data} provides summary statistics for the NHL data with player last season stats only,
+Table~\ref{table:nhl-match-data} provides summary statistics for the NHL data with player last season stats and target match statistics,
+Table~\ref{table:premier-league-data} for the Premier League data.
+
+The NHL dataset is a real-world, continuous dataset obtained using a web crawler on www.nhl.com. Player match performance and player career statistics are used as player features. The NHL dataset is also a singular dataset, as the points(player,team,match) feature is a sum of the goals(player,team,match) and assists(player,team,match) features. The Premier League dataset is a real-world, continuous dataset obtained from ###GET INFORMATION### For the NHL dataset, only skaters were evaluated, and goalies were left out of the model. Each NHL team dresses exactly 18 skaters per match, which keeps a constant neighborhood size in the Bayes Net. For Premier League, the number of players on a team is variable.
+[discuss how all teams have the same number of players in a match, so the size of the neighborhood is constant. should be good for feature aggregation according to Jensen]
+
+Models learned on the NHL dataset used the 2010-2011 matches as a training set, with 2009-2010 player statistics as the previous season statistics. Score aggregation modeling uses all 44,280 player-team-match rows for the training set. Feature aggregation uses 2,460 team-match rows.
+
+\begin{tabular}{c|c|c|c|c}
+
+ &  &  & \multicolumn{2}{c}{Total Number of Data Points} \\
+Teams / Season & Matches / Season & Skaters / Team, Match & Feature Aggregation & Score Aggregation \\
+30 & 1,230 & 18 & 2,460 & 44,280
+\end{tabular}
+
+
+Outline the datasets that you are using. Highlight interesting aspects. Give summary statistics (e.g., data set sizes). Are they real-world or synthetic?
+
+\subsection{Methods Compared} The methods compared are feature aggregation versus score aggregation. Feature aggregation takes all players on a team in a match, and aggregates each feature. Aggregate operators used are summation, arithmetic mean, geometric mean, maximum, minimum, and midrange. All aggregations of all features are used to train a SVM or Logistic Ridge Regression model. 
+
+Score aggregation first uses player information to train a SVM or Logistic Ridge Regression model and generate player scores. These player scores are grouped for each team in a match, and the individual player scores are aggregated over each team to generate a team score. Player scores are aggregated using arithmetic mean, maximum, minimum, and noisy-or. Geometric mean was only used for Logistic Ridge Regression, as it cannot operate properly on negative values returned by a SVM model. For example, if all players on a team are assigned a negative score, the intuition would be the team is likely to lose the match. If the team has an even number of players dressed for a match, the geometric mean will return a positive score, falsely indicating the team is likely to win.
+
+
+[mention that we take ``loss'' as the positive class variable]
+
+List all of the methods. Make sure you explain which methods are yours and which were proposed by other researchers. Explain settings of methods, and why you chose them.
+\subsection{Performance Measures} The performance of each method is measured by its accuracy is correctly classifying a match result. For feature aggregation... Explain what you are measuring (e.g., runtime, accuracy) etc. More is better. How are you computing the numbers? E.g., with cross-validation, taking averages? Usually referees like you to add error bars or standard deviations.
+\subsection{Results} You need to report results for triples of (method, datasets, metric). This kind of three-dimensional setting is not easy to translate into graphs but you should try. It's best to try and find graphs that support your points; refer back to the hypotheses listed above. I suggest importing  your data into a spreadsheet program, which allows you to produce many charts. Also, there are macros that convert Excel tables into latex tables. This saves you a lot of the pain of producing Latex tables. Avoid color graphs because referees may be printing on black and white, and in any case the conference proceedings won't be in color.
+
+\begin{table}[htdp]
+\caption{Feature Aggregation Results. Last Seasons Features =, Aggregate Function Used.}
+\begin{center}
+\begin{tabular}{|c|c|c|}
+& \multicolumn{2}{c}{Feature Set} \\
+Classifier & NHL Last Season  & NHL Last Season + Target Match  & PLG Target Match \\
+SVM � Linear & 53.43\% & 60.40\% & 90.44\% \\
+SVM � Quadratic & 52.66\% & 61.74\% & 89.71\% \\
+SVM � Sigmoid & 50.00\% & 50.00\% & 50.00\% \\
+SVM � Gaussian & 50.00\% & 52.52\% & 54.78\% \\
+Logistic Regression & 53.94\% & 87.41\% & 90.44\% \\
+\end{tabular}
+\end{center}
+\label{default}
+\end{table}%
+
+\begin{table}[htdp]
+\caption{NHL Last Season Statistics Only}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+	Classifier &\multicolumn{5}{c}{Score Aggregator}\\	
+	&Average &	Max	&Min	 &Geometric Mean &	Noisy-Or\\
+SVM - Linear & \% & \% & \% & - & \% \\
+SVM - Quadratic & \% & \% & \% & - & \% \\
+SVM - Sigmoid & \% & \% & \% & - &  	\% \\
+SVM - Gaussian & \% & \% & \% & - & \% \\		
+Logistic Regression	&54.43\%	&54.43\%	&50.42\%	& 54.39\%	 50.00\%
+\end{tabular}
+\end{center}
+\label{default}
+\end{table}%
+
+\begin{table}[htdp]
+\caption{NHL Last Season + Target Match}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+	Classifier &\multicolumn{5}{c}{Score Aggregator}\\	
+	&Average &	Max	&Min	 &Geometric Mean &	Noisy-Or\\
+SVM - Linear & \% & \% & \% & - & \% \\
+SVM - Quadratic & \% & \% & \% & - & \% \\
+SVM - Sigmoid & \% & \% & \% & - &  	\% \\
+SVM - Gaussian & \% & \% & \% & - & \% \\
+Logistic Regression & 87.26\% & 87.26\% & 54.89\% & 86.60\% & 51.67\% \\
+\end{tabular}
+\end{center}
+\label{default}
+\end{table}%
+
+\begin{table}[htdp]
+\caption{PLG Target Match}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+	Classifier &\multicolumn{5}{c}{Score Aggregator}\\	
+	&Average &	Max	&Min	 &Geometric Mean &	Noisy-Or\\
+SVM - Linear & 80.15\% & 54.78\% & 51.10\% & - & 54.78\% \\
+SVM - Quadratic & 76.84\% & 53.68\% & 51.47\% & - & 53.68\% \\
+SVM - Sigmoid & 53.68\% & 50.00\% & 50.00\% & - &  	50.00\% \\
+SVM - Gaussian & 68.75\% & 50.37\% & 55.88\% & - & 50.37\% \\
+Logistic Regression & 81.26\% & 52.57\% & 52.21\% & 77.21\% & 52.57\% \\
+\end{tabular}
+\end{center}
+\label{default}
+\end{table}%
+
+
+\section{Conclusion} We considered relational classification with continuous features of linked entities. Two fundamental approaches: aggregate features, or aggregate predictions (combine). Propositionalization vs. combining rules. New combining rule = geometric mean performs the best on sports data. Fast effective baseline. Assuming degrees are similar, theoretically equivalent to using a single-table piecemeal classifier.
+
+\textbf{Acknowledgements.} This research was supported by NSERC discovery grants to. Presented at UAI workshop, thank you to audiences.
+
+%\begin{spacing}{0.9}
+
+%\bibliographystyle{mlapa}
+\bibliographystyle{abbrv}
+\bibliography{uai}
+%\bibliography{master}
+%\bibliography{thesis}
+
+%\end{spacing}
+\end{document}
