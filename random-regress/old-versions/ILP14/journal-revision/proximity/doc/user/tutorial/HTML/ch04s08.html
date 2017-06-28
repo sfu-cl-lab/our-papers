@@ -1,0 +1,168 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Analyzing the Database Schema</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Exploring Data">
+      <link rel="prev" href="ch04s07.html" title="Setting Display Preferences">
+      <link rel="next" href="ch04s09.html" title="Tips and Reminders">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s07.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;4.&nbsp;Exploring Data</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04s09.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="browse_schema"></a>Analyzing the Database Schema
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e5606"></a><a class="indexterm" name="d0e5609"></a><a class="indexterm" name="d0e5614"></a><p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e715"><span class="glossterm">Schema analysis</span></a>
+            provides summary information about the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_object"><span class="glossterm">objects</span></a> and 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_link"><span class="glossterm">links</span></a> in a database.  To run a
+            schema analysis, you need to tell 
+            Proximity which attributes identify the
+            <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e785"><span class="glossterm">type</span></a></em></span>
+            <a class="indexterm" name="d0e5633"></a>
+            <a class="indexterm" name="d0e5637"></a>
+            <a class="indexterm" name="d0e5643"></a>
+            <a class="indexterm" name="d0e5649"></a>
+            of an object or link. Proximity then analyzes the database to determine
+            the relationships among each type of object or link (as identified
+            by these attributes) and other database entities.
+         </p>
+         <p>Because MonetDB
+            <a class="indexterm" name="d0e5657"></a>
+            maximizes performance for joins at the expense of row-centric
+            operations, schema analysis can be slow. Therefore Proximity performs
+            schema analysis in a separate thread.
+         </p>
+         <div class="procedure"><a name="d0e5664"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;4.6.&nbsp;Exploring the database schema:</b></p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>In the database actions list, click <span><strong class="guibutton">analyze
+                           schema</strong></span>.
+                     Proximity displays the Schema Analysis
+                     dialog.
+                     
+                  </p>
+                  <div class="informalfigure">
+                     <div class="mediaobject" align="center">
+                        <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                           <tr>
+                              <td align="center" valign="bottom"><img src="images/SA_AttrSelection.png" align="middle" width="630"></td>
+                           </tr>
+                        </table>
+                     </div>
+                  </div>
+                  <p>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>In the <span class="guilabel">Object</span> list, choose
+                     <span><strong class="guimenuitem">pagetype</strong></span>.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>In the <span class="guilabel">Link</span> list, choose
+                     <span><strong class="guimenuitem">link_tag</strong></span>.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">Analyze</strong></span>. Proximity performs the schema analysis.
+                  </p>
+                  <p>A new window displays the trace of Proximity&#8217;s schema
+                     analysis processing. Because schema analysis runs in a separate
+                     thread, you can continue to use the Proximity Database Browser for other tasks while
+                     this process runs.
+                  </p>
+                  <p>When the schema analysis is complete, 
+                     Proximity displays a schema analysis report.
+                     <a class="indexterm" name="d0e5710"></a>
+                     The report shows the other object attributes associated with each type
+                     of object (as identified by the object &#8220;type&#8221; attribute
+                     you selected). For links, the report 
+                     shows both the kinds of objects connected to each link type as well as
+                     the other link attributes associated with each type of link.
+                     
+                  </p>
+                  <p>
+                     
+                  </p>
+                  <div class="informalfigure">
+                     <div class="mediaobject" align="center">
+                        <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0" width="383">
+                           <tr>
+                              <td align="center" valign="bottom"><img src="images/SA_Report.png" align="middle" width="383"></td>
+                           </tr>
+                        </table>
+                     </div>
+                  </div>
+                  <p>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>To save a copy of the schema analysis report,
+                     <a class="indexterm" name="d0e5726"></a>
+                     click <span><strong class="guibutton">Save</strong></span>. Proximity displays the Open dialog.
+                  </p>
+                  <p>In the <span class="guilabel">Save As</span> box, enter a name for
+                     the file.  Navigate to the directory in which you want to save the 
+                     file and click <span><strong class="guibutton">Save</strong></span>. Proximity saves the report as an HTML file. To
+                     view the report, open the file in a web browser.
+                  </p>
+               </li>
+               <li>
+                  <p>When you have finished examining the schema analysis report,
+                     click the window close button to close the report window.
+                  </p>
+               </li>
+            </ol>
+         </div>
+         <p>If you want, you can perform additional analyses using different
+            object and link attributes.  Some analyses may be
+            quite slow. In general, the more distinct values an attribute has, the
+            slower the corresponding schema analysis will be.
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s07.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04s09.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Setting Display Preferences&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Tips and Reminders</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

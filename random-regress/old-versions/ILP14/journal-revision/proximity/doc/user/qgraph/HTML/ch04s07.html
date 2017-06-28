@@ -1,0 +1,203 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Summary</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Numeric Annotations">
+      <link rel="prev" href="ch04s06s02.html" title="Efficiency considerations">
+      <link rel="next" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Constraints">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s06s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;4.&nbsp;Numeric Annotations</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="qg_annot_summary"></a>Summary
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e4687"></a><div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Annotation uses</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>Numeric annotations serve to place limits on the number of
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e435"><span class="glossterm">isomorphic</span></a> structures that can occur in
+                         matching portions of the database.
+                  </p>
+               </li>
+               <li>
+                  <p>Numeric annotations also serve to group isomorphic
+                         structures that would otherwise produce multiple matches into a
+                         single subgraph.
+                  </p>
+               </li>
+               <li>
+                  <p>QGraph does not provide any mechanism for limiting the 
+                         number of matching substructures without grouping the results.
+                  </p>
+               </li>
+               <li>
+                  <p>A numeric annotation can be specified on a vertex or edge in
+                         a QGraph query.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Annotation format</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>An <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e791"><span class="glossterm">unbounded range</span></a>
+                         [<em class="replaceable"><code>i</code></em>..] on a vertex or edge means that at
+                         least <em class="replaceable"><code>i</code></em> instances of the corresponding
+                         database element must be present to match the query.  An unbounded
+                         range will match any number greater than or equal to
+                         <em class="replaceable"><code>i</code></em> of database elements.
+                  </p>
+               </li>
+               <li>
+                  <p>A <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e87"><span class="glossterm">bounded range</span></a>
+                         [<em class="replaceable"><code>i</code></em>..<em class="replaceable"><code>j</code></em>] means
+                         that at least <em class="replaceable"><code>i</code></em> and no more than
+                         <em class="replaceable"><code>j</code></em> instances are required for a
+                         match. The query will not match database structures that have
+                         fewer than <em class="replaceable"><code>i</code></em> or more than 
+                         <em class="replaceable"><code>j</code></em> of the annotated element.
+                  </p>
+               </li>
+               <li>
+                  <p>An <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e334"><span class="glossterm">exact annotation</span></a>
+                         [<em class="replaceable"><code>i</code></em>] means that exactly
+                         the specified number of database elements must be present to match
+                         the query.  The query will not match database structures that have
+                         fewer than or more than the specified number of elements.
+                  </p>
+               </li>
+               <li>
+                  <p>To group substructures without limit, we use the annotation
+                         <code class="token">[1..]</code>.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Adjacency requirements</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>Edges adjacent to annotated vertices must themselves be
+                         annotated.
+                  </p>
+               </li>
+               <li>
+                  <p>Annotated edges can stand alone; they do not require that
+                         any adjacent vertices be annotated.
+                  </p>
+               </li>
+               <li>
+                  <p>The <code class="token">[1..]</code> annotation is often the
+                         appropriate choice for annotating an edge adjacent to an annotated
+                         vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>The vertex annotation takes <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e595"><span class="glossterm">precedence</span></a>
+                         over the edge annotation.
+                  </p>
+               </li>
+               <li>
+                  <p>At most, only one of two adjacent vertices can be
+                         annotated.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Negated and optional elements</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>A <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e534"><span class="glossterm">negated element</span></a> is annotated with
+                         <code class="token">[0]</code>, indicating that the corresponding database
+                         element must not be present in the matching subgraph.
+                  </p>
+               </li>
+               <li>
+                  <p>An <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e573"><span class="glossterm">optional element</span></a> is annotated with
+                         <code class="token">[0..]</code> or
+                         <code class="token">[0..<em class="replaceable"><code>j</code></em>]</code>, indicating
+                         that the corresponding database element may be present but is not
+                         required in the matching subgraph.
+                  </p>
+               </li>
+               <li>
+                  <p>To be <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e848"><span class="glossterm">well formed</span></a>, a query must
+                         remain a connected graph
+                         after removing any negated or optional elements.
+                  </p>
+               </li>
+               <li>
+                  <p>The annotation <code class="token">[1..]</code> is usually
+                         appropriate for annotating edges adjacent to a negated or optional
+                         vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>Negated query elements do not appear in the query&#8217;s
+                         results.
+                  </p>
+               </li>
+               <li>
+                  <p>Negated elements cannot substitute for conditions that
+                         express inequalities.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Implementation restrictions</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>Proximity cannot process queries in which an annotated
+                         vertex is connected to more than one unannotated vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>Proximity prohibits edge annotations with a lower
+                         bound of <code class="token">0</code>.
+                  </p>
+               </li>
+            </ul>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s06s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Efficiency considerations&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;5.&nbsp;Constraints</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

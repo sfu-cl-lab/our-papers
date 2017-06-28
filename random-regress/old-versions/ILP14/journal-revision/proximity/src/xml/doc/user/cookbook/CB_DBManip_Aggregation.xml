@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/local/sgml/docbook-xml-4.5/docbookx.dtd" [
+<!ENTITY % entities SYSTEM "../../ProxCommonEntities.ent">
+<!ENTITY % recipeentities SYSTEM "ProxCookbookEntities.ent">
+%entities;
+%recipeentities;
+<!ENTITY gCol '<varname>G</varname>'>
+<!ENTITY vCol '<varname>V</varname>'>
+]>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+
+<!-- CHAPTER: Database Manipulation -->
+
+<!-- ============================================================== -->
+<!--                            RECIPE:                             -->
+<!--                      AGGREGATION IN NSTS                       -->
+<!-- ============================================================== -->
+
+<section id="recipe_aggregation01">
+<title>Aggregation in NSTs</title>
+
+<!-- All index terms at top -->
+<indexterm><primary>aggregation</primary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>aggregation in</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>aggregating values</secondary></indexterm>
+<indexterm><primary>summarizing</primary>
+           <see>aggregation</see></indexterm>
+<indexterm><primary>distinct values</primary>
+           <secondary>aggregation operator for</secondary></indexterm>
+<indexterm><primary>true values</primary>
+           <secondary>aggregation operator for</secondary></indexterm>
+<indexterm><primary>out degree</primary>
+           <secondary>computing using aggregation</secondary></indexterm>
+<indexterm><primary>min aggregation operator</primary></indexterm>
+<indexterm><primary>max aggregation operator</primary></indexterm>
+<indexterm><primary>sum aggregation operator</primary></indexterm>
+<indexterm><primary>prod aggregation operator</primary></indexterm>
+<indexterm><primary>avg aggregation operator</primary></indexterm>
+<indexterm><primary>variance aggregation operator</primary></indexterm>
+<indexterm><primary>count aggregation operator</primary></indexterm>
+<indexterm><primary>card aggregation operator</primary></indexterm>
+<indexterm><primary>size aggregation operator</primary></indexterm>
+<indexterm><primary>counting</primary>
+           <secondary>distinct attribute values</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>aggregation operators in MIL</secondary></indexterm>
+<indexterm><primary>grouping</primary>
+           <see>aggregation</see></indexterm>
+<indexterm><primary>IDs</primary>
+           <secondary>aggregating by</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>computing degree</secondary></indexterm>
+
+<!-- classes used in the recipe -->
+<indexterm><primary>NST class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>NST</secondary></indexterm>
+<indexterm><primary>DB class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>DB</secondary></indexterm>
+
+<!-- methods used in this recipe -->
+<indexterm><primary>aggregate()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>aggregate</secondary></indexterm>
+<indexterm><primary>addConditionColumn()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>addConditionColumn</secondary></indexterm>
+<indexterm><primary>getAttrDataNST()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getAttrDataNST</secondary></indexterm>
+<indexterm><primary>copy()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>copy (NST)</secondary></indexterm>
+<indexterm><primary>getLinksNST()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getLinksNST</secondary></indexterm>
+<indexterm><primary>renameColumn()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>renameColumn</secondary></indexterm>
+
+<!-- ============================================================== -->
+<!-- PROBLEM                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Problem</title>
+
+<para>You have a set-valued attribute, where a single object is
+associated with more than one value, and you want to summarize
+that information with a single value per object ID.
+For example, an attribute that stores the historical salaries 
+of company employees could be summarized by finding the maximum amount
+ever received by each individual. In a SQL database, you can get such
+a summary using a combination of <code>GROUP BY id</code>
+and an aggregation method (<code>max</code> in this case) on the
+<token role="column">salary</token> column.
+How can you do this in Proximity?</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SOLUTION                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Solution</title>
+
+<para>The NST class provides a powerful but (until now) less well
+known &aggregateMethod; method. Given a table with a
+<emphasis>grouping column</emphasis> (&gCol;, typically the 
+<token role="column">id</token> column) and a changing 
+<emphasis>value column</emphasis> (&vCol;), this method lets you apply
+a specified aggregation function on &vCol; to groups of rows with the
+same value in &gCol;. For example, suppose that your multi-set 
+<token role="attr">salary</token> attribute has the following content:
+
+<programlisting><userinput> objAttrs = prox.objectAttrs
+ salaryNST = objAttrs.getAttrDataNST("salary")
+ printNST(salaryNST)
+</userinput></programlisting>
+
+<screen>[SHOWING head, id, value WHERE * LIMIT *]
+[ 1@0,    1@0,    10    ]
+[ 2@0,    1@0,    20    ]
+[ 3@0,    2@0,     5    ]
+[ 4@0,    2@0,     7    ]
+[ 5@0,    3@0,    10    ]
+[ 6@0,    3@0,    10    ]
+</screen></para>
+
+<para>You can apply the <code>max</code> aggregator to find sets of
+equal <token role="column">id</token> (the &gCol;
+column) and get their highest <token role="column">value</token>
+(&vCol; column):
+
+<programlisting><userinput> maxSalaryNST = salaryNST.aggregate("max", "id", "value")
+ printNST(maxSalaryNST)
+</userinput></programlisting>
+
+<screen>[SHOWING head, id, value WHERE * LIMIT *]
+[ 0@0,    1@0,    20    ]
+[ 1@0,    2@0,     7    ]
+[ 2@0,    3@0,    10    ]
+</screen></para>
+
+<para>The &aggregateMethod; method is fast because it takes advantage of
+MonetDB&rsquo;s <code>{operator}</code> syntax, a built-in construct
+that very efficiently groups a BAT&rsquo;s rows by their
+<code>HEAD</code> values and then applies the specified operator to
+each set. Furthermore, most of MonetDB&rsquo;s aggregation operators
+are implemented as cache-conscious and type-specific C code, which
+allows MonetDB to use highly optimized code for the most common
+operations.</para>
+
+<para>Several aggregation operators are available:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>min, max, mode</para>
+  </listitem>
+  <listitem>
+    <para>sum, prod</para>
+  </listitem>
+  <listitem>
+    <para>avg, variance</para>
+  </listitem>
+  <listitem>
+    <para>count</para>
+  </listitem>
+  <listitem>
+    <para>card</para>
+  </listitem>
+  <listitem>
+    <para>size</para>
+  </listitem>
+</itemizedlist>
+Most of these operators are self-explanatory. For example,
+<code>avg</code> computes the average of values within common values
+of the &gCol; column:
+
+<programlisting><userinput> avgSalaryNST = salaryNST.aggregate("avg", "id", "value")
+ printNST(avgSalaryNST)
+</userinput></programlisting>
+
+<screen>[SHOWING head, id, value WHERE * LIMIT *]
+[ 0@0,    1@0,    15    ]
+[ 1@0,    2@0,     6    ]
+[ 2@0,    3@0,    10    ]
+</screen>
+
+The definitions of the last two aggregation operators,
+<code>card</code> and <code>size</code>, are less obvious. The 
+<code>card</code> operator counts the number of <code>DISTINCT</code>
+values associated with a given group, and the <code>size</code>
+operator returns a count of the number of <code>true</code> 
+values within a given group (on boolean columns). For example,
+
+<programlisting><userinput> distinctSalaryNST = salaryNST.aggregate("card", "id", "value")
+ printNST(distinctSalaryNST)
+</userinput></programlisting>
+
+<screen>[SHOWING head, id, value WHERE * LIMIT *]
+[ 0@0,    1@0,    2    ]
+[ 1@0,    2@0,    2    ]
+[ 2@0,    3@0,    1    ]
+</screen>
+and
+<programlisting><userinput> tempNST = salaryNST.copy()
+ tempNST.addConditionColumn("value >= 10", "gte10")
+ gteNST = tempNST.aggregate("size", "id", "gte10")
+ printNST(gteNST)
+</userinput></programlisting>
+
+<screen>[SHOWING head, id, gte10 WHERE * LIMIT *]
+[ 0@0,    1@0,    2    ]
+[ 1@0,    2@0,    0    ]
+[ 2@0,    3@0,    2    ]
+</screen>
+
+It is also possible to write new aggregation operators directly in
+MIL, and some packages in Proximity take advantage of that
+ability, but that&rsquo;s the subject of another recipe.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- DISCUSSION                                                     -->
+<!-- ============================================================== -->
+
+<section>
+<title>Discussion</title>
+
+<para>There are many cases when you need to get summaries of tables
+with more than one row per group.  The &aggregateMethod; method makes
+this easy and efficient.  For example, to compute the out-degree of
+all the objects in the system, all you have to do is:
+
+<programlisting><userinput> DB.getLinkNST().aggregate("count", "o1_id", "o2_id")
+</userinput></programlisting>
+
+<!-- The method is also used throughout the new RPT code to compute
+the feature tables from the original attributes. -->
+In general, &aggregateMethod;
+provides an efficient way to compute aggregates over groups.</para>
+
+<para>Keep in mind that &aggregateMethod; always returns an NST of two
+columns. The first column has the same name and type as the grouping
+column &gCol;, while the second column has the name of the value column
+&vCol;, but its type corresponds to the operator
+used. For example, the call to compute the average of salaries returns
+an NST where the second column is of type <code>dbl</code>, even
+though the original value column was of type <code>int</code>.</para>
+
+<para>And remember that the new NST uses the old column name for the
+column containing the aggregated value.  In the out-degree example,
+above, the <token role="column">o2_id</token> column in the new NST
+holds the out degree for each of the 
+<token role="column">o1_id</token> IDs. You can use the &renameColumn;
+method to change the name of this column, if you want to provide a
+more meaningful column name.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SUPPORTING FILES                                                -->
+<!-- ============================================================== -->
+
+<section>
+<title>Supporting Files</title>
+
+<para>Download the following files to demonstrate this recipe:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Database:
+     <filename><ulink url="&examplespath;DBManip_Aggregation_DB.xml">DBManip_Aggregation_DB.xml</ulink></filename></para>
+  </listitem>
+</itemizedlist>
+You may also want to examine the unit test file for this recipe at
+<filename>&testpath;/cookbook/AggregateTest.java</filename>.
+</para>
+
+<para>Also, the <filename>aggregators</filename> package in
+<filename>model2</filename> makes extensive use of the techniques
+described above.</para>
+
+
+</section>
+
+<!-- === End of recipe ============================================ -->
+</section>
+
+<!--
+</chapter>
+-->
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("ProxCookbook.xml" "chapter" "section")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

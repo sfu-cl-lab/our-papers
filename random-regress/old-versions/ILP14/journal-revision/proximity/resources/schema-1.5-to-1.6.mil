@@ -1,0 +1,91 @@
+# $Id: schema-1.5-to-1.6.mil 1992 2005-03-10 16:08:26Z schapira $
+
+# Converts a Proximity database from v1.5 to v1.6
+# Make a backup of your database before running this (just cp the directory)
+# Make sure you load the standard Proximity resources, running for example
+# Mserver --dbname ProxWebKB $PROX_HOME/resources/init-mserver.mil $PROX_HOME/resources/schema-1.5-to-1.6.mil
+
+proc create_sgi_table() : bat {
+   var var_0:=bat(oid,oid);
+   var var_1:=bat(oid,oid);
+   var var_2:=bat(oid,str);
+   var var_3:=bat(str,str);
+   var_3.insert("item_id",str(var_0));
+   var_3.insert("subg_id",str(var_1));
+   var_3.insert("name",str(var_2));
+   var_3.persists(true);
+   [persists]([bat](var_3),const true);
+   return var_3;
+}
+
+proc get_object_or_link(str a, str kind) : void {
+     var b1:=bat(a);
+     var obj:=bat(b1.find(kind));
+     if (obj.count() > 0) {
+	   return obj.fetch(0);
+     } else {
+       return str(create_sgi_table());
+     }
+}
+
+proc get_parent(str a) : void {
+     var b1:=bat(a);
+     var parent:=b1.find("parent");
+     return parent;
+}
+
+
+# Get the original BATs from prox_container
+var prox_container:=bat("prox_container");
+if ((bat("prox_schema_log").max()>="1.6")) {
+  # Conversion already performed
+  printf("Database schema is up-to-date\n");
+  quit();
+}
+var name:=bat(prox_container.find("name"));
+var parent_cont:=bat(prox_container.find("parent"));
+var subg:=bat(prox_container.find("subg"));
+var subg_attr:=bat(prox_container.find("subg_attr"));
+
+# Get default BATs in case there are no containers
+# ... but get the real BATs if there are
+var cont_id:=bat(oid,oid);
+var subg_object:=bat(oid,str);
+var subg_link:=bat(oid,str);
+var subg_parent:=bat(oid,oid);
+if (name.count() > 0) {
+    # Create new ones: cont_id and subg_obj and subg_link
+    cont_id:=name.mirror();
+    subg_object:=[get_object_or_link](subg, "object");
+    subg_link:=[get_object_or_link](subg, "link");
+    subg_parent:=[get_parent](subg);
+}
+
+# Make them persistent and writable
+cont_id.persists(true);
+subg_object.persists(true);
+subg_link.persists(true);
+cont_id.access(BAT_WRITE);
+subg_object.access(BAT_WRITE);
+subg_link.access(BAT_WRITE);
+
+# Delete the old ones and insert the new ones
+prox_container.delete();
+prox_container.insert("id",cont_id.bbpname());
+prox_container.insert("name",name.bbpname());
+prox_container.insert("parent",parent_cont.bbpname());
+prox_container.insert("object",subg_object.bbpname());
+prox_container.insert("link",subg_link.bbpname());
+prox_container.insert("subg_attr",subg_attr.bbpname());
+
+# And delete all the intermediate BATs for subg
+if (name.count() > 0) {
+   [persists]([bat](subg_parent),const false);
+}
+
+# Finally, store the new version
+bat("prox_schema_log").insert(current_date(), "1.6");
+commit();
+
+printf("Conversion complete.\n");
+quit();

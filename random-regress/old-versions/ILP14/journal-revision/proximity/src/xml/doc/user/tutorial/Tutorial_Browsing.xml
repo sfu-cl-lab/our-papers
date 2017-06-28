@@ -1,0 +1,1704 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="ch_browse">
+<title>Exploring Data</title>
+
+<!-- ============================================================== -->
+<!--                            OVERVIEW                            -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Overview</title>
+
+<para>The &uiname; is a browser-based interface that lets you explore
+database entities, create and execute queries, examine models, and run
+Python scripts that operate on the 
+database.<indexterm><primary>data</primary>
+           <secondary>exploring</secondary></indexterm>
+<!-- deleted 'accessing' example
+<indexterm><primary>exploring</primary>
+           <seealso>accessing database entities</seealso></indexterm>
+-->
+<indexterm><primary>browsing</primary>
+           <see>exploring</see></indexterm>
+<indexterm><primary>exploring</primary>
+           <secondary>data</secondary></indexterm>
+</para>
+
+<para>
+<itemizedlist spacing="compact">
+<title>Objectives</title>
+
+<para>The text and exercises in this chapter demonstrate how to</para>
+  <listitem>
+    <para>start and use the &uiname;</para>
+  </listitem>
+  <listitem>
+    <para>explore <glossterm baseform="object">objects</glossterm>,
+    <glossterm baseform="link">links</glossterm>, and 
+    <glossterm baseform="attribute">attributes</glossterm> in a Proximity
+    database</para>
+  </listitem>
+  <listitem>
+    <para>visualize portions of the database as a graph</para>
+  </listitem>
+  <listitem>
+    <para>set display preferences for the &uiname;</para>
+  </listitem>
+  <listitem>
+    <para>create a <glossterm>schema analysis</glossterm> report</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                 THE PROXIMITY USER INTERFACE                   -->
+<!-- ============================================================== -->
+
+<sect1 id="browse_ui">
+<title>The Proximity User Interface</title>
+
+<para>The &uiname; 
+<indexterm><primary>user interface</primary>
+           <see>Proximity Database Browser</see></indexterm>
+<indexterm><primary>&uiname;</primary>
+           <secondary>overview</secondary></indexterm>
+<indexterm><primary>browser</primary>
+           <seealso>&uiname;</seealso></indexterm>
+operates much like a web
+browser. Most of its functionality is accessed through standard
+linked (blue and underlined) text items.</para>
+
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUIHome.png" format="PNG"
+   width="5.75in" /><!-- was 4.5 -->
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/GUIHome.png" 
+    contentwidth="5.75in"
+    format="PNG" /><!-- was 5.75 -->
+</imageobject>
+</mediaobject>
+</informalfigure>
+
+<para>The home page includes a button bar, menu bar, 
+a list of database actions, and set of specific views into the
+database.</para>
+
+<para>The menu bar provides access to browser settings and
+Proximity&rsquo;s query processing, script handling functionality, and
+model display functionality:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>The <guimenu>File</guimenu> menu controls browser settings
+    and lets you view the contents of text files, such as queries or
+    scripts.</para>
+  </listitem>
+  <listitem>
+    <para>The <guimenu>Query</guimenu> menu lets you create, edit, and
+    execute queries (see <xref linkend="ch_queries"/>).</para>
+  </listitem>
+  <listitem>
+    <para>The <guimenu>Model</guimenu> menu lets you display graphical
+    representations of Proximity models
+    (see <xref linkend="ch_models"/>).</para>
+  </listitem>
+  <listitem>
+    <para>The <guimenu>Script</guimenu> menu lets you execute Python
+    commands interactively and in scripts
+    (see <xref linkend="ch_scripts"/>).</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+<para>The button bar provides access to navigation shortcuts 
+and general browser functionality:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>The <guibutton>Back</guibutton> button returns the browser
+     to the previous page.</para>
+  </listitem>
+  <listitem>
+    <para>The <guibutton>Home</guibutton> button returns the browser
+    to the &proxui; start page.</para>
+  </listitem>
+  <listitem>
+    <para>The <guibutton>Refresh</guibutton> button updates the
+    current display to include any new information.</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+<para>The location bar provides direct access to any Proximity
+database entity using a URL-like syntax described in 
+<xref xrefstyle="pageref" linkend="browse_locbar"/>.</para>
+
+<para>The database actions list provides access to database-level
+functionality:
+<itemizedlist spacing="compact">
+  <listitem>
+     <para>The <guibutton>graph</guibutton> action opens the
+     &dbviztool;, which lets you interactively explore the graph
+     structure of the database.
+     See <xref xrefstyle="pageref" linkend="browse_graphing"/>.
+     </para>
+  </listitem>
+  <listitem>
+     <para>The <guibutton>analyze schema</guibutton> action opens the
+     schema analysis dialog to begin the process of analyzing the
+     distribution of object and link types in the database.
+     See <xref xrefstyle="pageref" linkend="browse_schema"/>.
+     </para>
+  </listitem>
+  <listitem>
+    <para>The <guibutton>browse tables</guibutton> action opens the
+    Proximity NST browser, a tool for examining Proximity&rsquo;s
+    internal data structures.
+    NSTs are discussed in <xref linkend="ch_scripts"/>. See
+    <xref xrefstyle="pageref" linkend="scripts_nst"/>.</para>
+  </listitem>
+</itemizedlist> 
+</para>
+
+<para>The database views section lets you explore the entities in your
+database. <glossterm baseform="object">Objects</glossterm> and 
+<glossterm baseform="link">links</glossterm> are primary database
+entities.  Exploring these primary database entities is the focus if
+this chapter.
+<glossterm baseform="container">Containers</glossterm> are
+created as a result of executing queries. Containers and 
+<glossterm baseform="subgraph">subgraphs</glossterm>, and how to
+examine them in the &uiname;, are described in more detail in 
+<xref linkend="ch_queries"/>.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                  EXPLORING OBJECTS AND LINKS                    -->
+<!-- ============================================================== -->
+
+<sect1 id="browse_objs">
+<title>Exploring Objects and Links</title>
+
+<para>This exercise describes how to start the &uiname; and walks
+through an exploration of several objects and links in the &webkb;
+database.</para>
+
+<!--
+   EXERCISE: Exploring objects and links
+-->
+
+<procedure id="ex_exploring1">
+<title>Exploring objects and links</title>
+
+<step>
+<para>If it is not already running, start the MonetDB 
+<indexterm><primary>MonetDB</primary>
+           <secondary>server</secondary></indexterm>
+<indexterm><primary>starting</primary>
+           <secondary>MonetDB server</secondary></indexterm>
+<indexterm><primary>opening</primary>
+           <see>starting</see></indexterm>
+server on the &webkb; database.</para>
+
+<para><synopsis>&prompt; <userinput>Mserver --dbname &webkb; &proxpath;/resources/init-mserver.mil</userinput>
+</synopsis>
+<indexterm><primary>Mserver command</primary></indexterm>
+
+The <filename>init-mserver.mil</filename> 
+<indexterm><primary><filename>init-mserver.mil</filename> script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>init-mserver.mil</secondary></indexterm>
+script sets the port 
+<indexterm><primary>port number</primary></indexterm>
+for the server to 30000.  To use a different port, add 
+<userinput>--set port=<replaceable>nnnnn</replaceable></userinput>
+(where <replaceable>nnnnn</replaceable> is the new port number) to
+the command line, e.g.,
+<synopsis>&prompt; <userinput>Mserver --dbname &webkb; &proxpath;/resources/init-mserver.mil \
+  --set port=45678</userinput>
+</synopsis>
+Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+MonetDB&nbsp;&monetoldversion;.</para>
+</step>
+
+<step>
+<para>Start 
+<indexterm><primary>&uiname;</primary>
+           <secondary>starting</secondary></indexterm>
+<indexterm><primary>starting</primary>
+           <secondary>&uiname;</secondary></indexterm>
+the &uiname;. Substitute the appropriate host and port
+information if you are 
+running the MonetDB server on a different machine or are using a
+different port.</para>
+
+<para>
+<indexterm><primary>gui.sh/gui.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>gui.sh</secondary></indexterm>
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>gui.bat</secondary></indexterm>
+<synopsis>&prompt; <userinput>cd &proxpath;</userinput>
+&prompt; <userinput>bin/gui.sh localhost:30000</userinput>
+</synopsis>
+</para>
+
+<!--
+Windows:
+<synopsis>&winprompt; <userinput>cd &winproxpath;</userinput>
+&prompt; <userinput>bin\gui.bat localhost:30000</userinput>
+</synopsis>
+-->
+
+<para>Proximity starts the &uiname;.  The Proximity interactive Python
+interpreter opens in a separate window.  See
+<xref xrefstyle="pageref" linkend="scripts_interpreter"/> for
+information on using the interpreter to interactively work with the
+data.  You can close the interpreter window when you are not using
+it.</para>
+
+<sidebar><para>To exit the &uiname;, choose
+<guimenuitem>Quit</guimenuitem> from the <guimenu>File
+menu</guimenu>.</para>
+</sidebar> 
+</step>
+
+<step>
+<para>In the &uiname; home page, click
+<guibutton>Objects</guibutton>. 
+<indexterm><primary>objects</primary>
+           <secondary>exploring</secondary></indexterm>
+<indexterm><primary>exploring</primary>
+           <secondary>objects</secondary></indexterm>
+Proximity displays the total number of objects in the database and lists
+the <glossterm baseform="object identifier">IDs</glossterm> for the first 200
+objects. The &webkb; 
+<indexterm><primary>&webkb; database</primary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>&webkb;</secondary></indexterm>
+database includes 4135 objects.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_ObjectList.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_ObjectList.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para> 
+
+<para>Displaying long lists can take a considerable amount of time;
+therefore, Proximity displays 200 items at a time.  To display more
+objects, click <guibutton>Next</guibutton> to see the next 200
+objects, or click the corresponding page number to go to that
+portion of the object list.  For example, clicking 
+<guibutton>4</guibutton> displays objects 601 through&nbsp;800.
+</para>
+
+</step>
+
+<step>
+<para>Click <guibutton>1</guibutton> to see the details for object
+1. Proximity displays information about object 1.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Object1.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Object1.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+
+<para>Because MonetDB
+<indexterm><primary>MonetDB</primary>
+           <secondary>optimized operations</secondary></indexterm>
+optimizes column-centric operations at the
+expense of row-centric operations, it can be slow to collect the
+<glossterm baseform="attribute">attributes</glossterm> and values for a
+specific object or link in databases
+containing a large number of attributes. Proximity therefore separates
+the display of attribute information from other information about objects
+and links.</para>
+
+</step>
+
+<step>
+<para>Click <guibutton>attrs</guibutton>.
+<indexterm><primary>objects</primary>
+           <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="objects">of objects</secondary></indexterm>
+Proximity displays a list of the attributes and
+their values for object 1. (The order in which attributes are listed
+may differ from that shown below.)
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Object1_attrs.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Object1_attrs.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+
+<para>Proximity supports set-based
+<indexterm><primary>attributes</primary>
+           <secondary>multiple values</secondary></indexterm>
+attribute values allowing objects and links to have multiple values,
+including duplicated values, for an attribute.
+Object&nbsp;1 has 
+multiple values for the page_words_top100 attribute.
+This attribute represents occurrences of the top 100 words
+found in the web pages used to create the &webkb; database. Individual
+words can occur more than once in this list if they occur more than
+once in the source web page.</para>
+</step>
+
+<step>
+<para>Click &home; to return to the &uiname; start page.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Links</guibutton>. 
+<indexterm><primary>links</primary>
+           <secondary>exploring</secondary></indexterm>
+<indexterm><primary>exploring</primary>
+           <secondary>links</secondary></indexterm>
+Proximity displays the total number of links in the database and lists
+the IDs of the first 200 links. The &webkb; database contains 10,934
+links.</para>
+
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_LinkList.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_LinkList.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</step>
+
+<step>
+<para>Click <guibutton>1</guibutton> to see the details for link
+1. Proximity displays summary information about
+link 1 including the IDs of the objects it connects.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Link1.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Link1.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+</step> 
+
+<step>
+<para>Click <guibutton>attrs</guibutton>.
+<indexterm><primary>links</primary>
+           <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="links">of links</secondary></indexterm>
+Proximity displays a list of attributes and their
+values for link&nbsp;1.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Link1_attrs.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Link1_attrs.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+In Proximity, links are database entities on a par with objects. Like
+objects, links have IDs and set-based
+<indexterm><primary>attributes</primary>
+           <secondary>multiple values</secondary></indexterm>
+attribute values.  Because we imported additional values for the
+<token role="attr">link_tag</token> attribute in
+<xref linkend="ex_import_nocheck"/>, some links, including link&nbsp;1,
+have more than one value for this attribute.</para>
+</step>
+
+<step>
+<para>Continue exploring the &webkb; database. The remaining
+exercises in this tutorial use the &webkb; database, so understanding
+the data it represents can be helpful as you work through the
+remaining exercises.
+When you are finished, continue to the next section.</para>
+</step>
+
+</procedure>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       EXPLORING ATTRIBUTES                     -->
+<!-- ============================================================== -->
+
+<sect1 id="browse_attrs">
+<title>Exploring Attributes</title>
+
+<para>In addition to looking at at database in terms of its
+<glossterm baseform="object">objects</glossterm> and 
+<glossterm baseform="link">links</glossterm>, Proximity allows you to
+approach it in terms of its 
+<indexterm><primary>attributes</primary>
+           <secondary>exploring</secondary></indexterm>
+<indexterm><primary>exploring</primary>
+           <secondary>attributes</secondary></indexterm>
+<glossterm baseform="attribute">attributes</glossterm>.  Proximity
+separates object attributes from link attributes, but otherwise both
+support the same operations.</para>
+
+<!--
+   EXERCISE: Exploring attributes
+-->
+
+<procedure id="ex_exploringattrs">
+<title>Exploring attributes</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>Click &home; to go to the &uiname; start page.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Object Attributes</guibutton>.
+<indexterm><primary>objects</primary>
+           <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="objects">of objects</secondary></indexterm>
+Proximity displays a list of the object
+attributes in the &webkb; database.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_ObjAttrs.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_ObjAttrs.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+This list shows all the attributes that an object may have. Each
+object need not have a value for every attribute.</para>
+<para>The <guilabel>Object Attributes</guilabel> page includes a
+<guibutton>create new</guibutton> link 
+<indexterm><primary>Proximity Database Browser</primary>
+           <secondary>updating data</secondary>
+           <tertiary>creating attributes</tertiary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>attributes</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>creating</secondary></indexterm>
+for adding a new object attribute to the database. Clicking
+<guibutton>create new</guibutton> opens the
+<guilabel>Create New Attribute</guilabel> dialog, allowing you to
+specify the new attribute name and a function for assigning values.
+See <xref xrefstyle="pageref" linkend="scripts_attrs"/> for an
+example of a function that assigns values to the new attribute; the
+syntax for this function is further described in the Javadoc
+documentation for the &AddAttribute; class.</para>
+</step>
+
+<step>
+<para>Click <guibutton>pagetype</guibutton>. Proximity
+displays a histogram (table) showing the values and counts for the
+<token role="attr">pagetype</token> attribute.
+The table is initially sorted by count, with the highest count
+shown first. Click <guibutton>value</guibutton> to sort the table by
+attribute value.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_PagetypeAttr.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_PagetypeAttr.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+Row count 
+<indexterm><primary>row count</primary></indexterm>
+indicates how many instances of this attribute occur in
+the database. Because each object in &webkb; has a 
+<token role="attr">pagetype</token> attribute,
+there are 4135 instances of the <token role="attr">pagetype</token>
+attribute in the database.
+Because Proximity supports set-valued 
+<indexterm><primary>attributes</primary>
+           <secondary>multiple values</secondary></indexterm>
+attributes, some attributes such as
+<token role="attr">page_words_top100</token> may have a higher row
+count, indicating that some 
+objects have more than one value for that attribute.</para>
+
+<para>Column count
+<indexterm><primary>column count</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>dimensionality</secondary></indexterm>
+<indexterm><primary>dimensionality of attributes</primary></indexterm>
+indicates how many dimensions a single value contains. 
+In the &webkb; database, all original attributes have just a single
+dimension, although attributes that store model predictions (added by
+completing the exercises in 
+<xref xrefstyle="brief" linkend="ch_models"/>) employ two dimensions. 
+Other databases might have 
+<glossterm baseform="multi-dimensional attribute">multi-dimensional attributes</glossterm>,
+such as
+an attribute containing an (x,y) pair representing spatial
+coordinates. Proximity can store multi-dimensional data, but
+it cannot currently use multi-dimensional attribute values in
+queries.</para>
+
+<para>Object attribute pages also include
+<guibutton>delete</guibutton> and
+<guibutton>export</guibutton> links:
+<itemizedlist spacing="compact">
+<listitem>
+  <para>Clicking <guibutton>delete</guibutton> removes this attribute
+  <indexterm><primary>deleting</primary>
+             <secondary>attributes</secondary></indexterm>
+  <indexterm><primary>attributes</primary>
+             <secondary>deleting</secondary></indexterm>
+  <indexterm><primary>Proximity Database Browser</primary>
+             <secondary>updating data</secondary>
+             <tertiary>deleting attributes</tertiary></indexterm>
+and all its values from the database.  (If you want to experiment
+  with removing attributes, take care not to remove the 
+  <token role="attr">pagetype</token> attribute as it is needed in
+  later exercises.  You can safely remove the 
+  <token role="attr">url_hierarchy2</token> or
+  <token role="attr">url_hierarchy3</token> attributes without
+  affecting later <citetitle>Tutorial</citetitle> exercises.)</para>
+</listitem>
+<listitem>
+  <para>Clicking <guibutton>export</guibutton>
+  <indexterm><primary>data</primary>
+             <secondary>exporting</secondary></indexterm>
+  <indexterm><primary>exporting data</primary>
+             <secondary sortas="CSV">to CSV files</secondary></indexterm>
+  <indexterm><primary>attributes</primary>
+            <secondary>exporting to CSV files</secondary></indexterm>
+  <indexterm><primary>CSV files of exported data</primary></indexterm>
+  writes the object or link IDs and attribute values to a
+  tab-delimited text file suitable for importing into another
+  application.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>The attribute list is initially sorted by count, with the most
+numerous value shown first.  Click <guibutton>value</guibutton>
+to sort the list alphabetically.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Student</guibutton>. Proximity displays a list
+of objects whose <token role="attr">pagetype</token> attribute has the
+value <token role="attr">Student</token>.
+Said differently, Proximity 
+<glossterm baseform="filter"><emphasis>filters</emphasis></glossterm>
+<indexterm><primary>filtering</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>filtering by value</secondary></indexterm>
+the list of objects by the selected attribute value.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_FilteredObjs.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_FilteredObjs.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+</step>
+
+<step>
+<para>Click &back; to return to the Object Attributes
+page.</para>
+</step>
+
+<step>
+<para>Click <guibutton>page_words_top100</guibutton>. Proximity
+displays summary information for this attribute.</para>
+<para>Because &webkb; objects have multiple values for this
+attribute, its row count is much higher than the number of objects in
+the database.</para>
+</step>
+
+<step>
+<para>Click &home; to return to the &uiname; start page.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Link Attributes</guibutton>. 
+<indexterm><primary>links</primary>
+           <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="links">of links</secondary></indexterm>
+Proximity displays a list of the link attributes in the &webkb;
+database.  Links in &webkb; have two attributes, 
+<token role="attr">link_id</token> and <token role="attr">link_tag</token>.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata align="center" valign="bottom"
+   fileref="&graphicspath;/GUI_LinkAttrs.png"
+   width="5.75in"
+   format="PNG"/>
+</imageobject>
+<imageobject role="html">
+   <imagedata align="center" valign="bottom"
+   fileref="&graphicspath;/GUI_LinkAttrs.png"
+   contentwidth="7.0in"
+   format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+The <guilabel>Link Attributes</guilabel> page also includes a
+<guibutton>create new</guibutton> link for adding a new link
+attribute to the database.  
+Clicking
+<guibutton>create new</guibutton> opens the
+<guilabel>Create New Attribute</guilabel> dialog, allowing you to
+specify the new attribute name and a function for assigning values.
+See <xref xrefstyle="pageref" linkend="scripts_attrs"/> for an
+example of a function that assigns values to the new attribute; the
+syntax for this function is further described in the Javadoc
+documentation for the &AddAttribute; class.</para>
+</step>
+
+<step>
+<para>Explore the link attributes.  Every link in &webkb; has a value
+for each of these attributes: a 
+<token role="attr">link_tag</token> that indicates the
+relationship of one web page to another in a file hierarchy, and a
+<token role="attr">link_id</token> that provides a unique identifier
+for each link. As with other long pages, the 
+<token role="attr">link_id</token> page only displays the first 200
+entries.</para>
+
+<para>Like object attribute pages, link attribute pages include a
+<guibutton>delete</guibutton> link removes that
+attribute and all its values from the database, and an
+<guibutton>export</guibutton> link that exports the attribute values
+to a tab-delimited text file suitable for importing into another
+application.</para>
+</step>
+
+<step>
+<para>Continue exploring the &webkb; database.
+When you are finished, continue to the next section.</para>
+</step>
+
+</procedure>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        USING THE LOCATION BAR                  -->
+<!-- ============================================================== -->
+
+<sect1 id="browse_locbar">
+<title>Using the Location Bar</title>
+<indexterm><primary>location bar</primary>
+           <secondary sortas="Proximity">in &uiname;</secondary></indexterm>
+<indexterm><primary>Proximity Database Browser</primary>
+           <secondary>location bar</secondary></indexterm>
+<indexterm><primary>path in location bar</primary></indexterm>
+
+<para>The &uiname; location bar uses a URL-like path to provide direct
+access to any 
+Proximity database entity.  The following exercise illustrates how to
+use the location bar to access the different types of Proximity
+database entities 
+(<glossterm baseform="object">objects</glossterm>, 
+<glossterm baseform="link">links</glossterm>, and 
+<glossterm baseform="attribute">attributes</glossterm>).  Using the
+location bar to access 
+<glossterm baseform="container">containers</glossterm> and 
+<glossterm baseform="subgraph">subgraphs</glossterm> is described in 
+<xref xrefstyle="pageref" linkend="query_browsing"/>.
+See <xref linkend="apx_quickref"/> for a summary of how to use the
+location bar.</para>
+
+<!--
+   EXERCISE: Using the location bar
+-->
+
+<procedure>
+<title>Using the location bar</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>Click &home; to go to the &uiname; start page.</para>
+</step>
+
+<step>
+<para>In the location bar at the top of the &uiname;, type
+<userinput>db:/objects</userinput> and press <keycap>Return</keycap>.
+<indexterm><primary>exploring</primary>
+           <secondary>objects</secondary></indexterm>
+<indexterm><primary>objects</primary>
+           <secondary>exploring</secondary></indexterm>
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+              format="PNG"
+              width="5.75in"
+              fileref="&graphicspath;/GUI_LocBar_objects.png"/>
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom"
+              format="PNG" align="center"
+              contentwidth="7.0in"
+              fileref="&graphicspath;/GUI_LocBar_objects.png"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+Proximity reports the total number of objects in the database and
+lists the <glossterm baseform="object identifier">IDs</glossterm> for the first 200
+objects.</para>
+
+<para>The leftmost portion of the location bar path (to the left of
+the colon) can be loosely viewed as a protocol describing the
+type of information to be displayed.  
+Use <code>db:/</code> as the path protocol to access the list
+of objects or the list of links.
+See <xref xrefstyle="pageref" linkend="apx_quickref_locbar"/> for a
+complete list of location bar path protocols.</para>
+</step>
+
+<step>
+<para>Type <userinput>db:/objects#2</userinput> in the location bar
+and press <keycap>Return</keycap>. Proximity displays the second page
+of object IDs.</para>
+
+<para>When Proximity breaks up a list over multiple pages, follow the
+location bar path with the pound symbol (<code>#</code>) and a page
+number to display the corresponding page of items.</para>
+</step>
+
+<step>
+<para>Enter <userinput>item:/objects/1</userinput> in the location bar.
+Proximity displays information about object&nbsp;1.</para>
+
+<para>Note that the entire path has changed so that it no longer
+begins with the <code>db:</code> protocol.  Use the <code>item:</code>
+protocol to access individual objects or links.</para>
+</step>
+
+<step>
+<para>Enter <userinput>item:/objects/1!ATTRVALS</userinput>
+<indexterm><primary>attributes</primary>
+           <secondary>exploring</secondary></indexterm>
+<indexterm><primary>exploring</primary>
+           <secondary>attributes</secondary></indexterm>
+in the location bar.  Proximity displays
+the attributes and their values for object&nbsp;1.</para>
+
+<para>Add <code>!ATTRVALS</code> to the end of the location bar path to
+display the attribute list for any database entity that has attributes
+(objects, links, containers, and subgraphs).</para>
+</step>
+
+<step>
+<para>Enter <userinput>db:/</userinput> in the location bar.
+Proximity returns to the &uiname;
+start page.</para>
+
+<para>With the exception of <code>db:/</code> to indicate the &uiname;
+start page, location bar paths do not use a trailing slash
+(<code>/</code>).</para>
+</step>
+
+<step>
+<para>Enter <userinput>db:/links</userinput> in the location bar.
+<indexterm><primary>exploring</primary>
+           <secondary>links</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>exploring</secondary></indexterm>
+Proximity displays the list of link IDs.</para>
+</step>
+
+<step>
+<para>Enter <userinput>item:/links/1</userinput> in the location
+bar. Proximity displays information about link&nbsp;1. Again, the path
+protocol changes from <code>db:/</code> to <code>item:/</code>.</para>
+</step>
+
+<step>
+<para>Enter <userinput>item:/links/1!ATTRVALS</userinput> in the
+location bar.  Proximity displays
+the attributes and their values for link&nbsp;1.</para>
+
+<para>As we saw before, adding <code>!ATTRVALS</code> to the end of
+the location bar path displays the attribute values for the
+corresponding database item.</para>
+</step>
+
+<step>
+<para>Enter <userinput>attrdefs:/objects</userinput> in the location
+bar.  Proximity displays the list of object attributes.</para>
+
+<para>Use the <code>attrdefs:</code> protocol
+to display either the list of object attributes or
+the list of link attributes.</para>
+</step>
+
+<step>
+<para>Enter <userinput>attr:/objects/url</userinput> in the location
+bar.  Proximity displays the
+table of values and counts for the <token role="attr">url</token>
+object attribute.</para>
+
+<para>As we saw with the change from viewing a list of objects to
+viewing a single object, changing from displaying a list of attributes
+to displaying a single attribute requires changing the path protocol.
+Use the <code>attr:</code> protocol to display information
+on a specific attribute.</para>
+
+<para>Because the <token role="attr">url</token> attribute has over
+200 distinct values in the &webkb; database, Proximity breaks up the
+list of values across several pages. Add <code>#</code> and a page
+number to the end of the location bar path to display the
+corresponding page of attribute values. For example, to see the second
+page of values for the <token role="attr">url</token> attribute, enter
+<userinput>attr:/objects/url#2</userinput> in the location bar.</para>
+</step>
+
+<step>
+<para>Enter
+<userinput>filter:/objects/pagetype/value/'Student'</userinput> in the
+location bar. Proximity displays the list of objects filtered by the
+specified attribute 
+value.<indexterm><primary>filtering</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>filtering by value</secondary></indexterm>
+The text entered in the location bar
+states that we only want to see those objects whose 
+<token role="attr">pagetype</token> attribute has a value of 
+<token role="attr">Student</token>.</para>
+
+<para>The <code>filter:</code> protocol filters objects and links by
+the value of an attribute.  The syntax of the <code>filter:</code>
+protocol is:
+<blockquote>
+<para>
+<userinput>filter:/<replaceable>item-type</replaceable>/<replaceable>attribute-name</replaceable>/<replaceable>column-name</replaceable>/<replaceable>attribute-value</replaceable></userinput>
+</para></blockquote>
+where
+<itemizedlist spacing="compact">
+<listitem>
+<para><replaceable>item-type</replaceable> is either
+   <literal>objects</literal> or <literal>links</literal></para>
+</listitem>
+<listitem>
+<para><replaceable>attribute-name</replaceable> is the name of the
+   attribute to use</para>
+</listitem>
+<listitem>
+<para><replaceable>column-name</replaceable> is the name of the
+   data column for that attribute. Most Proximity attribute data,
+   including the data in ProxWebKB, is
+   one-dimensional<indexterm><primary>attributes</primary>
+      <secondary>dimensionality</secondary></indexterm>
+      <indexterm><primary>dimensionality of attributes</primary></indexterm>
+   and thus requires only a single column.  Unless you have specified
+   a different 
+   column name when importing data, this column will have the default
+   name <literal>value</literal>. Column names are shown above the
+   histogram (table of values and counts) for an attribute.</para>
+</listitem>
+<listitem>
+<para><replaceable>attribute-value</replaceable> is the specific
+   value to filter on.  Only database items having this value will be
+   displayed.  If the attribute is of type <code>str</code> (string),
+   the value must be quoted.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</step>
+
+</procedure>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                          VISUALIZING DATA                      -->
+<!-- ============================================================== -->
+
+<sect1 id="browse_graphing">
+<title>Visualizing Data</title>
+<indexterm id="dbviz1" class="startofrange">
+           <primary>browser</primary>
+           <secondary>graphical</secondary></indexterm>
+<indexterm id="dbviz2" class="startofrange">
+           <primary>data</primary>
+           <secondary>visualizing</secondary></indexterm>
+<indexterm id="dbviz3" class="startofrange">
+           <primary>graphing</primary>
+           <secondary>data</secondary></indexterm>
+<indexterm id="dbviz4" class="startofrange">
+           <primary>visualizing</primary>
+           <secondary>data</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>visualizing data in</secondary></indexterm>
+
+<para>To complement the exploration capabilities available in the
+&uiname;, Proximity also provides a way to visualize data graphically.
+<indexterm id="dbviz5" class="startofrange">
+           <primary>&dbviztool;</primary></indexterm>
+The &dbviztool;
+lets you interactively explore and visualize the local
+neighborhood of a selected object.</para>
+
+<procedure id="ex_dbviz">
+<title>Exploring data with the &dbviztool;</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>Display the details for object 295.</para>
+<para>From the &uiname; start page,
+either click <guibutton>Objects</guibutton> then click
+<guibutton>Next</guibutton> and choose object
+<guibutton>295</guibutton>, or enter
+<userinput>item:/objects/295</userinput> in the location bar.</para>
+</step>
+
+<step>
+<para>Click <guibutton>graph</guibutton>. Proximity opens a new window
+displaying a graph of object&nbsp;295 and its immediate neighbors.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+              format="PNG"
+              width="5.75in"
+              fileref="&graphicspath;/DBViz_Callouts.png"/>
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+              format="PNG"
+              contentwidth="7.0in"
+              fileref="&graphicspath;/DBViz_Callouts.png"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+<para>The initial graph display shows the <emphasis>expansion</emphasis> 
+of the start object to show the object and its immediate neighbors,
+labeled with their object IDs.
+<indexterm><primary>IDs in Proximity</primary></indexterm>
+<indexterm><primary>objects</primary>
+           <secondary>IDs for</secondary></indexterm>
+In this example, the start object, object&nbsp;295, is linked to 
+three neighbors: objects 1758, 1764, and 1769.
+<!-- 
+Hover the mouse over any node or link to display a tooltip containing
+that item&rsquo;s OID.
+-->
+</para>
+
+<para>The graph visualization window includes its own location bar
+<indexterm><primary>location bar</primary>
+           <secondary sortas="graphical">in &dbviztool;</secondary></indexterm>
+at the top of the window and a status bar at the bottom of the
+window.  Enter an object&rsquo;s ID to visualize the immediate
+neighborhood around that object.
+The location bar displays the ID of the most recently
+expanded object&mdash;in this example it indicates that we are displaying
+the local neighborhood of object&nbsp;295.</para>
+
+<para>The status bar reports the
+results of the most recent expansion&mdash;that expanding
+object&nbsp;295 adds three new objects and three new links for a total of
+four objects and three links.</para>
+</step>
+
+<step>
+<para>Set the display preferences for the graph.
+<indexterm><primary>preferences</primary>
+           <secondary>&dbviztool;</secondary></indexterm>
+Display options determine
+<itemizedlist spacing="compact">
+<listitem>
+  <para>labels for nodes in the graph</para>
+</listitem>
+<listitem>
+  <para>labels for links in the graph</para>
+</listitem>
+<listitem>
+  <para>the color of nodes in the graph</para>
+</listitem>
+<listitem>
+  <para>whether to use of animation when updating the graph (enabled
+  by default)</para>
+</listitem>
+</itemizedlist>
+Labels and colors are based on the attribute values and OIDs of the
+displayed items:
+<!-- In some cases, new display options may not
+be updated until the next time you expand a node. -->
+<orderedlist numeration="loweralpha" spacing="compact">
+<listitem>
+  <para>From the <guimenu>Graph</guimenu> menu, choose
+  <guimenuitem>Set Object Colors</guimenuitem>.  Proximity opens the
+  <guilabel>Choose Attribute</guilabel> dialog.</para>
+</listitem>
+<listitem>
+  <para>Choose <guimenuitem>pagetype</guimenuitem> from the list of
+  attributes and click <guibutton>Set</guibutton>.
+  Proximity updates the node colors in the graph.</para>
+</listitem>
+<listitem>
+  <para>From the <guimenu>Graph</guimenu> menu, choose
+  <guimenuitem>Show Color Legend</guimenuitem>.
+  Proximity displays a
+  key that illustrates how node color maps to
+  <token role="attr">pagetype</token>.</para>
+</listitem>
+<listitem>
+  <para>To change the graph&rsquo;s object labels, choose 
+  <guimenuitem>Set Object Labels</guimenuitem> from the
+  <guimenu>Graph</guimenu> menu.
+  You can label the objects with the object&rsquo;s OID, label objects
+  with the value of a selected attribute, or choose to use no object
+  labels.</para>
+</listitem>
+</orderedlist>
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center" format="PNG"
+              width="5.75in"
+              fileref="&graphicspath;/DBViz_Legend.png"/>
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center" format="PNG"
+              contentwidth="7.0in"
+              fileref="&graphicspath;/DBViz_Legend.png"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+Although we do not do so as part of this exercise, you can also add
+and remove labels for the links in the graph.  Like node labels, link
+labels can use either the link&rsquo;s ID number or the value of a
+selected attribute.
+</para>
+</step>
+
+<step>
+<para>Click the node for object&nbsp;1758.</para>
+<para>Proximity expands this node to show you some of
+the objects linked to object&nbsp;1758.  
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+              fileref="&graphicspath;/DBViz_Expanded.png"
+              width="5.75in"
+              format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+              fileref="&graphicspath;/DBViz_Expanded.png"
+              contentwidth="7.0in"
+              format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+Notice that the location bar has been updated to show you the most
+recently expanded object. Nodes that have previously been expanded
+are marked by a medium-weight black outline.  The most recently expanded
+node is marked by a thick black outline and a blue label.
+</para>
+
+<para>One of the newly added nodes is a
+<glossterm baseform="proxy node"><emphasis>proxy</emphasis>
+node</glossterm>.
+<indexterm><primary>proxy nodes</primary></indexterm>
+Proxy nodes are colored gray and labeled with a
+percentage that indicates how many of the neighboring nodes it
+represents.  In this case, object&nbsp;1758 is linked to 119
+neighboring objects, of which 5 are currently shown in the graphing
+window. (The 5 linked objects include the 4 objects on the
+outside circle and object&nbsp;295 in the center of the graph.)  An
+additional 114 objects linked to object&nbsp;1758 are not shown, so the
+proxy node reports that 95.80% (or 114 out of 119) of
+object&nbsp;1758&rsquo;s neighbors are not displayed.</para>
+</step>
+
+<step>
+<para>To show more objects linked to object&nbsp;1758, click the gray
+proxy node on the outside circle.</para>
+<para>Proximity displays six additional objects linked to
+object&nbsp;1758.  Because Proximity redraws the graph after each
+expansion, nodes and links may change position after you expand an
+object or proxy node.</para>
+<para>Expanding either an object or proxy node normally adds up to six
+additional nodes to the graph.  New nodes are selected from the remaining
+(undisplayed) objects linked to the expanded node.  Expanding a proxy
+node that represents more than six objects produces a display
+containing another proxy node representing the remaining unexpanded
+objects.  You can continue clicking each new proxy node to display
+additional neighboring objects.</para>
+</step>
+
+<step>
+<para>Right-click (<keycap>Ctrl-click</keycap> for &macosx;) the node for
+object&nbsp;1758.  Proximity displays a context menu for the selected
+node.  Choose <guimenuitem>Move to center</guimenuitem>.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+              fileref="&graphicspath;/DBViz_ContextMenu.png"
+              width="5.75in"
+              format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+              fileref="&graphicspath;/DBViz_ContextMenu.png"
+              contentwidth="7.0in"
+              format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+Proximity redraws the graph, placing the selected node in the
+center. Re-centering a graph can make it easier to understand the
+immediate neighborhood around an object.  In this example, by placing
+object&nbsp;1758 in the center, we can more easily see that
+object&nbsp;295 is part of object&nbsp;1758&rsquo;s immediate
+neighborhood, and that it has the same 
+<token role="attr">pagetype</token> as object&nbsp;1758&rsquo;s other
+neighbors.</para>
+<para>After a couple of expansions to the proxy node representing
+object&nbsp;1758&rsquo;s unshown neighbors, the graph shows that the
+web page represented by object&nbsp;1758 is linked to a large number
+of faculty and research project pages.  We might therefore suspect
+that object&nbsp;1758 represents some type of main page or directory
+listing.  We test this suspicion in the next step.</para>
+<tip>
+<para>If the graph display becomes crowded, hover the mouse over any
+node or link to display a tool tip containing that item&rsquo;s
+OID.</para>
+</tip>
+</step>
+
+<step>
+<para>Right-click the node for object&nbsp;1758 and choose
+<guimenuitem>Browse object attributes</guimenuitem> from the
+context menu.</para>
+<para>Proximity opens a new &uiname; window that shows the
+attribute values for object&nbsp;1758.  The URL for this page
+contains only the domain, suggesting that object&nbsp;1758 indeed
+represents a home page for a computer science department.</para>
+
+<para>The context menu also provides a <guimenuitem>Browse
+object</guimenuitem> menu option.  Choosing <guimenuitem>Browse
+object</guimenuitem> opens a new &uiname; window that displays the
+main object page (i.e., the list of linked objects) for the
+selected object.</para>
+</step>
+
+<step>
+<para>Continue exploring the data with the &dbviztool;.  To
+explore a new object&rsquo;s neighborhood, enter the object&rsquo;s ID
+number in the &dbviztool;&rsquo;s location bar.  Alternately, if the
+new object is currently visible in the &dbviztool;, you can
+right-click the new object and choose
+<guimenuitem>Restart from vertex</guimenuitem>. 
+When you are finished, continue to the next section.</para>
+</step>
+
+</procedure>
+
+
+<para>You can also start the &dbviztool; from the &uiname; start
+page:</para>
+
+<orderedlist>
+<listitem>
+<para>Click &home; to return to the &uiname; start page.</para>
+</listitem>
+<listitem>
+<para>Click <guibutton>graph</guibutton>. Proximity displays the
+&dbviztool;, but without graphing any object&rsquo;s
+neighborhood.</para>
+</listitem>
+<listitem>
+<para>Type the number of the object to explore in the
+&dbviztool;&rsquo;s location bar and press
+<keycap>Return</keycap>. Proximity displays the object and its
+immediate neighborhood.</para>
+</listitem>
+</orderedlist>
+
+<indexterm startref="dbviz1" class="endofrange"/>
+<indexterm startref="dbviz2" class="endofrange"/>
+<indexterm startref="dbviz3" class="endofrange"/>
+<indexterm startref="dbviz4" class="endofrange"/>
+<indexterm startref="dbviz5" class="endofrange"/>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                     SETTING DISPLAY PREFERENCES                -->
+<!-- ============================================================== -->
+
+<sect1 id="browse_prefs">
+<title>Setting Display Preferences</title>
+<indexterm><primary>preferences</primary>
+           <secondary>&uiname;</secondary></indexterm>
+<indexterm><primary>setting display preferences</primary>
+           <seealso>layout</seealso></indexterm>
+<indexterm><primary>Proximity Database Browser</primary>
+           <secondary>setting preferences</secondary></indexterm>
+<indexterm><primary>customizing display of object and link names</primary></indexterm>
+<indexterm><primary>names</primary>
+           <secondary>setting display preferences</secondary></indexterm>
+<indexterm><primary>objects</primary>
+           <secondary>setting display preferences</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>setting display preferences</secondary></indexterm>
+
+<para>Proximity lets you customize the labels used to display 
+<glossterm baseform="object">objects</glossterm> and 
+<glossterm baseform="link">links</glossterm> in the &uiname;. You can
+use the value of any object or link 
+<glossterm>attribute</glossterm> as a label for the corresponding type
+of database element.  Labels are set globally and apply to all objects
+or links.</para>
+
+<!--
+   EXERCISE: Customizing object and link labels
+-->
+
+<procedure>
+<title>Customizing object and link labels</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>From the <guimenu>File</guimenu> menu, choose
+<guimenuitem>Preferences</guimenuitem>.
+Proximity displays the <guilabel>Preferences</guilabel> dialog.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_PrefDialog.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_PrefDialog.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+</step>
+
+<step>
+<para>In the <guilabel>Object</guilabel> list, choose
+<guimenuitem>url</guimenuitem>.  In general, you should choose an
+attribute that has a unique value for each object.
+</para>
+</step>
+
+<step>
+<para>In the <guilabel>Link</guilabel> list, choose
+<guimenuitem>link_id</guimenuitem>. Again, you should generally choose
+an attribute that has a unique value for each link.
+</para></step>
+
+<step>
+<para>Click <guibutton>OK</guibutton>.
+Proximity closes the <guilabel>Preferences</guilabel> dialog.
+</para>
+</step>
+
+<step>
+<para>Click <guibutton>Objects</guibutton>. Proximity displays the
+first 200 objects. Because you set the display
+preferences to use the value of the <token role="attr">url</token>
+attribute as the object label, 
+Proximity shows you the URLs for these objects instead of their 
+<glossterm baseform="object identifier">ID</glossterm> numbers.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_ObjsWithLabels.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_ObjsWithLabels.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+
+<para>Proximity limits the display of object and link labels to 25
+characters, making this feature of limited usefulness for this specific
+database.  Future Proximity development may allow users to change this
+character limit.</para>
+</step>
+
+<step>
+<para>Click &home; to return to the &uiname; start page.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Links</guibutton>.  Proximity displays the first
+200 links.  Because you set the display preferences to use the value
+of the <token role="attr">link_id</token> attribute as the link label,
+Proximity shows you these values instead of their Proximity ID
+numbers.</para>
+</step>
+
+<step>
+<para>Because these new labels do not provide any additional useful
+information, change the display preferences back to <code>no
+label</code> for both objects and links.
+The remaining tutorial examples continue to use Proximity IDs to label
+objects and links in the &uiname;.</para>
+</step>
+
+</procedure>
+
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                  ANALYZING THE DATABASE SCHEMA                 -->
+<!-- ============================================================== -->
+
+<sect1 id="browse_schema">
+<title>Analyzing the Database Schema</title>
+<indexterm><primary>schema analysis</primary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>schema analysis</secondary></indexterm>
+<indexterm><primary>analysis</primary>
+           <see>schema analysis</see></indexterm>
+
+<para><glossterm baseform="schema analysis">Schema analysis</glossterm>
+provides summary information about the 
+<glossterm baseform="object">objects</glossterm> and 
+<glossterm baseform="link">links</glossterm> in a database.  To run a
+schema analysis, you need to tell 
+Proximity which attributes identify the
+<emphasis><glossterm>type</glossterm></emphasis>
+<indexterm><primary>type of an object or link</primary></indexterm>
+<indexterm><primary>objects</primary>
+           <secondary>type information</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>type information</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>type information</secondary></indexterm>
+of an object or link. Proximity then analyzes the database to determine
+the relationships among each type of object or link (as identified
+by these attributes) and other database entities.</para>
+
+<para>Because MonetDB
+<indexterm><primary>MonetDB</primary>
+           <secondary>optimized operations</secondary></indexterm>
+maximizes performance for joins at the expense of row-centric
+operations, schema analysis can be slow. Therefore Proximity performs
+schema analysis in a separate thread.</para>
+
+<!--
+   EXERCISE: Exploring the database schema
+-->
+
+<procedure>
+<title>Exploring the database schema</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>In the database actions list, click <guibutton>analyze
+schema</guibutton>.
+Proximity displays the Schema Analysis
+dialog.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/SA_AttrSelection.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/SA_AttrSelection.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+</step>
+
+<step>
+<para>In the <guilabel>Object</guilabel> list, choose
+<guimenuitem>pagetype</guimenuitem>.
+</para></step>
+
+<step>
+<para>In the <guilabel>Link</guilabel> list, choose
+<guimenuitem>link_tag</guimenuitem>.
+</para></step>
+
+<step>
+<para>Click &analyze;. Proximity performs the schema analysis.</para>
+<para>A new window displays the trace of Proximity&rsquo;s schema
+analysis processing. Because schema analysis runs in a separate
+thread, you can continue to use the &uiname; for other tasks while
+this process runs.</para>
+
+<para>When the schema analysis is complete, 
+Proximity displays a schema analysis report.
+<indexterm><primary>reports from schema analysis</primary></indexterm>
+The report shows the other object attributes associated with each type
+of object (as identified by the object &ldquo;type&rdquo; attribute
+you selected). For links, the report 
+shows both the kinds of objects connected to each link type as well as
+the other link attributes associated with each type of link.
+</para>
+
+<para>
+<informalfigure>
+<mediaobject>
+<imageobject role="FO">
+   <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/SA_Report.png" 
+    width="4.25in" format="PNG" />
+</imageobject>
+<imageobject role="HTML">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/SA_Report.png"
+    contentwidth="5.20in" format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+</step>
+
+<step>
+<para>To save a copy of the schema analysis report,
+<indexterm><primary>saving</primary>
+           <secondary>schema analysis reports</secondary></indexterm>
+click &save;. Proximity displays the Open dialog.</para>
+<para>In the <guilabel>Save As</guilabel> box, enter a name for
+the file.  Navigate to the directory in which you want to save the 
+file and click &save;. Proximity saves the report as an HTML file. To
+view the report, open the file in a web browser.</para>
+</step>
+
+<step>
+<para>When you have finished examining the schema analysis report,
+click &windowclose; to close the report window.</para>
+</step>
+
+</procedure>
+
+<para>If you want, you can perform additional analyses using different
+object and link attributes.  Some analyses may be
+quite slow. In general, the more distinct values an attribute has, the
+slower the corresponding schema analysis will be.</para>
+
+</sect1>
+
+
+<!-- ============================================================== -->
+<!--                        TIPS AND REMINDERS                      -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Tips and Reminders</title>
+
+<para>
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Use the location bar for direct access to any Proximity
+    database entity.</para>
+  </listitem>
+  <listitem>
+    <para>Use the &dbviztool; to explore the local neighborhood
+    of an object.</para>
+  </listitem>
+  <listitem>
+    <para>Create a new attribute interactively by clicking
+    <guibutton>create new</guibutton> in the Object Attributes or Link
+    Attribute page.</para>
+  </listitem>
+  <listitem>
+    <para>Delete an existing attribute interactively by clicking
+    <guibutton>delete</guibutton> in the corresponding attribute
+    page.</para>
+  </listitem>
+  <listitem>
+    <para>Export an attribute&rsquo;s values to a tab-delimited text
+    file by clicking <guibutton>export</guibutton> in the
+    corresponding attribute page.</para>
+  </listitem>
+  <listitem>
+    <para>Use display preferences
+    (<xref xrefstyle="pageref" linkend="browse_prefs"/>)
+    to change the labels used for 
+    <glossterm baseform="object">objects</glossterm> and 
+    <glossterm baseform="link">links</glossterm> in the &uiname;.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity 
+    <glossterm baseform="attribute">attributes</glossterm> are
+    set-valued; an object or link can have 
+    multiple values for an attribute.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity can import and store 
+    <glossterm baseform="multi-dimensional attribute">multi-dimensional attribute</glossterm>
+    values, but it cannot use multi-dimensional attributes in a query.</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+<para>
+<itemizedlist spacing="compact">
+<title>Additional Information</title>
+  <listitem>
+    <para>See <xref xrefstyle="pageref" linkend="query_browsing"/> for
+    information on exploring 
+    <glossterm baseform="container">containers</glossterm>
+    and <glossterm baseform="subgraph">subgraphs</glossterm> in the
+    &uiname;.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref xrefstyle="pageref" linkend="apx_quickref_locbar"/>
+    for a summary of how to use the location bar path to directly
+    access Proximity database entities.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref xrefstyle="pageref" linkend="scripts_attrs"/>
+    for additional information on creating new attributes.</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

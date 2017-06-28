@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<appendix id="apx_quickref">
+<title>Proximity Quick Reference</title>
+
+<!-- ============================================================== -->
+<!--                           MONET SERVER                         -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>MonetDB Server</title>
+<indexterm><primary>MonetDB</primary>
+           <secondary>server</secondary></indexterm>
+
+<para>The <command>Mserver</command> command is in
+<indexterm><primary>Mserver command</primary></indexterm>
+<filename>&monetpath;/bin</filename>.  You can add this directory
+to <envar>PATH</envar> or specify the full path on the command line.
+<indexterm><primary>PATH</primary></indexterm>
+<indexterm><primary>environment variables</primary>
+           <secondary>PATH</secondary></indexterm></para>
+
+<example>
+<title>To start the the MonetDB server on the default port (30000):</title>
+<indexterm><primary>starting</primary>
+           <secondary>MonetDB server</secondary></indexterm>
+<para><synopsis>&prompt; <userinput>Mserver --dbname <replaceable>name</replaceable> &proxpath;/resources/init-mserver.mil</userinput>
+</synopsis>
+<indexterm><primary><filename>init-mserver.mil</filename> script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>init-mserver.mil</secondary></indexterm>
+where <replaceable>name</replaceable> is the name of the
+database to be served.
+The database name is the name of the directory
+under <filename>&monetdbpath;</filename> in
+which the database files are stored.</para>
+
+<para>Proximity uses the port number to select the appropriate protocol for
+the version of MonetDB being used.  You must use a port 
+number&nbsp;<symbol role="Symbol">&le;</symbol>&nbsp;40000 for the
+Mars versions (4.18.2 and 4.20) and a port number&nbsp;&gt;&nbsp;40000
+for MonetDB&nbsp;&monetoldversion;.</para>
+</example>
+
+<example>
+<title>To start the MonetDB server on a different port:</title>
+<para><synopsis>&prompt; <userinput>Mserver --dbname <replaceable>name</replaceable> &proxpath;/resources/init-mserver.mil --set port=<replaceable>nnnnn</replaceable></userinput>
+</synopsis>
+where
+<itemizedlist spacing="compact">
+<listitem>
+   <para><replaceable>name</replaceable> is the name of the
+   database to be served</para>
+</listitem>
+<listitem>
+   <para><replaceable>nnnnn</replaceable> is the port number</para>
+</listitem>
+</itemizedlist>
+</para></example>
+
+<example>
+<title>To stop the MonetDB server:</title>
+<indexterm><primary>closing the MonetDB server</primary></indexterm>
+<indexterm><primary>stopping the MonetDB server</primary></indexterm>
+<indexterm><primary>quitting the MonetDB server</primary></indexterm>
+<synopsis>&monetprompt; <userinput>quit();</userinput></synopsis>
+</example>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--            PROXIMITY SHELL SCRIPTS AND BATCH FILES             -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Proximity Shell Scripts and Batch Files</title>
+<indexterm><primary>Linux</primary>
+           <secondary>shell scripts</secondary></indexterm>
+<indexterm><primary>Mac OS X</primary>
+           <secondary>shell scripts</secondary></indexterm>
+<indexterm><primary>shell scripts</primary></indexterm>
+<indexterm><primary>Windows</primary>
+           <secondary>batch files</secondary></indexterm>
+<indexterm><primary>batch files (Windows)</primary></indexterm>
+
+<para>
+The following table lists the shell scripts and batch files for
+launching Proximity applications.  You can also execute queries and
+run scripts from the &uiname;. See the text following this table for
+additional details on selected parameters.
+<!-- The following table is in TU_ScriptTable.xml -->
+&scripttable;
+</para>
+
+<para>For <command>query.sh</command>, specifying the input container
+is optional; the input container defaults to the root container (the
+entire database) if it is omitted.  To explicitly specify the input
+container, Proximity uses a path-like syntax that reflects the
+container hierarchy for the specified container. Container names are
+separated by forward slashes with the initial <literal>/</literal>
+representing the root container, e.g.,
+&ldquo;<literal>/1d-clusters/samples</literal>&rdquo;.</para>
+
+<para>For <command>export-xml.sh</command>, specifying the exportType
+and exportSpec is optional; the export defaults to the full database
+if they are omitted.</para>
+
+<para>For <command>db-util.sh</command>, permitted commands are
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><userinput>clear-db</userinput> - clear the database
+    (deletes all database content)
+    <indexterm><primary>clear-db (db-util option)</primary></indexterm>
+    </para>
+  </listitem>
+  <listitem>
+    <para><userinput>init-db</userinput> - initialize the database
+    <indexterm><primary>init-db (db-util option)</primary></indexterm>
+    </para>
+  </listitem>
+  <listitem>
+    <para><userinput>test-db</userinput> - test the database connection
+    and print Proximity version information
+    <indexterm><primary>test-db (db-util option)</primary></indexterm>
+    </para>
+  </listitem>
+  <listitem>
+    <para><userinput>view-schema</userinput> - print the schema log (a
+    list of the database&rsquo;s schema versions)
+    <indexterm><primary>view-schema (db-util option)</primary></indexterm>
+    </para>
+  </listitem>
+  <listitem>
+    <para><userinput>view-stats</userinput>
+    <indexterm><primary>view-stats (db-util option)</primary></indexterm>
+     - print summary statistics for the database</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+<para>All Proximity shell scripts and batch files include
+<filename>proximity.jar.</filename>
+You must rebuild <filename>proximity.jar</filename>
+<indexterm><primary>proximity.jar</primary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>compiling</secondary></indexterm>
+<indexterm><primary>compiling Proximity</primary></indexterm>
+to have source code changes available when you use the Proximity shell
+scripts and batch files.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--               QUERY EDITOR KEYBOARD SHORTCUTS                  -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Query Editor Keyboard Shortcuts</title>
+<indexterm><primary>keyboard shortcuts</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>keyboard shortcuts</secondary></indexterm>
+<indexterm><primary>shortcuts</primary>
+           <secondary>for Query Editor</secondary></indexterm>
+<para>The following tables lists the keyboard shortcuts for working
+with the Proximity Query Editor.</para>
+
+&qeshortcuttable;
+</sect1>
+<?pagebreak?>
+
+<!-- ============================================================== -->
+<!--                   PYTHON INTERPETER COMMANDS                   -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Proximity Python Interpreter Commands</title>
+<indexterm><primary>editing</primary>
+      <secondary>command line in interpreter</secondary></indexterm>
+<indexterm><primary>command-line editing in interpreter</primary></indexterm>
+
+<para>The following table lists the keyboard shortcuts for working
+with the Proximity interactive Python interpreter.  Method name
+completion and parameter list display are enabled only for command
+lines that begin with a variable name.</para>
+
+<informaltable>
+<tgroup cols="4" align="left">
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="2*"/>
+<colspec colnum="3" colname="col3" colwidth="1*"/>
+<colspec colnum="4" colname="col4" colwidth="2*"/>
+<thead>
+<row valign="top">
+  <entry>Command</entry>
+  <entry>Description</entry>
+  <entry>Command</entry>
+  <entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row valign="top">
+  <entry><keycap>Ctrl-Space</keycap></entry>
+  <entry>List method completions</entry>
+  <entry><keycap>Ctrl-P</keycap></entry>
+  <entry>List parameter options</entry>
+</row>
+<row valign="top">
+  <entry>Up arrow</entry>
+  <entry>Previous command in history</entry>
+  <entry>Down arrow</entry>
+  <entry>Next command in history</entry>
+</row>
+<row valign="top">
+  <entry>Right arrow, <keycap>Ctrl-B</keycap></entry>
+  <entry>Move backward one character</entry>
+  <entry>Left arrow, <keycap>Ctrl-F</keycap></entry>
+  <entry>Move forward one character</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Ctrl-A</keycap></entry>
+  <entry>Move to beginning of line</entry>
+  <entry><keycap>Ctrl-E</keycap></entry>
+  <entry>Move to end of line</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Del</keycap></entry>
+  <entry>Delete one character backward</entry>
+  <entry><keycap>Ctrl-D</keycap></entry>
+  <entry>Delete one character forward</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Ctrl-K</keycap></entry>
+  <entry>Kill to end of line</entry>
+  <entry><keycap>Ctrl-Y</keycap></entry>
+  <entry>Paste contents of clipboard</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Ctrl-Alt-S</keycap></entry>
+  <entry>Save command history</entry>
+  <entry><keycap>Ctrl-Alt-C</keycap></entry>
+  <entry>Clear command history</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Ctrl-Alt-X</keycap></entry>
+  <entry>Execute Jython file</entry>
+  <entry> </entry>
+  <entry> </entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        LOCATION BAR PATHS                      -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_quickref_locbar">
+<title>Location Bar Path Syntax</title>
+<indexterm><primary>location bar</primary>
+           <secondary sortas="Proximity">in &uiname;</secondary></indexterm>
+<indexterm><primary>Proximity Database Browser</primary>
+           <secondary>location bar</secondary></indexterm>
+<indexterm><primary>path in location bar</primary></indexterm>
+
+<para>The following table lists the location bar paths for displaying
+sets of database entities. These correspond to the choices available
+from the database view links on the &uiname; start page:
+<informaltable>
+<tgroup cols="2" align="left">
+  <colspec colnum="1" colname="col1" colwidth="1.0*"/>
+  <colspec colnum="2" colname="col2" colwidth="1.0*"/>
+<thead>
+<row>
+  <entry namest="col1" nameend="col2" align="center">Sets of
+         entities</entry>
+</row>
+</thead>
+<tbody>
+<row valign="top">
+  <entry><emphasis>Database entity</emphasis></entry>
+  <entry><emphasis>Location bar path</emphasis></entry>
+</row>
+<row>
+  <entry>objects</entry>
+  <entry><code>db:/objects</code></entry>
+</row>
+<row>
+  <entry>links</entry>
+  <entry><code>db:/links</code></entry>
+</row>
+<row>
+  <entry>containers</entry>
+  <entry><code>cont:/containers</code></entry>
+</row>
+<row>
+  <entry>object attributes</entry>
+  <entry><code>attrdefs:/objects</code></entry>
+</row>
+<row>
+  <entry>link attributes</entry>
+  <entry><code>attrdefs:/links</code></entry>
+</row>
+<row>
+  <entry>container attributes</entry>
+  <entry><code>attrdefs:/containers</code></entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable></para>
+
+<para>The following table lists the location bar paths for displaying
+information for individual objects, links, containers, subgraphs, and
+their attributes. In each of these paths you must substitute the
+appropriate name or ID number as shown.
+<informaltable>
+<tgroup cols="2" align="left">
+  <colspec colnum="1" colname="col1" colwidth="1.0*"/>
+  <colspec colnum="2" colname="col2" colwidth="1.0*"/>
+<thead>
+<row>
+  <entry namest="col1" nameend="col2" align="center">Individual
+         entities</entry>
+</row>
+</thead>
+<tbody>
+<row valign="top">
+  <entry><emphasis>Database entity</emphasis></entry>
+  <entry><emphasis>Location bar path</emphasis></entry>
+</row>
+<row>
+  <entry>specific object</entry>
+  <entry><code>item:/objects/<varname>object-id</varname></code></entry>
+</row>
+<row>
+  <entry>specific link</entry>
+  <entry><code>item:/links/<varname>link-id</varname></code></entry>
+</row>
+<row>
+  <entry>specific container</entry>
+  <entry><code>cont:/containers/<varname>container-path</varname></code></entry>
+</row>
+<row>
+  <entry>specific subgraph</entry>
+  <entry><code>subg:/<varname>container-path</varname>/<varname>subg-id</varname></code></entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+Container names are
+separated by forward slashes with the initial <literal>/</literal>
+representing the root container, e.g.,
+&ldquo;<literal>/1d-clusters/samples</literal>&rdquo;.</para>
+
+<?pagebreak?>
+<para>Proximity permits the use of the following location bar path
+modifiers at the end of the path:
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col1" colwidth="3*"/>
+<colspec colnum="3" colname="col2" colwidth="9*"/>
+<tbody valign="top">
+<row>
+  <entry> </entry>
+  <entry><code>!ATTRVALS</code></entry>
+  <entry>Display attributes and values for the current item</entry>
+</row>
+<row>
+  <entry> </entry>
+  <entry><code>#<varname>pagenum</varname></code></entry>
+  <entry>Display page <varname>pagenum</varname> of values for the
+  current item</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+If both are used, the page number modifier must follow the
+attribute display modifier, e.g.,
+<informaltable frame="none">
+<tgroup cols="2" align="left" rowsep="0" colsep="0">
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col1" colwidth="12*"/>
+<tbody valign="top">
+<row>
+  <entry> </entry>
+  <entry><code>item:/objects/23!ATTRVALS#2</code></entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                            DTD FILES                           -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>DTD Files</title>
+
+<para>Proximity uses document type definitions (DTDs) to define the
+required syntax for files containing queries, models, and data to be
+imported.  Proximity requires that the appropriate DTD be in the same
+directory as the corresponding query or XML data file. Copy the
+appropriate DTD from <filename>&proxpath;/resources/</filename> to any
+directories containing these files.
+<informaltable>
+<tgroup cols="2" align="left">
+ <colspec colnum="1" colwidth="1.0*"/>
+ <colspec colnum="2" colwidth="1.0*"/>
+ <thead>
+   <row valign="top">
+      <entry>DTD</entry>
+      <entry>Required for</entry>
+   </row>
+ </thead>
+ <tbody>
+   <row>
+      <entry><filename>graph-query.dtd</filename>
+        <indexterm><primary>DTDs</primary>
+          <secondary>graph-query.dtd</secondary></indexterm>
+        <indexterm><primary>graph-query.dtd</primary></indexterm>
+      </entry>
+      <entry>query file format</entry>
+   </row>
+   <row>
+      <entry><filename>prox3db.dtd</filename>
+        <indexterm><primary>DTDs</primary>
+          <secondary>prox3db.dtd</secondary></indexterm>
+        <indexterm><primary>prox3db.dtd</primary></indexterm>
+      </entry>
+      <entry>import/export XML file format</entry>
+   </row>
+   <row>
+      <entry><filename>rbc2.dtd</filename>
+        <indexterm><primary>DTDs</primary>
+          <secondary>rbc2.dtd</secondary></indexterm>
+        <indexterm><primary>rbc2.dtd</primary></indexterm>
+      </entry>
+      <entry>RBC file format</entry>
+   </row>
+   <row>
+      <entry><filename>rpt2.dtd</filename>
+        <indexterm><primary>DTDs</primary>
+          <secondary>rpt2.dtd</secondary></indexterm>
+        <indexterm><primary>rpt2.dtd</primary></indexterm>
+      </entry>
+      <entry>RPT file format</entry>
+   </row>
+   <row>
+      <entry><filename>rdn.dtd</filename>
+        <indexterm><primary>DTDs</primary>
+          <secondary>rdn.dtd</secondary></indexterm>
+        <indexterm><primary>rdn.dtd</primary></indexterm>
+      </entry>
+      <entry>RDN wrapper file format</entry>
+   </row>
+ </tbody>
+</tgroup>
+</informaltable>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--             TECHNICAL SUPPPORT AND DOCUMENTATION               -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Technical Support and Documentation</title>
+<indexterm><primary>technical support</primary></indexterm>
+
+<para>Please use the following addresses to report any problems or
+questions you have about Proximity:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><email>proximity-bugs@kdl.cs.umass.edu</email> - Proximity bug
+    reports and documentation errors</para>
+  </listitem>
+  <listitem>
+    <para><email>proximity-support@kdl.cs.umass.edu</email> - requests
+    for general assistance with Proximity software</para>
+  </listitem>
+  <listitem>
+    <para><email>proximity@kdl.cs.umass.edu</email> - general comments,
+    suggestions, and criticism</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+<para>The Knowledge Discovery Laboratory maintains two mailing
+lists for Proximity news and information.
+<itemizedlist>
+<listitem>
+  <para><emphasis>Proximity-announce</emphasis> is a low-volume list
+  carrying only announcements of significant project milestones, such
+  as new releases.  To subscribe, send an email message to
+  <email>majordom@cs.umass.edu</email> with the text
+  <userinput>subscribe proximity-announce</userinput>
+  in the body of the message.</para>
+</listitem>
+<listitem>
+  <para><emphasis>Proximity-list</emphasis> is a general forum for
+  discussing Proximity issues.  To subscribe, send an email message to
+  <email>majordom@cs.umass.edu</email> with the text
+  <userinput>subscribe proximity-list</userinput>
+  in the body of the message.</para>
+</listitem>
+</itemizedlist></para>
+
+<para>The &proxcurrent; distribution includes the <emphasis>Proximity
+Tutorial</emphasis> (this document) and the <emphasis>Proximity
+&qgraph; Guide</emphasis> (a detailed description of the &qgraph;
+query language).  Both documents are available in the
+directory <filename>&proxpath;/doc/user/</filename> in the following
+files and formats.
+</para>
+
+<itemizedlist spacing="compact">
+<title>Tutorial:</title>
+  <listitem>
+    <para><filename>tutorial/Tutorial.pdf</filename> (PDF)</para>
+  </listitem>
+  <listitem>
+    <para><filename>tutorial/HTML/index.html</filename> (HTML)</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>QGraph Guide</title>
+  <listitem>
+    <para><filename>qgraph/QGraphGuide.pdf</filename> (PDF)</para>
+  </listitem>
+  <listitem>
+    <para><filename>qgraph/HTML/index.html</filename> (HTML)</para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+</appendix>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

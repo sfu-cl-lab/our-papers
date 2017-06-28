@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<graph-query name="test-query-bad-constraints">
+  <description>constraint is illegal</description>
+  <query-body>
+    <vertex name="E" />
+    <edge name="X">
+      <vertex1>B</vertex1>
+      <vertex2>E</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <edge name="Y">
+      <vertex1>C</vertex1>
+      <vertex2>E</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <subquery>
+      <vertex name="C" />
+      <vertex name="D">
+        <numeric-annotation>
+          <min>0</min>
+        </numeric-annotation>
+      </vertex>
+      <edge name="Z">
+        <vertex1>D</vertex1>
+        <vertex2>C</vertex2>
+        <directed>true</directed>
+        <numeric-annotation>
+          <min>1</min>
+        </numeric-annotation>
+      </edge>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </subquery>
+    <subquery>
+      <vertex name="B" />
+      <vertex name="A" />
+      <edge name="W">
+        <vertex1>A</vertex1>
+        <vertex2>B</vertex2>
+        <directed>true</directed>
+      </edge>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </subquery>
+    <constraint>
+      <and>
+        <test>
+          <operator>gt</operator>
+          <item>
+            <item-name>B</item-name>
+            <id />
+          </item>
+          <item>
+            <item-name>D</item-name>
+            <id />
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="E" x="440.0" y="336.0" />
+    <vertex-location name="C" x="592.0" y="193.0" />
+    <vertex-location name="D" x="746.0" y="194.0" />
+    <vertex-location name="B" x="276.0" y="188.0" />
+    <vertex-location name="A" x="151.0" y="286.0" />
+  </editor-data>
+</graph-query>
+

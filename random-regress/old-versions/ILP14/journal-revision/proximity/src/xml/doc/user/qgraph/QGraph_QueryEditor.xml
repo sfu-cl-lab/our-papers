@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="qg_ch_queryeditor">
+<title>The Query Editor</title>
+
+<para>Query Editor validates queries against the DTD but does no
+semantic checking.</para>
+
+
+<!-- ============================================================== -->
+<!--                                                                -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Conditions</title>
+
+<bridgehead renderas="sect2">Attribute value conditions</bridgehead>
+
+<para>
+The general form of an attribute value condition as specified in the
+Query Editor is
+<blockquote>
+<para><programlisting><replaceable>attribute</replaceable> <replaceable>operator</replaceable> <replaceable>value</replaceable></programlisting>
+</para></blockquote>
+where
+<blockquote>
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para><replaceable>attribute</replaceable> is the name of an
+      attribute for this database entity (object or link)</para>
+    </listitem>
+    <listitem>
+      <para><replaceable>value</replaceable> is a legal value for
+      <replaceable>attribute</replaceable></para>
+    </listitem>
+    <listitem>
+      <para><replaceable>operator</replaceable> is one of
+      <literal>=</literal>, <literal>&gt;=</literal>,
+      <literal>&lt;=</literal>, and
+      <literal>&lt;&gt;</literal>.</para>
+    </listitem>
+  </itemizedlist>
+<para>The <literal>&gt;</literal>
+and <literal>&lt;</literal> operators are not permitted; use
+boolean combinations of conditions (see <xref
+linkend="qg_complex_conditions"/>below) for these operators.</para>
+</blockquote>
+Surround vertex and attribute names containing spaces with single
+quotes.</para>
+
+<para>[Example] Suppose we want to find all the author-book pairs in
+the database. The database has an object attribute "ObjType" that
+specifies the type of an object and a link attribute "LinkType" that
+identifies the type of a link.  Our query seeks to find all objects
+with ObjType <literal>person</literal> connected to objects with
+ObjType <literal>book</literal> by links with LinkType
+<literal>author-of</literal>.</para>
+
+<para>We do this by adding conditions to our query vertices and
+edges, as shown below.
+<figure id="fg_query_authorbooks">
+<title>Author-book pairs</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata valign="bottom"
+               fileref="&graphicspath;/Tmp_QGEx_AuthorBooks.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata valign="bottom"
+               fileref="&graphicspath;/Tmp_QGEx_AuthorBooks.png"
+               contentwidth="4.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<bridgehead renderas="sect2">Existence conditions</bridgehead>
+
+<para>
+The general form of an existence condition as specified in the Query
+Editor is
+<blockquote>
+<para><programlisting>exists(<replaceable>attribute</replaceable>)</programlisting>
+</para></blockquote>
+where
+<blockquote>
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para><replaceable>attribute</replaceable> is the name of an
+      attribute for this database entity (object or link)</para>
+    </listitem>
+  </itemizedlist>
+</blockquote>
+The general form of a negated existence condition as specified in the
+Query Editor is
+<blockquote>
+<para><programlisting>not(exists(<replaceable>attribute</replaceable>)</programlisting>
+</para></blockquote></para>
+
+<bridgehead renderas="sect2">Combining conditions</bridgehead>
+
+<para>The Query Editor uses the keywords <literal>AND</literal>,
+<literal>OR</literal>, and <literal>NOT</literal> to combine
+conditions into a single statement.
+</para>
+
+
+</sect1>
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/local/sgml/docbook-xml-4.5/docbookx.dtd" [
+<!ENTITY % entities SYSTEM "../../ProxCommonEntities.ent">
+<!ENTITY % recipeentities SYSTEM "ProxCookbookEntities.ent">
+%entities;
+%recipeentities;
+]>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+
+<!-- CHAPTER: Database Manipulation -->
+
+<!-- ============================================================== -->
+<!--                            RECIPE:                             -->
+<!--                  CREATING SHORTCUT LINKS                       -->
+<!-- ============================================================== -->
+
+<section id="recipe_shortcutlinks">
+<title>Creating Shortcut Links</title>
+
+<!-- All index terms at top -->
+<indexterm><primary>links</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>links</secondary></indexterm>
+<indexterm><primary>adding</primary>
+           <see>creating</see></indexterm>
+<indexterm><primary>collaboration network</primary></indexterm>
+<indexterm><primary>efficiency</primary>
+  <secondary>createLinks method vs. adding links via queries</secondary>
+</indexterm>
+<indexterm><primary>links</primary>
+           <secondary>NSTs for</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary sortas="links">for links</secondary>
+           </indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>removing duplicate rows</secondary></indexterm>
+<indexterm><primary>deleting</primary>
+           <secondary>duplicate rows in NSTs</secondary></indexterm>
+<indexterm><primary>removing</primary>
+           <see>deleting</see></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>renaming columns</secondary></indexterm>
+<indexterm><primary>renaming</primary>
+           <secondary>NST columns</secondary></indexterm>
+<indexterm><primary>naming</primary>
+           <secondary>NST columns</secondary></indexterm>
+<indexterm><primary>naming</primary>
+           <seealso>renaming</seealso></indexterm>
+<indexterm><primary>renaming</primary>
+           <seealso>naming</seealso></indexterm>
+<indexterm><primary>self links</primary>
+           <secondary>avoiding creation of</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary sortas="self">to self</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>attributes</secondary>
+           <tertiary sortas="new links">on new links</tertiary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>creating</secondary>
+           <tertiary sortas="new links">on new links</tertiary></indexterm>
+<indexterm><primary>joining tables</primary>
+           <secondary>filters for</secondary></indexterm>
+<indexterm><primary>tables</primary>
+           <secondary>joining</secondary></indexterm>
+<indexterm><primary>columns in NSTs</primary>
+           <secondary>prefix identifiers</secondary></indexterm>
+<indexterm><primary>tables</primary>
+           <secondary>column identifiers</secondary></indexterm>
+<indexterm><primary>filters</primary>
+           <secondary>keeping columns</secondary></indexterm>
+<indexterm><primary>filters</primary>
+           <secondary sortas="self links">for self links</secondary></indexterm>
+<indexterm><primary>distinct values</primary>
+           <secondary>method for</secondary></indexterm>
+
+<!-- classes used in the recipe -->
+<indexterm><primary>DB class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>DB</secondary></indexterm>
+
+<!-- methods used in this recipe -->
+<indexterm><primary>addConstantColumn()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>addConstantColumn</secondary></indexterm>
+<indexterm><primary>createLinks()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>createLinks</secondary></indexterm>
+<indexterm><primary>distinct()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>distinct</secondary></indexterm>
+<indexterm><primary>filter()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>filter</secondary></indexterm>
+<indexterm><primary>getLinks()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getLinks</secondary></indexterm>
+<indexterm><primary>join()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>join</secondary></indexterm>
+<indexterm><primary>renameColumns()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>renameColumns</secondary></indexterm>
+
+
+<!-- ============================================================== -->
+<!-- PROBLEM                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Problem</title>
+
+<para>You need to create direct links between all pairs of objects that are
+connected to a common third item. A typical example of this task is
+building the actor collaboration network 
+in the IMDB: You want to
+create a direct link between two actors if they have both acted in the
+same movie (i.e., if they both have an 
+<token role="link">ActedIn</token> link to the same 
+<token role="object">Movie</token> object).</para>
+
+<para>Suppose for example that there are two movies in your database,
+and three different actors:
+<blockquote>
+<literallayout role="noshading">movie 300 linked to actors 30 and 40
+movie 400 linked to actors 30, 40, and 50
+</literallayout>
+</blockquote>
+You would then like to create a link between the following pairs of
+actors (with one link in each direction):
+<blockquote>
+<literallayout role="noshading">30 and 40, and 40 and 30 (because they were together in the two movies)
+30 and 50, and 50 and 30 (because they were together in the second movie)
+40 and 50, and 50 and 40 (because they were together in the second movie)
+</literallayout>
+</blockquote>
+</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SOLUTION                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Solution</title>
+
+<para>It is possible to solve this problem with QGraph, with a query
+containing three vertices: a main <token role="vertex">actor</token>
+vertex connected to a central <token role="vertex">movie</token>
+vertex (via an <token role="edge">acted-in</token> edge), which in turn
+is connected to an annotated vertex named 
+<token role="vertex">collaborator</token>. This query will create a
+subgraph for each actor and each movie that she or he has been in,
+with the list of all the people who have acted in the same film. You
+can then use the Add-links feature of
+QGraph to create a new link for each distinct pair
+of <token role="vertex">actor</token> and 
+<token role="vertex">collaborator</token>, adding the constraint
+that 
+<token role="vertex">actor</token>&nbsp;&lt;&nbsp;&gt;&nbsp;<token role="vertex">collaborator</token>
+to avoid self links.</para>
+
+<para>Even though the QGraph approach works, it is very inefficient: QGraph
+pays a high performance penalty in exchange for its support of very
+complex queries. Sometimes it is more convenient to simulate the
+execution of the query manually, to speed up the processing and avoid
+unnecessary steps.</para>
+
+<para>In this particular case, all we need to do is find the links of
+the type we are interested in (<token role="link">ActedIn</token>) and
+simply join them with themselves based on equal values of the 
+movie endpoint (which in the IMDB are stored as the <code>o2_id</code>
+end&mdash;that is, the <token role="attr">ActedIn</token> links go from 
+actors to movies).
+We begin by getting all the <token role="link">ActedIn</token> links:
+<programlisting> <userinput>actedInLinks = DB.getLinks("link_type = 'ActedIn'")
+ printNST(actedInLinks)</userinput>
+</programlisting>
+
+<screen>[SHOWING head,link_id,o1_id,o2_id,link_type WHERE * LIMIT *]
+[ 0@0,    1@0,    30@0,   300@0,   "ActedIn"    ]
+[ 1@0,    2@0,    40@0,   300@0,   "ActedIn"    ]
+[ 2@0,    3@0,    30@0,   400@0,   "ActedIn"    ]
+[ 3@0,    4@0,    40@0,   400@0,   "ActedIn"    ]
+[ 4@0,    5@0,    50@0,   400@0,   "ActedIn"    ]
+</screen>
+</para>
+
+<para>A join of the table with itself based on equal 
+<code>o2_id</code> produces the table shown below:
+<programlisting> <userinput>collaboratedLinks = actedInLinks.join(actedInLinks , "o2_id = o2_id")
+ printNST(collaboratedLinks)</userinput>
+</programlisting>
+
+<?pagebreak?>
+<screen>[SHOWING head,A.link_id,A.o1_id,A.o2_id,A.link_type,B.link_id,B.o1_id,B.o2_id,\
+B.link_type WHERE * LIMIT *]
+[ 0@0,   1@0,   30@0,   300@0,   "ActedIn",   1@0,   30@0,   300@0,   "ActedIn"    ]
+[ 1@0,   1@0,   30@0,   300@0,   "ActedIn",   2@0,   40@0,   300@0,   "ActedIn"    ]
+[ 2@0,   2@0,   40@0,   300@0,   "ActedIn",   1@0,   30@0,   300@0,   "ActedIn"    ]
+[ 3@0,   2@0,   40@0,   300@0,   "ActedIn",   2@0,   40@0,   300@0,   "ActedIn"    ]
+[ 4@0,   3@0,   30@0,   400@0,   "ActedIn",   3@0,   30@0,   400@0,   "ActedIn"    ]
+[ 5@0,   3@0,   30@0,   400@0,   "ActedIn",   4@0,   40@0,   400@0,   "ActedIn"    ]
+[ 6@0,   3@0,   30@0,   400@0,   "ActedIn",   5@0,   50@0,   400@0,   "ActedIn"    ]
+[ 7@0,   4@0,   40@0,   400@0,   "ActedIn",   3@0,   30@0,   400@0,   "ActedIn"    ]
+[ 8@0,   4@0,   40@0,   400@0,   "ActedIn",   4@0,   40@0,   400@0,   "ActedIn"    ]
+[ 9@0,   4@0,   40@0,   400@0,   "ActedIn",   5@0,   50@0,   400@0,   "ActedIn"    ]
+[ 10@0,  5@0,   50@0,   400@0,   "ActedIn",   3@0,   30@0,   400@0,   "ActedIn"    ]
+[ 11@0,  5@0,   50@0,   400@0,   "ActedIn",   4@0,   40@0,   400@0,   "ActedIn"    ]
+[ 12@0,  5@0,   50@0,   400@0,   "ActedIn",   5@0,   50@0,   400@0,   "ActedIn"    ]
+</screen>
+
+We remove the self links, that is, those rows where the two
+actors (<code>o1_id</code>s) 
+are the same, creating a new NST that contains only the two actor IDs
+(<code>A.o1_id</code> and <code>B.o1_id</code>):
+<programlisting> <userinput>noLoops=collaboratedLinks.filter("A.o1_id != B.o1_id", "A.o1_id, B.o1_id")
+ printNST(noLoops)</userinput>
+</programlisting>
+
+<screen>[SHOWING head,A.o1_id,B.o1_id WHERE * LIMIT *]
+[ 1@0,    30@0,   40@0    ]
+[ 2@0,    40@0,   30@0    ]
+[ 5@0,    30@0,   40@0    ]
+[ 6@0,    30@0,   50@0    ]
+[ 7@0,    40@0,   30@0    ]
+[ 9@0,    40@0,   50@0    ]
+[ 10@0,   50@0,   30@0    ]
+[ 11@0,   50@0,   40@0    ]
+</screen>
+
+The problem with this table is that we have more than one row
+per pair of collaborating actors, one for each movie they collaborated
+in. In particular, the pairs (30,40) and (40,30) appear twice, once
+for the first movie and another time for the second. We want to create
+a single link per pair of collaborating actors, so we use the
+&distinctMethod; method to get the correct rows from the table above:
+<programlisting> <userinput>noRepeats=noLoops.distinct("A.o1_id, B.o1_id")
+ printNST(noRepeats)</userinput>
+</programlisting>
+
+<screen>[SHOWING head,A.o1_id,B.o1_id WHERE * LIMIT *]
+[ 0@0,   30@0,   40@0    ]
+[ 1@0,   40@0,   30@0    ]
+[ 2@0,   30@0,   50@0    ]
+[ 3@0,   40@0,   50@0    ]
+[ 4@0,   50@0,   30@0    ]
+[ 5@0,   50@0,   40@0    ]
+</screen>
+
+That is exactly what we want! We&rsquo;re now ready to save the new
+links permanently, which we can easily do with the 
+&createLinks; method from the &DBClass; class. This method requires
+that the passed in NST has columns named &ldquo;from&rdquo; and
+&ldquo;to&rdquo;, so we rename them first:
+<programlisting> <userinput>DB.createLinks(noRepeats.renameColumns("from, to"))</userinput>
+</programlisting>
+
+And that&rsquo;s it. You now have six new links, connecting the
+actors that have collaborated in the same movie.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- DISCUSSION                                                     -->
+<!-- ============================================================== -->
+
+<section>
+<title>Discussion</title>
+
+<para>The combination of NST operations with &createLinks;
+gives you a lot of power to add new links to your database. 
+The &createLinks; method becomes particularly handy with its ability
+to also create attributes on those new links: for every column named
+<code>attr_*</code> in the NST you pass in, it will create (add) the
+corresponding values to the attribute for the new links, and create
+the attribute first if it does not already exist. We can, for
+example, set the <token role="attr">link_type</token> of the 
+new actor-to-actor links to be
+<token role="attr">CollaboratedWith</token>:
+<?pagebreak?>
+<programlisting> <userinput>noRepeats.renameColumns("from, to")
+ noRepeats.addConstantColumn("attr_link_type", "str", "CollaboratedWith")
+ DB.createLinks(noRepeats);</userinput>
+</programlisting></para>
+
+<para>What&rsquo;s more, the attribute columns don&rsquo;t necessarily
+have to be constants, but can instead hold any arbitrary value. 
+For example, if you wanted to also save, as attributes on the links,
+the names of the two actors, you could add to the noRepeats NST two
+columns, say <code>attr_actor1Name</code> and
+<code>attr_actor2Name</code> (by joining the NST with the attribute
+table that holds the name of actors), before passing it to
+<code>DB.createLinks()</code>.</para>
+
+<para>The general lesson to keep in mind is that &createLinks; allows
+you add new links to the database from the contents of any NST. You
+can create shortcut links as in the example above, self-loop links,
+links between objects for which there is no path, or in fact any kind
+of links you want. It all depends on the contents of the arbitrary NST
+that you pass in.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SUPPORTING FILES                                                -->
+<!-- ============================================================== -->
+
+<section>
+<title>Supporting Files</title>
+
+<para>Download the following XML data file to
+create the database used above to demonstrate this recipe:
+<itemizedlist spacing="compact">
+  <listitem>
+  <para>Database: 
+     <filename><ulink url="&examplespath;DBManip_ShortcutLinks_DB.xml">DBManip_ShortcutLinks_DB.xml</ulink></filename>
+  </para></listitem>
+</itemizedlist>
+You may also want to examine the unit test file for this recipe at
+<filename>&testpath;/cookbook/CreateLinksTest.java</filename>.
+</para>
+
+</section>
+
+<!-- === End of recipe ============================================ -->
+</section>
+
+<!--
+</chapter>
+-->
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("ProxCookbook.xml" "chapter" "section")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

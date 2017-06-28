@@ -1,0 +1,381 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Negated and Optional Elements</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Numeric Annotations">
+      <link rel="prev" href="ch04s03.html" title="Understanding Multiple Annotations">
+      <link rel="next" href="ch04s04s02.html" title="Negated elements versus inequality conditions">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;4.&nbsp;Numeric Annotations</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04s04s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="d0e3775"></a>Negated and Optional Elements
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e3778"></a><a class="indexterm" name="d0e3783"></a><a class="indexterm" name="d0e3788"></a><a class="indexterm" name="d0e3793"></a><p>Numeric annotations can also be used to indicate that a database
+            element must not or need not be present to match the query.
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p><span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e534"><span class="glossterm">Negated elements</span></a></em></span>
+                         must not be present in
+                         the matching subgraph. Negated elements are specified by the
+                         numeric annotation <code class="token">[0]</code>, indicating
+                         that exactly zero database elements can match this query
+                         element.
+                  </p>
+               </li>
+               <li>
+                  <p><span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e573"><span class="glossterm">Optional elements</span></a></em></span>
+                         may be but are not
+                         required to be present in the matching subgraph. Optional elements
+                         are specified by the numeric annotation 
+                         <code class="token">[0..]</code> or 
+                         <code class="token">[0..<em class="replaceable"><code>j</code></em>]</code>,
+                         indicating that zero or more database elements can match this
+                         query element.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            To be <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e848"><span class="glossterm">well formed</span></a>,
+            <a class="indexterm" name="d0e3829"></a>
+            a query must remain a connected
+            <a class="indexterm" name="d0e3835"></a>
+            <a class="indexterm" name="d0e3841"></a>
+            graph after removing any negated or optional elements.
+         </p>
+         <p>The database fragment shown in <a href="ch04s04.html#fig_annot_db04" title="Figure&nbsp;4.24.&nbsp;Database fragment [Annot_DB04.xml]">Figure&nbsp;4.24</a>
+            includes information on movies and any awards they have won.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db04"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB04.png" align="middle" width="558" alt="Database fragment [Annot_DB04.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.24.&nbsp;Database fragment [Annot_DB04.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            This fragment contains information on three movies, all directed by
+            Ron Howard.  <span class="emphasis"><em>A Beautiful Mind</em></span> was nominated for
+            and won the Academy Award for Best Picture for 2002;
+            <span class="emphasis"><em>Apollo&nbsp;13</em></span> was nominated for the Academy
+            Award for Best Picture for 1995, but the Oscar was awarded to
+            <span class="emphasis"><em>Forrest Gump</em></span> that year; and <span class="emphasis"><em>Far and
+                  Away</em></span> was not nominated for any Academy Awards.
+         </p>
+         <p>
+            Suppose we want to find all movies that have <span class="emphasis"><em>not</em></span>
+            been nominated for an Academy Award.  One way to do so is to only match
+            subgraphs that do not include any Academy Award objects.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db04_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB04_Q01.png" align="middle" width="360" alt="Query [Annot_DB04_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.25.&nbsp;Query [Annot_DB04_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The <code class="token">[0]</code> annotation on the 
+            <em class="token">award</em> object means that this query
+            matches only those movies that are not linked to any Academy Awards.
+            For now we&#8217;ll simply note that the <code class="token">[1..]</code>
+            edge annotation is usually the correct annotation for edges adjacent
+            <a class="indexterm" name="d0e3893"></a>
+            <a class="indexterm" name="d0e3901"></a>
+            <a class="indexterm" name="d0e3907"></a>
+            to negated or optional vertices and proceed accordingly.  Additional
+            information on choosing the correct annotation for edges adjacent to
+            negated or optional vertices is included in the section
+            <a href="ch04s04.html#ch_annot_opt_elements" title="Annotating edges adjacent to negative and optional&#xA;vertices">&#8220;Annotating edges adjacent to negative and optional
+               vertices&#8221;</a> later in this chapter.
+         </p>
+         <p>The result of executing this query on the database fragment
+            shown in <a href="ch04s04.html#fig_annot_db04" title="Figure&nbsp;4.24.&nbsp;Database fragment [Annot_DB04.xml]">Figure&nbsp;4.24</a> is shown below.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db04_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB04_Q01_res.png" align="middle" width="108" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.26.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            Only a single movie, <span class="emphasis"><em>Far and Away</em></span>, matches the
+            query. Note that negated query elements do not appear in the query
+            results. 
+            <a class="indexterm" name="d0e3932"></a>
+            <a class="indexterm" name="d0e3940"></a>
+            <a class="indexterm" name="d0e3946"></a>
+            Because the query includes a <code class="token">[0]</code>
+            annotation on the <em class="token">award</em> vertex, there
+            can be no corresponding object in order to match
+            <a class="indexterm" name="d0e3958"></a>
+            the query, and
+            therefore no <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">award</span> objects can appear in
+            the matching subgraphs.
+         </p>
+         <p>Compare this query to a similar query where we don&#8217;t care
+            whether the movie has been nominated for an Academy Award.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db04_q02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB04_Q02.png" align="middle" width="360" alt="Query [Annot_DB04_Q02.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.27.&nbsp;Query [Annot_DB04_Q02.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            In this example, the <em class="token">award</em> vertex is
+            annotated with <code class="token">[0..]</code>, making matches to
+            this vertex optional.  That is, subgraphs in the database will match
+            <a class="indexterm" name="d0e3984"></a>
+            <a class="indexterm" name="d0e3990"></a>
+            <a class="indexterm" name="d0e3998"></a>
+            <a class="indexterm" name="d0e4004"></a>
+            this query regardless of whether or not the corresponding movie has
+            been nominated for an Academy Award.  The results
+            of executing the new query with the optional
+            <em class="token">award</em> vertex are shown below.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db04_q02_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB04_Q02_res.png" align="middle" width="328.50000000000006" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.28.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            This time, all three movies appear in the query results.  The optional
+            <em class="token">award</em> vertex lets the query match both
+            movies that have received nominations and movies that have not
+            received any nominations.  Because <span class="emphasis"><em>Far and Away</em></span> has
+            no nominations, its subgraph does not include any award
+            objects.
+         </p>
+         <p>Although not yet supported by Proximity, QGraph queries can
+            include negated and optional edges
+            <a class="indexterm" name="d0e4030"></a>
+            <a class="indexterm" name="d0e4036"></a>
+            <a class="indexterm" name="d0e4042"></a>
+            <a class="indexterm" name="d0e4048"></a>
+            in addition to negated and optional
+            vertices.  Care must be taken to avoid 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e286"><span class="glossterm">disconnected queries</span></a>;
+            <a class="indexterm" name="d0e4057"></a>
+            <a class="indexterm" name="d0e4063"></a>
+            queries with negated or optional edges must also include
+            required alternate paths to all query elements.
+         </p>
+         <p><a href="ch04s04.html#fig_annot_db04_negedge" title="Figure&nbsp;4.29.&nbsp;Query">Figure&nbsp;4.29</a> illustrates a query that
+            includes a negated edge.  This query finds movies that have been
+            nominated for, but not won an Academy Award.  The 
+            <em class="token">won</em> edge is annotated with 
+            <code class="token">[0]</code> indicating that matching subgraphs
+            must not include a matching link.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db04_negedge"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB04_NegEdge.png" align="middle" width="382.5" alt="Query"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.29.&nbsp;Query</b></p>
+         </div>
+         <p><br class="figure-break">
+            To prevent the
+            query from becoming disconnected, the <em class="token">nominated</em>
+            edge is required.  The <code class="token">[1..]</code> edge annotation
+            means that the query only matches subgraphs that contain one or more
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">nominated</span>
+             links connecting the movie to any 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Academy Award</span> objects.
+         </p>
+         <p>The expected results, had we been able to execute this query in
+            Proximity, are shown below.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db04_negedge_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB04_NegEdge_res.png" align="middle" width="328.50000000000006" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.30.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            Only one movie in our database fragment,
+            <span class="emphasis"><em>Apollo&nbsp;13</em></span> has been nominated for but not
+            won an Academy Award.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="ch_annot_opt_elements"></a>Annotating edges adjacent to negative and optional
+                        vertices
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e4118"></a><a class="indexterm" name="d0e4125"></a><a class="indexterm" name="d0e4130"></a><a class="indexterm" name="d0e4135"></a><p>Because edges adjacent to annotated vertices must themselves be
+               annotated, how are we to annotate the edge adjacent to a negated or
+               optional vertex? In general, the usual annotation of
+               <code class="token">[1..]</code> remains appropriate. We require the
+               presence of the query edge to avoid having the query become
+               disconnected.
+               <a class="indexterm" name="d0e4145"></a>
+               <a class="indexterm" name="d0e4151"></a>
+               For example, an optional edge connected to an optional
+               vertex could result in a disconnected subgraph when the matching
+               vertex is present but the matching edge is not.  Optional or negated
+               edges are usually inappropriate in most queries, although they may
+               be safely used if other elements in the query ensure that the query remains
+               connected after removing any optional or negated elements.
+            </p>
+            <p>For example, consider the database fragment shown in 
+               <a href="ch04s04.html#fig_annot_dbsk" title="Figure&nbsp;4.31.&nbsp;Stephen King books and movies">Figure&nbsp;4.31</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_annot_dbsk"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Annot_DBSK.png" align="middle" width="517.5" alt="Stephen King books and movies"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.31.&nbsp;Stephen King books and movies</b></p>
+            </div>
+            <p><br class="figure-break">
+               If we wanted to identify author-book pairs and
+               also include movie adaptations, if any, we might initially (and
+               incorrectly) create a query
+               that looks like that shown in <a href="ch04s04.html#fig_annot_dbsk_badquery" title="Figure&nbsp;4.32.&nbsp;Improperly annotated query">Figure&nbsp;4.32</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_annot_dbsk_badquery"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Annot_DBSK_BadQuery.png" align="middle" width="567" alt="Improperly annotated query"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.32.&nbsp;Improperly annotated query</b></p>
+            </div>
+            <p><br class="figure-break">
+               This query uses the improper annotation <code class="token">[0..]</code> for
+               both the <em class="token">movie</em> vertex and adjacent
+               <em class="token">adapted-to</em> edge.  Such a query can match
+               disconnected subgraphs.  Consider the highlighted subset of elements
+               from this database shown in <a href="ch04s04.html#fig_annot_dbsk_badsubgr" title="Figure&nbsp;4.33.&nbsp;Disconnected subgraph">Figure&nbsp;4.33</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_annot_dbsk_badsubgr"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Annot_DBSK_BadSubgr.png" align="middle" width="517.5" alt="Disconnected subgraph"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.33.&nbsp;Disconnected subgraph</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>The highlighted set of objects and links matches the query shown in 
+               <a href="ch04s04.html#fig_annot_dbsk_badquery" title="Figure&nbsp;4.32.&nbsp;Improperly annotated query">Figure&nbsp;4.32</a>.  
+               The <code class="token">[0..]</code>
+               annotation on the <em class="token">movie</em> vertex and
+               <code class="token">[0..]</code> annotation on the 
+               <em class="token">adapted-to</em> edge mean that the query is
+               allowed to match database structures that include a matching 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">movie</span> object but that omit the matching 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">adapted-to</span> link.  This can
+               produce disconnected subgraphs like the highlighted elements shown
+               above, which clearly isn&#8217;t what was intended by the query.
+               To prevent the possibility of matching such disconnected subgraphs,
+               use the <code class="token">[1..]</code> annotation on edges adjacent to a
+               vertex annotated with <code class="token">[0]</code> or
+               <code class="token">[0..]</code>.
+               
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04s04s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Understanding Multiple Annotations&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Negated elements versus inequality conditions</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

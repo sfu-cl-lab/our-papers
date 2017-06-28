@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="Annot_DB05_Q02">
+  <description>Books without Stephen King as an author</description>
+  <query-body>
+    <vertex name="book">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>book</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="author">
+      <condition>
+        <and>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>ObjType</attribute-name>
+            <value>person</value>
+          </test>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>Name</attribute-name>
+            <value>Stephen King</value>
+          </test>
+        </and>
+      </condition>
+      <numeric-annotation>
+        <min>0</min>
+        <max>0</max>
+      </numeric-annotation>
+    </vertex>
+    <edge name="wrote">
+      <vertex1>author</vertex1>
+      <vertex2>book</vertex2>
+      <directed>true</directed>
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>LinkType</attribute-name>
+          <value>author-of</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+  </query-body>
+  <editor-data>
+    <vertex-location name="book" x="411.0" y="271.0" />
+    <vertex-location name="author" x="95.0" y="130.0" />
+  </editor-data>
+</graph-query>
+

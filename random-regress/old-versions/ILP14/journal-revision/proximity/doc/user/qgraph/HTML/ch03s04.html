@@ -1,0 +1,197 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Complex Conditions</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Conditions">
+      <link rel="prev" href="ch03s03s02.html" title="Evaluating existence conditions">
+      <link rel="next" href="ch03s05.html" title="Implementation in Proximity">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s03s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;3.&nbsp;Conditions</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s05.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="qg_complex_conditions"></a>Complex Conditions
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_complexcond0"></a><a class="indexterm" name="idx_complexcond1"></a><a class="indexterm" name="d0e2200"></a><a class="indexterm" name="d0e2207"></a><p>Sometimes you cannot capture the necessary query restrictions
+            using a single condition. For example, suppose we have a database that
+            contains information not just on authors and books, but that also
+            includes other published materials such as magazine articles and
+            screenplays.  If we want to not just restrict matches to items
+            published before 1990, but to also ensure that we only match 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">book</span> objects, we have to place two
+            conditions on the <em class="token">book</em> vertex to correctly
+            restrict the matching objects:
+            
+            
+         </p>
+         <div class="figure"><a name="fig_cond_multi01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Cond_Multi01.png" align="middle" width="328.50000000000006" alt="Using multiple conditions"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.16.&nbsp;Using multiple conditions</b></p>
+         </div>
+         <p><br class="figure-break">
+            Both of the conditions
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ObjType&nbsp;=&nbsp;book</span> and
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate&nbsp;&lt;&nbsp;1990</span>
+            must be satisfied
+            <a class="indexterm" name="d0e2235"></a>
+            <a class="indexterm" name="d0e2241"></a>
+            in order for the corresponding database object to match this vertex.
+            Because both conditions must be satisfied, we can more correctly write
+            this as the logical conjunction of two conditions, as shown in 
+            <a href="ch03s04.html#fig_cond_multi02" title="Figure&nbsp;3.17.&nbsp;Complex condition using AND">Figure&nbsp;3.17</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_cond_multi02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Cond_Multi02.png" align="middle" width="328.50000000000006" alt="Complex condition using AND"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.17.&nbsp;Complex condition using <code class="literal">AND</code></b></p>
+         </div>
+         <p><br class="figure-break">
+            In this example, the two conditions are combined using the logical
+            <code class="literal">AND</code>
+            <a class="indexterm" name="d0e2263"></a>
+            <a class="indexterm" name="d0e2269"></a>
+            <a class="indexterm" name="d0e2275"></a>
+            <a class="indexterm" name="d0e2281"></a>
+            operator. For clarity, query diagrams use the
+            English words <code class="literal">AND</code> and <code class="literal">OR</code>
+            <a class="indexterm" name="d0e2293"></a>
+            instead of the symbols
+            <code class="literal">
+               <fo:inline xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:exsl="http://exslt.org/common" font-family="Symbol">&#8743;</fo:inline></code> and
+            <code class="literal">
+               <fo:inline xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:exsl="http://exslt.org/common" font-family="Symbol">&#8744;</fo:inline></code>.
+            In principle, 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e156"><span class="glossterm">complex conditions</span></a>
+            in QGraph can be any logical combination of simple conditions.
+            For example, we could to modify the above query to find both books and
+            screenplays published before 1990 by creating the following query.
+            (However, see <a href="ch03s05s04.html" title="Complex conditions in Proximity">&#8220;Complex conditions in Proximity&#8221;</a>
+            for important Proximity limitations
+            on the form of complex conditions.)
+            
+         </p>
+         <div class="figure"><a name="fig_cond_multi03"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Cond_Multi03.png" align="middle" width="328.50000000000006" alt="Example of a more complex condition"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.18.&nbsp;Example of a more complex condition</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>QGraph also permits the use of the logical
+            <code class="literal">NOT</code>
+            <a class="indexterm" name="d0e2326"></a>
+            operator in complex conditions. The
+            <code class="literal">NOT</code> operator has the expected effect of requiring
+            that the condition&#8217;s test must fail for the
+            corresponding database entity to match the query.
+            For example, to find items not published in 1990, we can create
+            the query
+            
+         </p>
+         <div class="figure"><a name="fig_cond_neg01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Cond_Neg01.png" align="middle" width="341.99999999999994" alt="Example of a negated condition"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.19.&nbsp;Example of a negated condition</b></p>
+         </div>
+         <p><br class="figure-break">
+            This query matches objects whose <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate</span>
+            attribute does not include the value 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1990</span>.
+         </p>
+         <p>Remember that QGraph must consider all of an attribute&#8217;s
+            values for an object or link when evaluating a condition.  
+            Therefore, when database items have multiple attribute values,
+            we cannot assume that 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Attribute&nbsp;&lt;&gt;&nbsp;value</span> 
+            is equivalent to 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">NOT(Attribute&nbsp;=&nbsp;value)</span>.
+            For example, in the query above, if an object&#8217;s 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate</span> attribute
+            has the the value 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">{1984, 1990}</span>, then the condition
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate&nbsp;&lt;&gt;&nbsp;1990</span> will be
+            satisfied because 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1984</span>&nbsp;&lt;&gt;&nbsp;<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1990</span>.
+            But the condition
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">NOT(PubDate&nbsp;=&nbsp;1990)</span> will not
+            be satisfied because <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1990</span> is included in
+            the value for <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate</span>.
+            
+         </p>
+         <p>Similarly, the two conditions 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate&nbsp;&lt;&gt;&nbsp;1990</span>
+            and
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">NOT(PubDate&nbsp;=&nbsp;1990)</span>
+            do not yield the same results when applied to objects or links having
+            <span class="emphasis"><em>no</em></span> values for the specified attribute.  In the
+            case of an inequality condition, if an item has no 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate</span> attribute, no value exists to
+            satisfy the inequality, therefore the condition cannot be satisfied.
+            In the case of a negated condition, no value exists to
+            satisfy the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate&nbsp;=&nbsp;1990</span>
+            equality, therefore the condition is satisfied.
+         </p><a class="indexterm" name="d0e2399"></a><a class="indexterm" name="d0e2400"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s03s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s05.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Evaluating existence conditions&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Implementation in Proximity</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

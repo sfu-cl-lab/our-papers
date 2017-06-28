@@ -1,0 +1,253 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Sampling the Database</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">
+      <link rel="prev" href="ch06s04.html" title="Using the Proximity Python Interpreter">
+      <link rel="next" href="ch06s06.html" title="Adding a New Attribute">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Using Scripts</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="scripts_sampling"></a>Sampling the Database
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_sampling1"></a><a class="indexterm" name="idx_sampling2"></a><a class="indexterm" name="idx_sampling3"></a><p>To use the Proximity models, you need to create sets of
+            subgraphs. In the simplest case, one or more of these sets is used to
+            learn (train) the model. You then test the results of that training by
+            applying the model to the remaining set of subgraphs. You can create
+            these sets of subgraphs by 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e703"><span class="glossterm"><span class="emphasis"><em>sampling</em></span></span></a>
+            a container.
+         </p>
+         <p>Proximity provides a <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#sampleContainer(java.lang.String,%20int,%20java.lang.String)"><code class="methodname">sampleContainer()</code></a>
+            method for creating random samples of existing containers.<sup>[<a name="d0e11367" href="#ftn.d0e11367">2</a>]</sup>
+            You can either create a specified number of samples, or create samples
+            suitable for <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e249"><span class="glossterm">cross validation</span></a>.  Because
+            subgraphs in a container may 
+            contain objects and links that also appear in other subgraphs, the
+            resulting samples may not satisfy strict independence requirements
+            imposed by some experimental designs.
+            <a href="ch06s05.html#ex_scripts_sampling" title="Exercise&nbsp;6.4.&nbsp;Creating training and test sets:">Exercise&nbsp;6.4</a> illustrates the simplest case of
+            creating two samples&#8212;one for 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e779"><span class="glossterm">training</span></a> and one for
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e773"><span class="glossterm">testing</span></a>.
+            
+            
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>Running the sample-1d-clusters script creates
+                        <a href="go01.html#d18e234"><span class="glossterm">containers</span></a> used by
+                        later tutorial exercises.  Make sure that you complete this exercise
+                        if you plan to complete the exercises in the following
+                        chapters.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e11393"></a>Code example: sample-1d-clusters.py
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e11396"></a><a class="indexterm" name="d0e11399"></a><p>This section describes the script found in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/sample-1d-clusters.py</code>.
+            </p>
+            <p>To create the samples, we need to write a script that calls the
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#sampleContainer(java.lang.String,%20int,%20java.lang.String)"><code class="methodname">sampleContainer()</code></a> method 
+               <a class="indexterm" name="d0e11416"></a>
+               <a class="indexterm" name="d0e11420"></a>
+               on the <em class="varname"><code>prox</code></em> object.
+               <a class="indexterm" name="d0e11429"></a>
+               For this example, we
+               create two samples. Each will be placed in a new container and each
+               will hold approximately one-half the subgraphs from the original
+               container. The counts are approximate because the initial container
+               may not contain an even number of subgraphs.
+               
+               
+            </p><pre class="programlisting">print "Sampling database..."
+prox.sampleContainer("1d-clusters",2,"samples")
+</pre><p>This use of the <code class="methodname">sampleContainer()</code> method
+               requires three arguments:
+               
+            </p>
+            <div class="variablelist">
+               <dl>
+                  <dt><span class="term"><em class="varname"><code>containerName</code></em></span></dt>
+                  <dd>
+                     <p>the container to be sampled</p>
+                  </dd>
+                  <dt><span class="term"><em class="varname"><code>numFolds</code></em></span></dt>
+                  <dd>
+                     <p>the number of samples to create from this
+                            container
+                     </p>
+                  </dd>
+                  <dt><span class="term"><em class="varname"><code>sampleName</code></em></span></dt>
+                  <dd>
+                     <p>the name of the container that holds the sample
+                            containers
+                     </p>
+                  </dd>
+               </dl>
+            </div>
+            <p>The <code class="methodname">sampleContainer()</code> method creates both
+               a parent container, <em class="varname"><code>sampleName</code></em>, to hold the
+               samples as well as the sample containers themselves.
+               The <em class="varname"><code>sampleName</code></em> container is in turn,
+               contained by the initial <em class="varname"><code>containerName</code></em> container. For
+               example, the script above creates the following container hierarchy:
+               
+            </p>
+            <div class="informalfigure">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/FIG_NestedCollections.png" align="middle" width="630"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p>where the 1d-clusters container existed in the database before
+               running the scripts and the samples, 0, and 1 containers were
+               created as a result of running the script.
+            </p>
+            <p>The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#sampleContainer(java.lang.String,%20int,%20java.lang.String)"><code class="methodname">sampleContainer()</code></a> method provides an overload for
+               creating samples for <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e249"><span class="glossterm">cross validation</span></a>.  This
+               overload omits the 
+               <em class="parameter"><code>sampleName</code></em> parameter, placing the resulting
+               samples in either a <span class="token">training</span> or
+               <span class="token">test</span> container.  For example, when
+               creating samples for 10-fold cross validation, the method partitions
+               the data into 10 segments and creates 10 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e779"><span class="glossterm">training sets</span></a>, each
+               containing nine of those segments, and 10 corresponding 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e773"><span class="glossterm">test sets</span></a>
+               containing the remaining tenth segment.
+            </p>
+            <div class="procedure"><a name="ex_scripts_sampling"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;6.4.&nbsp;Creating training and test sets:</b></p><a class="indexterm" name="d0e11511"></a><a class="indexterm" name="d0e11516"></a><a class="indexterm" name="d0e11521"></a><p>This script requires the container created in 
+                  <a href="ch05s08.html#ex_queries_1dclusters" title="Exercise&nbsp;5.7.&nbsp;Executing a saved query from the Proximity Database Browser:">Exercise&nbsp;5.7</a>. You must have completed
+                  <a href="ch05s08.html#ex_queries_1dclusters" title="Exercise&nbsp;5.7.&nbsp;Executing a saved query from the Proximity Database Browser:">Exercise&nbsp;5.7</a> before running the current
+                  exercise.
+               </p>
+               <p>Before beginning, make sure that you are serving the ProxWebKB
+                  database using Mserver. Start the Proximity Database Browser if it is not already
+                  running.
+               </p>
+               <ol type="1">
+                  <li>
+                     <p>From the <span><strong class="guimenu">Script</strong></span> menu, choose
+                        <span><strong class="guimenuitem">Run Script</strong></span>.
+                        Proximity displays the <span class="guilabel">Open</span> dialog.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory and
+                        choose <code class="filename">sample-1d-clusters.py</code>.
+                        Click <span><strong class="guibutton">Open</strong></span>.
+                     </p>
+                     <p>Proximity opens a window to show you any output from the script
+                        along with a trace of the script execution. 
+                        Proximity reports:
+                        
+                        
+                     </p><pre class="screen">Status: starting running script: 
+   /proximity/doc/user/tutorial/examples/sample-1d-clusters.py
+Sampling database...
+Status: finished running script
+</pre><p>
+                        
+                        when the script successfully completes. You can close
+                        this window after the script finishes.
+                     </p>
+                  </li>
+                  <li>
+                     <p>To verify that the script created the sample containers,
+                        click <span><strong class="guibutton">Containers</strong></span> to display the list of
+                        containers in the database.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Click <span><strong class="guibutton">1d-clusters</strong></span>. Proximity shows you
+                        that 1d-clusters has a child container, samples.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Click <span><strong class="guibutton">samples</strong></span>. Proximity displays
+                        samples&#8217;s child containers, numbered 0 and 1.
+                     </p>
+                     <div class="mediaobject" align="center">
+                        <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                           <tr>
+                              <td align="center" valign="bottom"><img src="images/GUI_Samples.png" align="middle" width="630"></td>
+                           </tr>
+                        </table>
+                     </div>
+                     <p>The <span><strong class="guibutton">view query</strong></span> link is disabled because
+                        this container was created by a script rather than by querying.
+                     </p>
+                  </li>
+               </ol>
+            </div>
+            <p>Sampling adds an attribute to each of the sampled subgraphs
+               <a class="indexterm" name="d0e11593"></a>
+               <a class="indexterm" name="d0e11599"></a>
+               <a class="indexterm" name="d0e11605"></a>
+               <span class="emphasis"><em>in the initial container</em></span>
+               indicating which sample they belong to.  In this case, subgraphs in
+               1d-clusters get the new attribute, but corresponding subgraphs in
+               containers 0 and 1 do not.
+               This attribute will be overwritten if the container is re-sampled.
+            </p><a class="indexterm" name="d0e11614"></a><a class="indexterm" name="d0e11615"></a><a class="indexterm" name="d0e11616"></a></div>
+         <div class="footnotes"><br><hr width="100" align="left">
+            <div class="footnote">
+               <p><sup>[<a name="ftn.d0e11367" href="#d0e11367">2</a>] </sup>You cannot sample the  root container.
+               </p>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Using the Proximity Python Interpreter&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Adding a New Attribute</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

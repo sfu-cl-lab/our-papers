@@ -1,0 +1,1493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<appendix id="qg_ch_xml">
+<title>XML Representation</title>
+
+<para>This appendix describes the major elements used in the query XML
+format.
+<indexterm id="idx_xml" class="startofrange"><primary>XML representation of queries</primary></indexterm>
+<indexterm id="idx_xml2" class="startofrange"><primary>queries</primary>
+           <secondary>XML representation</secondary></indexterm>
+The Query Editor saves queries in this XML format. You can
+create queries by using the Query Editor or by creating an XML file
+in a text editor. The DTD for the Proximity XML query format is
+located in <filename>&proxpath;/resources/graph-query.dtd</filename>.
+<indexterm><primary>graph-query.dtd</primary></indexterm>
+<indexterm><primary>DTD for query files</primary></indexterm>
+</para>
+
+<para>Empty elements as well as elements whose content consists
+solely of PCDATA text are not included in this appendix.  The
+appendix also omits 
+detailed descriptions of <sgmltag class="element">and</sgmltag>, 
+<sgmltag class="element">or</sgmltag>, and 
+<sgmltag class="element">not</sgmltag> as their use is reasonably
+intuitive and a full description adds little useful
+information. Interested readers are encouraged to examine the examples
+under <xref linkend="apx_queryxml_cond"/>, 
+<xref linkend="apx_queryxml_constraint"/>, and 
+<xref linkend="apx_queryxml_test"/> or the DTD file.</para>
+
+<!-- ============================================================== -->
+<!--                         DECLARATIONS                           -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Declarations</title>
+
+<para></para>
+
+<!-- ===== DOCUMENT TYPE DECLARATION ============================== -->
+
+<sect2>
+<title>Document type declaration</title>
+
+<para>The XML import file must include the following document
+type declaration: 
+
+<programlisting><![CDATA[<!DOCTYPE graph-query SYSTEM "graph-query.dtd">]]>
+</programlisting>
+</para>
+
+<para>Note that the document type declaration uses a system identifier
+for the DTD. Proximity expects to find the
+<filename>graph-query.dtd</filename> file in the same directory as the XML
+data file.</para>
+
+</sect2>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                  THE GRAPH-QUERY ROOT ELEMENT                  -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>The <code role="heading">graph-query</code> root
+element</title> 
+
+<para>The root element for a query file is 
+<sgmltag class="element">graph-query</sgmltag>. The 
+<sgmltag class="element">graph-query</sgmltag> tag must appear
+immediately after the document type declaration. The query XML file
+ends with the closing <sgmltag class="endtag">graph-query</sgmltag>
+tag.</para>
+
+<para>The <sgmltag class="element">graph-query</sgmltag> specifies the
+name of the query in the required 
+<sgmltag class="attribute">name</sgmltag> attribute.  Queries must
+include a <sgmltag class="element">query-body</sgmltag> element, and
+may optionally include a description and layout information for the
+Query Editor.</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;graph-query&gt;</code></bridgehead>
+
+<!-- ===== Graph-query : Attributes =============================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">name</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of the query</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Graph-query : Children ================================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">description</sgmltag></entry>
+<entry>zero or one</entry>
+<entry>String describing the query</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_qb"><sgmltag class="element">query-body</sgmltag></link></entry>
+<entry>exactly one</entry>
+<entry>Specifies the graph pattern to be matched</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_ed"><sgmltag class="element">editor-data</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Specifies layout information for the query editor</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Graph-query : Content Model ============================ -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(description?, query-body)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== Graph-query : Example ================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;graph-query name="1d-clusters"&gt;
+  &lt;description&gt;Finds 1d-clusters&lt;/description&gt;
+  &lt;query-body&gt;<replaceable> see <link linkend="apx_queryxml_qb_ex">query-body</link> </replaceable>&lt;/query-body&gt;
+  &lt;editor-data&gt;<replaceable> see <link linkend="apx_queryxml_ed_ex">editor-data</link> </replaceable>&lt;/editor-data&gt;
+&lt;/graph-query&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                           QUERY-BODY                           -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_qb">
+<title>Query Body</title>
+
+<para>The required <sgmltag class="element">query-body</sgmltag>
+element specifies the structure and requirements for the pattern to be
+matched to structures in the database.
+</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;query-body&gt;</code></bridgehead>
+
+<!-- ===== Query-body : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Query-body : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_queryxml_vertex"><sgmltag class="element">vertex</sgmltag></link></entry>
+<entry>one or more</entry>
+<entry>Describes a <glossterm>vertex</glossterm> in the query; matches
+       an <glossterm>object</glossterm> in the data</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_edge"><sgmltag class="element">edge</sgmltag></link></entry>
+<entry>zero or more</entry>
+<entry>Describes an <glossterm>edge</glossterm> in the query; matches
+       a <glossterm>link</glossterm> in the data</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_subquery"><sgmltag class="element">subquery</sgmltag></link></entry>
+<entry>zero or more</entry>
+<entry>Specifies a <glossterm>subquery</glossterm> within the current
+       query</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_constraint"><sgmltag class="element">constraint</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Specifies a <glossterm>constraint</glossterm> between query
+       elements</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_addlink"><sgmltag class="element">add-link</sgmltag></link></entry>
+<entry>zero or more</entry>
+<entry>Specifies new links to be added to the database</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Query-body : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(vertex, (edge | vertex)*, subquery*, constraint?, add-link*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Query-body : Example =================================== -->
+<formalpara id="apx_queryxml_qb_ex">
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;query-body&gt;
+  &lt;vertex name="A"&gt; <replaceable>see <link linkend="apx_queryxml_vertex_ex">vertex</link></replaceable> &lt;/vertex&gt;
+  &lt;edge name="Y"&gt; <replaceable>see <link linkend="apx_queryxml_edge_ex">edge</link></replaceable> &lt;/edge&gt;
+  &lt;subquery&gt; <replaceable>see <link linkend="apx_queryxml_subq_ex">subquery</link></replaceable> &lt;/subquery&gt;
+  &lt;constraint&gt; <replaceable>see <link linkend="apx_queryxml_constr_ex">constraint</link></replaceable> &lt;/constraint&gt;
+  &lt;add-link&gt; <replaceable>see <link linkend="apx_queryxml_addlink_ex">add-link</link></replaceable> &lt;/add-link&gt;
+&lt;/query-body&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                              VERTEX                            -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_vertex">
+<title>Vertices</title>
+<indexterm><primary>vertices</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>The <sgmltag class="element">vertex</sgmltag> element defines a
+<glossterm>vertex</glossterm> in the query.  The
+<glossterm>name</glossterm> of the vertex, as defined in the query, is 
+provided in the required <sgmltag class="attribute">name</sgmltag>
+<indexterm><primary>vertices</primary>
+           <secondary>names of</secondary></indexterm>
+<indexterm><primary>names</primary>
+           <secondary sortas="vertices">of vertices</secondary></indexterm>
+attribute. The <sgmltag class="element">vertex</sgmltag> element may 
+contain an optional <link linkend="apx_queryxml_cond"><sgmltag
+class="element">condition</sgmltag></link>
+element and an optional <link linkend="apx_queryxml_na"><sgmltag
+class="element">numeric-annotation</sgmltag></link> element. Vertices
+in the query are matched to objects in the database.</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;vertex&gt;</code></bridgehead>
+
+<!-- ===== Vertex: Attributes ===================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">name</sgmltag></entry>
+<entry>required</entry>
+<entry>Vertex name as used in the query; vertex names are case
+       sensitive</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== Vertex : Children ====================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_queryxml_cond"><sgmltag class="element">condition</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Restrictions on the link&rsquo;s attribute values</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_na"><sgmltag class="element">numeric-annotation</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Cardinality requirements for matching links</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Vertex : Content Model ================================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(condition?, numeric-annotation?)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Vertex : Example ======================================= -->
+<formalpara id="apx_queryxml_vertex_ex">
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;vertex name="A"&gt;
+  &lt;condition&gt; see <link linkend="apx_queryxml_cond_ex">condition</link> &lt;/condition&gt;
+  &lt;numeric-annotation&gt; see <link linkend="apx_queryxml_annot_ex">numeric-annotation</link> &lt;/numeric-annotation&gt;
+&lt;/vertex&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                               EDGE                             -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_edge">
+<title>Edges</title>
+<indexterm><primary>edges</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>The <sgmltag class="element">edge</sgmltag> element defines an
+<glossterm>edge</glossterm> in the query. 
+The <glossterm>name</glossterm> of the edge, as defined in the query, is
+provided in the required <sgmltag class="attribute">name</sgmltag>
+<indexterm><primary>edges</primary>
+           <secondary>names of</secondary></indexterm>
+<indexterm><primary>names</primary>
+           <secondary sortas="edges">of edges</secondary></indexterm>
+attribute. The <sgmltag class="element">edge</sgmltag> element may 
+contain an optional <link linkend="apx_queryxml_cond"><sgmltag
+class="element">condition</sgmltag></link>
+element and an optional <link linkend="apx_queryxml_na"><sgmltag
+class="element">numeric-annotation</sgmltag></link> element. Edges in
+the query are matched to links in the database.</para> 
+
+<para>Edges must indicate which vertices they connect and whether or
+not the direction of the edge is taken into account when matching the 
+query to database structures.</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;edge&gt;</code></bridgehead>
+
+<!-- ===== Edge : Attributes ====================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">name</sgmltag>
+</entry>
+<entry>required</entry>
+<entry>Edge name as used in the query; edge names are case
+       sensitive</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Edge : Children ======================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row>
+<entry><sgmltag class="element">vertex1</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>The starting vertex; must match the name (including case) of a
+       vertex in this query</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">vertex2</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>The ending vertex; must match the name (including case) of a
+       vertex in this query</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">directed</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>Whether to consider link direction in matching; must be
+  &ldquo;true&rdquo; or &ldquo;false&rdquo;
+  <indexterm><primary>edges</primary>
+             <secondary>directed vs. undirected</secondary></indexterm>
+</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_cond"><sgmltag class="element">condition</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Restrictions on the link&rsquo;s attribute values</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_na"><sgmltag class="element">numeric-annotation</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Cardinality requirements for matching links</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Edge : Content Model =================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(vertex1, vertex2, directed, condition?, numeric-annotation?)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== Edge : Example ========================================= -->
+<formalpara id="apx_queryxml_edge_ex">
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;edge name="Y"&gt;
+  &lt;vertex1&gt;A&lt;/vertex1&gt;
+  &lt;vertex2&gt;B&lt;/vertex2&gt;
+  &lt;directed&gt;true&lt;/directed&gt;
+  &lt;condition&gt; see <link linkend="apx_queryxml_cond_ex">condition</link> &lt;/condition&gt;
+  &lt;numeric-annotation&gt; see <link linkend="apx_queryxml_annot_ex">numeric-annotation</link> &lt;/numeric-annotation&gt;
+&lt;/edge&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                           CONDITION                            -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_cond">
+<title>Conditions</title>
+<indexterm><primary>conditions</primary>
+           <secondary>XML representation</secondary></indexterm>
+<indexterm><primary>attribute value conditions</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>A <sgmltag class="element">condition</sgmltag> is a boolean
+combination of <sgmltag class="element">test</sgmltag> elements, each
+of which defines a <glossterm>condition</glossterm> on the vertex (or
+link). Condition <sgmltag class="element">test</sgmltag> elements can
+be combined with the 
+<sgmltag class="element">and</sgmltag>,
+<sgmltag class="element">or</sgmltag>, and
+<sgmltag class="element">not</sgmltag> elements using
+<glossterm>disjunctive normal form</glossterm>.
+<indexterm><primary>disjunctive normal form</primary></indexterm>
+</para>
+
+<sidebar>
+<para>Legal operators for conditions are <literal>eq</literal>,
+<literal>lt</literal>, <literal>le</literal>, <literal>gt</literal>,
+<literal>ge</literal>, and <literal>ne</literal>.
+You can also use the <literal>exists</literal>
+operator to define an 
+<glossterm>existence condition</glossterm>,
+<indexterm><primary>existence conditions</primary>
+           <secondary>XML representation</secondary></indexterm>
+requiring only that an object or link 
+have a specific attribute without concern for its value.</para>
+</sidebar>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;condition&gt;</code></bridgehead>
+
+<!-- ===== Condition : Attributes ================================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Condition : Children =================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_queryxml_test"><sgmltag class="element">test</sgmltag></link></entry>
+<entry>member of a required set</entry>
+<entry>A requirement for the corresponding vertex&rsquo;s or edge&rsquo;s
+attribute values</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">and</sgmltag></entry>
+<entry>member of a required set</entry>
+<entry>Requires all of the included tests be satisfied</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">or</sgmltag></entry>
+<entry>member of a required set</entry>
+<entry>Requires one of the included tests be satisfied</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">not</sgmltag></entry>
+<entry>member of a required set</entry>
+<entry>Requires that the specified test not be satisfied</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Condition : Content Model ============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para><blockquote><para>
+<literal>(or | and | not | test)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Condition : Example ==================================== -->
+<formalpara id="apx_queryxml_cond_ex">
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;condition&gt;
+  &lt;and&gt;
+    &lt;test&gt;
+      &lt;operator&gt;eq&lt;/operator&gt;
+      &lt;attribute-name&gt;objtype&lt;/attribute-name&gt;
+      &lt;value&gt;person&lt;/value&gt;
+    &lt;/test&gt;
+    &lt;not&gt;
+      &lt;test&gt;
+        &lt;operator&gt;exists&lt;/operator&gt;
+        &lt;attribute-name&gt;cluster-coeff&lt;/attribute-name&gt;
+      &lt;/test&gt;
+    &lt;/not&gt;
+  &lt;/and&gt;
+&lt;/condition&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        NUMERIC-ANNOTATION                      -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_na">
+<title>Numeric Annotations</title> 
+<indexterm><primary>numeric annotations</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>The <sgmltag class="element">numeric-annotation</sgmltag>
+element includes a required <sgmltag class="element">min</sgmltag>
+element indicating the 
+<glossterm baseform="numeric annotation">annotation&rsquo;s</glossterm> 
+lower bound and an optional
+<sgmltag class="element">max</sgmltag> element indicating the
+annotation&rsquo;s upper bound.  You must specify both upper and lower
+bounds for exact annotations.
+Numeric annotations are optional child elements of 
+<sgmltag class="element">vertex</sgmltag>, <sgmltag
+class="element">edge</sgmltag>, and <sgmltag
+class="element">subquery</sgmltag> elements.</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;numeric-annotation&gt;</code></bridgehead>
+
+<!-- ===== Numeric-annotation : Attributes ======================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Numeric-annotation : Children ========================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">min</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>Lower bound of the annotation</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">max</sgmltag></entry>
+<entry>zero or one</entry>
+<entry>Upper bound of the annotation</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Numeric-annotation : Content Model ==================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(min, max?)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Nummeric-annotation : Example ========================== -->
+<formalpara id="apx_queryxml_annot_ex">
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;numeric-annotation&gt;
+  &lt;min&gt;0&lt;/min&gt;
+  &lt;max&gt;3&lt;/max&gt;
+&lt;/numeric-annotation&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                            SUBQUERY                            -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_subquery">
+<title>Subqueries</title>
+<indexterm><primary>subqueries</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para><glossterm baseform="subquery">Subqueries</glossterm> must be
+<glossterm baseform="well formed">well-formed</glossterm>
+<indexterm><primary>queries</primary>
+           <secondary>well-formedness</secondary></indexterm>
+queries in their own right. They 
+must have one or more edges that connect the subquery to a vertex or
+vertices in the main query. Subqueries can be nested.
+(Nested subqueries are allowed by QGraph and the DTD, but are
+prohibited by the current Proximity implementation.)</para>
+
+<para>Subqueries are always 
+<glossterm baseform="numeric annotation">annotated</glossterm>, as
+shown in the example below. The <glossterm>boundary edge</glossterm>
+of a subquery must be annotated. The 
+<glossterm>boundary vertex</glossterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>requirements</secondary></indexterm>
+<indexterm><primary>edges</primary>
+           <secondary>on subquery boundaries</secondary></indexterm>
+<indexterm><primary>vertices</primary>
+           <secondary>on subquery boundaries</secondary></indexterm>
+of a subquery cannot be annotated.</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;subquery&gt;</code></bridgehead>
+
+<!-- ===== Subquery : Attributes ================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Subquery : Children ==================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_queryxml_vertex"><sgmltag class="element">vertex</sgmltag></link></entry>
+<entry>one or more</entry>
+<entry>A vertex within the subquery</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_edge"><sgmltag class="element">edge</sgmltag></link></entry>
+<entry>one or more</entry>
+<entry>An edge within the subquery</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">subquery</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>A nested subquery</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_constraint"><sgmltag class="element">constraint</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Specifies a <glossterm>constraint</glossterm> between query
+       elements</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_na"><sgmltag class="element">numeric-annotation</sgmltag></link></entry>
+<entry>exactly one</entry>
+<entry>Cardinality requirements for the subquery</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Subquery : Content Model =============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(vertex, (edge | vertex)*, subquery*, numeric-annotation)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== Subquery : Example ===================================== -->
+<formalpara id="apx_queryxml_subq_ex">
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;vertex name="B"&gt;
+&lt;/vertex&gt;
+&lt;subquery&gt;
+  &lt;vertex name="C"&gt;
+  &lt;/edge&lt;
+  &lt;edge name="Z"&gt;
+    &lt;vertex1&gt;B&lt;/vertex1&gt;
+    &lt;vertex2&gt;C&lt;/vertex2&gt;
+    &lt;directed&gt;true&lt;/directed&gt;
+    &lt;numeric-annotation&gt;
+      &lt;min&gt;1&lt;/min&gt;
+    &lt;/numeric-annotation&gt;
+  &lt;/edge&gt;
+  &lt;numeric-annotation&gt;
+    &lt;min&gt;1&lt;/min&gt;
+  &lt;/numeric-annotation&gt;
+&lt;/subquery&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                           CONSTRAINT                           -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_constraint">
+<title>Constraints</title>
+<indexterm><primary>constraints</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>A <sgmltag class="element">constraint</sgmltag> defines a
+<sgmltag class="element">test</sgmltag> 
+element that compares the 
+<glossterm baseform="identity constraint">identity</glossterm> or 
+<glossterm baseform="attribute constraint">attribute values</glossterm>
+of two vertices or two edges. 
+You cannot mix vertices and edges within a <glossterm>constraint</glossterm>,
+but queries may include both vertex constraints and edge
+constraints. Because constraints apply to two different query
+elements, they occur at the top level within a query, rather than
+under any specific element.  Specifically, you cannot include
+constraints within <sgmltag class="element">subquery</sgmltag>
+elements.  You can combine multiple constraints with
+<sgmltag class="element">and</sgmltag> elements.</para>
+
+<sidebar>
+<para>Legal operators for constraints are <literal>eq</literal>,
+<literal>lt</literal>, <literal>le</literal>, <literal>gt</literal>,
+<literal>ge</literal>, and <literal>ne</literal>.</para>
+</sidebar>
+
+<para>Constraints take slightly different forms depending on whether
+they are comparing attributes or identity. In the example below, the
+first <sgmltag class="element">test</sgmltag> requires that query
+items (vertices or edge) A and B have the same value for attribute
+<varname>attr</varname>. The second <sgmltag
+class="element">test</sgmltag> requires that query items B and C do
+not map to the same entity in the database.</para>
+
+<para>Vertex and edge <glossterm baseform="name">names</glossterm>
+used in the constraint, as specified by
+the <sgmltag class="element">item-name</sgmltag> element, must match
+the name and case of vertices and edges defined for this query.</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;constraint&gt;</code></bridgehead>
+
+<!-- ===== Constraint : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Constraint : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_queryxml_test"><sgmltag class="element">test</sgmltag></link></entry>
+<entry>member of a required set</entry>
+<entry>Requirement for query elements&rsquo; attribute values</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">and</sgmltag></entry>
+<entry>member of a required set</entry>
+<entry>Requires all of the included tests be satisfied</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">or</sgmltag></entry>
+<entry>member of a required set</entry>
+<entry>Requires one of the included tests be satisfied; allowed by DTD
+       but prohibited by current Proximity implementation</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">not</sgmltag></entry>
+<entry>member of a required set</entry>
+<entry>Requires that the specified test not be satisfied; allowed by DTD
+       but prohibited by current Proximity implementation</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== Constraint : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para> </para></formalpara>
+<para>
+Although the DTD does not enforce this, Proximity requires that
+constraint <sgmltag class="element">test</sgmltag> elements may only
+be combined with <sgmltag class="element">and</sgmltag>.
+<blockquote>
+<para>
+<literal>(or | and | not | test)</literal>
+</para>
+</blockquote>
+</para>
+
+
+<!-- ===== Constraint : Example =================================== -->
+<formalpara id="apx_queryxml_constr_ex">
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;constraint&gt;
+  &lt;and&gt;
+    &lt;test&gt;
+      &lt;operator&gt;eq&lt;/operator&gt;
+      &lt;item&gt;
+        &lt;item-name&gt;A&lt;/item-name&gt;
+        &lt;attribute-name&gt;objtype&lt;/attribute-name&gt;
+      &lt;/item&gt;
+      &lt;item&gt;
+        &lt;item-name&gt;B&lt;/item-name&gt;
+        &lt;attribute-name&gt;objtype&lt;/attribute-name&gt;
+      &lt;/item&gt;
+    &lt;/test&gt;
+    &lt;test&gt;
+      &lt;operator&gt;ne&lt;/operator&gt;
+      &lt;item&gt;
+        &lt;item-name&gt;B&lt;/item-name&gt;
+        &lt;id/&gt;
+      &lt;/item&gt;
+      &lt;item&gt;
+        &lt;item-name&gt;C&lt;/item-name&gt;
+        &lt;id/&gt;
+      &lt;/item&gt;
+    &lt;/test&gt;
+  &lt;/and&gt;
+&lt;/constraint&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                          TEST EXPRESSIONS                      -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_test">
+<title>Test Expressions</title> 
+<indexterm><primary>test expression, XML representation</primary></indexterm>
+
+<para>Both <glossterm baseform="condition">conditions</glossterm> and
+<glossterm baseform="constraint">constraints</glossterm> use test expressions, 
+represented by the <sgmltag class="element">test</sgmltag> element, to
+describe the required comparison.  Conditions test attribute values
+for a single database entity whereas constraints compare attribute
+values or IDs for two database entities.  Proximity uses the same DTD
+elements to represent these query constructs, although each will be
+realized in somewhat different forms in the XML representation. See
+the examples under <xref linkend="apx_queryxml_cond"/> and
+<xref linkend="apx_queryxml_constraint"/> for examples of each form.
+</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;test&gt;</code></bridgehead>
+
+<!-- ===== Test : Attributes ===================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Test : Children ======================================= -->
+<formalpara>
+<title role="header">Children</title>
+<para> </para>
+</formalpara>
+
+<para>The cardinality of <sgmltag class="element">test</sgmltag>&rsquo;s
+children, listed below, reflect the legal uses of these elements based
+on a query&rsquo;s semantics rather than the restrictions imposed by the
+DTD.</para>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">operator</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>The comparison operator; used in both conditions and
+       constraints</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">attribute-name</sgmltag></entry>
+<entry>zero or one</entry>
+<entry>Name of attribute(s) to be compared; used in 
+       <sgmltag class="element">condition</sgmltag> elements</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">value</sgmltag></entry>
+<entry>zero or one</entry>
+<entry>Value to be compared to that for the specified attribute; used in 
+       <sgmltag class="element">condition</sgmltag> elements</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_queryxml_item"><sgmltag class="element">item</sgmltag></link></entry>
+<entry>zero or two</entry>
+<entry>Provides data for one of the items being compared; used in 
+       <sgmltag class="element">constraint</sgmltag> elements</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+
+<!-- ===== Test : Content Model ================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literallayout role="noshading"><literal>(operator, (attribute-name | value | item),
+           (attribute-name | value | item)?)</literal></literallayout>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Test : Example ======================================== -->
+<formalpara id="apx_queryxml_test_ex">
+<title role="header">Example</title>
+<para>See <xref linkend="apx_queryxml_cond"/>
+and <xref linkend="apx_queryxml_constraint"/>.
+</para>
+</formalpara>
+
+<!-- ====================== ELEMENT : ITEM ====================== -->
+
+<bridgehead renderas="sect1" id="apx_queryxml_item"><code role="heading">&lt;item&gt;</code></bridgehead>
+
+<para>The <sgmltag class="element">item</sgmltag> element describes
+one of the two items being compared in a constraint.  The name of the
+item is contained in the required 
+<sgmltag class="element">item-name</sgmltag> element.
+<glossterm baseform="attribute constraint">Attribute constraints</glossterm>
+use the <sgmltag class="element">attribute-name</sgmltag>
+element to indicate which of this item&rsquo;s attribute&rsquo;s
+values are to be compared.  
+<glossterm baseform="identity constraint">Identity constraints</glossterm>
+use the <sgmltag class="element">id</sgmltag> element to indicate that the
+constraint compares IDs rather than attribute values.</para>
+
+<!-- ===== Item : Attributes ==================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Item : Children ===================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">item-name</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>Name of vertex or edge whose attribute is being compared</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">attribute-name</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>Name of attribute to be compared</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">id</sgmltag></entry>
+<entry>zero or one</entry>
+<entry>Indicates constraint is to compare IDs rather than attribute
+       values</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Item : Content Model ================================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(item-name, (attribute-name | id))</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Item : Example ======================================= -->
+<formalpara id="apx_queryxml_item_ex">
+<title role="header">Example</title>
+<para>
+See <xref linkend="apx_queryxml_constraint"/>.
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       UPDATE FUNCTIONALITY                     -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Update Functionality</title>
+<indexterm><primary>queries</primary>
+           <secondary>update</secondary></indexterm>
+
+<bridgehead renderas="sect1" id="apx_queryxml_addlink"><code role="heading">&lt;add-link&gt;</code></bridgehead>
+
+<para>&qgraph; provides complete update capabilities, however, only a
+portion has been implemented in Proximity to date.  Proximity permits
+adding links to the database through the use of &qgraph;
+queries.</para>
+
+<para>The <sgmltag class="element">add-link</sgmltag> element
+describes how and where to add new links to the database. The element
+has two children, representing the query vertices that match the
+starting and ending objects for the new links.  Each new link must be
+given a specified attribute value, specified by the element&rsquo;s
+<sgmltag class="attribute">attrname</sgmltag> and 
+<sgmltag class="attribute">attrval</sgmltag> attributes. Attribute
+values for new links must be the same for all links created by a
+single specification.</para>
+
+<!-- ===== Add-Link : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">attrname</sgmltag>
+</entry>
+<entry>required</entry>
+<entry>The name of the attribute to be added to each newly created
+link; the attribute must already exist in the database</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">attrval</sgmltag>
+</entry>
+<entry>required</entry>
+<entry>The value to be assigned to the new link&rsquo;s attribute;
+value must be static</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== Add-Link : Children ================================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">vertex1</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>Name of vertex matching starting objects for the new links;
+vertex names are case sensitive</entry>
+</row>
+
+<row>
+<entry><sgmltag class="element">vertex2</sgmltag></entry>
+<entry>exactly one</entry>
+<entry>Name of vertex matching ending objects for the new links; vertex names
+are case sensitive</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Add-Link : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(vertex1, vertex2)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Add-Link : Example ======================================= -->
+<formalpara id="apx_queryxml_addlink_ex">
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;add-link attrname="linktype" attrval="newlink"&gt;
+  &lt;vertex1&gt;start-obj&lt;/vertex1&gt;
+  &lt;vertex2&gt;end-obj&lt;/vertex2&gt;
+&lt;/add-link&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                           EDITOR-DATA                          -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_queryxml_ed">
+<title>Editor data</title>
+<indexterm><primary>queries</primary>
+           <secondary>layout</secondary></indexterm>
+<indexterm><primary>layout of queries</primary></indexterm>
+
+<para>Proximity stores layout information when you save a query
+in the Query Editor, letting the Query Editor re-display the query as
+currently laid out the next time it&rsquo;s opened.  Layout information, in
+the form of <emphasis>x</emphasis> and <emphasis>y</emphasis>
+coordinates, is stored in the 
+<sgmltag class="element">editor-data</sgmltag> element in the query
+XML file.</para>
+
+<para>The <sgmltag class="element">editor-data</sgmltag> element
+contains one <sgmltag class="element">vertex-location</sgmltag>
+element for each vertex in the query.  Each 
+<sgmltag class="element">vertex-location</sgmltag> element includes
+three required attributes, representing the
+<glossterm>name</glossterm> and coordinates of the vertex.</para>
+
+<para>Proximity currently only saves the location of vertices in the
+Query Editor; edge location is determined by vertex location and is
+thus not saved.</para>
+
+<bridgehead renderas="sect1"><code role="heading">&lt;editor-data&gt;</code></bridgehead>
+
+<!-- ===== Editor-data : Attributes ============================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Editor-data : Children =============================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">vertex-location</sgmltag></entry>
+<entry>one or more</entry>
+<entry>Vertex location in the query editor</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== Editor-data : Content Model ========================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(vertex-location+)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Editor-data : Example ================================ -->
+<formalpara id="apx_queryxml_ed_ex">
+<title role="header">Example</title>
+<para>
+See <link linkend="apx_queryxml_vertexloc"><sgmltag class="element">vertex-location</sgmltag></link>.
+</para>
+</formalpara>
+
+<!-- ================= ELEMENT : VERTEX-LOCATION ================ -->
+
+<bridgehead renderas="sect1" id="apx_queryxml_vertexloc"><code role="heading">&lt;vertex-location&gt;</code></bridgehead>
+
+<!-- ===== Vertex-location : Attributes ========================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">name</sgmltag></entry>
+<entry>required</entry>
+<entry>Vertex name as used in the query; vertex names are case
+       sensitive</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">x</sgmltag></entry>
+<entry>required</entry>
+<entry>The x coordinate describing the vertex&rsquo;s location in the Query
+       Editor</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">y</sgmltag></entry>
+<entry>required</entry>
+<entry>The y coordinate describing the vertex&rsquo;s location in the Query
+       Editor</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+
+</para>
+</formalpara>
+
+<!-- ===== Vertex-location : Children =========================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== Vertex-location : Content Model ====================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>EMPTY</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== Vertex-location : Example ============================ -->
+<formalpara id="apx_queryxml_vertexloc_ex">
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<editor-data>
+   <vertex-location name="vertex1" x="514" y="99" />
+   <vertex-location name="vertex2" x="314" y="232" />
+</editor-data>]]></programlisting>
+</para>
+</formalpara>
+<indexterm startref="idx_xml" class="endofrange"/>
+<indexterm startref="idx_xml2" class="endofrange"/>
+</sect1>
+
+</appendix>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

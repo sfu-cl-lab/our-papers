@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/local/sgml/docbook-xml-4.5/docbookx.dtd" [
+<!ENTITY % entities SYSTEM "../../ProxCommonEntities.ent">
+<!ENTITY % recipeentities SYSTEM "ProxCookbookEntities.ent">
+%entities;
+%recipeentities;
+]>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+
+<!-- ============================================================== -->
+<!--                            RECIPE:                             -->
+<!--          CREATING ATTRIBUTES FROM ARBITRARY DATA               -->
+<!-- ============================================================== -->
+
+<section id="recipe_attrsfromdata">
+<title>Creating Attributes from Arbitrary Data</title>
+
+<indexterm><primary>creating</primary>
+           <secondary>attributes</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm><primary>counting</primary>
+           <secondary>distinct attribute values</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>counting distinct values</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>renaming columns</secondary></indexterm>
+<indexterm><primary>renaming</primary>
+           <secondary>NST columns</secondary></indexterm>
+<indexterm><primary>AS keyword</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>NSTs for</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary sortas="attribute values">for attribute values</secondary>
+           </indexterm>
+
+<!-- classes used in the recipe -->
+<indexterm><primary>AddAttribute class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>AddAttribute</secondary></indexterm>
+<indexterm><primary>Attributes class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>Attributes</secondary></indexterm>
+
+<!-- methods used in this recipe -->
+<indexterm><primary>addDistinctCountColumn()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>addDistinctCountColumn</secondary></indexterm>
+<indexterm><primary>defineAttributeWithData()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>defineAttributeWithData</secondary></indexterm>
+<indexterm><primary>getContainer()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getContainer</secondary></indexterm>
+<indexterm><primary>getObjectsNST()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getObjectsNST</secondary></indexterm>
+<indexterm><primary>getSubgraphAttrs()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getSubgraphAttrs</secondary></indexterm>
+<indexterm><primary>projectDistinct()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>projectDistinct</secondary></indexterm>
+<indexterm><primary>removeColumn()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>removeColumn</secondary></indexterm>
+
+
+<!-- ============================================================== -->
+<!-- PROBLEM                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Problem</title>
+
+<para>&AddAttribute; is a powerful class that allows you to create new
+attributes based on complex expressions. It provides if/then
+capabilities, aggregation of values, comparisons, and regular
+arithmetic operations. But what if you want to create an attribute
+based on an expression that &AddAttribute; doesn&rsquo;t
+support?</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SOLUTION                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Solution</title>
+
+<para>We&rsquo;ll use an example to show how to create an arbitrary
+attribute. Suppose, for instance, that you want to create a subgraph
+attribute that counts the distinct kinds of items in each subgraph of
+a given container. If your container has the following elements:
+<informaltable align="center">
+<?dbfo table-width="3in"?>
+<?dbhtml table-width="50%"?>
+<tgroup cols="3">
+<colspec colname="c1" colwidth="1*" />
+<colspec colname="c2" colwidth="1*" />
+<colspec colname="c3" colwidth="2*" />
+<thead>
+<row>
+  <entry>item_id</entry>
+  <entry>subg_id</entry>
+  <entry>name</entry>
+</row>
+</thead>
+<tbody>
+<row>
+  <entry>1</entry>
+  <entry>0</entry>
+  <entry>Movie</entry>
+</row>
+<row>
+  <entry>2</entry>
+  <entry>0</entry>
+  <entry>Movie</entry>
+</row>
+<row>
+  <entry>3</entry>
+  <entry>0</entry>
+  <entry>Studio</entry>
+</row>
+<row>
+  <entry>4</entry>
+  <entry>0</entry>
+  <entry>Actor</entry>
+</row>
+<row>
+  <entry>5</entry>
+  <entry>0</entry>
+  <entry>Actor</entry>
+</row>
+<row>
+  <entry>6</entry>
+  <entry>1</entry>
+  <entry>Movie</entry>
+</row>
+<row>
+  <entry>7</entry>
+  <entry>1</entry>
+  <entry>Studio</entry>
+</row>
+<row>
+  <entry>8</entry>
+  <entry>1</entry>
+  <entry>Director</entry>
+</row>
+<row>
+  <entry>9</entry>
+  <entry>1</entry>
+  <entry>Actor</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+then you want to create an attribute that says that the first subgraph
+has three different kinds of items 
+(<token role="attr">Movie</token>, <token role="attr">Studio</token>,
+<token role="attr">Actor</token>) and that the
+second subgraph has four (<token role="attr">Movie</token>, 
+<token role="attr">Studio</token>, <token role="attr">Director</token>,
+<token role="attr">Actor</token>), like this:
+<informaltable align="center">
+<?dbfo table-width="2.5in"?>
+<?dbhtml table-width="35%"?>
+<tgroup cols="2">
+<colspec colname="c1"/>
+<colspec colname="c2"/>
+<thead>
+<row>
+  <entry>subg_id</entry>
+  <entry>value</entry>
+</row>
+</thead>
+<tbody>
+<row>
+  <entry>0</entry>
+  <entry>3</entry>
+</row>
+<row>
+  <entry>1</entry>
+  <entry>4</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+<para>You can create a new attribute by first computing an NST with
+the desired rows, and then saving that NST using methods in the
+&Attributes; class. In this case, you can create the attribute NST using
+the &addDistinctCountColumn; method. Assume that the container is
+named <token role="container">studio-clusters</token> and get its
+<token role="table">objects</token> NST. 
+<programlisting> <userinput>studioClusters = DB.getContainer("studio-clusters")
+ containerObjects = studioClusters.getObjectsNST()</userinput>
+</programlisting>
+Use the &addDistinctCountColumn; method to find, for every
+<token role="column">subg_id</token>, the count of distinct values of 
+<token role="attr">name</token> and save it as the 
+<token role="column">cnt</token> column.
+<programlisting> <userinput>containerObjects.addDistinctCountColumn("subg_id", "name", "cnt")</userinput>
+</programlisting>
+</para>
+
+<para>The <token role="table">containerObjects</token> NST will now
+have a new column with the same value for all the rows with a common 
+<token role="column">subg_id</token>.
+<programlisting> <userinput>printNST(containerObjects)</userinput>
+</programlisting>
+
+<?pagebreak?>
+<screen>[SHOWING head,item_id,subg_id,name,cnt WHERE * LIMIT *]
+[ 0@0,   3@0,   0@0,   "studio",     3    ]
+[ 1@0,   7@0,   1@0,   "studio",     4    ]
+[ 2@0,   1@0,   0@0,   "movie",      3    ]
+[ 3@0,   2@0,   0@0,   "movie",      3    ]
+[ 4@0,   6@0,   1@0,   "movie",      4    ]
+[ 5@0,   4@0,   0@0,   "actor",      3    ]
+[ 6@0,   5@0,   0@0,   "actor",      3    ]
+[ 7@0,   9@0,   1@0,   "actor",      4    ]
+[ 8@0,   8@0,   1@0,   "director",   4    ]
+</screen>
+</para>
+
+<para>However, attribute tables normally have two columns (called 
+<token role="column">id</token> and 
+<token role="column">value</token>, such that the first one
+stores the ID of the item or subgraph that the second one
+applies to), and a single row for each unique ID (except
+for multi-valued attributes, but that is not the case in this
+example).  Use the &projectDistinct; method to get
+the distinct (<token role="column">subg_id</token>,
+<token role="column">cnt</token>) pairs.  The <code>AS</code> keyword
+renames the columns in the resulting NST to the expected <code>id</code> and 
+<code>value</code> without requiring a separate method call.  The new
+attribute will get its values from a projection of 
+distinct (<token role="column">subg_id</token>, 
+<token role="column">cnt</token>) pairs, stored in a new NST
+with columns named <token role="column">id</token> and 
+<token role="column">value</token>.
+
+<programlisting> <userinput>attrNST = containerObjects.projectDistinct("subg_id AS id, cnt AS value")
+ printNST(attrNST)</userinput>
+</programlisting>
+
+<screen>[SHOWING head,id,value WHERE * LIMIT *]
+[ 0@0,   0@0,    3     ]
+[ 1@0,   1@0,    4     ]
+</screen></para>
+
+<para>At this point, you are ready to create the new attribute. The
+&Attributes; class provides several public methods to manipulate its
+internal tables.  In particular, the &defineAttributeWithData; method
+allows you to define a new attribute based on an arbitrary NST
+that you pass to it, which is what you need in this case.
+Save the new NST as a subgraph attribute inside the container, with
+the name <code>distinct_types</code> and of type <code>int</code>.
+<programlisting> <userinput>studioClusters.getSubgraphAttrs().defineAttributeWithData("distinct_types","int",attrNST)</userinput>
+</programlisting>
+</para>
+
+<para>And you&rsquo;re done. Just remember to remove the
+<token  role="column">cnt</token> column that you added to the
+objectsNST:
+
+<programlisting> <userinput>containerObjects.removeColumn("cnt")</userinput>
+</programlisting>
+</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- DISCUSSION                                                     -->
+<!-- ============================================================== -->
+
+<section>
+<title>Discussion</title>
+
+<para>The combination of NST operations with the
+&defineAttributeWithData; method give you a lot of power to create all
+kinds of attributes. The example above focused on the creation of a
+standard single-column, single-value attribute, but in fact you can
+create any kind of attribute. Just remember to match the structure and
+content of your NST to the kind of attribute you want to create, and
+to make the first column of the NST be of type <code>oid</code> and
+be named <code>id</code>.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SUPPORTING FILES                                                -->
+<!-- ============================================================== -->
+
+<section>
+<title>Supporting Files</title>
+
+<para>Download the following XML data file and query
+to create the database and container used above to demonstrate this
+recipe:
+<itemizedlist spacing="compact">
+  <listitem>
+  <para>Database:
+     <filename><ulink url="&examplespath;DBManip_AttrsFromData_DB.xml">DBManip_AttrsFromData_DB.xml</ulink></filename>
+  </para></listitem>
+  <listitem>
+  <para>Query:
+     <filename><ulink url="&examplespath;DBManip_AttrsFromData_Query.qg2.xml">DBManip_AttrsFromData_Query.qg2.xml</ulink></filename>
+  </para></listitem>
+</itemizedlist>
+You may also want to examine the unit test file for this recipe at
+<filename>&testpath;/cookbook/AddAttributeTest.java</filename>.
+</para>
+
+</section>
+
+<!-- === End of recipe ============================================ -->
+</section>
+
+<!--
+</chapter>
+-->
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("ProxCookbook.xml" "chapter" "section")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

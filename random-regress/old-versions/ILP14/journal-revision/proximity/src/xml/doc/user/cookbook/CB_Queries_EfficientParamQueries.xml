@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/local/sgml/docbook-xml-4.5/docbookx.dtd" [
+<!ENTITY % entities SYSTEM "../../ProxCommonEntities.ent">
+<!ENTITY % recipeentities SYSTEM "ProxCookbookEntities.ent">
+%entities;
+%recipeentities;
+]>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+
+<!-- CHAPTER: Queries -->
+
+<!-- ============================================================== -->
+<!--                            RECIPE:                             -->
+<!--                  Efficient Parameter Queries                   -->
+<!-- ============================================================== -->
+
+<section id="recipe_paramqueries">
+<title>Efficient Parameter Queries</title>
+
+<!-- All index terms at top -->
+<indexterm><primary>queries</primary></indexterm>
+<indexterm><primary>parameter queries</primary></indexterm>
+<indexterm><primary>template queries</primary></indexterm>
+<indexterm><primary>don&rsquo;t repeat yourself principle</primary></indexterm>
+<indexterm><primary>iterating</primary>
+           <secondary>over conditions in queries</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>parametrized</secondary></indexterm>
+<indexterm><primary>parametrized queries</primary></indexterm>
+<indexterm><primary>executing queries</primary>
+           <secondary sortas="scripts">from scripts</secondary></indexterm>
+<indexterm><primary>derivative containers</primary></indexterm>
+<indexterm><primary>containers</primary></indexterm>
+<indexterm><primary>filters</primary>
+           <secondary>complex conditions in</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>containers</secondary></indexterm>
+<indexterm><primary>saving</primary>
+           <seealso>creating</seealso></indexterm>
+<indexterm><primary>efficiency</primary>
+           <secondary sortas="parameter">in parameter queries</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary sortas="objects">for objects</secondary></indexterm>
+<indexterm><primary>objects</primary>
+           <secondary>NSTs for</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary sortas="links">for links</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>NSTs for</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary sortas="attribute values">for attribute values</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>NSTs for</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary sortas="subgraphs">for subgraphs</secondary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>NSTs for</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>importing</secondary>
+           <tertiary>using populateDB()</tertiary></indexterm>
+<indexterm><primary>importing data</primary>
+           <secondary>using populateDB()</secondary></indexterm>
+
+<!-- not used; keep in case we get more query-related recipes and want
+     the additional detail.
+<indexterm><primary>queries</primary>
+           <secondary>parameter</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>template</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>efficiency</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>iterating over conditions</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>executing from scripts</secondary></indexterm>
+-->
+
+<!-- classes used in the recipe -->
+<indexterm><primary>ParameterQuery class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>ParameterQuery</secondary></indexterm>
+
+<!-- methods used in this recipe -->
+<indexterm><primary>graphQueryEleFromFile()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>graphQueryEleFromFile</secondary></indexterm>
+<indexterm><primary>queryGraph()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>queryGraph</secondary></indexterm>
+<indexterm><primary>getContainer()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getContainer</secondary></indexterm>
+<indexterm><primary>getObjectsNST()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getObjectsNST</secondary></indexterm>
+<indexterm><primary>getAttrDataNST()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getAttrDataNST</secondary></indexterm>
+<indexterm><primary>getObjects()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getObjects</secondary></indexterm>
+<indexterm><primary>intersect()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>intersect</secondary></indexterm>
+<indexterm><primary>getRootContainer()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getRootContainer</secondary></indexterm>
+<indexterm><primary>createChildFromTempSGINSTs()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>createChildFromTempSGINSTs</secondary></indexterm>
+<indexterm><primary>populateDB()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>populateDB</secondary></indexterm>
+
+<!-- ============================================================== -->
+<!-- PROBLEM                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Problem</title>
+
+<para>You want to run <emphasis>parameter queries</emphasis>, where a
+set of individual QGraph queries is automatically derived by combining
+a <emphasis>template query</emphasis> with different conditions from a
+list. However, you find that the template query is too expensive, and
+the time it would take to run all the parametrized instances is
+prohibitive.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SOLUTION                                                       -->
+<!-- ============================================================== -->
+
+<section>
+<title>Solution</title>
+
+<para>Parameter queries are a neat solution to the problem of having
+to run several queries that only differ in small details. For example,
+suppose you want to run queries to find movies and their actors, but
+you want separate containers for movies from the 1970s, the
+1980s, the 1990s, and so on.  Writing several queries that
+are identical except for the value of the decade requires a lot of
+repetitive work. Following the 
+<ulink url="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY
+principle (Don&rsquo;t Repeat Yourself)</ulink>, you write a template
+query with a <token role="vertex">Movie</token> vertex linked to an
+annotated <token role="vertex">Actor</token> vertex, and compile a 
+list of conditions in the form:
+<synopsis><userinput> Movie.decade=70
+ Movie.decade=80
+ Movie.decade=90
+</userinput></synopsis>
+You then iterate over the list of conditions and use the
+&ParameterQuery; class to add each one to the template query before
+executing it, saving the result of each run in its own
+container. But although the parameter query provides an elegant
+solution, it may not be practical in all cases.</para>
+
+<para>If the template query has many vertices and edges to which the
+parametrized conditions do not apply (for example, if you also want to
+include a subquery that finds, for each actor, all the movies that actor
+appeared in), then you are asking QGraph to execute the same
+computations over and over again, unnecessarily. In other words, you
+are not repeating yourself, but QGraph is. This is not a problem for
+small queries, but it can become a serious problem for larger
+ones.</para>
+
+<para>The solution comes by noticing that, at least in cases like our
+example, the subgraphs that match each parametrized query are a subset
+of the subgraphs that match the full template query. In other words,
+the contents of each subgraph is exactly the same as for the full
+template query, but the set of matching subgraphs is
+restricted for each parametrized condition. It is therefore possible,
+and much more efficient, to run the expensive template query just
+once, and then process each condition by copying the results into a
+new container and removing the subgraphs that don&rsquo;t match the extra
+requirement. The Jython commands below show you how to do it.</para>
+
+<para>First, we run the template query and save the results in the
+container named &ldquo;<token role="container">all-decades</token>&rdquo;:
+
+<programlisting><userinput> from java.io import File
+ from kdl.prox.qgraph2 import QueryXMLUtil
+ from kdl.prox.qgraph2 import QueryGraph2CompOp
+
+ f=File("parameter-query-template.qg2.xml")
+ q=QueryXMLUtil.graphQueryEleFromFile(f)
+ QueryGraph2CompOp.queryGraph(q,  None, "all-decades", 1)
+</userinput></programlisting>
+
+The results will be stored in the objects and links tables of the
+<token role="container">all-decades</token>
+container.</para>
+
+<para>The results of executing the query on the sample database listed
+in the <xref linkend="paramqueries_files" /> section of this recipe
+are shown below. (We sort the rows by
+<token role="column">subg_id</token> to more easily see the objects in
+each of the subgraphs.)
+
+<programlisting><userinput> printNST(DB.getContainer("all-decades").getObjectsNST().sort("subg_id", "*"))
+</userinput></programlisting>
+<screen>[SHOWING head, item_id, subg_id, name WHERE * LIMIT *]
+[ 0@0,   1@0,    0@0,   "Movie"   ]
+[ 1@0,   10@0,   0@0,   "Actor"   ]
+[ 2@0,   11@0,   0@0,   "Actor"   ]
+[ 3@0,   12@0,   0@0,   "Actor"   ]
+
+[ 4@0,   14@0,   1@0,   "Actor"   ]
+[ 5@0,   2@0,    1@0,   "Movie"   ]
+[ 6@0,   13@0,   1@0,   "Actor"   ]
+
+[ 7@0,   3@0,    2@0,   "Movie"   ]
+[ 8@0,   16@0,   2@0,   "Actor"   ]
+[ 9@0,   15@0,   2@0,   "Actor"   ]
+</screen>
+We see that the container has three subgraphs, with IDs
+<token role="subgraph">0</token>, <token role="subgraph">1</token>,
+and <token role="subgraph">2</token>.</para>
+
+<para>We can also take a look at the values of the 
+<token role="attr">decade</token> attribute for those 
+<token role="object">Movie</token> objects:
+
+<programlisting><userinput> printNST(objectAttrs.getAttrDataNST("decade"))
+</userinput></programlisting>
+<screen>[SHOWING head, id, value WHERE * LIMIT *]
+[ 1@0,   1@0,   70   ]
+[ 2@0,   2@0,   80   ]
+[ 3@0,   3@0,   80   ]
+</screen>
+From the combination of the two tables we can see that
+subgraph <token role="subgraph">0</token> has a 
+<token role="object">Movie</token> object 
+(object 1) that was made in the 1970s; 
+subgraph <token role="subgraph">1</token> has a 
+<token role="object">Movie</token> object (object 2) that was made in
+the 1980s, and subgraph <token role="subgraph">2</token> has a 
+<token role="object">Movie</token> object that was also made in the
+1980s.</para>
+
+<para>Now that we have the container with the results for the full query,
+let&rsquo;s create a derivative container for a given decade. First we
+filter the container&rsquo;s objects to return only those rows that
+correspond to the <token role="vertex">Movie</token> vertex
+<emphasis>and</emphasis> that were made in the 1970s. We use the
+powerful &getObjects; method on the container, which allows us to
+specify complex conditions on the vertices and their attributes:
+
+<programlisting><userinput> just70s=DB.getContainer("all-decades").getObjects("name = 'Movie' AND decade = 70")
+ printNST(just70s)
+</userinput></programlisting>
+<screen>[SHOWING head, item_id, subg_id, name, decade WHERE * LIMIT *]
+[ 0@0,   1@0,   0@0,   "Movie",   70   ]
+</screen>
+<!--
+We want to keep only those subgraphs that are found in the
+<token role="table">just70s</token> table above, so we get the
+<code>subg_ids</code> in this table:
+<programlisting><userinput> subgs = just70s.project("subg_id")
+ printNST(subgs)
+</userinput></programlisting>
+<screen>[SHOWING head, subg_id WHERE * LIMIT *]
+[ 0@0,   0@0   ]
+</screen>
+-->
+For the 1970s container, the only subgraph that we want to keep is the
+first one (subgraph <token role="subgraph">0</token>), and this is
+exactly what we now have in the <token role="table">just70s</token>
+NST.</para>
+
+<para>Now we&rsquo;re ready to filter the original objects and links
+tables from the <token role="container">all-decades</token> container,
+using the &intersect; operation:
+<programlisting><userinput> c = DB.getContainer("all-decades")
+ newObjects = c.getObjectsNST().intersect(just70s,"subg_id = subg_id")
+ newLinks = c.getLinksNST().intersect(just70s,"subg_id = subg_id")
+</userinput></programlisting>
+The new tables have copies of the data from the original table, but
+only for subgraph <token role="subgraph">0</token>:
+<programlisting><userinput> printNST(newObjects)</userinput></programlisting>
+<screen>[SHOWING head, item_id, subg_id, name WHERE * LIMIT *]
+[ 1@0,   1@0,    0@0,   "Movie"   ]
+[ 4@0,   10@0,   0@0,   "Actor"   ]
+[ 5@0,   11@0,   0@0,   "Actor"   ]
+[ 6@0,   12@0,   0@0,   "Actor"   ]
+</screen>
+<programlisting><userinput> printNST(newLinks)</userinput></programlisting>
+<screen>[SHOWING head, item_id, subg_id, name WHERE * LIMIT *]
+[ 0@0,   1@0,   0@0,   "ActedIn"   ]
+[ 1@0,   2@0,   0@0,   "ActedIn"   ]
+[ 2@0,   3@0,   0@0,   "ActedIn"   ]
+</screen>
+We now have two new NSTs storing the objects and links of subgraphs
+where the movie was made in the 1970s.</para>
+
+<para>The final step is to save these objects and in a new
+container. There is a method (with an admittedly unfriendly name)
+that allows us to do just that:
+<programlisting><userinput> DB.getRootContainer().createChildFromTempSGINSTs("70s", newObjects,newLinks)
+</userinput></programlisting>
+We now have a container, named 
+&ldquo;<token role="container">70s</token>,&rdquo; of subgraphs for
+1970s movies.</para>
+
+<para>By repeating the same procedure, we can quickly create the
+containers for other decades without having to run the (presumably
+expensive) QGraph query multiple times. You remain 
+<ulink url="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</ulink>,
+and so does QGraph.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- DISCUSSION                                                     -->
+<!-- ============================================================== -->
+
+<section>
+<title>Discussion</title>
+
+<para>The technique above is quite powerful and efficient, and its
+application has allowed us to run parametrized queries on very large
+databases that would have taken too long to execute with the
+traditional method. Notice, however, that the technique as described
+above is only suitable to those cases where the application of
+parametrized conditions has the effect of removing entire subgraphs
+from the results for the full template query. This is true
+when the conditions apply to unannotated objects outside of a
+subquery.  In such cases, if a particular item no longer matches a
+vertex or edge because of the added condition, then the entire
+subgraph is removed, as an unannotated object is always required to be
+present in the resulting subgraph.</para>
+
+<para>The case of annotated vertices and vertices inside of a subquery is
+more delicate, and it requires two steps: In the first step, the items
+that don&rsquo;t match the added condition are removed from the 
+objects table, and in the second step the annotation is rechecked,
+verifying that every single remaining subgraph still contains the
+number of vertices required by the annotation 
+(<token role="annot">[0..]</token> annotations are exempt from this
+extra check).</para>
+
+<para>In addition to the specific example of running efficient
+parametrized queries, this recipe also shows that it is possible to
+create new containers directly from generic objects and links NSTs,
+just as it is possible to create new attributes from arbitrary NSTs
+(see <xref linkend="recipe_attrsfromdata"/>.)</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SUPPORTING FILES                                                -->
+<!-- ============================================================== -->
+
+<section id="paramqueries_files">
+<title>Supporting Files</title>
+
+<para>Download the following files to create the database and query
+used to demonstrate this recipe:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Sample database: 
+      <filename><ulink url="&examplespath;parameter-query-db.xml">parameter-query-db.xml</ulink></filename>
+<!--
+      import via
+      <programlisting><userinput> DB.populateDB(<varname>path-to-file</varname>)</userinput></programlisting>
+-->
+    </para></listitem>
+  <listitem>
+    <para>Template query: <filename><ulink url="&examplespath;parameter-query-template.qg2.xml">parameter-query-template.qg2.xml</ulink></filename>
+    </para></listitem>
+</itemizedlist>
+You may also want to examine the unit test file for this recipe at
+<filename>&testpath;/cookbook/OptimizedParameterQueryTest.java</filename>.
+The database and query files are also available in the same unit test
+directory.</para>
+
+</section>
+
+<!-- === End of recipe ============================================ -->
+</section>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("ProxCookbook.xml" "chapter" "section")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

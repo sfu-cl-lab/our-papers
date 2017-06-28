@@ -1,0 +1,252 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Query Results</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Query Basics">
+      <link rel="prev" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Query Basics">
+      <link rel="next" href="ch02s03.html" title="Undirected Edges">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;2.&nbsp;Query Basics</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch02s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="d0e662"></a>Query Results
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <p>Evaluating a QGraph query returns a
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e234"><span class="glossterm"><span class="emphasis"><em>container</em></span></span></a>,
+            <a class="indexterm" name="d0e671"></a>
+            a collection of all the matching subgraphs from the database. To match
+            the query,
+            <a class="indexterm" name="d0e675"></a>
+            a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e749"><span class="glossterm">subgraph</span></a> must
+            have the correct structure and satisfy all of the query&#8217;s requirements
+            (conditions, numeric annotations, and constraints).  This chapter
+            covers how query structure
+            <a class="indexterm" name="d0e684"></a>
+            matches database structure; 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e162"><span class="glossterm">conditions</span></a>,
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e555"><span class="glossterm">numeric annotations</span></a>
+            and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">constraints</span></a> are
+            covered in subsequent chapters.
+         </p>
+         <p>It&#8217;s important to understand how
+            the structure of a QGraph query matches database structures.  Let&#8217;s
+            look at an example database fragment and see how a simple query
+            matches that fragment.  <a href="ch02s02.html#fig_basics_db01" title="Figure&nbsp;2.2.&nbsp;Database fragment [Basics_DB01.xml]">Figure&nbsp;2.2</a>
+            shows a fragment of a database containing information about books,
+            movies, and writers.  We can see that this fragment includes three
+            different types of objects, as represented by the different values for
+            the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ObjType</span> attribute.  Similarly, the
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">LinkType</span> attribute describes the type of
+            relationship that links two objects in the database.  Additional
+            object attributes provide more details about the objects, such as a
+            person&#8217;s name or a book&#8217;s publication date.
+            
+         </p>
+         <div class="figure"><a name="fig_basics_db01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Basics_DB01.png" align="middle" width="368.99999999999994" alt="Database fragment [Basics_DB01.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;2.2.&nbsp;Database fragment [Basics_DB01.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The query shown in 
+            <a href="ch02s02.html#fig_basics_db01_q01" title="Figure&nbsp;2.3.&nbsp;Basic structural query [Basics_DB01_Q01.qg2.xml]">Figure&nbsp;2.3</a> finds two objects
+            connected by a directed link. It will match any database subgraph with
+            this structure.
+            
+         </p>
+         <div class="figure"><a name="fig_basics_db01_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Basics_DB01_Q01.png" align="middle" width="328.50000000000006" alt="Basic structural query [Basics_DB01_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;2.3.&nbsp;Basic structural query [Basics_DB01_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>Executing the query on the database fragment shown above yields
+            the four subgraphs shown in
+            <a href="ch02s02.html#fig_basics_db01_q01_res" title="Figure&nbsp;2.4.&nbsp;Query results">Figure&nbsp;2.4</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_basics_db01_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Basics_DB01_Q01_res.png" align="middle" width="630" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;2.4.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            The database fragment in 
+            <a href="ch02s02.html#fig_basics_db01" title="Figure&nbsp;2.2.&nbsp;Database fragment [Basics_DB01.xml]">Figure&nbsp;2.2</a>
+            includes four different instances of two objects connected by a
+            directed link, which correspond to the four subgraphs in the query
+            results.  Each match to the query yields a separate subgraph
+            in the results container, for example, the two links
+            <a class="indexterm" name="d0e742"></a>
+            between <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Stephen King</span> and <span class="emphasis"><em>Storm
+                  of the Century</em></span> create two different matches to the query and
+            therefore two different subgraphs in the query 
+            results.  Importantly, the query returns subgraphs that include all
+            related object and link attributes.  Query results retain the vertex
+            and edge names
+            <a class="indexterm" name="d0e756"></a>
+            <a class="indexterm" name="d0e762"></a>
+            <a class="indexterm" name="d0e768"></a>
+            used in the query.  These names are used only in the
+            context of the result subgraphs; they are not added to the database
+            objects or links themselves.
+         </p>
+         <p>Let&#8217;s examine the results of a slightly more complicated query
+            run on another database fragment, shown in <a href="ch02s02.html#fig_basics_db02" title="Figure&nbsp;2.5.&nbsp;Database fragment [Basics_DB02.xml]">Figure&nbsp;2.5</a>.
+            This time our fragment contains information on movies and their
+            casts.  In particular, we see that <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Elizabeth
+               Taylor</span> appeared in <em class="citetitle">Butterfield 8</em>, that
+            both <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Elizabeth Taylor</span> and
+            and <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Richard Burton</span> appeared in
+            <em class="citetitle">Cleopatra</em>, and that the two actors were married
+            to each other.
+            
+         </p>
+         <div class="figure"><a name="fig_basics_db02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Basics_DB02.png" align="middle" width="427.5" alt="Database fragment [Basics_DB02.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;2.5.&nbsp;Database fragment [Basics_DB02.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            This time, our query finds all subgraphs that have two objects
+            linked to a third object. Both links must be directed and must point
+            to the third object. The new query is shown in 
+            <a href="ch02s02.html#fig_basics_db02_q1" title="Figure&nbsp;2.6.&nbsp;Three-vertex query [Basics_DB02_Q01.qg2.xml]">Figure&nbsp;2.6</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_basics_db02_q1"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Basics_DB02_Q01.png" align="middle" width="328.50000000000006" alt="Three-vertex query [Basics_DB02_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;2.6.&nbsp;Three-vertex query [Basics_DB02_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The results of executing this query on the above database fragment are
+            shown in <a href="ch02s02.html#fig_basics_db02_q01_res" title="Figure&nbsp;2.7.&nbsp;Query results">Figure&nbsp;2.7</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_basics_db02_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Basics_DB02_Q01_res.png" align="middle" width="630" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;2.7.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            Because QGraph finds each unique match of the query&#8217;s
+            structure, the query&#8217;s results can include subgraphs that
+            contain the same <span class="emphasis"><em>database</em></span> objects and links but
+            which are mapped to different <span class="emphasis"><em>query</em></span> elements.
+            <a class="indexterm" name="d0e830"></a>
+            <a class="indexterm" name="d0e836"></a>
+            This can be seen in the top two subgraphs in
+            <a href="ch02s02.html#fig_basics_db02_q01_res" title="Figure&nbsp;2.7.&nbsp;Query results">Figure&nbsp;2.7</a>.  Both subgraphs contain the
+            objects <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Elizabeth Taylor</span>, 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Richard Burton</span>, and
+            <span class="emphasis"><em>Cleopatra</em></span> and their associated
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">acted-in</span> links, but they correspond to different
+            vertices and edges in the query.
+            
+         </p>
+         <p>Additionally, QGraph does not require that distinct query
+            elements match 
+            distinct database entities, therefore database elements may appear more
+            than once in an individual subgraph if they correctly match the
+            query&#8217;s structure.  In this example, the last four subgraphs
+            include duplicated
+            <a class="indexterm" name="d0e856"></a>
+            <a class="indexterm" name="d0e862"></a>
+            objects and links.  Although
+            they correspond to the same database entity, such duplicated objects and
+            links are treated as distinct entities within the subgraph because
+            they match distinct query elements. Query constructs such as
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e162"><span class="glossterm">conditions</span></a>, 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e555"><span class="glossterm">numeric annotations</span></a>,
+            and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">constraints</span></a>, 
+            introduced later in
+            this guide, can be used to restrict matches and avoid this kind of
+            duplication in query results when desired, but the query structure
+            alone carries no such requirement.
+         </p>
+         <p>Just as important as what a query returns, is what it doesn&#8217;t
+            return. Note that the first two subgraphs in 
+            <a href="ch02s02.html#fig_basics_db02_q01_res" title="Figure&nbsp;2.7.&nbsp;Query results">Figure&nbsp;2.7</a> do not include the
+            married-to link from Richard Burton to Elizabeth Taylor. QGraph
+            does not return links in the database that are not specified in the
+            query, even when both link ends are in the same subgraph.
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch02s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;2.&nbsp;Query Basics&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Undirected Edges</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

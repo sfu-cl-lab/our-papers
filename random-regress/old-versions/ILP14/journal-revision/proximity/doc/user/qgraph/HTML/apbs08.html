@@ -1,0 +1,153 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Subqueries</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="apb.html" title="Appendix&nbsp;B.&nbsp;XML Representation">
+      <link rel="prev" href="apbs07.html" title="Numeric Annotations">
+      <link rel="next" href="apbs09.html" title="Constraints">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="apbs07.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Appendix&nbsp;B.&nbsp;XML Representation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="apbs09.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="apx_queryxml_subquery"></a>Subqueries
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e10046"></a><p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e755"><span class="glossterm">Subqueries</span></a> must be
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e848"><span class="glossterm">well-formed</span></a>
+            <a class="indexterm" name="d0e10058"></a>
+            queries in their own right. They 
+            must have one or more edges that connect the subquery to a vertex or
+            vertices in the main query. Subqueries can be nested.
+            (Nested subqueries are allowed by QGraph and the DTD, but are
+            prohibited by the current Proximity implementation.)
+         </p>
+         <p>Subqueries are always 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e555"><span class="glossterm">annotated</span></a>, as
+            shown in the example below. The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e75"><span class="glossterm">boundary edge</span></a>
+            of a subquery must be annotated. The 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e81"><span class="glossterm">boundary vertex</span></a>
+            <a class="indexterm" name="d0e10075"></a>
+            <a class="indexterm" name="d0e10081"></a>
+            <a class="indexterm" name="d0e10087"></a>
+            of a subquery cannot be annotated.
+         </p>
+         <h2><a name="d0e10093"></a><code class="code">&lt;subquery&gt;</code></h2>
+         <p><b xmlns:exsl="http://exslt.org/common">Attributes&nbsp;</b>
+            None.
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Children&nbsp;</b>
+            
+         </p>
+         <div class="informaltable">
+            <table border="0" width="100%">
+               <colgroup>
+                  <col width="27%" align="left">
+                  <col width="18%" align="left">
+                  <col width="55%" align="left">
+               </colgroup>
+               <tbody valign="top">
+                  <tr>
+                     <td align="left"><a href="apbs04.html" title="Vertices"><code class="sgmltag-element">vertex</code></a></td>
+                     <td align="left">one or more</td>
+                     <td align="left">A vertex within the subquery</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><a href="apbs05.html" title="Edges"><code class="sgmltag-element">edge</code></a></td>
+                     <td align="left">one or more</td>
+                     <td align="left">An edge within the subquery</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">subquery</code></td>
+                     <td align="left">zero or more</td>
+                     <td align="left">A nested subquery</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><a href="apbs09.html" title="Constraints"><code class="sgmltag-element">constraint</code></a></td>
+                     <td align="left">zero or one</td>
+                     <td align="left">Specifies a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">constraint</span></a> between query
+                               elements
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left"><a href="apbs07.html" title="Numeric Annotations"><code class="sgmltag-element">numeric-annotation</code></a></td>
+                     <td align="left">exactly one</td>
+                     <td align="left">Cardinality requirements for the subquery</td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <p>
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Content Model&nbsp;</b>
+            
+         </p>
+         <div class="blockquote">
+            <blockquote class="blockquote">
+               <p>
+                  <code class="literal">(vertex, (edge | vertex)*, subquery*, numeric-annotation)</code>
+                  
+               </p>
+            </blockquote>
+         </div>
+         <p><a name="apx_queryxml_subq_ex"></a><b xmlns:exsl="http://exslt.org/common">Example&nbsp;</b>
+            
+         </p><pre class="programlisting">&lt;vertex name="B"&gt;
+&lt;/vertex&gt;
+&lt;subquery&gt;
+  &lt;vertex name="C"&gt;
+  &lt;/edge&lt;
+  &lt;edge name="Z"&gt;
+    &lt;vertex1&gt;B&lt;/vertex1&gt;
+    &lt;vertex2&gt;C&lt;/vertex2&gt;
+    &lt;directed&gt;true&lt;/directed&gt;
+    &lt;numeric-annotation&gt;
+      &lt;min&gt;1&lt;/min&gt;
+    &lt;/numeric-annotation&gt;
+  &lt;/edge&gt;
+  &lt;numeric-annotation&gt;
+    &lt;min&gt;1&lt;/min&gt;
+  &lt;/numeric-annotation&gt;
+&lt;/subquery&gt;
+</pre><p>
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="apbs07.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="apb.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="apbs09.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Numeric Annotations&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Constraints</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

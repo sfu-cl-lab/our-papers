@@ -1,0 +1,221 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Executing a Query from the Proximity Database Browser</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="prev" href="ch05s07.html" title="Adding Links to Data with Queries">
+      <link rel="next" href="ch05s09.html" title="Executing a Query from the Command Line">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s07.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Querying the Database</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s09.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_running_gui"></a>Executing a Query from the Proximity Database Browser
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <p>In addition to executing queries from the Query Editor, you can
+            execute previously saved queries directly from the Proximity Database Browser. 
+            <a class="indexterm" name="d0e9360"></a>
+            <a class="indexterm" name="d0e9366"></a>
+            <a class="indexterm" name="d0e9372"></a>
+            <a class="indexterm" name="d0e9378"></a>
+            The following exercise executes the query shown below to find, for every
+            object (web page) in the database, the 1d-cluster of objects directly
+            connected to that core object.  
+            
+         </p>
+         <div class="mediaobject" align="center">
+            <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+               <tr>
+                  <td align="center" valign="bottom"><img src="images/QE_1dclusters.png" align="middle" width="382.5"></td>
+               </tr>
+            </table>
+         </div>
+         <p>
+            
+            This is another example of the common 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e733"><span class="glossterm">1d-star query</span></a>.
+            The query places no restrictions on the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e240"><span class="glossterm">core object</span></a>
+            or on any related objects&#8212;that is, there are no
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e162"><span class="glossterm">conditions</span></a> or 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e228"><span class="glossterm">constraints</span></a>.
+            Additionally, the use of the <code class="token">[0..]</code>
+            annotation on the
+            <em class="token">linked_from_page</em> and
+            <em class="token">linked_to_page</em> vertices makes these
+            matches <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e573"><span class="glossterm">optional</span></a>.
+            By having no conditions or constraints and making 
+            the linked objects optional, we ensure that the query will return a
+            subgraph for every object in the database.
+         </p>
+         <p>Note that this query distinguishes links pointing to the 
+            core object from links leaving the core object,
+            and thus defines two types 
+            of related objects: <em class="token">linked_from_page</em>,
+            those objects that link to the core object, and 
+            <em class="token">linked_to_page</em>, those objects that
+            are linked to by the core object.  The matching subgraphs retain
+            these vertex labels, allowing you to identify and use each type of
+            linked object independently when learning and applying models.  If
+            this distinction were not important, we could have instead used a
+            simpler query of two vertices connected by an undirected edge.
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>Executing the 1d-clusters query creates a 
+                        <a href="go01.html#d18e234"><span class="glossterm">container</span></a> used by
+                        later tutorial exercises.  Make sure that you complete this exercise
+                        if you plan to complete the exercises in the following
+                        chapters.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div class="procedure"><a name="ex_queries_1dclusters"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;5.7.&nbsp;Executing a saved query from the Proximity Database Browser:</b></p><a class="indexterm" name="d0e9432"></a><a class="indexterm" name="d0e9435"></a><p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>If you have not already done so, copy
+                     <code class="filename">graph-query.dtd</code>
+                     <a class="indexterm" name="d0e9450"></a>
+                     <a class="indexterm" name="d0e9454"></a>
+                     from <code class="filename">$PROX_HOME/resources</code> to the directory
+                     containing the example queries.
+                     
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cp $PROX_HOME/resources/graph-query.dtd $PROX_HOME/doc/user/tutorial/examples/</code></strong>
+</pre><p>
+                     
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>Proximity queries are represented using an XML format. The 
+                                 <a href="go01.html#d18e304"><span class="glossterm">DTD</span></a>
+                                 that describes this format must be in the directory containing the
+                                 query file in order to execute the query.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">Query</strong></span> menu, choose
+                     <span><strong class="guimenuitem">Run Query</strong></span>.
+                     Proximity displays the <span class="guilabel">Open</span> dialog.
+                  </p>
+               </li>
+               <li>
+                  <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code>
+                     directory and choose the query <code class="filename">1d-clusters.qg2.xml</code>.
+                     
+                  </p>
+                  <p>You can create shortcuts to commonly used directories for easier
+                     access to query files. Shortcuts appear in the 
+                     <span class="guilabel">Shortcuts</span> pane of the <span class="guilabel">Open</span>
+                     dialog. See <a href="ch02s03s04.html#ex_shortcuts" title="Creating a file or directory shortcut">Creating a file or directory shortcut</a> for
+                     information on creating shortcuts.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">Open</strong></span>. Proximity prompts you for a
+                     name for the results container.  Enter
+                     <strong class="userinput"><code>1d-clusters</code></strong> and click
+                     <span><strong class="guibutton">OK</strong></span>.
+                  </p>
+                  <p>
+                     
+                  </p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>If the database already includes a container with this name,
+                                 Proximity asks whether you want to delete the existing container.
+                                 Answering yes lets Proximity overwrite the contents of this
+                                 container. This also deletes any containers inside the existing
+                                 container.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <p>Proximity opens a window to show you a trace of the
+                     query execution. The last lines should be
+                     similar to the following excerpt
+                     
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                  </p><pre class="screen">INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; found 4135 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; query results saved in
+   container: 1d-clusters
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</pre><p>
+                     Close this window after the query finishes.
+                  </p>
+               </li>
+               <li>
+                  <p>Explore the <span class="token">1d-clusters</span>
+                     container. Note that because we used the 
+                     <code class="token">[0..]</code> annotation on the linked objects
+                     making them optional for the match, some subgraphs contain only a
+                     single object.
+                  </p>
+               </li>
+            </ol>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s07.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s09.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Adding Links to Data with Queries&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Executing a Query from the Command Line</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

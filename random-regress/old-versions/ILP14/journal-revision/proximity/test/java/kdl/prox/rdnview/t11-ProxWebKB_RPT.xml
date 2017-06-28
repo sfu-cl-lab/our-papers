@@ -1,0 +1,324 @@
+<!DOCTYPE rpt2 SYSTEM "rpt2.dtd">
+<!-- Created by Proximity 4.2 -->
+
+<rpt2>
+    <class-label>
+        <source>
+            <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+            <data-type>str</data-type>
+            <is-continuous>false</is-continuous>
+            <is-single-value>true</is-single-value>
+            <source-elements>
+                <item-name>core_page</item-name>
+                <attr-name>pagetype</attr-name>
+            </source-elements>
+        </source>
+    </class-label>
+    <rpt-body>
+        <node>
+            <class-label-distr>
+                <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                <class-label-info class="Student" count="266.0"/>
+                <class-label-info class="Staff" count="18.0"/>
+                <class-label-info class="Faculty" count="81.0"/>
+                <class-label-info class="ResearchProject" count="33.0"/>
+                <class-label-info class="Course" count="140.0"/>
+                <class-label-info class="Other" count="1530.0"/>
+            </class-label-distr>
+            <split>
+                <feature-setting>
+                    <fs-class>kdl.prox.model2.rpt.featuresettings.ValueFilteredFeatureSetting</fs-class>
+                    <source>
+                        <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+                        <data-type>int</data-type>
+                        <is-continuous>false</is-continuous>
+                        <is-single-value>false</is-single-value>
+                        <source-elements>
+                            <item-name>linked_to_page</item-name>
+                            <attr-name>page_num_inlinks</attr-name>
+                        </source-elements>
+                    </source>
+                    <aggregator>
+                        <aggregator-class>kdl.prox.model2.rpt.aggregators.ProportionAggregator</aggregator-class>
+                    </aggregator>
+                    <threshold>0.052631578947368418</threshold>
+                    <fs-elements>
+                        <value>1</value>
+                    </fs-elements>
+                </feature-setting>
+            </split>
+            <yes-branch>
+                <node>
+                    <class-label-distr>
+                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                        <class-label-info class="Student" count="163.01628068089485"/>
+                        <class-label-info class="Staff" count="10.265638381242752"/>
+                        <class-label-info class="Faculty" count="27.250214099884033"/>
+                        <class-label-info class="ResearchProject" count="23.265638381242752"/>
+                        <class-label-info class="Course" count="78.25021409988403"/>
+                        <class-label-info class="Other" count="247.2921958565712"/>
+                    </class-label-distr>
+                    <split>
+                        <feature-setting>
+                            <fs-class>kdl.prox.model2.rpt.featuresettings.UnfilteredFeatureSetting</fs-class>
+                            <source>
+                                <source-class>kdl.prox.model2.common.sources.ItemSource</source-class>
+                                <data-type>str</data-type>
+                                <is-continuous>false</is-continuous>
+                                <is-single-value>false</is-single-value>
+                                <source-elements>
+                                    <item-name>linked_to_page</item-name>
+                                </source-elements>
+                            </source>
+                            <aggregator>
+                                <aggregator-class>kdl.prox.model2.rpt.aggregators.DegreeAggregator</aggregator-class>
+                            </aggregator>
+                            <threshold>1</threshold>
+                            <fs-elements/>
+                        </feature-setting>
+                    </split>
+                    <yes-branch>
+                        <node>
+                            <class-label-distr>
+                                <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                </distr-class>
+                                <class-label-info class="Student" count="150.0"/>
+                                <class-label-info class="Staff" count="10.0"/>
+                                <class-label-info class="Faculty" count="23.0"/>
+                                <class-label-info class="ResearchProject" count="23.0"/>
+                                <class-label-info class="Course" count="74.0"/>
+                                <class-label-info class="Other" count="30.0"/>
+                            </class-label-distr>
+                            <split>
+                                <feature-setting>
+                                    <fs-class>kdl.prox.model2.rpt.featuresettings.UnfilteredFeatureSetting</fs-class>
+                                    <source>
+                                        <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+                                        <data-type>str</data-type>
+                                        <is-continuous>false</is-continuous>
+                                        <is-single-value>true</is-single-value>
+                                        <source-elements>
+                                            <item-name>core_page</item-name>
+                                            <attr-name>url_hierarchy1b</attr-name>
+                                        </source-elements>
+                                    </source>
+                                    <aggregator>
+                                        <aggregator-class>kdl.prox.model2.rpt.aggregators.NopAggregator
+                                        </aggregator-class>
+                                    </aggregator>
+                                    <threshold>courses</threshold>
+                                    <fs-elements/>
+                                </feature-setting>
+                            </split>
+                            <yes-branch>
+                                <node>
+                                    <class-label-distr>
+                                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                        </distr-class>
+                                        <class-label-info class="Student" count="0.6779661029577255"/>
+                                        <class-label-info class="Staff" count="0.08474576286971569"/>
+                                        <class-label-info class="Faculty" count="0.15254237316548824"/>
+                                        <class-label-info class="ResearchProject" count="0.11864406801760197"/>
+                                        <class-label-info class="Course" count="25.305084746330976"/>
+                                        <class-label-info class="Other" count="2.2881355937570333"/>
+                                    </class-label-distr>
+                                </node>
+                            </yes-branch>
+                            <no-branch>
+                                <node>
+                                    <class-label-distr>
+                                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                        </distr-class>
+                                        <class-label-info class="Student" count="149.3220329284668"/>
+                                        <class-label-info class="Staff" count="9.91525411605835"/>
+                                        <class-label-info class="Faculty" count="22.84745740890503"/>
+                                        <class-label-info class="ResearchProject" count="22.88135576248169"/>
+                                        <class-label-info class="Course" count="48.69491481781006"/>
+                                        <class-label-info class="Other" count="27.71186399459839"/>
+                                    </class-label-distr>
+                                </node>
+                            </no-branch>
+                        </node>
+                    </yes-branch>
+                    <no-branch>
+                        <node>
+                            <class-label-distr>
+                                <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                </distr-class>
+                                <class-label-info class="Student" count="13.016280680894852"/>
+                                <class-label-info class="Staff" count="0.2656383812427521"/>
+                                <class-label-info class="Faculty" count="4.250214099884033"/>
+                                <class-label-info class="ResearchProject" count="0.2656383812427521"/>
+                                <class-label-info class="Course" count="4.250214099884033"/>
+                                <class-label-info class="Other" count="217.2921958565712"/>
+                            </class-label-distr>
+                            <split>
+                                <feature-setting>
+                                    <fs-class>kdl.prox.model2.rpt.featuresettings.ValueFilteredFeatureSetting
+                                    </fs-class>
+                                    <source>
+                                        <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+                                        <data-type>int</data-type>
+                                        <is-continuous>false</is-continuous>
+                                        <is-single-value>false</is-single-value>
+                                        <source-elements>
+                                            <item-name>linked_from_page</item-name>
+                                            <attr-name>page_num_outlinks</attr-name>
+                                        </source-elements>
+                                    </source>
+                                    <aggregator>
+                                        <aggregator-class>kdl.prox.model2.rpt.aggregators.ProportionAggregator
+                                        </aggregator-class>
+                                    </aggregator>
+                                    <threshold>0.066666666666666666</threshold>
+                                    <fs-elements>
+                                        <value>147</value>
+                                    </fs-elements>
+                                </feature-setting>
+                            </split>
+                            <yes-branch>
+                                <node>
+                                    <class-label-distr>
+                                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                        </distr-class>
+                                        <class-label-info class="Student" count="4.520284132463095"/>
+                                        <class-label-info class="Faculty" count="0.004431651336309073"/>
+                                        <class-label-info class="ResearchProject" count="0.0022158256681545363"/>
+                                    </class-label-distr>
+                                </node>
+                            </yes-branch>
+                            <no-branch>
+                                <node>
+                                    <class-label-distr>
+                                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                        </distr-class>
+                                        <class-label-info class="Student" count="8.495996559317138"/>
+                                        <class-label-info class="Staff" count="0.2656383812427521"/>
+                                        <class-label-info class="Faculty" count="4.245782459433105"/>
+                                        <class-label-info class="ResearchProject" count="0.263422561017288"/>
+                                        <class-label-info class="Course" count="4.250214099884033"/>
+                                        <class-label-info class="Other" count="217.2921958565712"/>
+                                    </class-label-distr>
+                                </node>
+                            </no-branch>
+                        </node>
+                    </no-branch>
+                </node>
+            </yes-branch>
+            <no-branch>
+                <node>
+                    <class-label-distr>
+                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                        <class-label-info class="Student" count="102.98371785879135"/>
+                        <class-label-info class="Staff" count="7.7343615889549255"/>
+                        <class-label-info class="Faculty" count="53.74978542327881"/>
+                        <class-label-info class="ResearchProject" count="9.734361588954926"/>
+                        <class-label-info class="Course" count="61.74978542327881"/>
+                        <class-label-info class="Other" count="1282.707779765129"/>
+                    </class-label-distr>
+                    <split>
+                        <feature-setting>
+                            <fs-class>kdl.prox.model2.rpt.featuresettings.ValueFilteredFeatureSetting</fs-class>
+                            <source>
+                                <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+                                <data-type>int</data-type>
+                                <is-continuous>false</is-continuous>
+                                <is-single-value>false</is-single-value>
+                                <source-elements>
+                                    <item-name>linked_from_page</item-name>
+                                    <attr-name>page_num_outlinks</attr-name>
+                                </source-elements>
+                            </source>
+                            <aggregator>
+                                <aggregator-class>kdl.prox.model2.rpt.aggregators.ProportionAggregator
+                                </aggregator-class>
+                            </aggregator>
+                            <threshold>0.066666666666666666</threshold>
+                            <fs-elements>
+                                <value>147</value>
+                            </fs-elements>
+                        </feature-setting>
+                    </split>
+                    <yes-branch>
+                        <node>
+                            <class-label-distr>
+                                <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                </distr-class>
+                                <class-label-info class="Student" count="32.54712186626575"/>
+                                <class-label-info class="Faculty" count="0.026664747516127463"/>
+                                <class-label-info class="ResearchProject" count="0.013332373758063731"/>
+                                <class-label-info class="Course" count="0.090775266289711"/>
+                                <class-label-info class="Other" count="0.1452404260635376"/>
+                            </class-label-distr>
+                        </node>
+                    </yes-branch>
+                    <no-branch>
+                        <node>
+                            <class-label-distr>
+                                <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                </distr-class>
+                                <class-label-info class="Student" count="70.43659604421362"/>
+                                <class-label-info class="Staff" count="7.7343615889549255"/>
+                                <class-label-info class="Faculty" count="53.72312069764836"/>
+                                <class-label-info class="ResearchProject" count="9.721029226139702"/>
+                                <class-label-info class="Course" count="61.659010231494904"/>
+                                <class-label-info class="Other" count="1282.5625394582748"/>
+                            </class-label-distr>
+                            <split>
+                                <feature-setting>
+                                    <fs-class>kdl.prox.model2.rpt.featuresettings.ValueFilteredFeatureSetting
+                                    </fs-class>
+                                    <source>
+                                        <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+                                        <data-type>int</data-type>
+                                        <is-continuous>false</is-continuous>
+                                        <is-single-value>false</is-single-value>
+                                        <source-elements>
+                                            <item-name>linked_from_page</item-name>
+                                            <attr-name>page_num_outlinks</attr-name>
+                                        </source-elements>
+                                    </source>
+                                    <aggregator>
+                                        <aggregator-class>kdl.prox.model2.rpt.aggregators.ProportionAggregator
+                                        </aggregator-class>
+                                    </aggregator>
+                                    <threshold>0.14285714285714285</threshold>
+                                    <fs-elements>
+                                        <value>129</value>
+                                    </fs-elements>
+                                </feature-setting>
+                            </split>
+                            <yes-branch>
+                                <node>
+                                    <class-label-distr>
+                                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                        </distr-class>
+                                        <class-label-info class="Student" count="29.133124531009646"/>
+                                        <class-label-info class="Faculty" count="0.023350307895423597"/>
+                                        <class-label-info class="ResearchProject" count="0.011675153947711799"/>
+                                        <class-label-info class="Course" count="0.07949186152510224"/>
+                                        <class-label-info class="Other" count="1.1271869784401636"/>
+                                    </class-label-distr>
+                                </node>
+                            </yes-branch>
+                            <no-branch>
+                                <node>
+                                    <class-label-distr>
+                                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution
+                                        </distr-class>
+                                        <class-label-info class="Student" count="41.30347160835947"/>
+                                        <class-label-info class="Staff" count="7.7343615889549255"/>
+                                        <class-label-info class="Faculty" count="53.699770430043586"/>
+                                        <class-label-info class="ResearchProject" count="9.709354092337314"/>
+                                        <class-label-info class="Course" count="61.57951850713196"/>
+                                        <class-label-info class="Other" count="1281.435352699294"/>
+                                    </class-label-distr>
+                                </node>
+                            </no-branch>
+                        </node>
+                    </no-branch>
+                </node>
+            </no-branch>
+        </node>
+    </rpt-body>
+</rpt2>

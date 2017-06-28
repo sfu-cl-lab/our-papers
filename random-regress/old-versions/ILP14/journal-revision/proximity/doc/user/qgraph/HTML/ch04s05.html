@@ -1,0 +1,235 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Adjacency Requirements</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Numeric Annotations">
+      <link rel="prev" href="ch04s04s02.html" title="Negated elements versus inequality conditions">
+      <link rel="next" href="ch04s06.html" title="Implementation in Proximity">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s04s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;4.&nbsp;Numeric Annotations</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04s06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_adjreason"></a>Adjacency Requirements
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_query_adjreason0"></a><a class="indexterm" name="idx_query_adjreason1"></a><p>We saw before that an edge adjacent to an annotated vertex must
+            itself be annotated. To illustrate the reason for this rule, let&#8217;s
+            examine what happens without such a requirement. 
+            <a href="ch04s05.html#fig_annot_db06" title="Figure&nbsp;4.39.&nbsp;Database fragment [Annot_DB06.xml]">Figure&nbsp;4.39</a> shows a 
+            part of the database shown in <a href="ch04s03.html#fig_annot_db03" title="Figure&nbsp;4.17.&nbsp;Database fragment [Annot_DB03.xml]">Figure&nbsp;4.17</a>.
+            This fragment includes multiple links from an actor to a
+            single movie, representing Alec Guinness&#8217;s multiple roles in
+            <span class="emphasis"><em>Kind Hearts and Coronets</em></span>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db06"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB06.png" align="middle" width="373.50000000000006" alt="Database fragment [Annot_DB06.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.39.&nbsp;Database fragment [Annot_DB06.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>The (illegal) query shown in <a href="ch04s05.html#fig_annot_db06_badquery" title="Figure&nbsp;4.40.&nbsp;Illegal query omitting adjacent edge annotation">Figure&nbsp;4.40</a>
+            finds actor-movie pairs but omits the required edge annotation.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db06_badquery"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB06_BadQuery.png" align="middle" width="328.50000000000006" alt="Illegal query omitting adjacent edge annotation"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.40.&nbsp;Illegal query omitting adjacent edge annotation</b></p>
+         </div>
+         <p><br class="figure-break">
+            How are we to interpret this query? One 
+            interpretation would be to retain the
+            ability of numeric annotations to collapse the subgraphs containing
+            the same actor and different movies but let each
+            <em class="token">role</em> edge define a distinct match, much as
+            we saw in <a href="ch02.html" title="Chapter&nbsp;2.&nbsp;Query Basics">Chapter&nbsp;2, <i>Query Basics</i></a>.
+            If we could execute such a query on the database fragment in 
+            <a href="ch04s05.html#fig_annot_db06" title="Figure&nbsp;4.39.&nbsp;Database fragment [Annot_DB06.xml]">Figure&nbsp;4.39</a>, we would see the results shown in
+            <a href="ch04s05.html#fig_annot_db06_badquery_res" title="Figure&nbsp;4.41.&nbsp;Hypothetical results for improperly annotated query">Figure&nbsp;4.41</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db06_badquery_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB06_BadQuery_res.png" align="middle" width="630" alt="Hypothetical results for improperly annotated query"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.41.&nbsp;Hypothetical results for improperly annotated query</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>In this interpretation, the unannotated edge results in three
+            different matching 
+            subgraphs instead of one subgraph that groups the three links. Each
+            contains the same objects, but they differ in 
+            the link connecting the actor Alec Guinness with the movie
+            <span class="emphasis"><em>Kind Hearts and Coronets</em></span>.
+            But annotating the edge as shown in <a href="ch04s05.html#fig_annot_db06_q02" title="Figure&nbsp;4.42.&nbsp;Legal query including adjacent edge annotation [Annot_DB06_Q02.qg2.xml]">Figure&nbsp;4.42</a>
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db06_q02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB06_Q02.png" align="middle" width="328.50000000000006" alt="Legal query including adjacent edge annotation [Annot_DB06_Q02.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.42.&nbsp;Legal query including adjacent edge annotation [Annot_DB06_Q02.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            collapses these three subgraphs into the single subgraph shown below:
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db06_q02_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB06_Q02_res.png" align="middle" width="373.50000000000006" alt="Results for properly annotated query"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.43.&nbsp;Results for properly annotated query</b></p>
+         </div>
+         <p><br class="figure-break">
+            This subgraph best corresponds to our intuitive understanding of the
+            query as identifying actor-movie clusters, regardless of
+            how many roles the actor played in each movie.
+            
+         </p>
+         <p>QGraph also requires that, at most, only one of two adjacent
+            vertices may be annotated. 
+            <a class="indexterm" name="d0e4482"></a>
+            Another way of stating this is that there
+            can be no edge connecting two annotated vertices in a query.
+            To see why this is the case, consider the database fragment
+            and (illegal) query shown in 
+            <a href="ch04s05.html#fig_adjvert_db" title="Figure&nbsp;4.44.&nbsp;Database fragment and illegal query">Figure&nbsp;4.44</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_adjvert_db"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB_and_BadQuery.png" align="middle" width="630" alt="Database fragment and illegal query"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.44.&nbsp;Database fragment and illegal query</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>How are we to match the query against this database fragment?
+            We have many instances where an actor is connected to two or more
+            movies, and where a movie is connected to two or more actors, but
+            matching these database elements to the query is far from
+            straightforward.
+         </p>
+         <p>Can we include the actor Mary Astor in the query results?  She is
+            connected to two movies, satisfying the annotation on the
+            <em class="token">movie</em> vertex, but those movies must also be part
+            of a subgraph that satisfies the query&#8217;s other conditions and
+            annotations, thus each movie she is connected to must be connected to
+            two or more actors (one of which can be Mary Astor).
+         </p>
+         <p>One of the movies linked to Mary Astor, <span class="emphasis"><em>Little
+                  Women</em></span>, is only linked to a single actor, Mary Astor
+            herself, and therefore does not satisfy the 
+            <em class="token">actor</em> vertex annotation, so it does not match the
+            query&#8217;s requirements.  And if we cannot include
+            <span class="emphasis"><em>Little Women</em></span>, then Mary Astor cannot be included
+            because she no longer links to two movies that satisfy the query.
+         </p>
+         <p>A similar situation arises with respect to the movie <span class="emphasis"><em>The
+                  Maltese Falcon</em></span>.  At first glance, it appears to satisfy the
+            query&#8212;it is linked to two actors, and each of those actors is
+            linked to at least two movies.  But as we&#8217;ve seen, at least one of
+            those actors, Mary Astor, does not satisfy the query&#8217;s requirements,
+            so it cannot be included, and therefore <span class="emphasis"><em>The Maltese
+                  Falcon</em></span> also cannot be included in the query&#8217;s results.
+         </p>
+         <p>This query is <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e21"><span class="glossterm">ambiguous</span></a>
+            <a class="indexterm" name="d0e4530"></a>
+            <a class="indexterm" name="d0e4534"></a>
+            because neither vertex annotation takes
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e595"><span class="glossterm">precedence</span></a>
+            <a class="indexterm" name="d0e4543"></a>
+            over the other. In effect, we don&#8217;t know where to start
+            when evaluating the query&#8217;s match to a specific part of the database,
+            and the choice of a starting point effects how we determine whether an
+            object in the database satisfies the requirements of the query.
+            To avoid this ambiguity of interpretation, QGraph requires that
+            at most one of two adjacent vertices be annotated.
+         </p>
+         <p>QGraph also places additional restrictions in numeric annotations
+            when used in queries that include 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">constraints</span></a>
+            (<a href="ch05.html" title="Chapter&nbsp;5.&nbsp;Constraints">Chapter&nbsp;5, <i>Constraints</i></a>)
+            or <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e755"><span class="glossterm">subqueries</span></a>
+            (<a href="ch06.html" title="Chapter&nbsp;6.&nbsp;Subqueries">Chapter&nbsp;6, <i>Subqueries</i></a>).
+            These rules are discussed in later chapters.
+            <a class="indexterm" name="d0e4559"></a>
+            <a class="indexterm" name="d0e4561"></a>
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s04s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04s06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Negated elements versus inequality conditions&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Implementation in Proximity</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

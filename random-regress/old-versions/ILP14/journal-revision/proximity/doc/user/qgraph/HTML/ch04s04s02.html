@@ -1,0 +1,196 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Negated elements versus inequality conditions</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch04s04.html" title="Negated and Optional Elements">
+      <link rel="prev" href="ch04s04.html" title="Negated and Optional Elements">
+      <link rel="next" href="ch04s05.html" title="Adjacency Requirements">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Negated and Optional Elements</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04s05.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e4233"></a>Negated elements versus inequality conditions
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e4236"></a><a class="indexterm" name="d0e4243"></a><p>Although they represent conceptually similar concepts, 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e534"><span class="glossterm">negated elements</span></a>
+            cannot substitute for conditions that express inequalities.
+            Each has a different effect on how the query matches
+            <a class="indexterm" name="d0e4253"></a>
+            <a class="indexterm" name="d0e4259"></a>
+            <a class="indexterm" name="d0e4265"></a>
+            the database. Consider the database fragment shown in
+            <a href="ch04s04s02.html#fig_annot_db05" title="Figure&nbsp;4.34.&nbsp;Database fragment [Annot_DB05.xml]">Figure&nbsp;4.34</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db05"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB05.png" align="middle" width="328.50000000000006" alt="Database fragment [Annot_DB05.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.34.&nbsp;Database fragment [Annot_DB05.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            If we want to find books not written by Stephen King, we have
+            at least two options, depending on our intent.  As our first option,
+            the query in <a href="ch04s04s02.html#fig_annot_db05_q01" title="Figure&nbsp;4.35.&nbsp;Query using inequality condition [Annot_DB05_Q01.qg2.xml]">Figure&nbsp;4.35</a> seems to satisfy
+            this goal. 
+            
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db05_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB05_Q01.png" align="middle" width="328.50000000000006" alt="Query using inequality condition [Annot_DB05_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.35.&nbsp;Query using inequality condition [Annot_DB05_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+            The inequality in the condition on the
+            <em class="token">author</em> vertex,
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Name&nbsp;&lt;&gt;&nbsp;Stephen&nbsp;King</span>, 
+            specifies that only books linked to persons that are not Stephen King
+            are to be included in the query results.  The results of running this
+            query on the database fragment in <a href="ch04s04s02.html#fig_annot_db05" title="Figure&nbsp;4.34.&nbsp;Database fragment [Annot_DB05.xml]">Figure&nbsp;4.34</a>
+            are shown below:
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db05_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB05_Q01_res.png" align="middle" width="328.50000000000006" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.36.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            The results of this query include both person and book objects. As 
+            specified in the query, we only match books linked to 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">person</span> objects with a
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Name</span> attribute not equal to 
+            Stephen King.
+            To be more precise, because QGraph works with set-valued
+            attributes, the query&#8217;s <em class="token">author</em>
+            vertex matches <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">person</span> objects if their
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Name</span> attribute includes at least one value
+            other than <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Stephen King</span>.
+            The query uses numeric annotations to group the results into a single
+            subgraph, so both books written by Peter Straub are included in the
+            subgraph.
+         </p>
+         <p>The query shown in <a href="ch04s04s02.html#fig_annot_db05_q02" title="Figure&nbsp;4.37.&nbsp;Query using inequality condition [Annot_DB05_Q02.qg2.xml]">Figure&nbsp;4.37</a> also
+            appears to satisfy our goal of finding books not written by Stephen
+            King.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db05_q02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB05_Q02.png" align="middle" width="328.50000000000006" alt="Query using inequality condition [Annot_DB05_Q02.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.37.&nbsp;Query using inequality condition [Annot_DB05_Q02.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            In this case, the negated <em class="token">author</em> vertex
+            specifies that we can only match book objects that are not connected
+            to a person 
+            named Stephen King.  This is different than matching
+            books connected to people not named Stephen King, as
+            seen in the results of the second query, below.
+         </p>
+         <p>
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db05_Q02_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB05_Q02_res.png" align="middle" width="94.5" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.38.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            Because Stephen King is one of the authors of <span class="emphasis"><em>The
+                  Talisman</em></span>, this book is not included in the query results.
+            <span class="emphasis"><em>The Talisman</em></span> is included in the results of the
+            first query because it is connected to a second author, satisfying the
+            inequality condition.  Also, remember that 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e534"><span class="glossterm">negated elements</span></a> 
+            are not included in query
+            <a class="indexterm" name="d0e4364"></a>
+            <a class="indexterm" name="d0e4372"></a>
+            <a class="indexterm" name="d0e4378"></a>
+            <a class="indexterm" name="d0e4384"></a>
+            results, therefore the second query&#8217;s results
+            do not include an author object (and associated links).
+            
+         </p>
+         <p>Both queries can be viewed as satisfying our goal of
+            identifying books not written by Stephen King.  Each makes us aware of
+            an unstated assumption in this initial goal&#8212;do we want books
+            written exclusively by someone else or books that are not solely
+            written by Stephen King?  And each query also has a different impact
+            on the form of the resulting subgraphs.  The inequality condition
+            must still match an object in the database so the corresponding
+            objects appear in the results. But a negated element cannot match a
+            database entity and therefore there can be no corresponding element in
+            the query results.
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch04s04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04s05.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Negated and Optional Elements&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Adjacency Requirements</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

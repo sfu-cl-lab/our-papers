@@ -1,0 +1,192 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Running Proximity Scripts</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">
+      <link rel="prev" href="ch06s02s03.html" title="The prox object">
+      <link rel="next" href="ch06s04.html" title="Using the Proximity Python Interpreter">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s02s03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Using Scripts</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s04.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="scripts_running"></a>Running Proximity Scripts
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e10475"></a><a class="indexterm" name="d0e10480"></a><a class="indexterm" name="d0e10485"></a><p>Proximity provides two methods for running scripts:
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p>from the Proximity Database Browser</p>
+               </li>
+               <li>
+                  <p>from the command line</p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            The exercises in this section demonstrate both methods of running
+            scripts in Proximity. The script used in these exercises prints
+            a &#8220;Hello world&#8221; greeting along with the 
+            connection information (host and port) for the database. See
+            <a href="ch06s04.html" title="Using the Proximity Python Interpreter">&#8220;Using the Proximity Python Interpreter&#8221;</a> for
+            information on using Proximity&#8217;s interactive Python
+            interpreter.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e10505"></a>Code example: helloworld.py
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e10508"></a><a class="indexterm" name="d0e10511"></a><a class="indexterm" name="d0e10518"></a><p>This section describes the script found in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/helloworld.py</code>.
+            </p>
+            <p>
+               Proximity scripts use the <em class="varname"><code>prox</code></em> object to access the
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html"><code class="classname">Proximity</code></a> class&#8217;s methods.
+               The method <code class="methodname">getDbName()</code> 
+               <a class="indexterm" name="d0e10539"></a>
+               <a class="indexterm" name="d0e10543"></a>
+               returns a string containing the connection information for the current
+               database.
+               
+               
+            </p><pre class="programlisting">dbname = prox.getDbName()
+print "Hello world, you're using database ", dbname
+</pre><div class="procedure"><a name="d0e10552"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;6.1.&nbsp;Running a script from the Proximity Database Browser:</b></p><a class="indexterm" name="d0e10555"></a><p>Before beginning, make sure that you are serving the ProxWebKB
+                  database using Mserver. Start the Proximity Database Browser if it is not already
+                  running.
+               </p>
+               <ol type="1">
+                  <li>
+                     <p>From the <span><strong class="guimenu">Script</strong></span> menu, choose
+                        <span><strong class="guimenuitem">Run Script</strong></span>.
+                        Proximity displays the <span class="guilabel">Open</span> dialog.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory and
+                        choose <code class="filename">helloworld.py</code>.
+                        Click <span><strong class="guibutton">Open</strong></span>.
+                     </p>
+                     <p>Proximity opens a window to show you any output from the script
+                        along with a trace of the script execution. Your output
+                        should look similar to the following:
+                        
+                        
+                     </p><pre class="screen">Status: starting running script:
+    /proximity/doc/user/tutorial/examples/helloworld.py
+Hello world, you're using database  [localhost, 30000]
+Status: finished running script
+</pre><p>
+                        
+                        You can close this window after the script finishes.
+                     </p>
+                  </li>
+               </ol>
+            </div>
+            <p>You can create shortcuts to commonly used directories for easier
+               access to script files. Shortcuts appear in the 
+               <span class="guilabel">Shortcuts</span> pane of the <span class="guilabel">Open</span>
+               dialog. See <a href="ch02s03s04.html#ex_shortcuts" title="Creating a file or directory shortcut">Creating a file or directory shortcut</a> for
+               information on creating shortcuts.
+            </p>
+            <p>You can also execute Python scripts directly from the command
+               line using the Proximity <span><strong class="command">script.sh</strong></span>
+               <a class="indexterm" name="d0e10607"></a>
+               <a class="indexterm" name="d0e10611"></a>
+               <a class="indexterm" name="d0e10617"></a>
+               shell script or <span><strong class="command">query.bat</strong></span> batch file.
+            </p>
+            <div class="procedure"><a name="d0e10626"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;6.2.&nbsp;Running a script from the command line:</b></p>
+               <p>Before beginning, make sure that you are serving the ProxWebKB
+                  database using Mserver.
+               </p>
+               <ul>
+                  <li>
+                     <p>Execute the <span><strong class="command">script.sh</strong></span> shell script or
+                        <span><strong class="command">script.bat</strong></span> batch file, specifying
+                        
+                     </p>
+                     <div class="variablelist">
+                        <dl>
+                           <dt><span class="term"><em class="replaceable"><code>host:port</code></em></span></dt>
+                           <dd>
+                              <p>the MonetDB server&#8217;s host and port</p><a class="indexterm" name="d0e10648"></a></dd>
+                           <dt><span class="term"><em class="replaceable"><code>scriptName</code></em></span></dt>
+                           <dd>
+                              <p>the file containing the Python script</p>
+                           </dd>
+                        </dl>
+                     </div>
+                     <p>
+                        
+                        Substitute the appropriate host and port information if you are
+                        running the MonetDB server on a different machine or are using a
+                        different port.
+                     </p><pre class="synopsis">&gt; <strong class="userinput"><code>cd $PROX_HOME</code></strong>
+&gt; <strong class="userinput"><code>bin/script.sh localhost:30000 \
+  $PROX_HOME/doc/user/tutorial/examples/helloworld.py</code></strong>
+</pre><p>
+                        
+                        
+                        
+                        Proximity writes the execution trace to the window from which you
+                        executed the above command. The last lines should be
+                        similar to the following excerpt
+                        
+                        (leading information showing elapsed time and execution thread 
+                        has been omitted from the trace for brevity):
+                        
+                     </p><pre class="screen">INFO  app.PythonScript: * connecting to db
+INFO  app.PythonScript: * executing script:
+      /proximity/doc/user/tutorial/examples/helloworld.py
+Hello world, you're using database  [localhost, 30000]
+INFO  app.PythonScript: * done executing script
+</pre></li>
+               </ul>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s02s03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s04.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">The <em class="varname"><code>prox</code></em> object&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Using the Proximity Python Interpreter</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

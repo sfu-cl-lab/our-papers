@@ -1,0 +1,1308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="qg_ch_constraints">
+<title>Constraints</title>
+
+<para><glossterm baseform="condition">Conditions</glossterm> let you
+specify restrictions on individual items in a 
+query. To place restrictions across different items we use
+<emphasis><glossterm baseform="constraint">constraints</glossterm></emphasis>.
+Constraints compare one <glossterm>vertex</glossterm> or 
+<glossterm>edge</glossterm> in the query to another vertex or
+edge.</para>
+
+<para>QGraph provides two types of constraints:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><emphasis><glossterm baseform="identity constraint">Identity constraints</glossterm></emphasis>
+    compare the identity of the corresponding 
+    database objects, for example, making sure that the same object
+    does not match multiple query elements.</para>
+  </listitem>
+  <listitem>
+    <para><emphasis><glossterm baseform="attribute constraint">Attribute constraints</glossterm></emphasis>
+    compare <glossterm>attribute</glossterm> values for the 
+    corresponding database objects, for example, requiring that
+    objects have the same attribute value.</para>
+  </listitem>
+</itemizedlist>
+Both types of constraints are described in more detail below.</para>
+
+<para>Because constraints involve more than one query
+element, they apply to the query as a whole rather than to a specific
+vertex or edge. We therefore draw constraints
+<indexterm><primary>constraints</primary>
+           <secondary>graphical representation</secondary></indexterm>
+<indexterm><primary>graphical representation</primary>
+           <secondary>constraints</secondary></indexterm>
+separate from any query element.
+<xref linkend="fig_const_ex01"/> shows an example query with an
+identity constraint that requires that the object matching vertex
+<token role="vertex">A</token> must be different from the object matching
+vertex <token role="vertex">C</token>.
+<figure id="fig_const_ex01">
+<title>Example query with an identity constraint</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_Ex01.png"
+               width="4.2in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_Ex01.png"
+               contentwidth="5.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<!-- ============================================================== -->
+<!--                      IDENTITY CONSTRAINTS                      -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Identity Constraints</title>
+<indexterm id="idx_idconst0" class="startofrange">
+           <primary>constraints</primary>
+           <secondary>identity</secondary></indexterm>
+<indexterm id="idx_idconst1" class="startofrange">
+           <primary>identity constraints</primary></indexterm>
+
+<para>Identity constraints are commonly used to ensure that the same
+database element does not match two different query elements. Consider
+the database fragment shown in <xref linkend="fig_const_db01"/>. This
+database represents interconnected web pages.
+<figure id="fig_const_db01">
+<title>Database fragment [Const_DB01.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01.png"
+               width="3.85in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01.png"
+               contentwidth="4.7in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Like many long web pages, <token role="object">page3.html</token>
+links to itself, creating a 
+<glossterm baseform="self link">loop</glossterm>.  Notice,
+also, that this database does not have any link attributes.
+<indexterm><primary>Proximity</primary>
+           <secondary>databases</secondary>
+           <tertiary>attribute requirements</tertiary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>Proximity</secondary>
+           <tertiary>attribute requirements</tertiary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>representation</secondary>
+           <tertiary>attributes</tertiary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>representation in Proximity</secondary></indexterm>
+<indexterm><primary>representation in Proximity</primary>
+           <secondary>attributes</secondary></indexterm>
+Neither &qgraph; nor Proximity requires the use of
+attributes for either objects or links in a database.
+</para>
+
+<para>
+<xref linkend="fig_id_no_constraint"/> shows a query designed to find
+the cluster of pages (<glossterm baseform="star query">star</glossterm>)
+linked from each
+web page in the database. 
+<figure id="fig_id_no_constraint">
+<title>1-dimensional star query [Const_DB01_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+
+With no constraints, we get the following results when the query is run on the
+database fragment shown in <xref linkend="fig_const_db01"/>.
+
+<figure id="fig_const_db01_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01_Q01_res.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01_Q01_res.png"
+               contentwidth="6.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The subgraph with <token role="object">page3.html</token> as the
+<token role="vertex">core_page</token> shows how Proximity used the link from
+<token role="object">page3.html</token> to itself to match the
+query.  As we saw in <xref xrefstyle="brief" linkend="qg_ch_basics"/>,
+&qgraph; does not require that distinct query elements be matched by
+distinct database elements.  Because this object 
+matches both the <token role="vertex">core_page</token> and the
+<token role="vertex">linked_page</token> vertices in the query, it 
+appears twice in the query results, once for each corresponding query
+vertex.</para>
+
+<para>To eliminate such duplicated
+<indexterm><primary>duplicates in subgraphs</primary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>duplicated elements in</secondary></indexterm>
+elements, we use an identity
+constraint that specifies that the object that matches the 
+<token role="vertex">core_page</token> vertex must not be the same as
+the object that matches the <token role="vertex">linked_page</token>
+vertex.</para>
+
+<sidebar>
+<para>The general form of an identity constraint is
+<blockquote>
+<para>
+<replaceable>element1</replaceable>
+&nbsp;&nbsp;<replaceable>operator</replaceable>&nbsp;&nbsp;
+<replaceable>element2</replaceable>
+</para>
+</blockquote>
+where
+<itemizedlist spacing="compact">
+   <listitem>
+	<para><replaceable>element1</replaceable> and
+	<replaceable>element2</replaceable> are the names of two
+	vertices or two edges in the query</para>
+  </listitem>
+  <listitem>
+	<para><replaceable>operator</replaceable> is one of
+<indexterm><primary>comparison operators</primary>
+           <secondary sortas="constraints">in constraints</secondary></indexterm>
+<indexterm><primary>constraints</primary>
+           <secondary>comparison operators in</secondary></indexterm>
+	<literal>=</literal>, <literal>&lt;&gt;</literal>,
+        <literal>&lt;</literal>, <literal>&lt;=</literal>,
+	<literal>&gt;</literal>, and <literal>&gt;=</literal></para>
+  </listitem>
+</itemizedlist>
+</para>
+</sidebar>
+
+<para>The revised query with the identity constraint is shown in
+<xref linkend="fig_const_db01_q02"/>. 
+<figure id="fig_const_db01_q02">
+<title>Query with identity constraint [Const_DB01_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01_Q02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01_Q02.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The query&rsquo;s constraint,
+<token role="constraint">core_page&nbsp;&lt;&nbsp;&gt;&nbsp;linked_page</token>,
+prohibits matching the same object to both the
+<token role="vertex">core_page</token> and 
+<token role="vertex">linked_page</token> vertices.
+The results of executing this query on the database fragment shown
+in <xref linkend="fig_const_db01"/> are shown below:
+<figure id="fig_const_db01_q02_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01_Q02_res.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB01_Q02_res.png"
+               contentwidth="6.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The subgraph with <token role="object">page3.html</token> as the
+<token role="vertex">core_page</token> is no longer included in the
+query results.  The
+constraint ensures that the same object cannot match both of the
+query&rsquo;s vertices.
+</para>
+
+<para>Another common use for constraints is to
+remove equivalent subgraphs
+<indexterm><primary>subgraphs</primary>
+           <secondary>equivalent subgraphs</secondary></indexterm>
+<indexterm><primary>equivalent subgraphs</primary></indexterm>
+from a query&rsquo;s results.  Consider the
+fragment of a genealogy database shown below:
+<figure id="fig_const_db02">
+<title>Database fragment [Const_DB02.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02.png"
+               width="4.6in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02.png"
+               contentwidth="5.6in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>A query (without constraints) that finds both parents of
+an individual is shown in <xref linkend="fig_const_db02_q01"/>.
+<figure id="fig_const_db02_q01">
+<title>Query [Const_DB02_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q01.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q01.png"
+               contentwidth="6.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+As we saw before, a query without constraints can
+return matches that include repeated elements as well as equivalent
+subgraphs where the same objects match different vertices, but with
+the order reversed.   We call such subgraphs
+<emphasis><glossterm baseform="mirror match">mirror matches</glossterm></emphasis>
+<indexterm><primary>mirror matches</primary></indexterm>
+because one often looks like the
+mirror image of the other when graphed.</para>
+
+<?pagebreak?>
+<para>The results of executing this query on the database fragment 
+in <xref linkend="fig_const_db02"/> are shown below:
+<figure id="fig_const_db02_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q01_res.png"
+               width="4.8in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q01_res.png"
+               contentwidth="5.9in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The top two subgraphs are mirror matches; they 
+differ only in how Tony Curtis and Janet Leigh correspond to
+the <token role="vertex">parent1</token> and 
+<token role="vertex">parent2</token> vertices.
+The bottom two subgraphs contain repeated elements. In one 
+<token role="object">Tony Curtis</token> matches both the 
+<token role="vertex">parent1</token> and 
+<token role="vertex">parent2</token> vertices; in the other,
+<token role="object">Janet Leigh</token> matches both vertices.
+</para>
+
+<para>As described before, we can add an identity constraint 
+to the query to remove the subgraphs containing duplicated elements:
+<figure id="fig_const_db02_q02">
+<title>Query [Const_DB02_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q02.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q02.png"
+               contentwidth="6.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The constraint,
+<token role="constraint">parent1&nbsp;&lt;&nbsp;&gt;&nbsp;parent2</token>,
+ensures that the same object cannot match both vertices.  
+<figure id="fig_const_db02_q02_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q02_res.png"
+               width="4.8in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q02_res.png"
+               contentwidth="5.9in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The inequality constraint
+<token role="constraint">parent1&nbsp;&lt;&nbsp;&gt;&nbsp;parent2</token>
+eliminates the subgraphs where the same object matches both the
+<token role="vertex">parent1</token> and <token role="vertex">parent2</token>
+vertices, but the results still include a mirror match.  These two
+subgraphs include the same database objects and links but matches them
+to different query elements.
+To remove the mirror match from the results, we modify the
+constraint as shown below.
+<figure id="fig_const_db02_q03">
+<title>Query [Const_DB02_Q03.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q03.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q03.png"
+               contentwidth="6.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The new constraint, 
+<token role="constraint">parent1&nbsp;&lt;&nbsp;parent2</token>, enforces an
+ordering on the object IDs matching these vertices. Because each
+object has a unique ID, this ensures that different subgraphs do not
+contain the same objects in a different order. The results of
+the modified query can be seen below:
+<figure id="fig_const_db02_q03_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q03_res.png"
+               width="4.8in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB02_Q03_res.png"
+               contentwidth="5.9in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+As you can see, this <glossterm>container</glossterm> includes just a
+single subgraph. The revised constraint removed the mirror match.</para>
+
+<para>This constraint works because the underlying database provides
+a unique ID for each object and link.  Proximity provides unique
+IDs; therefore, Proximity queries can take advantage of such constraints
+to eliminate mirror matches.</para>
+<indexterm startref="idx_idconst0" class="endofrange"/>
+<indexterm startref="idx_idconst1" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                     ATTRIBUTE CONSTRAINTS                      -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Attribute Constraints</title>
+<indexterm id="idx_attrconst0" class="startofrange">
+           <primary>constraints</primary>
+           <secondary>attribute</secondary></indexterm>
+<indexterm id="idx_attrconst1" class="startofrange">
+           <primary>attribute constraints</primary></indexterm>
+
+<para>Attribute constraints are used to compare attribute values
+across different database entities.  (See <xref linkend="qg_const_impl"/>
+later in this chapter, however, for important restrictions 
+regarding mixing object and link attributes in a constraint in
+Proximity.)</para>
+
+<sidebar>
+<para>The general form
+<indexterm><primary>constraints</primary>
+           <secondary>general form</secondary></indexterm>
+of an attribute constraint is
+<blockquote>
+  <para>
+  <replaceable>element1</replaceable>.<replaceable>attribute1</replaceable>
+  &nbsp;&nbsp;<replaceable>operator</replaceable>&nbsp;&nbsp;
+  <replaceable>element2</replaceable>.<replaceable>attribute2</replaceable>
+  </para>
+</blockquote>
+where
+<itemizedlist spacing="compact">
+   <listitem>
+	<para><replaceable>element1</replaceable> and
+	<replaceable>element2</replaceable> are the names of two
+	vertices or two edges in the query</para>
+  </listitem>
+  <listitem>
+	<para><replaceable>attribute1</replaceable> is the
+	name of an attribute for <replaceable>element1</replaceable>
+        </para>
+  </listitem>
+  <listitem>
+	<para><replaceable>attribute2</replaceable> is the
+	name of an attribute for <replaceable>element2</replaceable>
+        </para>
+  </listitem>
+  <listitem>
+	<para><replaceable>operator</replaceable> is one of
+<indexterm><primary>comparison operators</primary>
+           <secondary sortas="constraints">in constraints</secondary></indexterm>
+<indexterm><primary>constraints</primary>
+           <secondary>comparison operators in</secondary></indexterm>
+	<literal>=</literal>, <literal>&lt;&gt;</literal>,
+        <literal>&lt;</literal>, <literal>&lt;=</literal>,
+        <literal>&gt;</literal>, and <literal>&gt;=</literal></para>
+  </listitem>
+</itemizedlist>
+
+<replaceable>Attribute1</replaceable> and
+<replaceable>attribute2</replaceable> must be comparable types, but
+need not be the same attribute name.
+</para>
+</sidebar>
+
+<para><xref linkend="fig_const_db03"/> shows a fragment of a
+database containing information about movies released as DVDs.
+Note that Proximity databases
+<indexterm><primary>Proximity</primary>
+           <secondary>databases</secondary>
+           <tertiary>link requirements</tertiary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>Proximity</secondary>
+           <tertiary>link requirements</tertiary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>disconnected</secondary></indexterm>
+<indexterm><primary>disconnected databases</primary></indexterm>
+do not necessarily have to be fully
+connected; as this example illustrates, discontinuities are
+permitted.
+<figure id="fig_const_db03">
+<title>Sample database fragment [Const_DB03.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB03.png"
+               width="5.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB03.png"
+               contentwidth="6.6in"
+               format="PNG"/>
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Suppose that we want to find movies released as DVDs in the same year
+as their theatrical release.
+<xref linkend="fig_const_db03_q01"/> shows the &qgraph; query
+for this task.
+<figure id="fig_const_db03_q01">
+<title>Query: Movies and DVDs released in the same year
+[Const_DB03_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB03_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB03_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+
+The query&rsquo;s constraint requires that the value of the
+<token role="attr">ReleaseYear</token> attribute of the object corresponding to
+the <token role="vertex">movie</token> vertex be the same as the value of the
+<token role="attr">PubYear</token> attribute of the object corresponding to 
+the <token role="vertex">DVD</token> vertex.
+<xref linkend="fig_const_db03_q01_res"/> shows the results of
+executing the above query on the database fragment shown in 
+<xref linkend="fig_const_db03"/>.
+<figure id="fig_const_db03_q01_res">
+<title>Query results: Movies and DVDs released in the same year</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB03_Q01_res.png"
+               width="5.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB03_Q01_res.png"
+               contentwidth="6.6in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The query finds two subgraphs where a movie&rsquo;s DVD release
+occurred in the same year as its theatrical release.
+<indexterm startref="idx_attrconst0" class="endofrange"/>
+<indexterm startref="idx_attrconst1" class="endofrange"/>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                      MULTIPLE CONSTRAINTS                      -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Multiple Constraints</title>
+<indexterm><primary>constraints</primary>
+           <secondary>multiple</secondary></indexterm>
+<indexterm><primary>multiple constraints</primary></indexterm>
+
+<para>In principle, &qgraph; permits any boolean
+<indexterm><primary>logical operators</primary>
+           <secondary sortas="constraints">in constraints</secondary></indexterm>
+<indexterm><primary>boolean operators</primary>
+           <see>logical operators</see></indexterm>
+combination of constraints.  In query diagrams, like that 
+shown in <xref linkend="fig_mult_const"/>, we simply list
+all the constraints with the understanding that they must all be
+satisfied.  (Proximity, however, requires that multiple constraints
+always be <literal>AND</literal>ed 
+together. You cannot combine constraints with <literal>OR</literal>
+or use <literal>NOT</literal> in a constraint.)
+<figure id="fig_mult_const">
+<title>Query with multiple constraints</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_MultiExample.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_MultiExample.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This query finds books that have been adapted to movies where both the
+book and movie have the same name, and where the book was published
+before the movie was released.</para>
+
+<para>Queries may include both 
+<glossterm baseform="identity constraint">identity</glossterm> and 
+<glossterm baseform="attribute constraint">attribute constraints</glossterm>,
+but an individual constraint may not attempt to compare identity with
+attribute values.  For example, if a database includes objects with an
+<token role="attr">age</token> attribute, a query for that database
+might include both an identity constraint such as 
+<token role="constraint">vertex1&nbsp;&lt;&nbsp;&gt;&nbsp;vertex2</token>
+and an attribute constraint such as 
+<token role="constraint">vertex1.age&nbsp;&lt;&nbsp;vertex2.age</token>,
+but it may not include a constraint such as
+<token role="constraint">vertex1&nbsp;&lt;&nbsp;vertex2.age</token>
+that attempts to compare identity to an attribute value.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                     EVALUATIING CONSTRAINTS                    -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Evaluating Constraints</title>
+<indexterm id="idx_evalconst0" class="startofrange">
+           <primary>constraints</primary>
+           <secondary>evaluating</secondary></indexterm>
+<indexterm id="idx_evalconst2" class="startofrange">
+           <primary>matching queries</primary>
+           <secondary>satisfying constraints</secondary></indexterm>
+<indexterm id="idx_evalconst1" class="startofrange">
+           <primary>evaluating</primary>
+           <secondary>constraints</secondary></indexterm>
+
+<para>As we saw with conditions, the process of evaluating
+<glossterm baseform="attribute constraint">attribute constraints</glossterm>
+must take into account that attributes are set
+<indexterm><primary>attributes</primary>
+           <secondary>multiple values</secondary></indexterm>
+valued.  Constraints follow the same evaluation principle as do
+<glossterm baseform="condition">conditions</glossterm>:
+A constraint is satisfied if any member of
+the set of attribute values satisfies the constraint.</para>
+
+<sidebar>
+<para>The rule for evaluating attribute constraints can be more
+formally expressed as:
+<blockquote>
+<para>Given 
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>two database entities (objects or links)
+    <varname>A</varname> and <varname>B</varname></para>
+  </listitem>
+  <listitem>
+    <para>an attribute <varname>attr1</varname> on
+    <varname>A</varname></para>
+  </listitem>
+  <listitem>
+    <para>an attribute <varname>attr2</varname> on
+    <varname>B</varname>, where
+    <varname>attr1</varname> and <varname>attr2</varname> must be
+    comparable types and may be the same attribute</para>
+  </listitem>
+  <listitem>
+    <para>a set of values <varname>V1</varname> for <varname>attr1</varname>
+    on <varname>A</varname></para>
+  </listitem>
+  <listitem>
+    <para>a set of values <varname>V2</varname> for <varname>attr2</varname>
+    on <varname>B</varname></para>
+  </listitem>
+  <listitem>
+    <para>an attribute constraint
+    <varname>A.attr1</varname>&nbsp;&nbsp;<varname>operator</varname>&nbsp;&nbsp;<varname>B.attr2</varname></para>
+  </listitem>
+</itemizedlist>
+The constraint is satisfied if there exists a value <varname>a1</varname>
+a member of <varname>V1</varname>, and a value <varname>a2</varname>
+a member of <varname>V2</varname>, such that 
+<varname>a1</varname>&nbsp;<varname>operator</varname>&nbsp;<varname>a2</varname>
+holds.
+</para>
+</blockquote>
+</para>
+</sidebar>
+
+<para>As an example, let&rsquo;s look at a fragment of a database
+describing books and related movies, shown below.
+<figure id="fig_const_db04">
+<title>Database fragment [Const_DB04.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB04.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB04.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Because books are often reissued or issued in different formats, they
+can have multiple publication dates, as we see with
+<emphasis>Carrie</emphasis>.  Also, 
+books and movies can have varying temporal relationships. Frequently,
+movies are adapted from an existing book, as we see for <emphasis>A
+Beautiful Mind</emphasis>, but occasionally a screenplay or novelization
+is published after a successful movie, as is the case for
+<emphasis>Shakespeare in Love</emphasis>. And sometimes we know that a
+book&rsquo;s movie rights have been optioned, but the movie has not
+yet been released, as we see for <emphasis>Bag of Bones</emphasis>.</para>
+
+<para>This database has
+no attributes on the links connecting books and their associated
+movies. Although this is a directed link, as Proximity requires, the
+lack of any attributes means that we have no semantics for this link
+and thus cannot assign a temporal
+ordering based on the arrow&rsquo;s direction.  We could have just as easily
+reversed the links without changing the information
+represented by these objects and links.
+</para>
+
+<para>Suppose we want to find both categories of books&mdash;those
+released before their movie adaptation, and those initially published
+after the movie&rsquo;s release.  We need two queries to do so:
+<figure id="fig_const_db04_q01">
+<title>Queries</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB04_Q01andQ02.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB04_Q01andQ02.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The results of executing the first query are shown below:
+<figure id="fig_const_db04_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB04_Q01_res.png"
+               width="3.1in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB04_Q01_res.png"
+               contentwidth="3.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The resulting container includes two subgraphs.
+The movie <emphasis>A Beautiful Mind</emphasis> was based on the book
+written by Sylvia Nasar, so it came out after the book&rsquo;s publication.
+<emphasis>Carrie</emphasis> was originally published before the movie
+adaptation, then re-released in various formats after the movie&rsquo;s
+release.</para>
+
+<para>Compare these matches to those for the second query:
+<figure id="fig_const_db04_q02_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB04_Q02_res.png"
+               width="3.3in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB04_Q02_res.png"
+               contentwidth="4.05in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This time, the movie <emphasis>Shakespeare in Love</emphasis> appears
+in the results; its associated book is a screenplay based on the
+movie.  But <emphasis>Carrie</emphasis> appears again, this time
+because re-releases of the book occurred after the movie&rsquo;s
+release.</para>
+
+<para>Because objects and links in a Proximity database can be
+structurally heterogeneous, some entities may not have a value
+<indexterm><primary>attributes</primary>
+           <secondary>missing</secondary></indexterm>
+<indexterm><primary>missing attribute values</primary></indexterm>
+for an attribute used in a constraint.  In our example database fragment,
+because the movie version of <emphasis>Bag of Bones</emphasis> has not
+been released yet, the corresponding database object has no 
+value for the <token role="attr">ReleaseDate</token> attribute.
+In such cases, an attribute constraint&rsquo;s test always fails
+because there are no values to compare against the constraint&rsquo;s
+requirements.  Therefore <emphasis>Bag of Bones</emphasis> does not
+appear in any of our query results.</para>
+
+<para>As we saw for conditions, the ability to have set-valued
+attributes can result in satisfying apparently contradictory
+constraints. In this case, the book-movie pair for
+<emphasis>Carrie</emphasis> appears in the results for both queries
+because the multiple book publication dates contain values that
+satisfy both constraints.
+Specifically, the values for the book&rsquo;s publication
+date attribute include a value (<token role="attr">1974</token>) that
+is before the movie&rsquo;s release date of 
+<token role="attr">1976</token>, and several values
+(<token role="attr">1981</token>, <token role="attr">1993</token>,
+and <token role="attr">2003</token>) that are after the
+movie&rsquo;s release date.</para>
+<indexterm startref="idx_evalconst0" class="endofrange"/>
+<indexterm startref="idx_evalconst1" class="endofrange"/>
+<indexterm startref="idx_evalconst2" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                   CONSTRAINTS AND ANNOTATIONS                  -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_constr_and_annot">
+<title>Constraints and Annotations</title>
+<indexterm><primary>constraints</primary>
+           <secondary sortas="annotated">on annotated elements</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="constraints">and constraints</secondary></indexterm>
+
+<!-- .............................................................. -->
+<!--                Constraints on annotated elements               -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Constraints on annotated elements</title>
+
+<para>&qgraph; prohibits constraints between two 
+<glossterm baseform="numeric annotation">annotated</glossterm> query
+elements. As we saw in <xref linkend="qg_ch_annotations"/>, annotating
+adjacent vertices can result in 
+<glossterm baseform="ambiguous">ambiguities</glossterm>
+<indexterm><primary>ambiguous queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>ambiguous</secondary></indexterm>
+of interpretation.
+Placing a constraint on two annotated elements results in similar
+ambiguities.</para>
+
+<para>&qgraph; admits one exception to the above prohibition against
+constraints between two annotated elements: Constraints between an
+annotated vertex and its adjacent annotated edge are permitted. This
+exception has not been implemented
+<indexterm><primary>Proximity</primary>
+           <secondary>QGraph implementation</secondary>
+           <tertiary>constraints</tertiary></indexterm>
+<indexterm><primary>constraints</primary>
+           <secondary>implementation restrictions</secondary></indexterm>
+in Proximity, however. Proximity
+prohibits all constraints between two annotated elements,
+whether or not they involve this special case.</para>
+
+<para>Proximity imposes additional restrictions on the use of
+constraints for annotated elements.  See 
+<xref linkend="qg_const_impl"/> later in this chapter
+for details on these limitations.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--      Constraints involving negated and optional elements       -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Constraints involving negated and optional elements</title>
+<indexterm><primary>constraints</primary>
+           <secondary sortas="negated">on negated/optional elements</secondary></indexterm>
+<indexterm><primary>negated</primary>
+           <secondary>query elements</secondary>
+           <tertiary sortas="constraints">in constraints</tertiary></indexterm>
+<indexterm><primary>optional</primary>
+           <secondary>query elements</secondary>
+           <tertiary sortas="constraints">in constraints</tertiary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>negated elements</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>optional elements</secondary></indexterm>
+
+<para>What does it mean to have a constraint involving 
+<glossterm baseform="optional element">optional</glossterm> or
+<glossterm baseform="negated element">negated elements</glossterm>
+(elements that
+may not or must not be present)?  Interpreting such queries can require
+careful attention to how each query component influences how database
+elements match the query.  This is most easily seen by walking through
+a relevant example.</para>
+
+<para>The database fragment below represents selected college and
+university student Internet home pages and the pages they connect to:
+<figure id="fig_const_db05">
+<title>Database fragment [Const_DB05.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The query in <xref linkend="fig_const_db05_q01"/> finds
+home pages that do not link to any other pages from the same site.
+<figure id="fig_const_db05_q01">
+<title>Query [Const_DB05_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The constraint
+<token role="constraint">start-page.Site&nbsp;=&nbsp;linked-page.Site</token>
+requires that the query only consider linked pages from the
+same site as the start page.  The <token role="annot">[0]</token>
+<glossterm baseform="numeric annotation">annotation</glossterm>
+on the <token role="vertex">linked_page</token> vertex tells 
+the query to only match subgraphs that contain no such linked pages.
+In other words, the query will only match student home pages that do
+not link to any other pages from the same site.  Such home pages may
+or may not link to pages on other sites.  Linked pages from different
+sites are irrelevant for this query.  
+</para>
+
+<para>The results of executing this query are shown below:
+<figure id="fig_const_db05_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05_Q01_res.png"
+               width="2.3in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05_Q01_res.png"
+               contentwidth="2.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This query found two home pages that do not connect to other pages on
+the same site.  <token role="object">Page1.html</token> doesn&rsquo;t
+link to any other page; therefore, it satisfies the query.  
+<token role="object">Page2.html</token> links to two other pages, but 
+neither of the linked pages is from the same site, so it also
+satisfies the query. The third home page in the database, 
+<token role="object">page5.html</token>, links to another page
+from Smith and thus satisfies the constraint, but the
+<token role="annot">[0]</token> annotation excludes it from the query results.
+</para>
+
+<para>If we modify the query to use <token role="annot">[0..]</token> instead
+of <token role="annot">[0]</token> for the <token role="vertex">linked-page</token>
+vertex, we change the meaning of the query and thus its results.
+<figure id="fig_const_db05_q02">
+<title>Query [Const_DB05_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05_Q02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05_Q02.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This modification says that a home page may, but is not required to,
+link to a page from the same site to match the query. Executing the
+modified query yields different results than those we saw for 
+the query in <xref linkend="fig_const_db05_q01"/>.
+
+<figure id="fig_const_db05_q02_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05_Q02_res.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Const_DB05_Q02_res.png"
+               contentwidth="6.1in"
+               format="PNG"/>
+</imageobject>
+</mediaobject>
+</figure>
+Because home pages that do not link to other pages from the same
+site match the query, the results of this query include the previous
+results.  <token role="object">Page5.html</token> links to a page
+from the same site and 
+therefore satisfies the constraint.  But this time the
+<token role="annot">[0..]</token> annotation on the
+<token role="vertex">linked-page</token> vertex tells us to include
+such pairs in the results.
+</para>
+
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                    IMPLEMENTATION IN PROXIMITY                 -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_const_impl">
+<title>Implementation in Proximity</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>QGraph implementation</secondary>
+           <tertiary>constraints</tertiary></indexterm>
+<indexterm><primary>constraints</primary>
+           <secondary>implementation restrictions</secondary></indexterm>
+
+<para>Proximity imposes some additional restrictions on how constraints
+can be used in &qgraph; queries.  This section describes the current
+requirements for using constraints in Proximity.</para>
+
+<sect2>
+<title>Constraint elements</title>
+
+<para>&qgraph; permits constraints between
+<indexterm><primary>constraints</primary>
+           <secondary>mixing vertices and edges</secondary></indexterm>
+an edge and a vertex, as long as they involve
+<glossterm>comparable types</glossterm>
+and obey the <glossterm baseform="numeric annotation">annotation</glossterm>
+requirements discussed above, but this functionality is not currently
+implemented in Proximity.  Proximity restricts constraints to either
+two vertices or two edges; mixing is not allowed.</para>
+
+<para>As we saw above, constraints do not have to use the same
+<glossterm>attribute</glossterm> on both sides of the expression, as
+long as the attribute data types
+<indexterm><primary>comparable data types</primary></indexterm>
+<indexterm><primary>data type</primary></indexterm>
+can be legally compared. Proximity allows you to compare
+<code>DBL</code> with <code>FLT</code> and <code>INT</code>, and
+<code>FLT</code> with <code>INT</code>.
+</para>
+</sect2>
+
+<sect2>
+<title>Annotation restrictions</title>
+
+<para>Proximity adds the additional restriction that you cannot have a
+constraint between two edges if one of them is 
+<glossterm baseform="numeric annotation">annotated</glossterm>.
+Proximity
+admits one exception to this rule:  Constraints between an annotated
+edge and an unannotated edge are permitted only if the annotated edge
+is connected to a vertex annotated with
+<token role="annot">[0..]</token> or 
+<token role="annot">[0..<replaceable>n</replaceable>]</token>.</para>
+</sect2>
+
+<sect2>
+<title>Multiple constraints</title>
+<indexterm><primary>constraints</primary>
+           <secondary>multiple</secondary></indexterm>
+<indexterm><primary>multiple constraints</primary></indexterm>
+
+<para>Although &qgraph; permits arbitrary boolean
+combinations of constraints, Proximity requires that multiple
+constraints only be combined with <literal>AND</literal>; the boolean
+<indexterm><primary>logical operators</primary>
+           <secondary sortas="constraints">in constraints</secondary></indexterm>
+operators <literal>OR</literal> and <literal>NOT</literal>
+are not supported.</para>
+</sect2>
+
+</sect1>
+
+<?pagebreak?>
+<!-- ============================================================== -->
+<!--                             SUMMARY                            -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Summary</title>
+<indexterm><primary>queries</primary>
+           <secondary>rule summaries</secondary></indexterm>
+
+<itemizedlist spacing="compact">
+<title>Constraint uses</title>
+  <listitem>
+    <para>Constraints compare one <glossterm>vertex</glossterm> or 
+    <glossterm>edge</glossterm>
+    in the query to another vertex or edge.</para>
+  </listitem>
+  <listitem>
+    <para>Constraints apply to the query as a whole, rather than to a
+    specific vertex, edge, or <glossterm>subquery</glossterm>.</para>
+  </listitem>
+  <listitem>
+    <para><glossterm baseform="identity constraint">Identity constraints</glossterm>
+    compare the identity of the corresponding
+    database objects.</para>
+  </listitem>
+  <listitem>
+    <para><glossterm baseform="attribute constraint">Attribute constraints</glossterm>
+    compare attribute values for the
+    corresponding database objects.</para>
+  </listitem>
+  <listitem>
+    <para>Constraints can compare either identity or attributes;
+    mixing is not allowed.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Identity constraints</title>
+  <listitem>
+    <para>Identity constraints can use the comparison operators
+    <literal>=</literal>, <literal>&lt;&gt;</literal>, 
+    <literal>&lt;</literal>, <literal>&lt;=</literal>,
+    <literal>&gt;</literal>, and <literal>&gt;=</literal>.
+    </para>
+  </listitem>
+  <listitem>
+    <para>Identity constraints are commonly used to ensure that the same
+    database element does not match two different query elements.</para>
+  </listitem>
+  <listitem>
+    <para>Another typical use for identity constraints is to remove equivalent
+    subgraphs (<glossterm baseform="mirror match">mirror matches</glossterm>)
+    from a query&rsquo;s results.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Attribute constraints</title>
+  <listitem>
+    <para>Attribute constraints can use the comparison operators
+    <literal>=</literal>, <literal>&lt;&gt;</literal>, 
+    <literal>&lt;</literal>, <literal>&lt;=</literal>,
+    <literal>&gt;</literal>, and <literal>&gt;=</literal>. 
+    </para>
+  </listitem>
+  <listitem>
+    <para>The attributes on both sides of a constraint must be
+    <glossterm>comparable types</glossterm>, but need not be the same
+    attribute.</para>
+  </listitem>
+  <listitem>
+    <para>A constraint is satisfied if any member of the set of attribute
+    values for the corresponding database entities satisfies the
+    constraint.</para>
+  </listitem>
+  <listitem>
+    <para>When an object or link has multiple values for an attribute,
+    different constraints may match different values resulting in 
+    matching apparently contradictory constraints.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Constraints and annotations</title>
+  <listitem>
+    <para>&qgraph; prohibits constraints between two
+   <glossterm baseform="numeric annotation">annotated</glossterm>
+    query elements.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; admits one exception to the prohibition against
+    constraints between two annotated elements: Constraints between an
+    annotated vertex and its adjacent annotated edge are permitted.
+    </para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Implementation restrictions</title>
+  <listitem>
+    <para>Proximity does not permit comparing object
+    and edge attributes in the same constraint.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity limits the allowed boolean operations on
+    constraints. Multiple constraints are always <literal>AND</literal>ed
+    together. You cannot combine constraints with <literal>OR</literal>
+    or negate constraints with <literal>NOT</literal> in Proximity.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity allows you to compare
+    <code>DBL</code> with <code>FLT</code> and <code>INT</code>, and
+    <code>FLT</code> with <code>INT</code>.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity does not permit any constraint between annotated
+    elements, even those between an annotated vertex and its adjacent
+    annotated edge, which are allowed in &qgraph;.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity prohibits constraints between two edges if one of
+    them is annotated, with the exception that such constraints are
+    allowed if the vertex adjacent to the annotated edge is itself
+    annotated with <token role="annot">[0..]</token> or
+    <token role="annot">[0..<replaceable>j</replaceable>]</token>.
+    </para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

@@ -1,0 +1,1452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<appendix id="apx_xmlformat">
+<title>Proximity XML Format</title>
+<indexterm id="idx_dataxmla" class="startofrange">
+           <primary>XML data</primary>
+           <secondary>format</secondary></indexterm>
+<indexterm id="idx_dataxmlb" class="startofrange">
+           <primary>data</primary>
+           <secondary>XML representation</secondary></indexterm>
+<indexterm><primary>importing</primary>
+           <secondary>XML data</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm><primary>exporting data</primary>
+           <secondary sortas="XML">to XML</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>exporting</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>exporting</secondary></indexterm>
+
+<para>This appendix describes the XML format for importing data into
+and exporting data out of Proximity.
+<!-- removed support for format 08/2006
+<footnote><para>This appendix
+describes the XML data format for &prox3; and later.  The deprecated
+&prox2; XML data format is described in <citetitle>&prox2;
+XML Data Format</citetitle>, included in the &prox4; distribution as
+<filename>&proxpath;/doc/user/historic/Prox2XMLFormat.pdf</filename>.</para></footnote>
+-->
+In addition to handling complete
+databases, Proximity can import and export individual attributes and
+containers.  Users are solely responsible for ensuring that imported
+attribute and container data correctly matches the identifiers and
+data types
+<indexterm><primary>data type</primary></indexterm>
+in the existing database.
+</para>
+
+<para>The DTD
+<indexterm><primary>DTDs</primary>
+           <secondary>prox3db.dtd</secondary></indexterm>
+<indexterm><primary>prox3db.dtd</primary></indexterm>
+for the Proximity XML format is located in
+<filename>&proxpath;/resources/prox3db.dtd</filename>.</para>
+
+<sidebar>
+<indexterm><primary>special characters</primary>
+           <secondary sortas="XML">in XML data representation</secondary></indexterm>
+<indexterm><primary>characters</primary>
+           <secondary>special</secondary>
+           <tertiary sortas="XML">in XML data representation</tertiary></indexterm>
+<para>The characters <literal>&lt;</literal>,
+<literal>&gt;</literal>, and <literal>&amp;</literal>, are represented
+by the corresponding XML entities,
+<literal>&amp;lt;</literal>, <literal>&amp;gt;</literal>, and
+<literal>&amp;amp;</literal>. Proximity makes the conversion when
+exporting data to the XML format; users must use the appropriate
+entities in XML data to be imported into Proximity.
+</para>
+
+<para>For compatibility with MonetDB, single quotes, double quotes,
+<indexterm><primary>MonetDB</primary>
+           <secondary>character conversion for</secondary></indexterm>
+<indexterm><primary>characters</primary>
+           <secondary>converting for MonetDB</secondary></indexterm>
+<indexterm><primary>converting</primary>
+           <secondary>characters for MonetDB</secondary></indexterm>
+and newline characters in the XML data are automatically
+changed to underscores during import.</para>
+</sidebar>
+
+<para>The examples in this appendix are designed to illustrate the
+relevant XML syntax and are not intended to represent, in whole or in
+part, a valid or semantically meaningful database.</para>
+
+<!-- ============================================================== -->
+<!--                         DECLARATIONS                           -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Declarations</title>
+
+<!-- ===== XML DECLARATION ======================================== -->
+
+<sect2>
+<title>XML declaration</title>
+
+<para>The XML data file must start with the following XML
+declaration:
+
+<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]>
+</programlisting>
+</para>
+
+</sect2>
+
+<!-- ===== DOCUMENT TYPE DECLARATION ============================== -->
+
+<sect2>
+<title>Document type declaration</title>
+
+<para>The document type declaration immediately follows the XML
+declaration. The XML data file must include the following document
+type declaration: 
+
+<programlisting><![CDATA[<!DOCTYPE PROX3DB SYSTEM "prox3db.dtd">]]>
+</programlisting>
+
+Note that the document type declaration uses a system identifier
+for the DTD. Proximity expects to find the
+<filename>prox3db.dtd</filename> file in the same directory as the XML
+data file.</para>
+
+</sect2>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                    THE PROX3DB ROOT ELEMENT                    -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>The <code role="heading">PROX3DB</code> root
+element</title> 
+
+<para>The root element for the XML data file is <sgmltag
+class="element">PROX3DB</sgmltag>. The <sgmltag
+class="element">PROX3DB</sgmltag> tag must appear immediately
+after the document type declaration.
+The XML data file ends with the closing 
+<sgmltag class="endtag">PROX3DB</sgmltag> tag.
+</para>
+
+
+<bridgehead renderas="sect1"><code role="heading">&lt;PROX3DB&gt;</code></bridgehead>
+
+<!-- ===== PROX3DB : Attributes ======================================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.</para>
+</formalpara>
+
+<!-- ===== PROX3DB : Children ========================================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_xml_objs"><sgmltag class="element">OBJECTS</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>The objects in the database</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_xml_links"><sgmltag class="element">LINKS</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>The links in the database</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_xml_attrs"><sgmltag class="element">ATTRIBUTES</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Attributes for objects, links, and containers</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_xml_container"><sgmltag class="element">CONTAINERS</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>Containers and their subgraphs, including subgraph attributes</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== PROX3DB : Content Model ==================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(OBJECTS?, LINKS?, ATTRIBUTES?, CONTAINERS?)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== PROX3DB : Example ========================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<PROX3DB>
+    <OBJECTS>...</OBJECTS>
+    <LINKS>...</LINKS>
+    <ATTRIBUTES>...</ATTRIBUTES>
+    <CONTAINERS>...</CONTAINERS>
+</PROX3DB>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                            OBJECTS                             -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_xml_objs">
+<title>Objects</title>
+<indexterm><primary>objects</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>Database objects are specified by 
+<sgmltag class="element">OBJECT</sgmltag> elements, all of which must
+be included in a single <sgmltag class="element">OBJECTS</sgmltag>
+element.  The <sgmltag class="element">OBJECT</sgmltag> element is
+empty and includes one required attribute, 
+<sgmltag class="attribute">ID</sgmltag>, which specifies the value for
+the object&rsquo;s identifier.  <sgmltag class="attribute">ID</sgmltag>
+values must be unique non-negative integers and are typically sequential
+numbers.</para>
+
+<!-- ====================== ELEMENT : OBJECTS ===================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;OBJECTS&gt;</code></bridgehead>
+
+<!-- ===== OBJECTS : Attributes =================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== OBJECTS : Children ===================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">OBJECT</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">OBJECT</sgmltag>
+element for each object in the database.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== OBJECTS : Content Model =============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(OBJECT*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== OBJECTS : Example ====================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+See 
+<link linkend="apx_xml_objs_ex"><sgmltag class="element">OBJECT</sgmltag></link>.
+</para>
+</formalpara>
+
+<!-- ====================== ELEMENT : OBJECT ====================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;OBJECT&gt;</code></bridgehead>
+
+<!-- ===== OBJECT : Attributes ==================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">ID</sgmltag></entry>
+<entry>required</entry>
+<entry>ID values must be unique non-negative integers and are typically
+sequential numbers.</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== OBJECT : Children ====================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== OBJECT : Content Model ================================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>EMPTY</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== OBJECTS/OBJECT : Example =============================== -->
+<formalpara id="apx_xml_objs_ex">
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<OBJECTS>
+   <OBJECT ID="1"/>
+   <OBJECT ID="2"/>
+   <OBJECT ID="3"/>
+   <OBJECT ID="4"/>
+   <OBJECT ID="5"/>
+</OBJECTS>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                             LINKS                              -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_xml_links">
+<title>Links</title>
+<indexterm><primary>links</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>All Proximity links are binary (they connect exactly two objects)
+and directional.  Links are specified by
+<sgmltag class="element">LINK</sgmltag> elements, all of which must be
+included in a single <sgmltag class="element">LINKS</sgmltag>
+element.  The <sgmltag class="element">LINK</sgmltag> element is
+empty; its data is included in three required attributes, described
+below. Object IDs must correspond to ID numbers specified in the
+<sgmltag class="element">OBJECT</sgmltag> elements.
+</para>
+
+
+<!-- ====================== ELEMENT : LINKS ======================= -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;LINKS&gt;</code></bridgehead>
+
+<!-- ===== LINKS : Attributes ===================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== LINKS : Children ======================================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">LINK</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">LINK</sgmltag>
+element for each link in the database.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== LINKS : Content Model ================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(LINK*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== LINKS : Example ======================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+See 
+<link linkend="apx_xml_link_ex"><sgmltag class="element">LINK</sgmltag></link>.
+</para>
+</formalpara>
+
+
+<!-- ====================== ELEMENT : LINK ======================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;LINK&gt;</code></bridgehead>
+
+<!-- ===== LINK : Attributes ====================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">ID</sgmltag></entry>
+<entry>required</entry>
+<entry>ID values must be unique non-negative integers and are typically
+sequential numbers.</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">O1-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the start object for this link</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">O2-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the end object for this link</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== LINK : Children ======================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== LINK : Content Model =================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>EMPTY</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== LINKS/LINK : Example =================================== -->
+<formalpara id="apx_xml_link_ex">
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<LINKS>
+   <LINK ID="1" O1-ID="1" O2-ID="2"/>
+   <LINK ID="2" O1-ID="2" O2-ID="1"/>
+   <LINK ID="3" O1-ID="2" O2-ID="3"/>
+   <LINK ID="4" O1-ID="1" O2-ID="4"/>
+   <LINK ID="5" O1-ID="2" O2-ID="4"/>
+   <LINK ID="6" O1-ID="3" O2-ID="5"/>
+</LINKS>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                          ATTRIBUTES                            -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_xml_attrs">
+<title>Attributes</title>
+<indexterm id="idx_apxxml" class="startofrange"><primary>attributes</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>Attributes on the objects, links, and containers in the database are
+specified by <sgmltag class="element">ATTRIBUTE</sgmltag> elements, all
+of which must be included in a single 
+<sgmltag class="element">ATTRIBUTES</sgmltag> element. The
+<sgmltag class="element">ATTRIBUTE</sgmltag> element has three
+required attributes, described below.
+Each <sgmltag class="element">ATTRIBUTE</sgmltag> element
+contains a list of <sgmltag class="element">ATTR-VALUE</sgmltag>
+elements, one for each instance of that attribute in the database. The
+<sgmltag class="element">ATTR-VALUE</sgmltag> element specifies the
+value of the attribute.
+Because Proximity supports multi-dimensional attributes, values are
+enclosed in a <sgmltag class="element">COL-VALUE</sgmltag>, with one
+<sgmltag class="element">COL-VALUE</sgmltag> element for each dimension.
+The <sgmltag class="element">ATTR-VALUE</sgmltag> element has one
+required attribute, 
+<sgmltag class="attribute">ITEM-ID</sgmltag>, which specifies the ID
+of the object or link to which this attribute applies.
+Include multiple <sgmltag class="element">ATTR-VALUE</sgmltag>
+elements when an object or link has multiple values for an attribute.
+</para>
+
+<?pagebreak?>
+<sidebar>
+<para>
+Although Proximity supports the use of multi-dimensional attributes
+for data representation, import, and display in the &uiname;,
+Proximity does not yet allow the use of multi-dimensional attributes
+in queries.  Furthermore, attribute type definitions (the value of a
+<code>DATA-TYPE</code> element) must be defined using the default
+format of omitting the column name, or must use the column name
+&ldquo;value&rdquo;, if you want to use that attribute in query conditions or
+constraints.
+</para>
+</sidebar>
+
+<para>Subgraph attributes
+are specified by 
+<link linkend="apx_xml_subattrs"><sgmltag class="element">SUBG-ATTRIBUTE</sgmltag></link>
+elements.</para>
+
+<!-- ===================== ELEMENT : ATTRIBUTES =================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;ATTRIBUTES&gt;</code></bridgehead>
+
+<!-- ===== ATTRIBUTES : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== ATTRIBUTES : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">ATTRIBUTE</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">ATTRIBUTE</sgmltag>
+element for each object, link, or container attribute in the
+database.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ATTRIBUTES : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(ATTRIBUTE*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== ATTRIBUTES : Example =================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+See 
+<link linkend="apx_xml_colval_ex"><sgmltag class="element">COL-VALUE</sgmltag></link>.
+</para>
+</formalpara>
+
+<!-- ==================== ELEMENT : ATTRIBUTE ===================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;ATTRIBUTE&gt;</code></bridgehead>
+
+<!-- ===== ATTRIBUTE : Attributes ================================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">NAME</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of the object or link attribute</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">ITEM-TYPE</sgmltag></entry>
+<entry>required</entry>
+<entry>Specifies whether this is an object (O), link (L), or container (C)
+       attribute</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">DATA-TYPE</sgmltag></entry>
+<entry>required</entry>
+<entry>The data type of the attribute. 
+<indexterm><primary>data type</primary></indexterm>
+For multi-column
+(multi-dimensional) data, use the format &ldquo;columnName0:dataType0,
+columnName1:dataType1, ....&rdquo; Single-column attributes can
+omit the column name and simply indicate the data type.  See 
+&defineAttribute;
+<indexterm><primary>defineAttribute()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>defineAttribute()</secondary></indexterm>
+for more information on this specification and
+&DataTypeEnum;
+<indexterm><primary>DataTypeEnum class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>DataTypeEnum</secondary></indexterm>
+for a list of valid Proximity data types.
+<indexterm><primary>Proximity</primary>
+           <secondary>data types</secondary></indexterm>
+</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ATTRIBUTE : Children =================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">ATTR-VALUE</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">ATTR-VALUE</sgmltag>
+element for each instance of this attribute in the database, that is, one
+for each object, link, or container that has a value for this attribute.
+Each <sgmltag class="element">ATTR-VALUE</sgmltag> specifies a single,
+possibly multi-dimensional, value. The file includes multiple 
+<sgmltag class="element">ATTR-VALUE</sgmltag> 
+elements when an object, link, or container has multiple values for a
+specified attribute.
+</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ATTRIBUTE : Content Model ============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(ATTR-VALUE*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== ATTRIBUTE : Example ==================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+See 
+<link linkend="apx_xml_colval_ex"><sgmltag class="element">COL-VALUE</sgmltag></link>.
+</para>
+</formalpara>
+
+<!-- ===================== ELEMENT : ATTR-VALUE =================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;ATTR-VALUE&gt;</code></bridgehead>
+
+<!-- ===== ATTR-VALUE : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">ITEM-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the object, link, or container to which this
+       attribute applies</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ATTR-VALUE : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">COL-VALUE</sgmltag></entry>
+<entry>one or more</entry>
+<entry>The value of one dimension of the attribute. For
+multi-dimensional attributes, include one
+<sgmltag class="element">COL-VALUE</sgmltag> element for each
+dimension&rsquo;s value.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ATTR-VALUE : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(COL-VALUE+)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== ATTR-VALUE : Example =================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+See 
+<link linkend="apx_xml_colval_ex"><sgmltag class="element">COL-VALUE</sgmltag></link>.
+</para>
+</formalpara>
+
+<!-- ==================== ELEMENT : COL-VALUE ===================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;COL-VALUE&gt;</code></bridgehead>
+
+<!-- ===== COL-VALUE : Attributes ================================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== COL-VALUE : Children =================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== COL-VALUE : Content Model ============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(#PCDATA)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== ATTRIBUTES/ATTRIBUTE/ATTR-VALUE/COL-VALUE : Example ==== -->
+<formalpara id="apx_xml_colval_ex">
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<ATTRIBUTES>
+   <ATTRIBUTE NAME="obj-type" ITEM-TYPE="O" DATA-TYPE="STR">
+       <ATTR-VALUE ITEM-ID="1">
+          <COL-VALUE>person</COL-VALUE>
+       </ATTR-VALUE>
+       <ATTR-VALUE ITEM-ID="6">
+          <COL-VALUE>box</COL-VALUE>
+       </ATTR-VALUE>
+   </ATTRIBUTE>
+   <ATTRIBUTE NAME="pets" ITEM-TYPE="O" DATA-TYPE="STR">
+       <ATTR-VALUE ITEM-ID="1">
+          <COL-VALUE>Spot</COL-VALUE>
+       </ATTR-VALUE>
+       <ATTR-VALUE ITEM-ID="1">
+          <COL-VALUE>Snowball</COL-VALUE>
+       </ATTR-VALUE>
+   </ATTRIBUTE>
+   <ATTRIBUTE NAME="xy-dimensions" ITEM-TYPE="O" DATA-TYPE="X:DBL, Y:DBL">
+       <ATTR-VALUE ITEM-ID="6">
+          <COL-VALUE>3.5</COL-VALUE>
+          <COL-VALUE>11.25</COL-VALUE>
+       </ATTR-VALUE>
+   </ATTRIBUTE>
+   <ATTRIBUTE NAME="link-type" ITEM-TYPE="L" DATA-TYPE="STR">
+       <ATTR-VALUE ITEM-ID="1">
+          <COL-VALUE>has-friend</COL-VALUE>
+       </ATTR-VALUE>
+       <ATTR-VALUE ITEM-ID="2">
+          <COL-VALUE>owns</COL-VALUE>
+       </ATTR-VALUE>
+   </ATTRIBUTE>
+   <ATTRIBUTE NAME="uses-directed-links" ITEM-TYPE="C" DATA-TYPE="STR">
+       <ATTR-VALUE ITEM-ID="1">
+          <COL-VALUE>true</COL-VALUE>
+       </ATTR-VALUE>
+       <ATTR-VALUE ITEM-ID="2">
+          <COL-VALUE>false</COL-VALUE>
+       </ATTR-VALUE>
+   </ATTRIBUTE>
+</ATTRIBUTES>]]>
+</programlisting>
+</para>
+</formalpara>
+<indexterm startref="idx_apxxml" class="endofrange"/>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                          CONTAINERS                            -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_xml_container">
+<title>Containers</title>
+<indexterm><primary>containers</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>Containers are groups of subgraphs sharing some common
+characteristic. Containers are usually created as a result of running a
+query on a Proximity database.</para>
+
+<para>Containers in the database are represented by 
+<sgmltag class="element">CONTAINER</sgmltag> elements, all of which
+must be included in a single
+<sgmltag class="element">CONTAINERS</sgmltag> element.  The
+<sgmltag class="element">CONTAINER</sgmltag> element includes a list
+of subgraph items, subgraph attributes, and any nested containers
+within the parent container.</para>
+<indexterm><primary>nested containers</primary></indexterm>
+<indexterm><primary>containers</primary>
+           <secondary>nested</secondary></indexterm>
+
+<!-- ===================== ELEMENT : CONTAINERS ================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;CONTAINERS&gt;</code></bridgehead>
+
+<!-- ===== CONTAINERS : Attributes =============================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== CONTAINERS : Children ================================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">CONTAINER</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">CONTAINER</sgmltag>
+element for each container in the data. Nested containers are
+represented by nested <sgmltag class="element">CONTAINER</sgmltag>
+elements in the data file.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== CONTAINERS : Content Model ============================ -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(CONTAINER*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== CONTAINERS : Example ================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+See 
+<link linkend="apx_xml_cont_ex"><sgmltag class="element">CONTAINER</sgmltag></link>.
+</para>
+</formalpara>
+
+<!-- ===================== ELEMENT : CONTAINER =================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;CONTAINER&gt;</code></bridgehead>
+
+<!-- ===== CONTAINER : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">NAME</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of the container</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the container. ID values must be unique non-negative
+       integers.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== CONTAINER : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_xml_subgitems"><sgmltag class="element">SUBG-ITEMS</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>A list of database objects and links within this container and
+the subgraphs to which they belong.  Individual database entities can
+appear multiple times in this list if they appear in multiple
+subgraphs or if they appear in multiple locations within a single
+subgraph.</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_xml_subattrs"><sgmltag class="element">SUBG-ATTRIBUTES</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>A list of attributes for subgraphs in this container</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_xml_container"><sgmltag class="element">CONTAINER</sgmltag></link></entry>
+<entry>zero or more</entry>
+<entry>A nested container within this container</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== COLLECTION : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(SUBG-ITEMS?, SUBG-ATTRIBUTES?, CONTAINER*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== CONTAINERS/CONTAINER : Example ======================== -->
+<formalpara id="apx_xml_cont_ex">
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<CONTAINERS>
+   <CONTAINER>
+      <SUBG-ITEMS>...</SUBG-ITEMS>
+      <SUBG-ATTRIBUTES>...</SUBG-ATTRIBUTES>
+      <CONTAINER>...</CONTAINER>
+   </CONTAINER>
+</CONTAINERS>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                            SUBGRAPHS                           -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_xml_subgraphs">
+<title>Subgraphs</title>
+<indexterm><primary>subgraphs</primary>
+           <secondary>XML representation</secondary></indexterm>
+
+<para>Containers are collections of subgraphs. Each subgraph
+represents a match of the query against the database.</para>
+
+<para>All objects and links included in the container are
+represented by 
+<sgmltag class="element">ITEM</sgmltag> elements, all of which are
+included in a single 
+<sgmltag class="element">SUBG-ITEMS</sgmltag> element. Each
+<sgmltag class="element">ITEM</sgmltag> element identifies the
+subgraph to which that database entity belongs.  If an object appears
+in multiple subgraphs, or if it appears more than once in a single
+subgraph, it will also appear in multiple 
+<sgmltag class="element">ITEM</sgmltag> elements.
+</para>
+
+<!-- ===================== ELEMENT : SUBG-ITEMS =================== -->
+
+<bridgehead renderas="sect1" id="apx_xml_subgitems"><code role="heading">&lt;SUBG-ITEMS&gt;</code></bridgehead>
+
+<!-- ===== SUBG_ITEMS : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== SUBG-ITEMS : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">ITEM</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>Each <sgmltag class="element">ITEM</sgmltag> element identifies
+the enclosing subgraph and specifies a member entity (object or
+link).</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== SUBG-ITEMS : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(ITEM*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== SUBG-ITEMS : Example ==================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+See
+<link linkend="apx_xml_item_ex"><sgmltag class="element">ITEM</sgmltag></link>.
+</para>
+</formalpara>
+
+<!-- ================== ELEMENT : SUBG-ATTRIBUTES ================= -->
+
+<bridgehead renderas="sect1" id="apx_xml_subattrs"><code role="heading">&lt;SUBG-ATTRIBUTES&gt;</code></bridgehead>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="subgraphs">of subgraphs</secondary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>attributes of</secondary></indexterm>
+
+<!-- ===== SUBG-ATTRIBUTES : Attributes =========================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== SUBG-ATTRIBUTES : Children ============================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">SUBG-ATTRIBUTE</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>Each <sgmltag class="element">SUBG-ATTRIBUTE</sgmltag> element
+describes an attribute on subgraphs in the parent container and lists
+the values for specific subgraphs.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+
+</para>
+</formalpara>
+
+<!-- ===== SUBG-ATTRIBUTES : Content Model ======================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(SUBG-ATTRIBUTE*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+
+<!-- ===== SUBGRAPHS/SUBGRAPH : Example =========================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+See
+<link linkend="apx_xml_subgattr_ex"><sgmltag class="element">SUBG-ATTRIBUTE</sgmltag></link>.
+</para>
+</formalpara>
+
+<!-- ================== ELEMENT : SUBG-ATTRIBUTE ================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;SUBG-ATTRIBUTE&gt;</code></bridgehead>
+
+<!-- ===== SUBG-ATTRIBUTE : Attributes ============================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">NAME</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of the subgraph attribute</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">DATA-TYPE</sgmltag></entry>
+<entry>required</entry>
+<entry>The data type of the attribute. See &DataTypeEnum; 
+<indexterm><primary>DataTypeEnum class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>DataTypeEnum</secondary></indexterm>
+for a list
+of valid Proximity data types.
+<indexterm><primary>Proximity</primary>
+           <secondary>data types</secondary></indexterm>
+</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+
+</para>
+</formalpara>
+
+<!-- ===== SUBG-ATTRIBUTE : Children ============================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">ATTR-VALUE</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">ATTR-VALUE</sgmltag>
+element for each instance of this attribute in the parent container,
+that is, one for each subgraph that has a value for this attribute.
+Each <sgmltag class="element">ATTR-VALUE</sgmltag> specifies a single,
+possibly multi-dimensional, value. The file includes multiple 
+<sgmltag class="element">ATTR-VALUE</sgmltag> 
+elements when an subgraph has multiple values for a
+specified attribute.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== SUBG-ATTRIBUTE : Content Model ========================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(ATTR-VALUE*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== SUBG-ATTRIBUTES : Example ============================== -->
+<formalpara id="apx_xml_subgattr_ex">
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<SUBG-ATTRIBUTES>
+   <SUBG-ATTRIBUTE NAME="sample-membership" DATA-TYPE="INT">
+      <ATTR-VALUE ITEM-ID="1">
+         <COL-VALUE>0</COL-VALUE>
+      </ATTR-VALUE>
+      <ATTR-VALUE ITEM-ID="2">
+         <COL-VALUE>1</COL-VALUE>
+      </ATTR-VALUE>
+   </SUBG-ATTRIBUTE>
+   <SUBG-ATTRIBUTE NAME="originating-query" DATA-TYPE="STR">
+      <ATTR-VALUE ITEM-ID="1">
+         <COL-VALUE>research-clusters1</COL-VALUE>
+      </ATTR-VALUE>
+      <ATTR-VALUE ITEM-ID="2">
+         <COL-VALUE>research-clusters1</COL-VALUE>
+      </ATTR-VALUE>
+   </SUBG-ATTRIBUTE>
+</SUBG-ATTRIBUTES>]]>
+</programlisting>
+</para>
+</formalpara>
+
+<!-- ======================= ELEMENT : ITEM ======================= -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;ITEM&gt;</code></bridgehead>
+
+<!-- ===== ITEM : Attributes ====================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">SUBG-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the subgraph to which this object or link
+belongs. Objects and links can belong to multiple subgraphs and thus
+appear in multiple <sgmltag class="element">ITEM</sgmltag>
+elements.</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">ITEM-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the object or link</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">ITEM-TYPE</sgmltag></entry>
+<entry>required</entry>
+<entry>Specifies whether the referenced entity is an object (O) or
+       link (L)</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">NAME</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of this item within the subgraph. Subgraphs are
+usually created as the result of running queries. Proximity queries
+assign labels to their vertices and edges (corresponding to the
+objects and links in the database); these labels are included in the
+resulting subgraphs.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ITEM : Children ======================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== ITEM : Content Model =================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>EMPTY</literal>
+</para></blockquote></para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== SUBG-ITEMS : Example =================================== -->
+<formalpara id="apx_xml_item_ex">
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<SUBG-ITEMS>
+   <ITEM SUBG-ID="1" ITEM-ID="2" ITEM-TYPE="O" NAME="core_page"/>
+   <ITEM SUBG-ID="1" ITEM-ID="7" ITEM-TYPE="O" NAME="linked_page"/>
+   <ITEM SUBG-ID="1" ITEM-ID="4" ITEM-TYPE="L" NAME="linked_to"/>
+   <ITEM SUBG-ID="2" ITEM-ID="9" ITEM-TYPE="O" NAME="core_page"/>
+   <ITEM SUBG-ID="2" ITEM-ID="2" ITEM-TYPE="O" NAME="linked_page"/>
+   <ITEM SUBG-ID="2" ITEM-ID="6" ITEM-TYPE="L" NAME="linked_to"/>
+</SUBG-ITEMS>]]>
+</programlisting>
+</para>
+</formalpara>
+
+<indexterm startref="idx_dataxmla" class="endofrange"/>
+<indexterm startref="idx_dataxmlb" class="endofrange"/>
+</sect1>
+
+</appendix>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

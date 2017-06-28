@@ -1,0 +1,403 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>2.4.&nbsp;Creating a Degree Attribute</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Cookbook">
+      <link rel="up" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Database Manipulation">
+      <link rel="prev" href="ch02s03.html" title="2.3.&nbsp;Aggregation in NSTs">
+      <link rel="next" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Data Import">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02s03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;2.&nbsp;Database Manipulation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="section" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="recipe_degreeattr"></a>2.4.&nbsp;Creating a Degree Attribute
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e1357"></a><a class="indexterm" name="d0e1360"></a><a class="indexterm" name="d0e1365"></a><a class="indexterm" name="d0e1370"></a><a class="indexterm" name="d0e1375"></a><a class="indexterm" name="d0e1378"></a><a class="indexterm" name="d0e1383"></a><a class="indexterm" name="d0e1388"></a><a class="indexterm" name="d0e1391"></a><a class="indexterm" name="d0e1394"></a><a class="indexterm" name="d0e1399"></a><a class="indexterm" name="d0e1404"></a><a class="indexterm" name="d0e1409"></a><a class="indexterm" name="d0e1414"></a><a class="indexterm" name="d0e1419"></a><a class="indexterm" name="d0e1424"></a><a class="indexterm" name="d0e1429"></a><a class="indexterm" name="d0e1434"></a><a class="indexterm" name="d0e1440"></a><a class="indexterm" name="d0e1443"></a><a class="indexterm" name="d0e1449"></a><a class="indexterm" name="d0e1452"></a><a class="indexterm" name="d0e1457"></a><a class="indexterm" name="d0e1460"></a><a class="indexterm" name="d0e1465"></a><a class="indexterm" name="d0e1468"></a><a class="indexterm" name="d0e1473"></a><a class="indexterm" name="d0e1476"></a><a class="indexterm" name="d0e1481"></a><a class="indexterm" name="d0e1484"></a><a class="indexterm" name="d0e1489"></a><a class="indexterm" name="d0e1492"></a><a class="indexterm" name="d0e1497"></a><a class="indexterm" name="d0e1500"></a><a class="indexterm" name="d0e1505"></a><a class="indexterm" name="d0e1508"></a><div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1516"></a>Problem
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>When working with relational data, you often want to know the
+               degree of a node in the graph (an object in Proximity).  This recipe
+               demonstrates how to calculate the degree of an object and store that
+               value as an attribute on the object.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1524"></a>Solution
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Suppose you have a database like the one shown in the following
+               fragment:
+               
+            </p>
+            <div class="informalfigure">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/DBManip_AddDegreeAttr_DB.png" align="middle" width="481.49999999999994"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p>
+               
+            </p>
+            <p>The example database contains actors and movies.  Actors are
+               linked to the movies they&#8217;ve appeared in by 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ActedIn</span> links, and
+               actors that have appeared in the same movie are connected by a pair of
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">CollaboratedWith</span> links, one in each
+               direction.  In the fragment shown above, both Christopher Guest and
+               Harry Shearer appeared in <em class="citetitle">This is Spinal Tap</em>,
+               so there is a pair of <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">CollaboratedWith</span>
+               links connecting the actors.
+            </p>
+            <p>The recipe in <a href="ch02s03.html" title="2.3.&nbsp;Aggregation in NSTs">&#8220;Aggregation in NSTs&#8221;</a> showed us
+               how to use the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a> method to summarize multiple pieces
+               of information for a single object.  In the current example, we can
+               think of each linked object as a piece of information for the target
+               object, which we summarize by counting all such linked objects, once
+               again using the versatile <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a> method.
+            </p>
+            <p>The pieces of information we need&#8212;the different objects
+               linked to our target node&#8212;are contained in the links NST.
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> printNST(prox.linkNST)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,link_id,o1_id,o2_id WHERE * LIMIT *]
+[ 1@0,    1@0,    1@0,    3@0     ]
+[ 2@0,    2@0,    2@0,    3@0     ]
+[ 3@0,    3@0,    2@0,    4@0     ]
+[ 4@0,    4@0,    1@0,    2@0     ]
+[ 5@0,    5@0,    2@0,    1@0     ]
+</pre><p>The links NST contains one row per link.  To get the degree of
+               an object, we need to count the number of rows that show that object
+               as the start node for a link (rows having the target object ID in the
+               <code class="token">o1_id</code> column) and add that to
+               the number of rows that show that object as the terminating node for a
+               link (rows having the target object ID in the
+               <code class="token">o2_id</code> column).
+            </p>
+            <p>We can accomplish this more easily by employing a neat trick
+               involving adding inverse &#8220;links&#8221; to our link data.
+               (Because these inverses are not added to the links NST, they are not
+               actually added to the database.) First, we create an NST that contains
+               the inverses of all the links in the database.
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> inverseLinks = prox.linkNST.project("o2_id, o1_id")
+ printNST(inverseLinks)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,o2_id,o1_id WHERE * LIMIT *]
+[ 1@0,    3@0,    1@0     ]
+[ 2@0,    3@0,    2@0     ]
+[ 3@0,    4@0,    2@0     ]
+[ 4@0,    2@0,    1@0     ]
+[ 5@0,    1@0,    2@0     ]
+</pre><p>Then we create an NST that combines the actual link data with the
+               data from the inverse-link NST we just created.  (The steps to create
+               the <span class="token">biDirLinks</span> NST have been broken up
+               into two lines for clarity and formatting purposes; you can string the
+               method calls together on one line if you prefer.)
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> biDirLinks = prox.linkNST.project("o1_id, o2_id")
+ biDirLinks.insertRowsFromNST(inverseLinks)
+ printNST(biDirLinks)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,o1_id,o2_id WHERE * LIMIT *]
+[ 1@0,    1@0,    3@0     ]
+[ 2@0,    2@0,    3@0     ]
+[ 3@0,    2@0,    4@0     ]
+[ 4@0,    1@0,    2@0     ]
+[ 5@0,    2@0,    1@0     ]
+[ 6@0,    3@0,    1@0     ]
+[ 7@0,    3@0,    2@0     ]
+[ 8@0,    4@0,    2@0     ]
+[ 9@0,    2@0,    1@0     ]
+[ 10@0,   1@0,    2@0     ]
+</pre><p>Now we can aggregate over the IDs in the
+               <code class="token">o1_id</code> column to get a total count of links
+               going out of or into each object.  That is, we group on
+               <code class="token">o1_id</code> and count the number of
+               (non-distinct) <code class="token">o2_id</code> values for each
+               value of <code class="token">o1_id</code>.
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> degreeNST = biDirLinks.aggregate("count", "o1_id", "o2_id")
+ printNST(degreeNST)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,o1_id,o2_id WHERE * LIMIT *]
+[ 0@0,    1@0,    3     ]
+[ 1@0,    2@0,    4     ]
+[ 2@0,    3@0,    2     ]
+[ 3@0,    4@0,    1     ]
+</pre><p>The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a> method reuses the column names specified
+               in the method call.  Thus, the column containing the group
+               identifier is labeled <code class="token">o1_id</code> and the
+               column containing the counts is labeled 
+               <code class="token">o2_id</code>.  Note that the <code class="code">count</code>
+               operator gives us a count of <span class="emphasis"><em>all</em></span> linked objects,
+               not of distinct linked objects.
+            </p>
+            <p>The resulting NST contains the data we want to use for the new
+               degree attribute.  As we saw in the recipe 
+               <a href="ch02s02.html" title="2.2.&nbsp;Creating Attributes from Arbitrary Data">&#8220;Creating Attributes from Arbitrary Data&#8221;</a>, we just need to rename
+               the columns of the NST so that they
+               have the expected names <code class="token">id</code> and
+               <code class="token">value</code>, then use that NST to
+               define the values for the new <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">degree</span>
+               attribute.
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> objectAttrs = prox.objectAttrs
+ degreeNST.renameColumns("id, value")
+ objectAttrs.defineAttributeWithData("degree", "int", degreeNST)
+</code></strong></pre><p>
+               
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1652"></a>Discussion
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>There are many variations on simple degree that we might find
+               useful in developing models.  Calculating these values involve simple
+               modifications to the above procedure.
+            </p>
+            <div class="section" lang="en">
+               <div class="titlepage">
+                  <div>
+                     <div>
+                        <h4 class="title"><a name="d0e1661"></a>Degree for selected links
+                        </h4>
+                     </div>
+                  </div>
+               </div>
+               <p>Sometimes we might want to limit our degree calculations to
+                  include only links of a specified type.  Suppose we only wanted to
+                  know the degree of <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ActedIn</span> links.  To get
+                  this value we limit the links included in the bi-directional NST to
+                  those of the specified type.  We start by creating an  NST containing
+                  all the links of the desired type.
+                  
+                  
+               </p><pre class="programlisting"><strong class="userinput"><code> actedInLinks = DB.getLinks("linktype = 'ActedIn'")
+ printNST(actedInLinks)
+</code></strong></pre><p>
+                  
+                  
+               </p><pre class="screen">[SHOWING head,link_id,o1_id,o2_id,linktype WHERE * LIMIT *]
+[ 0@0,    1@0,    1@0,    3@0,    "ActedIn"    ]
+[ 1@0,    2@0,    2@0,    3@0,    "ActedIn"    ]
+[ 2@0,    3@0,    2@0,    4@0,    "ActedIn"    ]
+</pre><p>Now create the inverse links and combine them with the links in
+                  the <span class="token">actedInLinks</span> NST to obtain an NST of
+                  all <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ActedIn</span> links and their inverses.
+                  Use this new bi-directional NST to calculate and define the degree
+                  attribute as before.
+               </p>
+            </div>
+            <div class="section" lang="en">
+               <div class="titlepage">
+                  <div>
+                     <div>
+                        <h4 class="title"><a name="d0e1687"></a>Degree for selected objects
+                        </h4>
+                     </div>
+                  </div>
+               </div>
+               <p>Similarly, we might only care about the degree of objects of a
+                  specific type.  To limit our degree calculations to the specified
+                  objects, we start by creating an NST that holds the IDs of the
+                  objects that we&#8217;re interested in, in this case, actors.
+                  
+                  
+               </p><pre class="programlisting"><strong class="userinput"><code> actorObjects = DB.getObjects("objtype = 'Actor'")
+ printNST(actorObjects)
+</code></strong></pre><p>
+                  
+                  
+               </p><pre class="screen">[SHOWING head,id,objtype WHERE * LIMIT *]
+[ 0@0,    1@0,    "Actor"    ]
+[ 1@0,    2@0,    "Actor"    ]
+</pre><p>Now we can join that NST with the (full) bi-directional link NST
+                  we created earlier.  The join with the bi-directional links NST returns
+                  rows where the originating object is an actor.
+                  
+                  
+               </p><pre class="programlisting"><strong class="userinput"><code> actorBiDirLinks = biDirLinks.join(actorObjects,"o1_id = id", "o1_id, o2_id")
+</code></strong></pre><p>Note that this limits the objects for which we calculate
+                  degree to <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Actor</span> objects but does not
+                  similarly restrict the type of the linked objects.  If we wanted to
+                  limit our degree calculations to only actor-to-actor links, we can do
+                  so by joining the <span class="token">actorObjects</span> NST with the
+                  links NST to create an NST where <code class="token">o2_id</code> only
+                  contains actors, then using that in place of the links NST when
+                  creating our bi-directional NST.
+               </p>
+            </div>
+            <div class="section" lang="en">
+               <div class="titlepage">
+                  <div>
+                     <div>
+                        <h4 class="title"><a name="d0e1719"></a>In- or out-degree only
+                        </h4>
+                     </div>
+                  </div>
+               </div>
+               <p>We needed the trick of creating inverse &#8220;links&#8221;
+                  above because we wanted to include both link directions in our degree
+                  calculations.  But suppose we only care about the number of links
+                  terminating at the target object (in degree) or the number of links
+                  originating from the target object (out degree)?  This is even
+                  simpler&#8212;we can skip creating the bi-directional NST and use the
+                  links NST directly.
+               </p>
+               <p>To calculate the out degree, we group on the originating object 
+                  (<code class="token">o1_id</code>) and count the number rows for
+                  each ID in <code class="token">o1_id</code>.
+                  
+                  
+               </p><pre class="programlisting"><strong class="userinput"><code> outDegree = prox.linkNST.aggregate("count", "o1_id", "o2_id")
+ printNST(outDegree)
+</code></strong></pre><p>
+                  
+                  
+               </p><pre class="screen">[SHOWING head,o1_id,o2_id WHERE * LIMIT *]
+[ 0@0,    1@0,    2    ]
+[ 1@0,    2@0,    3    ]
+</pre><p>And to get the in degree, we group on the terminating object
+                  (<code class="token">o2_id</code>).
+                  
+                  
+               </p><pre class="programlisting"><strong class="userinput"><code> inDegree = prox.linkNST.aggregate("count", "o2_id", "o1_id")
+ printNST(inDegree)
+</code></strong></pre><p>
+                  
+                  
+               </p><pre class="screen">[SHOWING head,o2_id,o1_id WHERE * LIMIT *]
+[ 0@0,    3@0,    2    ]
+[ 1@0,    4@0,    1    ]
+[ 2@0,    2@0,    1    ]
+[ 3@0,    1@0,    1    ]
+</pre><p>We can now proceed as before by renaming the columns and using
+                  <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Attributes.html#defineAttributeWithData(java.lang.String,%20java.lang.String,%20kdl.prox.dbmgr.NST)"><code class="methodname">defineAttributeWithData()</code></a> to create and populate the new
+                  attribute.
+               </p>
+            </div>
+            <div class="section" lang="en">
+               <div class="titlepage">
+                  <div>
+                     <div>
+                        <h4 class="title"><a name="d0e1757"></a>Degree for unique links
+                        </h4>
+                     </div>
+                  </div>
+               </div>
+               <p>All the above examples count multiple links connecting objects
+                  separately, but what if we want to instead count the number of unique
+                  objects that an object is linked to?
+               </p>
+               <p>The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a> method solves this nicely with the
+                  <code class="code">card</code> aggregation operator.  The <code class="code">card</code>
+                  operator counts the number of distinct values for a given group,
+                  giving us exactly the values we want.
+                  
+                  
+               </p><pre class="programlisting"><strong class="userinput"><code> uniqueDegree = biDirLinks.aggregate("card", "o1_id", "o2_id")
+</code></strong></pre><p>
+                  
+               </p>
+            </div>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1780"></a>Supporting Files
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Download the following XML data file to create the database used
+               above to demonstrate this recipe:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p>Database:
+                             <code class="filename"><a href="../examples/DBManip_AddDegreeAttr_DB.xml" target="_top">DBManip_AddDegreeAttr_DB.xml</a></code></p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               
+            </p>
+            <p>You may also want to examine the unit test file for this recipe at
+               <code class="filename">$PROX_HOME/test/java/kdl/prox/cookbook/DegreeAttributeTest.java</code>.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02s03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">2.3.&nbsp;Aggregation in NSTs&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;3.&nbsp;Data Import</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

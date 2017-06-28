@@ -1,0 +1,64 @@
+<!DOCTYPE rpt2 SYSTEM "rpt2.dtd">
+<!-- Created by Proximity 4.2 -->
+
+<rpt2>
+    <class-label>
+        <source>
+            <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+            <data-type>str</data-type>
+            <is-continuous>false</is-continuous>
+            <is-single-value>false</is-single-value>
+            <source-elements>
+                <item-name>movie</item-name>
+                <attr-name>genre</attr-name>
+            </source-elements>
+        </source>
+    </class-label>
+    <rpt-body>
+        <node>
+            <class-label-distr>
+                <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                <class-label-info class="0" count="166"/>
+                <class-label-info class="1" count="144"/>
+            </class-label-distr>
+            <split>
+                <feature-setting>
+                    <fs-class>kdl.prox.model2.rpt.featuresettings.ValueFilteredFeatureSetting</fs-class>
+                    <source>
+                        <source-class>kdl.prox.model2.common.sources.ItemSource</source-class>
+                        <data-type>int</data-type>
+                        <is-continuous>false</is-continuous>
+                        <is-single-value>false</is-single-value>
+                        <source-elements>
+                            <item-name>actor</item-name>
+                        </source-elements>
+                    </source>
+                    <aggregator>
+                        <aggregator-class>kdl.prox.model2.rpt.aggregators.DegreeAggregator</aggregator-class>
+                    </aggregator>
+                    <threshold>28</threshold>
+                    <fs-elements>
+                    </fs-elements>
+                </feature-setting>
+            </split>
+            <yes-branch>
+                <node>
+                    <class-label-distr>
+                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                        <class-label-info class="0" count="26"/>
+                        <class-label-info class="1" count="40"/>
+                    </class-label-distr>
+                </node>
+            </yes-branch>
+            <no-branch>
+                <node>
+                    <class-label-distr>
+                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                        <class-label-info class="0" count="124"/>
+                        <class-label-info class="1" count="7"/>
+                    </class-label-distr>
+                </node>
+            </no-branch>
+        </node>
+    </rpt-body>
+</rpt2>

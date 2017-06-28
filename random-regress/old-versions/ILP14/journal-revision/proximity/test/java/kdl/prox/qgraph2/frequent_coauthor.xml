@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<graph-query name="frequent co-authors">
+  <description>finds pairs of authors who have co-authored five or more
+        times</description>
+  <query-body>
+    <vertex name="Author2">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>objecttype</attribute-name>
+          <value>Author</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="Author1">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>objecttype</attribute-name>
+          <value>Author</value>
+        </test>
+      </condition>
+    </vertex>
+    <edge name="CoAuthor">
+      <vertex1>Author1</vertex1>
+      <vertex2>Author2</vertex2>
+      <directed>true</directed>
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>linktype</attribute-name>
+          <value>Co-Authored</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>5</min>
+      </numeric-annotation>
+    </edge>
+  </query-body>
+</graph-query>
+

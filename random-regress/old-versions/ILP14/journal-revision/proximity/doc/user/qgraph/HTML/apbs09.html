@@ -1,0 +1,187 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Constraints</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="apb.html" title="Appendix&nbsp;B.&nbsp;XML Representation">
+      <link rel="prev" href="apbs08.html" title="Subqueries">
+      <link rel="next" href="apbs10.html" title="Test Expressions">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="apbs08.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Appendix&nbsp;B.&nbsp;XML Representation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="apbs10.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="apx_queryxml_constraint"></a>Constraints
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e10191"></a><p>A <code class="sgmltag-element">constraint</code> defines a
+            <code class="sgmltag-element">test</code> 
+            element that compares the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e385"><span class="glossterm">identity</span></a> or 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e41"><span class="glossterm">attribute values</span></a>
+            of two vertices or two edges. 
+            You cannot mix vertices and edges within a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">constraint</span></a>,
+            but queries may include both vertex constraints and edge
+            constraints. Because constraints apply to two different query
+            elements, they occur at the top level within a query, rather than
+            under any specific element.  Specifically, you cannot include
+            constraints within <code class="sgmltag-element">subquery</code>
+            elements.  You can combine multiple constraints with
+            <code class="sgmltag-element">and</code> elements.
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>Legal operators for constraints are <code class="literal">eq</code>,
+                        <code class="literal">lt</code>, <code class="literal">le</code>, <code class="literal">gt</code>,
+                        <code class="literal">ge</code>, and <code class="literal">ne</code>.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>Constraints take slightly different forms depending on whether
+            they are comparing attributes or identity. In the example below, the
+            first <code class="sgmltag-element">test</code> requires that query
+            items (vertices or edge) A and B have the same value for attribute
+            <em class="varname"><code>attr</code></em>. The second <code class="sgmltag-element">test</code> requires that query items B and C do
+            not map to the same entity in the database.
+         </p>
+         <p>Vertex and edge <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e528"><span class="glossterm">names</span></a>
+            used in the constraint, as specified by
+            the <code class="sgmltag-element">item-name</code> element, must match
+            the name and case of vertices and edges defined for this query.
+         </p>
+         <h2><a name="d0e10259"></a><code class="code">&lt;constraint&gt;</code></h2>
+         <p><b xmlns:exsl="http://exslt.org/common">Attributes&nbsp;</b>
+            None.
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Children&nbsp;</b>
+            
+         </p>
+         <div class="informaltable">
+            <table border="0" width="100%">
+               <colgroup>
+                  <col width="27%" align="left">
+                  <col width="18%" align="left">
+                  <col width="55%" align="left">
+               </colgroup>
+               <tbody valign="top">
+                  <tr>
+                     <td align="left"><a href="apbs10.html" title="Test Expressions"><code class="sgmltag-element">test</code></a></td>
+                     <td align="left">member of a required set</td>
+                     <td align="left">Requirement for query elements&#8217; attribute values</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">and</code></td>
+                     <td align="left">member of a required set</td>
+                     <td align="left">Requires all of the included tests be satisfied</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">or</code></td>
+                     <td align="left">member of a required set</td>
+                     <td align="left">Requires one of the included tests be satisfied; allowed by DTD
+                               but prohibited by current Proximity implementation
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">not</code></td>
+                     <td align="left">member of a required set</td>
+                     <td align="left">Requires that the specified test not be satisfied; allowed by DTD
+                               but prohibited by current Proximity implementation
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <p>
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Content Model&nbsp;</b> 
+         </p>
+         <p>
+            Although the DTD does not enforce this, Proximity requires that
+            constraint <code class="sgmltag-element">test</code> elements may only
+            be combined with <code class="sgmltag-element">and</code>.
+            
+         </p>
+         <div class="blockquote">
+            <blockquote class="blockquote">
+               <p>
+                  <code class="literal">(or | and | not | test)</code>
+                  
+               </p>
+            </blockquote>
+         </div>
+         <p>
+            
+         </p>
+         <p><a name="apx_queryxml_constr_ex"></a><b xmlns:exsl="http://exslt.org/common">Example&nbsp;</b>
+            
+         </p><pre class="programlisting">&lt;constraint&gt;
+  &lt;and&gt;
+    &lt;test&gt;
+      &lt;operator&gt;eq&lt;/operator&gt;
+      &lt;item&gt;
+        &lt;item-name&gt;A&lt;/item-name&gt;
+        &lt;attribute-name&gt;objtype&lt;/attribute-name&gt;
+      &lt;/item&gt;
+      &lt;item&gt;
+        &lt;item-name&gt;B&lt;/item-name&gt;
+        &lt;attribute-name&gt;objtype&lt;/attribute-name&gt;
+      &lt;/item&gt;
+    &lt;/test&gt;
+    &lt;test&gt;
+      &lt;operator&gt;ne&lt;/operator&gt;
+      &lt;item&gt;
+        &lt;item-name&gt;B&lt;/item-name&gt;
+        &lt;id/&gt;
+      &lt;/item&gt;
+      &lt;item&gt;
+        &lt;item-name&gt;C&lt;/item-name&gt;
+        &lt;id/&gt;
+      &lt;/item&gt;
+    &lt;/test&gt;
+  &lt;/and&gt;
+&lt;/constraint&gt;
+</pre><p>
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="apbs08.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="apb.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="apbs10.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Subqueries&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Test Expressions</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

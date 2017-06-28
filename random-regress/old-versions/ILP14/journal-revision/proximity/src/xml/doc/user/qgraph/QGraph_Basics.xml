@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="qg_ch_basics">
+<title>Query Basics</title>
+
+<!-- ============================================================== -->
+<!--                         QUERY STRUCTURE                        -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Query Structure</title>
+
+<para>A &qgraph; query
+<indexterm><primary>queries</primary>
+           <secondary>definition</secondary></indexterm>
+is a labeled graph that describes the structure
+and content of the database entities (objects and links) to be
+matched.  <glossterm baseform="vertex">Vertices</glossterm> and
+<glossterm baseform="edge">edges</glossterm> in the query correspond
+to <glossterm baseform="object">objects</glossterm> and 
+<glossterm baseform="link">links</glossterm> in the database. Every
+query must have at least one vertex and 
+every edge must have vertices at both ends. A &qgraph; query must be
+a connected graph, with a single vertex being the simplest &qgraph;
+query.</para>
+
+<para>&qgraph; queries are represented graphically.
+<indexterm><primary>queries</primary>
+           <secondary>graphical representation</secondary></indexterm>
+<indexterm><primary>graphical representation</primary>
+           <secondary>queries</secondary></indexterm>
+The example below
+shows a query that matches two objects connected by a directed link.
+<figure id="fig_basic_query">
+<title>Example query structure</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_Query_Structure.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_Query_Structure.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Each vertex and edge in a &qgraph; query has a unique 
+<glossterm>name</glossterm>
+<indexterm><primary>edges</primary>
+           <secondary>names of</secondary></indexterm>
+<indexterm><primary>vertices</primary>
+           <secondary>names of</secondary></indexterm>
+<indexterm><primary>names</primary>
+           <secondary sortas="edges">of edges</secondary></indexterm>
+<indexterm><primary>names</primary>
+           <secondary sortas="vertices">of vertices</secondary></indexterm>
+within the context of the query. These names have no intrinsic
+meaning and serve mostly to provide meaningful labels
+to the user in query results.</para>
+
+<para>For the example queries in this document, we use either
+arbitrary alphabetic labels
+<indexterm><primary>names</primary>
+           <secondary>conventions</secondary></indexterm>
+or semantically meaningful names for ease
+in understanding the query.  For example, if we define a query
+vertex that matches database objects with the attribute value 
+<token role="attr">ObjType&nbsp;=&nbsp;movie</token>, we might call this the
+<token role="vertex">movie</token> vertex.  Similarly, a 
+query edge defined to match links with the attribute value 
+<token role="attr">LinkType&nbsp;=&nbsp;acted-in</token> might be named
+<token role="edge">appeared-in</token> in the query. 
+By convention, when using alphabetic 
+labels, we use letters at the beginning of the alphabet such as
+<token role="vertex">A</token>, <token role="vertex">B</token>, and <token role="vertex">C</token>
+to label vertices, and letters at the end of the alphabet such as
+<token role="edge">X</token>, <token role="edge">Y</token>, and
+<token role="edge">Z</token> to label edges.
+When context makes the intent clear, we will also use an informal
+shorthand to refer to database entities within this document. For
+example, we might refer to an object with the attribute 
+<token role="attr">Name&nbsp;=&nbsp;James Dean</token> as the 
+<token role="object">James Dean</token> object.
+</para>
+
+<para>Although the underlying graph model uses only directed
+<indexterm><primary>edges</primary>
+           <secondary>directed vs. undirected</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>databases</secondary>
+           <tertiary>link requirements</tertiary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>Proximity</secondary>
+           <tertiary>link requirements</tertiary></indexterm>
+<indexterm><primary>directed edges</primary>
+           <see>edges</see></indexterm>
+<indexterm><primary>undirected edges</primary>
+           <see>edges</see></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>directionality</secondary></indexterm>
+links, &qgraph; supports both directed and undirected edges.  That is,
+&qgraph; requires that the database use directed, binary links, but 
+queries can either specify a required direction
+for edges and thus for
+corresponding links in the database, or indicate that the
+directionality of a
+link doesn&rsquo;t matter when matching the query.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                          QUERY RESULTS                         -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Query Results</title>
+
+<para>Evaluating a &qgraph; query returns a
+<glossterm><emphasis>container</emphasis></glossterm>,
+<indexterm><primary>containers</primary></indexterm>
+a collection of all the matching subgraphs from the database. To match
+the query,
+<indexterm><primary>matching queries</primary>
+           <secondary>requirements</secondary></indexterm>
+a <glossterm>subgraph</glossterm> must
+have the correct structure and satisfy all of the query&rsquo;s requirements
+(conditions, numeric annotations, and constraints).  This chapter
+covers how query structure
+<indexterm><primary>structure of queries</primary></indexterm>
+matches database structure; 
+<glossterm baseform="condition">conditions</glossterm>,
+<glossterm baseform="numeric annotation">numeric annotations</glossterm>
+and <glossterm baseform="constraint">constraints</glossterm> are
+covered in subsequent chapters.</para>
+
+<para>It&rsquo;s important to understand how
+the structure of a &qgraph; query matches database structures.  Let&rsquo;s
+look at an example database fragment and see how a simple query
+matches that fragment.  <xref linkend="fig_basics_db01"/>
+shows a fragment of a database containing information about books,
+movies, and writers.  We can see that this fragment includes three
+different types of objects, as represented by the different values for
+the <token role="attr">ObjType</token> attribute.  Similarly, the
+<token role="attr">LinkType</token> attribute describes the type of
+relationship that links two objects in the database.  Additional
+object attributes provide more details about the objects, such as a
+person&rsquo;s name or a book&rsquo;s publication date.
+<figure id="fig_basics_db01">
+<title>Database fragment [Basics_DB01.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01.png"
+               width="3.35in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01.png"
+               contentwidth="4.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The query shown in 
+<xref linkend="fig_basics_db01_q01"/> finds two objects
+connected by a directed link. It will match any database subgraph with
+this structure.
+<figure id="fig_basics_db01_q01">
+<title>Basic structural query [Basics_DB01_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Executing the query on the database fragment shown above yields
+the four subgraphs shown in
+<xref linkend="fig_basics_db01_q01_res"/>.
+<figure id="fig_basics_db01_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q01_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q01_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The database fragment in 
+<xref linkend="fig_basics_db01"/>
+includes four different instances of two objects connected by a
+directed link, which correspond to the four subgraphs in the query
+results.  Each match to the query yields a separate subgraph
+in the results container, for example, the two links
+<indexterm><primary>links</primary>
+           <secondary>multiple</secondary>
+           <tertiary>matching queries</tertiary></indexterm>
+between <token role="object">Stephen King</token> and <emphasis>Storm
+of the Century</emphasis> create two different matches to the query and
+therefore two different subgraphs in the query 
+results.  Importantly, the query returns subgraphs that include all
+related object and link attributes.  Query results retain the vertex
+and edge names
+<indexterm><primary>names</primary>
+           <secondary sortas="subgraphs">in subgraphs</secondary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>names in</secondary></indexterm>
+<indexterm><primary>labels</primary>
+           <see>names</see></indexterm>
+used in the query.  These names are used only in the
+context of the result subgraphs; they are not added to the database
+objects or links themselves.</para>
+
+<para>Let&rsquo;s examine the results of a slightly more complicated query
+run on another database fragment, shown in <xref linkend="fig_basics_db02"/>.
+This time our fragment contains information on movies and their
+casts.  In particular, we see that <token role="object">Elizabeth
+Taylor</token> appeared in <citetitle>Butterfield 8</citetitle>, that
+both <token role="object">Elizabeth Taylor</token> and
+and <token role="object">Richard Burton</token> appeared in
+<citetitle>Cleopatra</citetitle>, and that the two actors were married
+to each other.
+<figure id="fig_basics_db02">
+<title>Database fragment [Basics_DB02.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB02.png"
+               width="3.9in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB02.png"
+               contentwidth="4.75in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This time, our query finds all subgraphs that have two objects
+linked to a third object. Both links must be directed and must point
+to the third object. The new query is shown in 
+<xref linkend="fig_basics_db02_q1"/>.
+<figure id="fig_basics_db02_q1">
+<title>Three-vertex query [Basics_DB02_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB02_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB02_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The results of executing this query on the above database fragment are
+shown in <xref linkend="fig_basics_db02_q01_res"/>.
+<figure id="fig_basics_db02_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB02_Q01_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB02_Q01_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Because &qgraph; finds each unique match of the query&rsquo;s
+structure, the query&rsquo;s results can include subgraphs that
+contain the same <emphasis>database</emphasis> objects and links but
+which are mapped to different <emphasis>query</emphasis> elements.
+<indexterm><primary>subgraphs</primary>
+           <secondary>equivalent subgraphs</secondary></indexterm>
+<indexterm><primary>equivalent subgraphs</primary></indexterm>
+This can be seen in the top two subgraphs in
+<xref linkend="fig_basics_db02_q01_res"/>.  Both subgraphs contain the
+objects <token role="object">Elizabeth Taylor</token>, 
+<token role="object">Richard Burton</token>, and
+<emphasis>Cleopatra</emphasis> and their associated
+<token role="link">acted-in</token> links, but they correspond to different
+vertices and edges in the query.
+</para>
+
+<para>Additionally, &qgraph; does not require that distinct query
+elements match 
+distinct database entities, therefore database elements may appear more
+than once in an individual subgraph if they correctly match the
+query&rsquo;s structure.  In this example, the last four subgraphs
+include duplicated
+<indexterm><primary>subgraphs</primary>
+           <secondary>duplicated elements in</secondary></indexterm>
+<indexterm><primary>duplicates in subgraphs</primary></indexterm>
+objects and links.  Although
+they correspond to the same database entity, such duplicated objects and
+links are treated as distinct entities within the subgraph because
+they match distinct query elements. Query constructs such as
+<glossterm baseform="condition">conditions</glossterm>, 
+<glossterm baseform="numeric annotation">numeric annotations</glossterm>,
+and <glossterm baseform="constraint">constraints</glossterm>, 
+introduced later in
+this guide, can be used to restrict matches and avoid this kind of
+duplication in query results when desired, but the query structure
+alone carries no such requirement.</para>
+
+<para>Just as important as what a query returns, is what it doesn&rsquo;t
+return. Note that the first two subgraphs in 
+<xref linkend="fig_basics_db02_q01_res"/> do not include the
+married-to link from Richard Burton to Elizabeth Taylor. &qgraph;
+does not return links in the database that are not specified in the
+query, even when both link ends are in the same subgraph.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        UNDIRECTED EDGES                        -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Undirected Edges</title>
+<indexterm><primary>edges</primary>
+           <secondary>directed vs. undirected</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>directionality</secondary></indexterm>
+
+<para>Sometimes we don&rsquo;t care about the direction of a link
+when identifying matching subgraphs.  For example, we might care only
+that a path exists between two objects, but not about the direction of
+that path.  In such a case, we want to create a query that requires
+that two objects be linked, but that doesn&rsquo;t require a specific
+direction for that link.</para>
+
+<para>An <emphasis><glossterm>undirected edge</glossterm></emphasis>
+in a &qgraph; query
+indicates that there must be a link between the corresponding database
+objects without concern for the direction of that link.  To see how
+this affects query results, let&rsquo;s look at the following sample
+database and query.  <xref linkend="fig_basics_db03"/> shows a
+fragment of a database containing information about Web pages and their
+connections.
+<figure id="fig_basics_db03">
+<title>Database fragment [Basics_DB03.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB03.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB03.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para><xref linkend="fig_basics_db03_q01"/> is a simple query designed
+to find sets of two linked objects.
+Because we don&rsquo;t care whether the link goes from
+<token role="vertex">A</token> to <token role="vertex">B</token> or
+vice versa, we use an undirected edge to represent that connection.
+<figure id="fig_basics_db03_q01">
+<title>Query [Basics_DB03_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB03_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB03_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The results of running this query on the above database fragment
+are shown in <xref linkend="fig_basics_db03_q01_res"/>.
+<figure id="fig_basics_db03_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB03_Q01_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB03_Q01_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Ignoring link direction lets this query
+match any pair of objects as long as those objects have a link
+connecting them.  As we saw before, &qgraph; finds as many
+matches as it can, including subgraphs that duplicate the elements of
+another match but that map those database elements to different query
+elements.
+In this example, we have two subgraphs that include the
+linked objects <token role="object">home.html</token> and
+<token role="object">page1.html</token>.  In one subgraph, 
+<token role="object">home.html</token> matches vertex 
+<token role="vertex">A</token>; in the other it matches vertex
+<token role="vertex">B</token>.  The link matching edge 
+<token role="edge">X</token> always follows its direction in the
+database (from <token role="object">home.html</token> to
+<token role="object">page1.html</token>), even though it points from 
+<token role="vertex">A</token> to <token role="vertex">B</token> in
+one subgraph and from <token role="vertex">B</token> to
+<token role="vertex">A</token> in the other.
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                   HANDLING DATABASE SELF-LINKS                 -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Handling Database Self-Links</title>
+<indexterm><primary>links</primary>
+           <secondary>loops</secondary></indexterm>
+<indexterm><primary>loops in databases</primary></indexterm>
+<indexterm><primary>self-links</primary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>loops in</secondary></indexterm>
+
+<para>Some relational databases contain objects that link back to
+themselves. For example, a database where the objects represents Web
+pages is likely to include such a construct because many Web 
+pages include links from one part of the page to another part of the
+same page. It&rsquo;s important to understand how &qgraph; handles 
+<glossterm baseform="self link">self links</glossterm>
+(loops) when matching queries against the database structure.</para>
+
+<para>Consider the database fragment shown in 
+<xref linkend="fig_basics_db04"/>.
+<figure id="fig_basics_db04">
+<title>Database structure containing a loop [Basics_DB04.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB04.png"
+               width="3.7in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB04.png"
+               contentwidth="4.5in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This fragment contains a directed link that connects the
+<token role="object">directory-page</token> object to itself, a common
+phenomenon in 
+long Web pages.  &qgraph; treats this link and object the
+same as any other in the database, including matching them to
+more than one query element when appropriate.</para>
+
+<para>To see how this works, let&rsquo;s see what happens when we execute
+the query shown in <xref linkend="fig_basics_db04_q01"/> on the
+database fragment shown above.
+<figure id="fig_basics_db04_q01">
+<title>Query [Basics_DB04_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB04_Q01.png"
+               width="4.2in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB04_Q01.png"
+               contentwidth="5.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The results of executing this query on the database fragment are
+shown in <xref linkend="fig_basics_db04_q01_res"/>.
+<figure id="fig_basics_db04_q01_res">
+<title>Results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB04_Q01_res.png"
+               width="4.8in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB04_Q01_res.png"
+               contentwidth="5.9in"
+               format="PNG"/>
+</imageobject>
+</mediaobject>
+</figure>
+The loop connecting the <token role="object">directory-page</token>
+object to itself is treated the same as any other link.
+Like all other links, it can match more than one query edge and
+thus appear in more than one place in a subgraph.  Again, query
+constructs such as conditions and constraints can be used to restrict
+which database elements a query edge or vertex may match and to avoid
+such duplications in query results when desired.
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                    IMPLEMENTATION IN PROXIMITY                 -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_basics_impl">
+<title>Implementation in Proximity</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>QGraph implementation</secondary></indexterm>
+<indexterm><primary>implementation</primary>
+           <see>Proximity QGraph implementation</see></indexterm>
+
+<!-- .............................................................. -->
+<!--                          Query results                         -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Query results</title>
+
+<para>Query matches
+<indexterm><primary>Proximity</primary>
+           <secondary>query results in</secondary></indexterm>
+are returned as a collection of subgraphs called a
+<glossterm>container</glossterm>.  Containers and subgraphs are
+structural views of the data 
+that are added as persistent items to the database.</para>
+
+<para><glossterm baseform="subgraph">Subgraphs</glossterm> include the
+database objects and links that match the 
+originating query. Importantly, these are the actual objects
+and links in the database and not copies. If you modify
+<indexterm><primary>databases</primary>
+           <secondary>editing</secondary></indexterm>
+<indexterm><primary>editing</primary>
+          <secondary>database elements</secondary></indexterm>
+<indexterm><primary>modifying</primary>
+           <see>editing</see></indexterm>
+<indexterm><primary>changing</primary>
+           <see>editing</see></indexterm>
+a database entity, every subgraph that includes that entity will be
+correspondingly modified. Similarly, if you modify an object or link
+in a subgraph, you are modifying the underlying database
+entity.  Deleting
+<indexterm><primary>deleting</primary>
+           <secondary>database elements</secondary></indexterm>
+an object or link from the database will similarly
+impact existing subgraphs, potentially resulting in disconnected
+<indexterm><primary>subgraphs</primary>
+           <secondary>disconnected</secondary></indexterm>
+<indexterm><primary>disconnected subgraphs</primary></indexterm>
+or invalid subgraphs.</para>
+
+<para>Changes that delete database entities or alter attribute values
+may change subgraphs so that they no longer satisfy the original
+query. Proximity does not re-evaluate the query to update containers
+<indexterm><primary>containers</primary>
+           <secondary>updating</secondary></indexterm>
+when the underlying database changes.  Any subgraphs rendered invalid
+by database changes remain in the container until the query is
+re-executed.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                     Efficiency considerations                  -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Efficiency considerations</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>query efficiency</secondary></indexterm>
+<indexterm><primary>efficiency in Proximity</primary></indexterm>
+
+<para>In general, the efficiency considerations described in this
+<emphasis>Guide</emphasis> may improve processing speed for extremely
+complex queries or queries run against an extremely large database.
+They are unlikely to have a noticeable effect on query processing
+speed under normal circumstances.
+Taking advantage of some of these efficiency improvements may require
+perfect information about a database&rsquo;s data and design. However,
+in practice, we frequently do not have thorough enough information about
+a database to be able to use efficiency improvements with confidence
+that any modifications made for efficiency do not also affect query results.
+</para>
+
+<!--
+   Directed versus undirected edges
+-->
+
+<sect3>
+<title>Directed versus undirected edges</title>
+<indexterm><primary>edges</primary>
+           <secondary>directed vs. undirected</secondary></indexterm>
+
+<para>Queries containing 
+<glossterm baseform="undirected edge">undirected edges</glossterm> can be
+much more computationally expensive than those that contain only
+<glossterm baseform="directed edge">directed edges</glossterm>.
+Because the underlying database model uses only 
+directed links, Proximity must check for links in both directions
+when the query specifies an undirected edge, increasing the processing
+time accordingly.</para>
+
+<para>For those instances where a directed and
+undirected edge would return identical matches (such as when some
+links only occur in a specific direction), use the directed
+edge for more efficient processing. For example, in a database 
+where links only go from actors to movies (and never from movies to
+actors), queries should use directed edges to match these links, even
+though an undirected edge would return the same results.</para>
+
+</sect3>
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                               SUMMARY                          -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_basics_summary">
+<title>Summary</title>
+<indexterm><primary>queries</primary>
+           <secondary>rule summaries</secondary></indexterm>
+
+<itemizedlist spacing="compact">
+<title>Query format</title>
+  <listitem>
+    <para>Every query must have at least one 
+    <glossterm>vertex</glossterm> and every <glossterm>edge</glossterm>
+    must have vertices at both ends.</para>
+  </listitem>
+  <listitem>
+    <para>A &qgraph; query must be a connected graph.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; queries can be as simple as a single vertex.
+    </para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; supports both 
+    <glossterm baseform="directed edge">directed</glossterm> and 
+    <glossterm baseform="undirected edge">undirected edges</glossterm>
+    but requires that the underlying database use directed
+    links.</para>
+  </listitem>
+  <listitem>
+    <para>Each vertex and edge in a &qgraph; query has a unique 
+    <glossterm>name</glossterm> (label)
+    used within the context of the query. These names are used to
+    identify the elements in the query and resulting subgraphs but
+    have no effect on what the query matches.</para>
+  </listitem>
+</itemizedlist>
+
+<?pagebreak?>
+<itemizedlist spacing="compact">
+<title>Query results</title>
+  <listitem>
+    <para>&qgraph; queries return their results in the form of a
+    collection of 
+    <glossterm baseform="subgraph">subgraphs</glossterm> called a 
+    <glossterm>container</glossterm>.</para>
+  </listitem>
+  <listitem>
+    <para>Query results include all 
+    <glossterm baseform="attribute">attributes</glossterm> for the
+    objects and 
+    links in the container&rsquo;s subgraphs, even if those attributes are
+    not explicitly included in the query.
+    </para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; does not require that distinct query elements match
+    distinct database entities, therefore individual database items
+    may appear more than once in a subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; does not return links in the database that are not
+    specified in the query, even when both link ends are in the same
+    subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>Loops (links that point back to the originating object) in
+    the database are treated identically to other links.
+    </para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Proximity implementation</title>
+  <listitem>
+    <para><glossterm baseform="subgraph">Subgraphs</glossterm>
+    and <glossterm baseform="container">containers</glossterm> are
+    added as persistent items to the database.</para>
+  </listitem>
+  <listitem>
+    <para>Subgraphs include the actual database objects and links
+    that match the originating query, not copies.</para>
+  </listitem>
+  <listitem>
+    <para>Queries containing 
+    <glossterm baseform="undirected edge">undirected edges</glossterm>
+    are more computationally expensive than those that contain only 
+    <glossterm baseform="directed edge">directed edges</glossterm>.</para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

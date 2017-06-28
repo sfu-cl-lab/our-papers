@@ -1,0 +1,204 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Exporting Plain Text Data</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Importing and Exporting Proximity Data">
+      <link rel="prev" href="ch03s05s02.html" title="Importing database elements using plain text">
+      <link rel="next" href="ch03s07.html" title="Specialized Data Export">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s05s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;3.&nbsp;Importing and Exporting Proximity Data</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s07.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="export_textdata"></a>Exporting Plain Text Data
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_export5"></a><a class="indexterm" name="idx_export4"></a><a class="indexterm" name="idx_textexp1"></a><p>Proximity provides the <span><strong class="command">export-text.sh</strong></span> shell
+            script (<span><strong class="command">export-text.bat</strong></span> for Windows) for exporting
+            data in Proximity databases to an XML format. You can only export
+            complete databases, but you can prune and edit the resulting files if you
+            want to preserve only a portion of the exported data, such as the data
+            for a single <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attribute</span></a> or
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">container</span></a>.
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>Unlike XML data import, Proximity performs no character
+                        <a class="indexterm" name="d0e3565"></a>
+                        <a class="indexterm" name="d0e3573"></a>
+                        <a class="indexterm" name="d0e3579"></a>
+                        conversion during text data export.  If attribute values contain
+                        symbols such as &lt;, &gt;, or &amp;, they are exported as is to the
+                        resulting text files and are not converted to the corresponding XML
+                        entities.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p></p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>The general form of a call to the
+                        <span><strong class="command">export-text.sh</strong></span> script is
+                        
+                     </p>
+                     <div class="blockquote">
+                        <blockquote class="blockquote">
+                           <p><code class="code">export-text.sh&nbsp;&nbsp;</code><em class="replaceable"><code>host:port&nbsp;&nbsp;directory</code></em></p>
+                        </blockquote>
+                     </div>
+                     <p>
+                        where
+                        
+                     </p>
+                     <div class="blockquote">
+                        <blockquote class="blockquote">
+                           <div class="itemizedlist">
+                              <ul type="disc" compact>
+                                 <li>
+                                    <p><em class="replaceable"><code>host:port</code></em> is the MonetDB
+                                           server&#8217;s host and port
+                                    </p>
+                                 </li>
+                                 <li>
+                                    <p><em class="replaceable"><code>directory</code></em> is the absolute path to
+                                           the directory that will contain the resulting data files; this
+                                           directory must be on the same machine as that serving the
+                                           database
+                                    </p>
+                                 </li>
+                              </ul>
+                           </div>
+                        </blockquote>
+                     </div>
+                     <p>
+                        
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e3616"></a>Exporting databases using plain text
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e3619"></a><p>
+               <a href="ch03s06.html#ex_export_textdb" title="Exercise&nbsp;3.8.&nbsp;Exporting a database to plain text:">Exercise&nbsp;3.8</a> walks through the process of
+               exporting the complete database created in
+               <a href="ch03s05.html#ex_import_textdb" title="Exercise&nbsp;3.6.&nbsp;Importing a database using plain text data:">Exercise&nbsp;3.6</a>.
+            </p>
+            <div class="procedure"><a name="ex_export_textdb"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;3.8.&nbsp;Exporting a database to plain text:</b></p>
+               <p>Before beginning, make sure that you are serving the MovieDB
+                  database using Mserver.  Data files can only be exported to the same
+                  machine as that serving the database.
+               </p>
+               <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                  <table border="0" summary="Caution">
+                     <tr>
+                        <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                        <th align="left"></th>
+                     </tr>
+                     <tr>
+                        <td align="left" valign="top">
+                           <p>The export process overwrites existing data files in the output
+                              directory without warning.  Make sure that output directory is empty
+                              or can be safely overwritten.
+                           </p>
+                        </td>
+                     </tr>
+                  </table>
+               </div>
+               <ol type="1">
+                  <li>
+                     <p>Create a <code class="filename">$PROX_HOME/doc/user/tutorial/examples/TextExport</code> directory.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Export the database.  (Substitute the appropriate port number if
+                        you are using a different port.)
+                        You can only export text to an existing directory on the machine serving the
+                        database.
+                     </p>
+                     <p>
+                        <a class="indexterm" name="d0e3649"></a>
+                        <a class="indexterm" name="d0e3653"></a>
+                        <a class="indexterm" name="d0e3659"></a>
+                        
+                     </p><pre class="synopsis">&gt; <strong class="userinput"><code>bin/export-text.sh localhost:30000 \
+  $PROX_HOME/doc/user/tutorial/examples/TextExport</code></strong>
+</pre><p>
+                        
+                        Proximity outputs the following trace
+                        (leading information showing elapsed time and execution thread 
+                        has been omitted from the trace for brevity):
+                        
+                        
+                     </p><pre class="screen">INFO kdl.prox.app.ExportTextApp - * exporting database to
+  /proximity/doc/user/tutorial/examples/TextExport
+INFO kdl.prox.app.ExportTextApp -   Exporting object table
+INFO kdl.prox.app.ExportTextApp -   Exporting link table
+INFO kdl.prox.app.ExportTextApp -   Exporting attributes
+INFO kdl.prox.app.ExportTextApp - objtype
+INFO kdl.prox.app.ExportTextApp - title
+INFO kdl.prox.app.ExportTextApp - name
+INFO kdl.prox.app.ExportTextApp - birthyear
+INFO kdl.prox.app.ExportTextApp - linktype
+INFO kdl.prox.app.ExportTextApp - qgraph_query
+INFO kdl.prox.app.ExportTextApp -   Exporting containers
+INFO kdl.prox.app.ExportTextApp -      si_0
+INFO kdl.prox.app.ExportTextApp -      si_1
+INFO kdl.prox.app.ExportTextApp -      si_2
+INFO kdl.prox.app.ExportTextApp -      si_3
+INFO kdl.prox.app.ExportTextApp - * done exporting
+</pre><p>
+                        
+                     </p>
+                  </li>
+               </ol>
+            </div><a class="indexterm" name="d0e3674"></a></div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s05s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s07.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Importing database elements using plain text&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Specialized Data Export</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

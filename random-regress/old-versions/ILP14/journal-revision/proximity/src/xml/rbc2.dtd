@@ -1,0 +1,52 @@
+<!--
+
+  Proximity Relational Bayesian Classifier (RBC) DTD
+  Version: 2.0
+
+  Part of the open-source Proximity system
+  (see LICENSE for copyright and license information).
+
+  -->
+
+<!-- rpt -->
+
+<!ELEMENT rbc2 (estimator-class, class-label, sources)>
+
+<!-- estimator -->
+<!ELEMENT estimator-class (#PCDATA)>
+
+<!-- class label -->
+<!ELEMENT class-label (source, class-label-distr)>
+
+<!-- sources -->
+<!ELEMENT sources (source-element*)>
+<!ELEMENT source-element (source, conditional-distr)>
+<!ELEMENT conditional-distr (conditional-distr-info)*>
+<!ELEMENT conditional-distr-info (label, class-label-distr)>
+<!ELEMENT label (#PCDATA)>
+
+<!-- source NOTE: MUST BE IN SYNCH WITH THE SOURCE ELEMENT IN RPT2.DTD! -->
+<!ELEMENT source (source-class, data-type, is-continuous, is-single-value, source-elements) >
+<!ELEMENT source-class (#PCDATA)>
+<!ELEMENT data-type (#PCDATA)>
+<!ELEMENT is-continuous (#PCDATA)>
+<!ELEMENT is-single-value (#PCDATA)>
+<!ELEMENT source-elements ( (item-name)?, (attr-name)?, (temporal-col)? , (from)?, (to)?, (interval-min)?, (interval-max)?, (core-time-source)?, (related-time-source)?) >
+<!ELEMENT item-name (#PCDATA)>
+<!ELEMENT attr-name (#PCDATA)>
+<!ELEMENT interval-min (#PCDATA)>
+<!ELEMENT interval-max (#PCDATA)>
+<!ELEMENT temporal-col (#PCDATA)>
+<!ELEMENT from (#PCDATA)>
+<!ELEMENT to (#PCDATA)>
+<!ELEMENT core-time-source ( (item-name)?, (attr-name)?) >
+<!ELEMENT related-time-source ( (item-name)?, (attr-name)?) >
+
+<!-- class-label-distributions : MUST BE IN SYNCH WITH THE CLASS-LABEL-DISTR ELEMENT IN RPT2.DTD! -->
+<!ELEMENT class-label-distr (distr-class, (class-label-info)*) >
+<!ELEMENT distr-class (#PCDATA)>
+<!ELEMENT class-label-info (#PCDATA) >
+<!ATTLIST class-label-info class CDATA #REQUIRED>
+<!ATTLIST class-label-info count CDATA #REQUIRED>
+
+

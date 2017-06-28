@@ -1,0 +1,93 @@
+<!--
+$Id: graph-query.dtd 2733 2006-09-11 21:33:59Z schapira $
+
+Part of the open-source Proximity system
+(see LICENSE for copyright and license information).
+
+Proximity Graph Query DTD. Does not support the following:
+    o updates
+    o atomic_constraint -> ... | const_term comp_op const_term
+    o cond_term -> ... | agg_op (attr_name) | ...
+    o annotation -> [counter_var := annot_limits] | ...
+-->
+
+
+<!-- graph-query -->
+
+<!ELEMENT graph-query (description?, query-body, editor-data?)>
+<!ATTLIST graph-query name CDATA #REQUIRED>
+
+
+<!-- description -->
+<!ELEMENT description (#PCDATA)>
+
+
+<!-- query-body -->
+
+<!ELEMENT query-body (vertex, (edge | vertex)*, subquery*, constraint?, add-link*, cached*)>
+<!ELEMENT subquery (vertex, (edge | vertex)*, subquery*, numeric-annotation)>
+
+<!ELEMENT vertex (condition?, numeric-annotation?)>
+<!ATTLIST vertex name CDATA #REQUIRED>
+
+<!ELEMENT edge (vertex1, vertex2, directed, condition?, numeric-annotation?)>
+<!ATTLIST edge name CDATA #REQUIRED>
+<!ELEMENT vertex1 (#PCDATA)>	<!-- NB: direction is FROM 1 TO 2! -->
+<!ELEMENT vertex2 (#PCDATA)>
+<!ELEMENT directed (#PCDATA)>	<!-- possible values: "true", "false" -->
+
+<!ELEMENT numeric-annotation (min, max?)>	<!-- min and max are whole numbers, and min <= max. valid combinations: [i..j], [i..], or [i] -->
+<!ELEMENT min (#PCDATA)>
+<!ELEMENT max (#PCDATA)>
+
+
+<!ENTITY % dnf "(or | and | not | test)">	<!-- disjunctive normal form -->
+<!-- constraints should only test between pairs items
+     We use DNF in the DTD for consistency, but in reality only <AND>s can be used in constraints
+     also, no constrainsts involving annotated vertices are allowed.
+ -->
+<!ELEMENT constraint %dnf;>
+<!ELEMENT condition %dnf;>		<!-- conditions should only compare attribute names and values, or existence of an attribute name -->
+
+<!ENTITY % and-body "not | test">
+<!ELEMENT or (and | %and-body;)+>
+<!ELEMENT and (%and-body;)+>
+<!ELEMENT not (test)>
+
+<!-- test operands should be consistent:
+  for constraints: two edge-names, or two vertex-names
+  for conditions - operators:
+       "eq", "ge", "le", "ne" : an attribute-name and a value (binary operators), or two items
+       "exists"               :  an attribute name (unary operator)
+ -->
+<!ENTITY % operand "(attribute-name | value | item)">
+<!ELEMENT test (operator, %operand;, (%operand;)?)>
+<!ELEMENT operator (#PCDATA)>	<!-- possible values: "eq", "ge", "gt", "le", "lt", "ne", "exists" -->
+<!ELEMENT attribute-name (#PCDATA)>
+<!ELEMENT value (#PCDATA)>
+<!ELEMENT item (item-name, (attribute-name | id))>  <!-- for constraints -->
+<!ELEMENT item-name (#PCDATA)>
+<!ELEMENT id EMPTY>
+
+
+<!-- editor-data
+This is an optional element that contains information specific to the QGraph
+editor (more specifically, vertex layout information). We would have preferred
+to save the layout in separate files, but decided such a solution would impose
+an undue burden on users.
+ -->
+<!ELEMENT editor-data (vertex-location+)>
+
+<!ELEMENT vertex-location EMPTY>
+<!ATTLIST vertex-location name CDATA #REQUIRED>
+<!ATTLIST vertex-location x CDATA #REQUIRED>
+<!ATTLIST vertex-location y CDATA #REQUIRED>
+
+
+<!ELEMENT add-link (vertex1, vertex2)>
+<!ATTLIST add-link attrname CDATA #REQUIRED>
+<!ATTLIST add-link attrval CDATA #REQUIRED>
+
+<!ELEMENT cached EMPTY >
+<!ATTLIST cached item CDATA #REQUIRED>
+<!ATTLIST cached container CDATA #REQUIRED>

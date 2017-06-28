@@ -1,0 +1,248 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Chapter&nbsp;5.&nbsp;Querying the Database</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="prev" href="ch04s09.html" title="Tips and Reminders">
+      <link rel="next" href="ch05s02.html" title="A First Proximity Query">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s09.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">&nbsp;</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="chapter" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title"><a name="ch_queries"></a>Chapter&nbsp;5.&nbsp;Querying the Database
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <div class="toc">
+            <p><b>Table of Contents</b></p>
+            <dl>
+               <dt><span class="sect1"><a href="ch05.html#d0e5840">Overview</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s02.html">A First Proximity Query</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s03.html">Exploring Containers and Subgraphs</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s04.html">Grouping Elements in a Query</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s05.html">Comparing Items in a Query</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s06.html">Matching Complex Subgraphs with Subqueries</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s07.html">Adding Links to Data with Queries</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s08.html">Executing a Query from the Proximity Database Browser</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s09.html">Executing a Query from the Command Line</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s10.html">Querying Containers</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s11.html">Tips and Reminders</a></span></dt>
+            </dl>
+         </div>
+         <div class="sect1" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h2 class="title" style="clear: both"><a name="d0e5840"></a>Overview
+                     </h2>
+                  </div>
+               </div>
+            </div>
+            <p>
+               <a class="indexterm" name="d0e5845"></a>
+               Proximity uses <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e661"><span class="glossterm">QGraph</span></a> [<a href="bi01.html#blau02"><abbr class="abbrev">Blau, Immerman, and Jensen, 2002</abbr></a>],
+               a visual query language, for defining queries.  This chapter provides
+               information on QGraph&#8217;s features and walks through the process
+               of creating several example queries.  See the <em class="citetitle"><span class="phrase"><a href="../../qgraph/HTML/index.html" target="_top">Proximity QGraph Guide</a></span>
+                     
+                     
+                     </em>
+               for a full description of the QGraph language as implemented in
+               Proximity.
+            </p>
+            <p>A QGraph query is a labeled
+               graph of 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e824"><span class="glossterm">vertices</span></a> and 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e310"><span class="glossterm">edges</span></a>. The query vertices
+               <a class="indexterm" name="d0e5868"></a>
+               <a class="indexterm" name="d0e5874"></a>
+               correspond to 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_object"><span class="glossterm">objects</span></a> in the database and
+               the query edges
+               <a class="indexterm" name="d0e5883"></a>
+               <a class="indexterm" name="d0e5889"></a>
+               correspond to <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_link"><span class="glossterm">links</span></a> in the
+               database.  QGraph lets you easily describe a specific configuration of
+               objects and links, 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e162"><span class="glossterm">conditions</span></a> (required
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attribute</span></a> values), and global 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e228"><span class="glossterm">constraints</span></a> (restrictions
+               across objects or links). To match  
+               <a class="indexterm" name="d0e5907"></a>
+               <a class="indexterm" name="d0e5913"></a>
+               a query, a database 
+               subgraph must have the correct structure and satisfy all the
+               conditions and constraints.
+            </p>
+            <p>The result of executing a QGraph query is a collection of
+               matching <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraphs</span></a> called a
+               <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">container</span></a></em></span>. 
+               <a class="indexterm" name="d0e5926"></a>
+               <a class="indexterm" name="d0e5932"></a>
+               <a class="indexterm" name="d0e5936"></a>
+               <a class="indexterm" name="d0e5944"></a>
+               When you execute a query, the container holding the matching subgraphs
+               is added as a persistent 
+               <a class="indexterm" name="d0e5950"></a>
+               item in the Proximity database.
+               Proximity creates an empty container when the query returns no
+               matching subgraphs.
+            </p>
+            <p>QGraph also provides extensive data update 
+               <a class="indexterm" name="d0e5956"></a>
+               <a class="indexterm" name="d0e5962"></a>
+               <a class="indexterm" name="d0e5968"></a>
+               functionality; however, only a portion of this functionality has been
+               implemented in Proximity to date.  Proximity implements the ability to
+               add links to 
+               the database through the use of QGraph queries.
+            </p>
+            <p>Proximity represents queries in an XML 
+               <a class="indexterm" name="d0e5976"></a>
+               <a class="indexterm" name="d0e5982"></a>
+               format. Although you can
+               create queries by writing this XML representation in a text editor,
+               Proximity provides a Query Editor that lets you create queries
+               interactively using a natural graphical representation.  The exercises
+               in this chapter use the Query Editor to create queries of increasing
+               complexity, illustrating the range of QGraph&#8217;s functionality
+               as implemented in Proximity.  Details on the query XML file format are
+               included in the <em class="citetitle"><span class="phrase"><a href="../../qgraph/HTML/index.html" target="_top">Proximity QGraph Guide</a></span>
+                     
+                     
+                     </em>. 
+               
+            </p>
+            <p>
+               Proximity provides many ways to execute queries. This tutorial
+               describes how to execute queries
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p>from the Query Editor</p>
+                  </li>
+                  <li>
+                     <p>from the Proximity Database Browser</p>
+                  </li>
+                  <li>
+                     <p>from the command line using Proximity shell scripts</p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               You can also call methods that execute 
+               <a class="indexterm" name="d0e6007"></a>
+               <a class="indexterm" name="d0e6013"></a>
+               <a class="indexterm" name="d0e6019"></a>
+               queries from within Proximity Python scripts or Java programs.
+               
+            </p>
+            <p>All of the queries used in this chapter are available in
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code>. You can follow the exercises in this
+               chapter to create the queries interactively or execute the example
+               queries provided with the Proximity distribution.
+               
+            </p>
+            <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p><a href="ch05s08.html#ex_queries_1dclusters" title="Exercise&nbsp;5.7.&nbsp;Executing a saved query from the Proximity Database Browser:">Exercise&nbsp;5.7</a> creates a
+                           container used by exercises in later chapters. Make sure that you
+                           complete <a href="ch05s08.html#ex_queries_1dclusters" title="Exercise&nbsp;5.7.&nbsp;Executing a saved query from the Proximity Database Browser:">Exercise&nbsp;5.7</a> if you plan to
+                           complete the exercises in the following chapters.
+                           
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <p>
+               
+            </p>
+            <div class="itemizedlist">
+               <p xmlns:exsl="http://exslt.org/common" class="title"><b>Objectives</b></p>
+               <p>The exercises in this chapter demonstrate how to</p>
+               <ul type="disc" compact>
+                  <li>
+                     <p>create queries using the Query Editor</p>
+                  </li>
+                  <li>
+                     <p>add links to the data by executing queries</p>
+                  </li>
+                  <li>
+                     <p>execute queries from the Query Editor, Proximity Database Browser, and
+                        	command line
+                     </p>
+                  </li>
+                  <li>
+                     <p>execute a query against the contents of a
+                                container
+                     </p>
+                  </li>
+                  <li>
+                     <p>examine query results (containers and subgraphs)</p>
+                  </li>
+                  <li>
+                     <p>create the database entities used in later
+                                tutorial exercises
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               
+            </p>
+            <p>Each exercise in this chapter introduces new QGraph
+               features. A complete explanation of the QGraph query language
+               is available in the <em class="citetitle"><span class="phrase"><a href="../../qgraph/HTML/index.html" target="_top">Proximity QGraph Guide</a></span>
+                     
+                     
+                     </em>.  
+               The <a href="ch05s11.html" title="Tips and Reminders">&#8220;Tips and Reminders&#8221;</a> 
+               section at the end of this chapter provides a 
+               summary of rules for 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e848"><span class="glossterm">well-formed</span></a>
+               QGraph queries.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s09.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center">&nbsp;</td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Tips and Reminders&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;A First Proximity Query</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

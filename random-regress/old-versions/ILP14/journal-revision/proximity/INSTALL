@@ -1,0 +1,375 @@
+$Id: INSTALL 3770 2007-11-15 19:32:09Z schapira $
+
+You must install two components to run Proximity:
+  - a Proximity client
+  - a MonetDB server (the database back-end for Proximity)
+This document describes how to download and install both of these components.
+
+Proximity 4.3 operates with MonetDB 4.6.2 and selected later versions:
+
+  * New users should download and install MonetDB 4.18.2 (Windows) or 
+    4.20 (Linux/Mac OS X) (the "mars" versions)
+
+  * Users updating from Proximity 4.0 or later can stay with MonetDB 4.6.2
+    or update to Monet 4.18.2 (Windows) or 4.20 (Linux/Mac OS X).  The
+    later MonetDB versions provide some performance improvements, but
+    using these versions requires converting existing databases.  See
+    "Updating MonetDB databases" later in this document for additional
+    information on updating databases.
+
+  * Users updating from Proximity 3.1 or earlier must update their
+    MonetDB installation and update their databases.  Please contact
+    Proximity technical support at proximity-support@kdl.cs.umass.edu
+    for assistance if you are updating from Proximity 3.1 or earlier.
+
+  ---------------------------------------------------------
+  |  Proximity 4.3 is NOT yet fully compatible with the   |
+  |  latest release of MonetDB 5.                         |
+  ---------------------------------------------------------
+
+In addition to this file, please see the README file for additional
+information including:
+  - subscribing to Proximity mailing lists
+  - requesting technical support
+  - reporting bugs
+
+
+======================================================================
+Client (Proximity) installation
+======================================================================
+
+Note: Since version 4.1, the Proximity client changes the root
+      Proximity directory from "proximity3" to "proximity."
+
+The Proximity client requires Java 2 Platform, Standard Edition, v1.5
+(J2SE) or later.
+
+To install the Proximity client, follow these steps:
+
+  1.  Download the Proximity client distribution (proximity-4.3.tgz)
+      from http://kdl.cs.umass.edu/proximity/downloads.html.
+
+  2.  Extract the tarball to the desired location.
+
+      On Unix-based systems, use the tar command:
+
+         $ tar xvfz ~/proximity-4.3.tgz
+
+      You must use a version of tar (e.g., GNU tar) that supports long
+      filenames.
+
+      On Windows, unpack the file with WinZip or an equivalent application.
+
+  3a. On Unix-based systems, change the permissions of the bin/ directory with
+      the following command:
+
+         $ cd proximity/
+         $ chmod -R a+x bin/
+
+  3b. On Windows systems, set the PROX_HOME environment variable to the
+      Proximity installation directory.  For example, if you have installed
+      Proximity in C:\Proximity\, then you would set
+
+         PROX_HOME=C:\Proximity\
+
+      The way you set this variable will vary depending on your version
+      of Windows.
+
+To get started using Proximity, see the tutorial in either
+   - proximity/doc/user/tutorial/Tutorial.pdf
+   - proximity/doc/user/tutorial/HTML/index.html 
+
+======================================================================
+Server (MonetDB) installation
+======================================================================
+
+In order to run the Proximity client you need to install the MonetDB server. 
+Follow the appropriate instructions below for installing MonetDB for
+Unix-style platforms (including Mac OS X) or Windows.
+
+Installing MonetDB for Unix-style platforms:
+--------------------------------------------
+
+   You must have administrator privileges to install MonetDB; log in
+   as root (Unix/Linux) or use sudo (Mac).
+
+  1. Download the binary distribution for your platform from
+     http://kdl.cs.umass.edu/proximity/downloads.html.
+
+        Linux on Intel:       monet-mars-distr-linux.tgz
+        Linux on Intel 64:    monet-mars-distr-linux-64.tgz
+        Mac OS X on PPC:      monet-mars-distr-mac-ppc.tgz
+        Mac OS X on PPC-64:   monet-mars-distr-mac-ppc-64.tgz
+        Mac OS X on Intel:    monet-mars-distr-mac-intel.tgz
+
+     Although we recommend that new users install one of the "mars"
+     distributions, we also continue to provide MonetDB 4.6.2, as well.
+
+  2. Extract the tarball to your /usr/local/ directory.
+     (NOTE: this binary distribution of MonetDB is not relocatable!)
+
+        $ cd /usr/local
+        $ tar xvfz ~/monet-mars-distr-[platform].tgz
+
+  3. Change the permissions of the var/ directory with the following
+     command (also requires administrator privileges):
+
+        $ cd Monet-mars/
+        $ chmod -R a+w var/
+
+The MonetDB server is run from a terminal window.  To start the
+MonetDB server, use:
+
+        $ /usr/local/Monet-mars/bin/Mserver
+
+You can optionally add /usr/local/Monet-mars/bin to PATH.
+
+Running the server without specifying a database connects to the demo database.
+To start the server on a particular database, use:
+
+        $ Mserver --dbname <db_name> <prox_home>/resources/init-mserver.mil
+
+     where <db_name> is the database name and <prox_home> is the location
+     of your local Proximity installation.
+
+Proximity uses the port number to select the appropriate protocol for
+the version of MonetDB being used.  You must use a port number <= 40000 
+for the "mars" versions (4.20 and 4.18.2), and a port number > 40000
+for MonetDB 4.6.2.  To run the server on a different port number, use
+(all on one line):
+
+        $ Mserver --dbname <db_name> <prox_home>/resources/init-mserver.mil
+          --set port=<nnnnn>
+
+     where <nnnnn> is the new port number.
+
+To quit the MonetDB server, use:
+
+        MonetDB> quit();
+
+     where "MonetDB>" is the Monet server prompt and "quit();" is the command 
+     (note the parentheses and semi-colon) 
+
+See the Proximity tutorial for additional information on using the MonetDB
+server for Proximity.  MonetDB documentation is available from CWI's website at
+http://monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html
+
+
+Installing MonetDB for Windows platforms:
+-----------------------------------------
+
+The Windows MonetDB distribution requires Windows Professional 2000 or
+later (not 98 nor ME).
+
+  1. If you have an older version of MonetDB already installed on your system,
+     remove the following DLL files from the C:\WINDOWS\System32\ directory:
+
+        1. libstream.dll
+        2. libmutils.dll
+        3. libMonetODBCs.dll
+        4. libMonetODBC.dll
+        5. libMapi.dll
+
+  2. Download the binary distribution for your platform from
+     http://kdl.cs.umass.edu/proximity/downloads.html.
+
+        Windows:             monet-mars-distr-win.msi
+        Windows 64:          monet-mars-distr-win-64.msi
+
+     Although we recommend that new users install the "mars"
+     distribution, we also continue to provide MonetDB 4.6.2, as well.
+
+  3. As an administrator, run the Microsoft installer for MonetDB,
+     monet-mars-distr-win.msi, by double-clicking the file name to
+     start the installation wizard.  Follow the instructions to
+     install the server in the desired location.  The default 
+     installation directory is C:\Program Files\CWI\MonetDB4.
+
+     The choice of installing MonetDB for "Just me" or "All users"
+     affects only whether MonetDB is added to the Start Menu for the
+     current user or for all users.  In all cases, MonetDB stores its
+     databases in 
+        C:\\Documents and Settings\<username>\Application Data\MonetDB4\dbfarm\
+     where <username> is the name of the current user.
+
+  4. As an administrator, run Mserver.bat (located in the installation
+     directory). This creates the required directory hierarchy for
+     MonetDB databases.
+
+  5. Quit the MonetDB server with
+
+        MonetDB> quit();
+
+     where "MonetDB>" is the MonetDB server prompt and "quit();" is the
+     command (note the parentheses and semi-colon) 
+
+The MonetDB server is run from the command (DOS) window.  To start the
+MonetDB server, use the following command (substitute the appropriate
+path if you installed the server someplace other than the default location):
+
+        > "C:\Program Files\CWI\MonetDB4\Mserver.bat"
+
+You can optionally add the MonetDB installation directory to PATH.  You
+may need to restart your command window to have this update available. 
+
+Running the server without specifying a database connects to the demo
+database.  To start the server on a particular database, use the
+following command (all on one line):
+
+        > "C:\Program Files\CWI\MonetDB4\Mserver.bat" --dbname <db_name>
+          "<prox_home>\resources\init-mserver.mil"
+
+     where <db_name> is the database name and <prox_home> is the location
+     of your local Proximity installation.
+
+Proximity uses the port number to select the appropriate protocol for
+the version of MonetDB being used.  You must use a port number <= 40000 
+for the "mars" versions (4.20 and 4.18.2), and a port number > 40000
+for MonetDB 4.6.2.  To run the server on a different port number, use
+(all on one line):
+
+        > "C:\Program Files\CWI\MonetDB4\Mserver.bat" --dbname <db_name>
+          "<prox_home>\resources\init-mserver.mil" --set port=<nnnnn>
+
+     where <nnnnn> is the new port number.
+
+To quit the MonetDB server, use:
+
+        MonetDB> quit();
+
+See the Proximity tutorial for additional information on using the MonetDB
+server for Proximity.  MonetDB documentation is available from CWI's website
+http://monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html
+
+
+======================================================================
+Updating MonetDB databases
+======================================================================
+
+  --------------------------------------------------------------------
+  |  Users updating from Proximity 4.0 or later can continue to use  |
+  |  their current MonetDB installation and existing MonetDB         |
+  |  databases and safely ignore this section.  However, if you      |
+  |  choose to update to a newer version of MonetDB, you must also   |
+  |  update your databases to use the new database format.           |
+  --------------------------------------------------------------------
+
+Proximity 4.3 is fully compatible with MonetDB 4.6.2 (the version of
+Monet distributed with Proximity 4.0 through 4.2).  Current Proximity
+users may either stay with their existing MonetDB installation or
+update to MonetDB 4.18.2 (Windows) or 4.20 (Linux/OS X) (the "mars"
+versions).  This update provides some performance improvements over
+MonetDB 4.6.2.
+
+To update databases to a newer version of MonetDB, simply export the
+data to the Proximity plain text or XML data format and then re-import
+it into the new database.  For most import or export operations, we
+recommend using the more robust Proximity XML format in order to take
+advantage of its error checking capabilities.  In this case, because
+you are importing unchanged data exported from Proximity, the use of
+the plain text format is recommended for performance reasons.
+
+  -----------------------------------------------------------
+  |  Users updating to Proximity 4.3 from Proximity 3.1 or  |
+  |  earlier should contact Proximity technical support at  |
+  |  proximity-support@kdl.cs.umass.edu for assistance.     |
+  -----------------------------------------------------------
+
+Updating databases using plain text:
+------------------------------------
+
+  ------------------------------------------------------------
+  |  Do not delete your installation of MonetDB 4.6.2 until  |
+  |  you have completed updating all databases.              |
+  ------------------------------------------------------------
+
+  1. Install the new versions of MonetDB and Proximity, following the
+     instructions above. Do not delete MonetDB 4.6.2.
+ 
+  2. Serve the database using MonetDB 4.6.2 (all on one line):
+
+        $ /usr/local/Monet-46/bin/Mserver --dbname <db_name> 
+          <prox_home>/resources/init-mserver.mil --set port=45678
+
+     where <db_name> is the database name and <prox_home> is the
+     location of your local Proximity installation.  Using a port
+     number > 40000 tells Proximity to use the MonetDB 4.6.2 protocol.
+
+     (Windows users should substitute the appropriate path to their
+     MonetDB 4.6.2 installation's Mserver command.)
+
+  3. Export the data to plain text files. You can only export data to the
+     same machine as that serving the database.
+
+        $ <prox_home>/bin/export-text.sh localhost:45678 <data_dir>
+
+        where <port_num> is the number of the port used to serve the
+        database and <data_dir> is the absolute pate to the directory
+        that will hold the exported plain text data files.  
+
+        (Windows users should use export-text.bat instead of export-text.sh.)
+
+  4. Quit the MonetDB server.
+
+        MonetDB> quit();
+
+  5. Serve the new (empty) database.  Make sure that you use the
+     correct path to the new Mserver command, either by changing PATH
+     or by explicitly including the path on the command line.
+
+        $ /usr/local/Monet-mars/bin/Mserver --dbname <db_name>
+          <prox_home>/resources/init-mserver.mil
+
+     where <db_name> is the database name.  Note that Proximity 4.3
+     changes the default port number to '30000'.  (Proximity 4.3 requires
+     a port number <= 40000 for MonetDB Mars.)
+
+     (Windows users should substitute the appropriate path to their
+     MonetDB 4.18.2 installation's Mserver command.)
+
+  6. Initialize the new database.
+
+        $ <prox_home>/bin db-util.sh localhost:30000 init-db
+
+        (Windows users should use db-util.bat instead of db-util.sh.)
+
+  7. Import the plain text data. You can only import data residing on the
+     same machine as that serving the database.
+
+        $ <prox_home>/bin/import-text.sh localhost:30000 <data_dir>
+
+        where <data_dir> is the absolute path to the directory
+        containing the plain text data files created in step 2.
+
+        (Windows users should use import-text.bat instead of import-text.sh.)
+
+See "Chapter 3: Iporting and Exporting Proximity Data" in the
+Proximity Tutorial for additional information on using the plain text
+format to export and import data.
+
+
+Location of database files:
+---------------------------
+
+MonetDB Mars stores database files in a different directory than that 
+used by earlier versions of MonetDB.
+
+  - Database files for Linux and Macintosh installations are stored in
+
+       /usr/local/Monet-mars/var/MonetDB4/dbfarm
+
+  - Database files for Windows installations are stored in
+
+       C:\\Documents and Settings\<username>\Application Data\MonetDB4\dbfarm
+
+    where <username> is the login name of the user who installed MonetDB.
+
+
+Backward compatibility:
+-----------------------
+
+Databases converted to MonetDB Mars may not be usable in older versions
+of MonetDB.  We recommend that you backup any database that you might
+want to use in an older version of MonetDB before converting it to
+MonetDB Mars.
+

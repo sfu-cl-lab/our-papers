@@ -1,0 +1,208 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Test Expressions</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="apb.html" title="Appendix&nbsp;B.&nbsp;XML Representation">
+      <link rel="prev" href="apbs09.html" title="Constraints">
+      <link rel="next" href="apbs11.html" title="Update Functionality">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="apbs09.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Appendix&nbsp;B.&nbsp;XML Representation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="apbs11.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="apx_queryxml_test"></a>Test Expressions
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e10352"></a><p>Both <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e162"><span class="glossterm">conditions</span></a> and
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">constraints</span></a> use test expressions, 
+            represented by the <code class="sgmltag-element">test</code> element, to
+            describe the required comparison.  Conditions test attribute values
+            for a single database entity whereas constraints compare attribute
+            values or IDs for two database entities.  Proximity uses the same DTD
+            elements to represent these query constructs, although each will be
+            realized in somewhat different forms in the XML representation. See
+            the examples under <a href="apbs06.html" title="Conditions">&#8220;Conditions&#8221;</a> and
+            <a href="apbs09.html" title="Constraints">&#8220;Constraints&#8221;</a> for examples of each form.
+            
+         </p>
+         <h2><a name="d0e10370"></a><code class="code">&lt;test&gt;</code></h2>
+         <p><b xmlns:exsl="http://exslt.org/common">Attributes&nbsp;</b>
+            None.
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Children&nbsp;</b> 
+         </p>
+         <p>The cardinality of <code class="sgmltag-element">test</code>&#8217;s
+            children, listed below, reflect the legal uses of these elements based
+            on a query&#8217;s semantics rather than the restrictions imposed by the
+            DTD.
+         </p>
+         <p>
+            
+         </p>
+         <div class="informaltable">
+            <table border="0" width="100%">
+               <colgroup>
+                  <col width="27%" align="left">
+                  <col width="18%" align="left">
+                  <col width="55%" align="left">
+               </colgroup>
+               <tbody valign="top">
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">operator</code></td>
+                     <td align="left">exactly one</td>
+                     <td align="left">The comparison operator; used in both conditions and
+                               constraints
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">attribute-name</code></td>
+                     <td align="left">zero or one</td>
+                     <td align="left">Name of attribute(s) to be compared; used in 
+                               <code class="sgmltag-element">condition</code> elements
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">value</code></td>
+                     <td align="left">zero or one</td>
+                     <td align="left">Value to be compared to that for the specified attribute; used in 
+                               <code class="sgmltag-element">condition</code> elements
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left"><a href="apbs10.html#apx_queryxml_item"><code class="sgmltag-element">item</code></a></td>
+                     <td align="left">zero or two</td>
+                     <td align="left">Provides data for one of the items being compared; used in 
+                               <code class="sgmltag-element">constraint</code> elements
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <p>
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Content Model&nbsp;</b>
+            
+         </p>
+         <div class="blockquote">
+            <blockquote class="blockquote">
+               <p>
+                  
+               </p>
+               <div class="literallayout">
+                  <p><code class="literal">(operator,&nbsp;(attribute-name&nbsp;|&nbsp;value&nbsp;|&nbsp;item),<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(attribute-name&nbsp;|&nbsp;value&nbsp;|&nbsp;item)?)</code></p>
+               </div>
+               <p>
+                  
+               </p>
+            </blockquote>
+         </div>
+         <p><a name="apx_queryxml_test_ex"></a><b xmlns:exsl="http://exslt.org/common">Example&nbsp;</b>See <a href="apbs06.html" title="Conditions">&#8220;Conditions&#8221;</a>
+            and <a href="apbs09.html" title="Constraints">&#8220;Constraints&#8221;</a>.
+            
+         </p>
+         <h2><a name="apx_queryxml_item"></a><code class="code">&lt;item&gt;</code></h2>
+         <p>The <code class="sgmltag-element">item</code> element describes
+            one of the two items being compared in a constraint.  The name of the
+            item is contained in the required 
+            <code class="sgmltag-element">item-name</code> element.
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e41"><span class="glossterm">Attribute constraints</span></a>
+            use the <code class="sgmltag-element">attribute-name</code>
+            element to indicate which of this item&#8217;s attribute&#8217;s
+            values are to be compared.  
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e385"><span class="glossterm">Identity constraints</span></a>
+            use the <code class="sgmltag-element">id</code> element to indicate that the
+            constraint compares IDs rather than attribute values.
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Attributes&nbsp;</b>
+            None.
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Children&nbsp;</b>
+            
+         </p>
+         <div class="informaltable">
+            <table border="0" width="100%">
+               <colgroup>
+                  <col width="27%" align="left">
+                  <col width="18%" align="left">
+                  <col width="55%" align="left">
+               </colgroup>
+               <tbody valign="top">
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">item-name</code></td>
+                     <td align="left">exactly one</td>
+                     <td align="left">Name of vertex or edge whose attribute is being compared</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">attribute-name</code></td>
+                     <td align="left">exactly one</td>
+                     <td align="left">Name of attribute to be compared</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">id</code></td>
+                     <td align="left">zero or one</td>
+                     <td align="left">Indicates constraint is to compare IDs rather than attribute
+                               values
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <p>
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Content Model&nbsp;</b>
+            
+         </p>
+         <div class="blockquote">
+            <blockquote class="blockquote">
+               <p>
+                  <code class="literal">(item-name, (attribute-name | id))</code>
+                  
+               </p>
+            </blockquote>
+         </div>
+         <p><a name="apx_queryxml_item_ex"></a><b xmlns:exsl="http://exslt.org/common">Example&nbsp;</b>
+            See <a href="apbs09.html" title="Constraints">&#8220;Constraints&#8221;</a>.
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="apbs09.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="apb.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="apbs11.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Constraints&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Update Functionality</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,192 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Chapter&nbsp;6.&nbsp;Using Scripts</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="prev" href="ch05s11.html" title="Tips and Reminders">
+      <link rel="next" href="ch06s02.html" title="Working with Scripts">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s11.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">&nbsp;</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="chapter" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title"><a name="ch_scripts"></a>Chapter&nbsp;6.&nbsp;Using Scripts
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <div class="toc">
+            <p><b>Table of Contents</b></p>
+            <dl>
+               <dt><span class="sect1"><a href="ch06.html#d0e10204">Overview</a></span></dt>
+               <dt><span class="sect1"><a href="ch06s02.html">Working with Scripts</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s02.html#d0e10304">Processing overview</a></span></dt>
+                     <dt><span class="sect2"><a href="ch06s02s02.html">Importing Proximity packages</a></span></dt>
+                     <dt><span class="sect2"><a href="ch06s02s03.html">The <em class="varname"><code>prox</code></em> object</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s03.html">Running Proximity Scripts</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s03.html#d0e10505">Code example: helloworld.py</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s04.html">Using the Proximity Python Interpreter</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s04.html#d0e10953">Code Example: Finding Selected Objects</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s05.html">Sampling the Database</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s05.html#d0e11393">Code example: sample-1d-clusters.py</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s06.html">Adding a New Attribute</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s06.html#d0e11719">Code example: create-isStudent-attr.py</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s07.html">Social Networking Algorithms</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s07.html#d0e11904">Code example: social-networking-algs.py</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s08.html">Working with Proximity Tables</a></span></dt>
+               <dt><span class="sect1"><a href="ch06s09.html">Synthetic Data Generation</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s09.html#d0e13403">Generating i.i.d. data</a></span></dt>
+                     <dt><span class="sect2"><a href="ch06s09s02.html">Code example: generate-iid-data.py</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s10.html">Tips and Reminders</a></span></dt>
+            </dl>
+         </div><a class="indexterm" name="d0e10198"></a><div class="sect1" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h2 class="title" style="clear: both"><a name="d0e10204"></a>Overview
+                     </h2>
+                  </div>
+               </div>
+            </div>
+            <p>In addition to using the Proximity Database Browser and command shell scripts to
+               work with Proximity data, you can
+               access the complete Proximity API through the Proximity scripting
+               interface. This interface supports Python scripts run via the Jython
+               <a class="indexterm" name="d0e10209"></a>
+               <a class="indexterm" name="d0e10215"></a>
+               interpreter, permitting access to the full Proximity Java class library.
+               <a class="indexterm" name="d0e10219"></a>
+               <a class="indexterm" name="d0e10223"></a>
+               <a class="indexterm" name="d0e10227"></a>
+               Scripts provide the means for many Proximity tasks including
+               learning and applying models. Proximity lets you run full Python
+               programs from files as well as providing a full-featured Python
+               <a class="indexterm" name="d0e10233"></a>
+               <a class="indexterm" name="d0e10239"></a>
+               interpreter within the Proximity interface for convenient access to
+               Proximity&#8217;s scripting interface.
+            </p>
+            <p>The examples in this chapter are written in Jython, a Java
+               implementation of Python that lets you interact with Java code. The
+               classes and methods used in these examples are, of course, also
+               available for use in Java code. Source code files for all the scripts
+               discussed in this chapter are available in
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code>.
+            </p>
+            <p>For each exercise in this chapter, we first walk through the
+               source code and identify how Proximity classes and methods are used to
+               accomplish the desired task. This is followed by instructions for
+               running the script in Proximity.
+            </p>
+            <p>
+               
+            </p>
+            <div class="itemizedlist">
+               <p xmlns:exsl="http://exslt.org/common" class="title"><b>Objectives</b></p>
+               <p>The exercises in this chapter demonstrate how to</p>
+               <ul type="disc" compact>
+                  <li>
+                     <p>run scripts from the Proximity Database Browser</p>
+                  </li>
+                  <li>
+                     <p>run scripts from the command line</p>
+                  </li>
+                  <li>
+                     <p>execute Python statements interactively using Proximity&#8217;s
+                            Python interpreter
+                     </p>
+                  </li>
+                  <li>
+                     <p>find objects having specified attribute values</p>
+                  </li>
+                  <li>
+                     <p>sample containers to create training and test sets</p>
+                  </li>
+                  <li>
+                     <p>access database elements (containers, subgraphs,
+                            objects, links, and attributes) from a script
+                     </p>
+                  </li>
+                  <li>
+                     <p>add a new attribute to the database</p>
+                  </li>
+                  <li>
+                     <p>create synthetic data that exhibits specific 
+                            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e57"><span class="glossterm">autocorrelation</span></a>
+                            and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e267"><span class="glossterm">degree disparity</span></a> effects
+                     </p>
+                  </li>
+                  <li>
+                     <p>use 
+                            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e727"><span class="glossterm">social networking</span></a> 
+                            algorithms to 
+                            understand database structure
+                     </p>
+                  </li>
+               </ul>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s11.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center">&nbsp;</td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Tips and Reminders&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Working with Scripts</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

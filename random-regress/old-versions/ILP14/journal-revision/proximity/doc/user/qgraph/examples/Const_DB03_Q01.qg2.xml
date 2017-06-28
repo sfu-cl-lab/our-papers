@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="Const_DB03_Q01">
+  <description>Movies and DVDs released in the same year</description>
+  <query-body>
+    <vertex name="movie">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>movie</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="DVD">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>DVD</value>
+        </test>
+      </condition>
+    </vertex>
+    <edge name="released-as">
+      <vertex1>movie</vertex1>
+      <vertex2>DVD</vertex2>
+      <directed>true</directed>
+    </edge>
+    <constraint>
+      <and>
+        <test>
+          <operator>eq</operator>
+          <item>
+            <item-name>movie</item-name>
+            <attribute-name>ReleaseYear</attribute-name>
+          </item>
+          <item>
+            <item-name>DVD</item-name>
+            <attribute-name>PubYear</attribute-name>
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="movie" x="112.0" y="50.0" />
+    <vertex-location name="DVD" x="343.0" y="136.0" />
+  </editor-data>
+</graph-query>
+

@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<!--
+  Should be able to use below, but DTD is not yet available from a
+  stable location and catalog resolver doesn't seem to work with 
+  validation using sax.Counter class
+
+  <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+-->
+
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/local/sgml/docbook-xml-4.5/docbookx.dtd" [
+<!ENTITY % entities SYSTEM "../../ProxCommonEntities.ent">
+%entities;
+<!ENTITY copyrightyear "2006">
+<!ENTITY graphicspath "images">
+]>
+
+
+<article id="TD_QGraph">
+<title>KDL Technical Description: QGraph</title>
+
+<para>&qgraph; is a visual query language designed to support
+knowledge discovery in large graph databases.
+Queries employ generalized structural descriptions, enabling a
+single query to match a variety of database structures.  
+&qgraph; returns subgraphs in response to queries, provides
+powerful counting and grouping features, has a clean formal semantics,
+and admits efficient query evaluation.
+These features 
+<!-- support the ad hoc exploration of databases and -->
+facilitate the development and use of probabilistic relational
+models&mdash;models of the dependencies among the attributes of
+objects and links in a local neighborhood.
+</para>
+
+<para>&qgraph; has some important differences from standard relational
+database query languages such as SQL.  Most obviously, &qgraph; is a
+visual query language. Queries are created by drawing the desired
+graph structure and adding restrictions in the form of conditions,
+constraints, and numeric annotations.  Unlike SQL, which returns
+individual records, &qgraph; queries return
+<emphasis>subgraphs</emphasis>, complex structures that correspond to
+connected sets of objects and relations in the queried database.
+<!-- Nor do queries specify which attributes of matching objects and
+links are included in the query results. -->
+These subgraphs can vary in structure and retain the full details of
+the database entities rather than providing selected attribute values
+or aggregations such as count or average, giving users access to
+both the content and the structure of the matches for use in
+analyzing and exploring relational data.</para>
+
+<para>&qgraph; is designed to work with large graph databases such as
+those used by Proximity.  Such databases represent semi-structured
+<emphasis>relational</emphasis> data, that is, data that explicitly
+represent both objects (typically people, places, and things) and the
+relationships (links) among them.
+<!-- Proximity databases are directed, attributed graphs where nodes
+correspond to objects (typically people, places, and things) and
+binary links represent the relationships among objects.-->
+Both objects and links have zero or more attributes and all
+attributes are set valued. For example, in a database containing
+information about movies, an object representing an actor might have a
+<token role="attr">name</token> attribute that has multiple values for
+the actor&rsquo;s given and stage names. Similarly, a link connecting
+an actor to a movie might have a <token role="attr">role</token>
+attribute that contains multiple values when the actor plays multiple
+roles in a film.  Proximity databases do not include an inherent sense
+of type; the type of an object or link can be expressed as an attribute
+value and is treated the same as any other database attribute
+value.</para>
+
+<sect1>
+<title>Query Features</title>
+<!-- <title>Restricting query matches</title> -->
+
+<para>A &qgraph; query is a labeled graph that describes the structure
+and content of the database entities (objects and links) to be
+matched.  Vertices and edges in the query correspond to objects and
+links in the database.  Although &qgraph; is designed to work on
+databases with directed links, queries may contain undirected edges
+for cases where link direction is unknown or irrelevant.
+<!-- for when you don&rsquo;t know or don&rsquo;t care about a
+link&rsquo;s direction. -->
+Local conditions and global constraints restrict matches in a query,
+allowing queries to move beyond purely structural matches to consider
+database content. To match a query, the database subgraph must match the
+specified structure and satisfy all conditions and constraints.</para>
+
+<para>The query shown on the left, below, finds the set of
+movies along with their casts directed by the same individual.
+Important &qgraph; features used in this query are
+described in more detail, below.
+The right side shows one partial match to the query.
+Bold labels (omitted from links in the example result)
+preserve the correspondence between query elements and matching
+database entities in the query results.
+
+<informaltable frame="none">
+<tgroup cols="2" align="center" rowsep="0" colsep="0">
+<?dbfo table-width="6.5in"?>
+<colspec colnum="1" colname="col1" colwidth="1.0*"/>
+<colspec colnum="2" colname="col2" colwidth="1.0*"/>
+<tbody valign="middle">
+<row valign="middle">
+<entry>
+  <para><phrase role="caption">Example query</phrase></para>
+</entry>
+<entry>
+  <para><phrase role="caption">Example (partial) match</phrase></para>
+</entry>
+</row>
+<row valign="top">
+<entry>
+  <mediaobject>
+  <imageobject role="fo">
+    <imagedata align="center" valign="middle"
+               fileref="&graphicspath;/QG_query.png"
+               width="3.0in"
+               format="PNG"/> 
+  </imageobject>
+  <imageobject role="html">
+    <imagedata align="center" valign="middle"
+               fileref="&graphicspath;/QG_query.png"
+               contentwidth="3.5in"
+               format="PNG"/> 
+  </imageobject>
+  </mediaobject>
+</entry>
+<entry>
+  <mediaobject>
+  <imageobject role="fo">
+    <imagedata align="center" valign="middle"
+               fileref="&graphicspath;/QG_results.png"
+               width="3.0in"
+               format="PNG"/> 
+  </imageobject>
+  <imageobject role="html">
+    <imagedata align="center" valign="middle"
+               fileref="&graphicspath;/QG_results.png"
+               contentwidth="3.5in"
+               format="PNG"/> 
+  </imageobject>
+  </mediaobject>
+</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<itemizedlist>
+<listitem><para><emphasis>Conditions</emphasis> (shown below the vertices)
+restrict the number of query matches by placing boolean requirements
+on the attributes of a single object or link in the database.
+The conditions in the example query restrict matching objects to those
+with the specified <token role="attr">ObjType</token> attribute value.
+Conditions are commonly used to enforce type restrictions in query
+matches.</para></listitem>
+
+<listitem><para><emphasis>Constraints</emphasis> compare the identity
+or attribute values of one object or link to those of another in the
+matching subgraph. In the example query, the 
+<token role="constraint">director&nbsp;&lt;&nbsp;&gt;&nbsp;actor</token>
+constraint prohibits matches when the same object matches both the 
+<token role="vertex">actor</token> and <token role="vertex">director</token>
+vertices.</para>
+<para>QGraph provides two types of constraints: Identity constraints compare
+the identity of the corresponding database objects, for example,
+ensuring that the constrained items are distinct (such as making sure
+that the same object does not match more than one vertex in the
+query).  Attribute constraints compare attribute values for the
+corresponding database objects, for example, requiring that objects
+have the same attribute value.</para></listitem>
+
+<listitem><para><emphasis>Numeric annotations</emphasis> enable the
+use of generalized structural descriptions, letting a single query
+match a variety of database structures.
+<!-- &qgraph; provides a <emphasis>numeric annotation</emphasis>
+mechanism that lets queries specify generalized structural
+descriptions, enabling a single query to match a variety of database
+structures. -->
+Annotations <emphasis>group</emphasis> together
+in one match repeated isomorphic substructures that would otherwise
+create multiple matches, and place <emphasis>limits</emphasis> on how
+many such substructures can occur in matching portions of the
+graph. Limits can involve lower bounds, upper bounds, or both.
+<!-- (&qgraph; does not provide any mechanism for limiting the number
+of matching substructures without grouping the results.) -->
+The <token role="annot">[1..]</token> annotations in the example query
+indicate that the corresponding query element matches one or more
+database entities or structures.
+</para></listitem>
+
+<listitem><para><emphasis>Subqueries</emphasis> (shown by the rounded
+rectangle grouping selected query elements) identify connected
+subgraphs of query vertices and edges.  By treating these structures
+as a logical unit, subqueries enable the use of numeric annotations
+on composite structures in addition to individual vertices or edges.
+In this example, the subquery groups sets of actors linked to a single
+movie. The corresponding match includes different numbers of actors
+linked to each movie object.
+<!-- Numeric annotations can be applied to both individual
+query elements (single vertices or edges) or on
+<emphasis>subqueries</emphasis>, 
+connected subgraphs of vertices and edges that can be treated as
+logical units. -->
+Subqueries expand the expressive power of
+QGraph, enabling the identification and matching of more complex
+structures than could be found otherwise.</para></listitem>
+</itemizedlist>
+</para>
+
+<!-- old text
+<para>A subquery is a connected subgraph of vertices and edges that
+can be treated as a logical unit.  Subqueries enable the use of numeric
+annotations on a connected group of vertices and edges instead of just
+a single vertex or edge.  Using subqueries expands the
+expressive power of &qgraph;, enabling you to identify more complex
+structures than could be found otherwise.</para>
+-->
+
+</sect1>
+
+<sect1>
+<title>Query Results</title>
+
+<para>&qgraph; queries return a collection of subgraphs from the
+database that match the structure specified in the query. In
+Proximity, this result set is called a <emphasis>container</emphasis>.
+A container&rsquo;s subgraphs provide access to not just the matching
+objects and links, but to all associated attributes for these
+elements as well.</para>
+
+<para>By returning complete subgraphs, &qgraph; provides results
+particularly well suited for use in relational knowledge discovery.
+Unlike query languages that require propositionalizing attribute data
+from related objects, &qgraph; preserves both the explicit
+relationships among objects and the specific attribute values for all
+objects and links in the subgraph.  Simplistic approaches to
+propositionalizing relational data can result in bias due to hidden
+autocorrelation or degree disparity.  By preserving the full
+relationship and attribute value data, &qgraph; facilitates the
+development of models that can detect and adjust for such sources of
+bias.</para>
+
+</sect1>
+
+<sect1>
+<title>Implementation</title>
+
+<para>&qgraph; is used in Proximity, an open-source system for
+relational knowledge discovery.
+Proximity provides query evaluation, a graphical query editor, and
+tools for exploring and visualizing both data and query results.
+Although &qgraph; is a full-fledged
+query and update language for graph databases, Proximity currently
+only implements a large subset (but not all) of &qgraph;
+functionality.  See the technical report
+<citetitle>A Visual Language for Querying and Updating
+Graphs</citetitle> <xref linkend="blau02"/> and the
+<citetitle>Proximity &qgraph; Guide</citetitle>
+<!--
+<xref linkend="qgguide"/>
+-->
+for a full description of
+&qgraph;&rsquo;s power, including functionality not yet available in
+the current Proximity implementation.<footnote><para>How &qgraph;
+evaluates conditions and constraints on attributes with multiple
+values has changed since the publication of this technical report.  On
+this issue, the <ulink
+url="http://kdl.cs.umass.edu/proximity/documentation/qgraph/index.html"><citetitle>Proximity QGraph Guide</citetitle></ulink> is
+definitive.</para></footnote></para>
+
+</sect1>
+
+<sect1>
+<title>References</title>
+
+<bibliolist>
+
+<bibliomixed id="qgguide">
+<abbrev>QGraph Guide</abbrev>
+<title><emphasis>Proximity QGraph Guide</emphasis>,</title>
+<orgname>Knowledge Discovery Laboratory, University of Massachusetts
+   Amherst.</orgname> 
+<pubdate>2006</pubdate>
+</bibliomixed>
+
+<bibliomixed id="blau02">
+<abbrev>Blau, Immerman, and Jensen, 2002</abbrev>
+<authorgroup>
+    <author>
+      <firstname>H.</firstname>
+      <surname>Blau, </surname>
+    </author>
+    <author>
+      <firstname>N.</firstname>
+      <surname>Immerman, </surname>
+    </author>
+    <author>
+      <firstname>D.</firstname>
+      <surname>Jensen.</surname>
+    </author>
+  </authorgroup>
+  <title><emphasis>A Visual Language for Querying and Updating
+     Graphs</emphasis>,</title> 
+  <bibliosource>University of Massachusetts Amherst, Computer
+  Science Department Technical Report 2002-037.</bibliosource>
+  <pubdate>2002</pubdate>
+</bibliomixed>
+</bibliolist>
+
+</sect1>
+
+</article>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

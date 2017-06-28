@@ -1,0 +1,192 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Constraints crossing the subquery boundary</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch06s02.html" title="Subqueries and Constraints">
+      <link rel="prev" href="ch06s02.html" title="Subqueries and Constraints">
+      <link rel="next" href="ch06s03.html" title="Multiple Subqueries">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Subqueries and Constraints</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e6784"></a>Constraints crossing the subquery boundary
+                  </h3>
+               </div>
+            </div>
+         </div>
+         <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">Constraints</span></a> can
+            also cross subquery boundaries. That is, 
+            constraints can compare a query element inside a subquery with a query
+            element outside the subquery, either in the main query or in a
+            different subquery. 
+            (Proximity currently places limitations on the the circumstances under
+            which constraints can cross the subquery boundary.  See
+            <a href="ch06s04.html" title="Implementation in Proximity">&#8220;Implementation in Proximity&#8221;</a> later in this chapter for details on
+            these restrictions.)
+            
+         </p>
+         <p>The &#8220;Six Degrees&#8221; game finds paths between pairs of
+            actors based on the shared movies in which they and other actors have
+            appeared.  The length of the shortest path between actors becomes the
+            &#8220;degree of separation&#8221; between these two actors.
+            The database fragment shown in <a href="ch06s02s02.html#fig_subq_db03" title="Figure&nbsp;6.15.&nbsp;Database fragment [SubQ_DB03.xml]">Figure&nbsp;6.15</a>
+            contains information on actors and the other actors with whom they
+            have co-starred. Links between actors indicate that those two actors
+            appeared in the same movie. Proximity requires
+            <a class="indexterm" name="d0e6797"></a>
+            <a class="indexterm" name="d0e6805"></a>
+            that all links be directed, so the database
+            includes two links, one in each direction, between each pair of
+            connected actors.
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db03"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB03.png" align="middle" width="598.5" alt="Database fragment [SubQ_DB03.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.15.&nbsp;Database fragment [SubQ_DB03.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+            The query in <a href="ch06s02s02.html#fig_subq_db03_q01" title="Figure&nbsp;6.16.&nbsp;Two degrees of separation query without constraint [SubQ_DB03_Q01.qg2.xml]">Figure&nbsp;6.16</a> finds actors
+            who are one or two degrees of separation from another actor in
+            the database.
+            
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db03_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB03_Q01.png" align="middle" width="517.5" alt="Two degrees of separation query without constraint [SubQ_DB03_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.16.&nbsp;Two degrees of separation query without constraint [SubQ_DB03_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            A query without constraints, like the one shown in 
+            <a href="ch06s02s02.html#fig_subq_db03_q01" title="Figure&nbsp;6.16.&nbsp;Two degrees of separation query without constraint [SubQ_DB03_Q01.qg2.xml]">Figure&nbsp;6.16</a>, suffers from a problem similar
+            to that which we encountered in our previous example. In this case,
+            because the database 
+            includes links in both directions, this query can match the same
+            object to two different vertices.
+            Specifically, the same database object can match both the
+            <em class="token">start</em> and
+            <em class="token">2degrees</em> vertices, as can be seen in the
+            sample subgraph drawn from the query&#8217;s results, shown below:
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db03_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB03_Q01_res.png" align="middle" width="598.5" alt="Two degrees of separation results for Kevin Bacon (no constraint)"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.17.&nbsp;Two degrees of separation results for Kevin Bacon (no
+                         constraint)</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p><a href="ch06s02s02.html#fig_subq_db03_q01_res" title="Figure&nbsp;6.17.&nbsp;Two degrees of separation results for Kevin Bacon (no&#xA;       constraint)">Figure&nbsp;6.17</a> shows the subgraph in
+            which the <em class="token">start</em> vertex matches the
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Kevin Bacon</span> object.  This
+            subgraph includes three instances of 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Kevin Bacon</span> also matching the
+            <em class="token">2degrees</em> vertex.  In these instances, the
+            query matched the <em class="token">worked-with2</em> edge to the
+            links pointing back towards the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Kevin Bacon</span>
+            object.
+         </p>
+         <p>To eliminate these unwanted matches, we add an 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e385"><span class="glossterm">identity constraint</span></a> to the query, as shown in 
+            <a href="ch06s02s02.html#fig_subq_db03_q02" title="Figure&nbsp;6.18.&nbsp;Two degrees of separation query with constraint [SubQ_DB03_Q02.qg2.xml]">Figure&nbsp;6.18</a>.
+            The constraint states that the same object
+            may not match both the <em class="token">start</em> and
+            <em class="token">2degrees</em> vertices.
+            
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db03_q02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB03_Q02.png" align="middle" width="522" alt="Two degrees of separation query with constraint [SubQ_DB03_Q02.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.18.&nbsp;Two degrees of separation query with constraint [SubQ_DB03_Q02.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>Again, we examine the subgraph
+            in which the <em class="token">start</em> vertex matches the 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Kevin Bacon</span> object to examine.
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db03_q02_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB03_Q02_res.png" align="middle" width="598.5" alt="Two degrees of separation results for Kevin Bacon"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.19.&nbsp;Two degrees of separation results for Kevin Bacon</b></p>
+         </div>
+         <p><br class="figure-break">
+            The constraint successfully eliminated the three instances of
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Kevin Bacon</span> matching the
+            <em class="token">2degrees</em> vertex that we saw in 
+            <a href="ch06s02s02.html#fig_subq_db03_q01_res" title="Figure&nbsp;6.17.&nbsp;Two degrees of separation results for Kevin Bacon (no&#xA;       constraint)">Figure&nbsp;6.17</a>.
+            
+         </p><a class="indexterm" name="d0e6918"></a><a class="indexterm" name="d0e6919"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06s02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Subqueries and Constraints&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Multiple Subqueries</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

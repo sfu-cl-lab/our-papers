@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<graph-query name="Annot_DB01_Star">
+  <description>1d "star" query with movies as core objects</description>
+  <query-body>
+    <vertex name="movie">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>Movie</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="studio">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>Studio</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </vertex>
+    <edge name="produced">
+      <vertex1>studio</vertex1>
+      <vertex2>movie</vertex2>
+      <directed>true</directed>
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>LinkType</attribute-name>
+          <value>produced</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+  </query-body>
+  <editor-data>
+    <vertex-location name="movie" x="88.0" y="63.0" />
+    <vertex-location name="studio" x="388.0" y="117.0" />
+  </editor-data>
+</graph-query>
+

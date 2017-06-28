@@ -1,0 +1,590 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Annotation Basics</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Numeric Annotations">
+      <link rel="prev" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Numeric Annotations">
+      <link rel="next" href="ch04s03.html" title="Understanding Multiple Annotations">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;4.&nbsp;Numeric Annotations</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="qg_annot_basics"></a>Annotation Basics
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <p>A numeric annotation specifies how many database entities must
+            match a particular query element. Both 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e824"><span class="glossterm">vertices</span></a> and 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e310"><span class="glossterm">edges</span></a> 
+            may be annotated.
+            (<a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e755"><span class="glossterm">Subqueries</span></a> are
+            also annotated, as described in <a href="ch06.html" title="Chapter&nbsp;6.&nbsp;Subqueries">Chapter&nbsp;6, <i>Subqueries</i></a>.) 
+            Numeric annotations can specify a &nbsp;<span class="emphasis"><em>range</em></span> of
+            values, giving them a great deal more flexibility than the alternative
+            of specifying exact structural matches.
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td><a class="indexterm" name="d0e2993"></a><p>Numeric annotations take the form
+                        
+                     </p>
+                     <div class="blockquote">
+                        <blockquote class="blockquote">
+                           <p>
+                              <strong class="userinput"><code>[<em class="replaceable"><code>min</code></em>..<em class="replaceable"><code>max</code></em>]
+                                    </code></strong>
+                              
+                           </p>
+                        </blockquote>
+                     </div>
+                     <p>
+                        where
+                        
+                     </p>
+                     <div class="itemizedlist">
+                        <ul type="disc" compact>
+                           <li>
+                              <p><strong class="userinput"><code><em class="replaceable"><code>min</code></em></code></strong> specifies the minimum number of database elements
+                                     required to match the query
+                              </p>
+                           </li>
+                           <li>
+                              <p><strong class="userinput"><code><em class="replaceable"><code>max</code></em></code></strong> specifies the maximum number of database elements that
+                                     can be present to match the query
+                              </p>
+                           </li>
+                        </ul>
+                     </div>
+                     <p>
+                        That is, to match the query the database must contain at least <strong class="userinput"><code><em class="replaceable"><code>min</code></em></code></strong>
+                        and at most <strong class="userinput"><code><em class="replaceable"><code>max</code></em></code></strong> of the annotated entity.  The value for <strong class="userinput"><code><em class="replaceable"><code>max</code></em></code></strong> can be
+                        left unspecified.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>There are three legal forms of numeric annotation:
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p>An <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e791"><span class="glossterm">unbounded range</span></a></em></span>
+                         <a class="indexterm" name="d0e3050"></a>
+                         <a class="indexterm" name="d0e3056"></a>
+                         <a class="indexterm" name="d0e3060"></a>
+                         [<em class="replaceable"><code>i</code></em>..] on a vertex or edge means that at
+                         least <em class="replaceable"><code>i</code></em> instances of the corresponding
+                         database element must be present to match the query.  An unbounded
+                         range will match any number greater than or equal to
+                         <em class="replaceable"><code>i</code></em> of database elements.
+                         
+                  </p>
+               </li>
+               <li>
+                  <p>A <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e87"><span class="glossterm">bounded range</span></a></em></span>
+                         <a class="indexterm" name="d0e3080"></a>
+                         <a class="indexterm" name="d0e3086"></a>
+                         [<em class="replaceable"><code>i</code></em>..<em class="replaceable"><code>j</code></em>] means
+                         that at least <em class="replaceable"><code>i</code></em> and no more than
+                         <em class="replaceable"><code>j</code></em> instances are required for a
+                         match. The query will not match database structures that have
+                         fewer than or more than the specified number of elements.
+                  </p>
+               </li>
+               <li>
+                  <p>An <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e334"><span class="glossterm">exact annotation</span></a></em></span>
+                         <a class="indexterm" name="d0e3109"></a>
+                         <a class="indexterm" name="d0e3115"></a>
+                         means that exactly
+                         the specified number of database elements must be present to match
+                         the query. For example, if you specify a vertex annotation of
+                         <code class="token">[2]</code>, the query will not match database
+                         structures that have one, three, or more matching vertices.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            
+         </p>
+         <p>We can use numeric annotations to restate the query with which
+            we began this chapter, finding movies produced by exactly two studios:
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_q02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Q02.png" align="middle" width="328.50000000000006" alt="Movies produced by exactly two studios [Annot_DB01_Q02.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.3.&nbsp;Movies produced by exactly two studios [Annot_DB01_Q02.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p><a href="ch04s02.html#fig_annot_db01_q02" title="Figure&nbsp;4.3.&nbsp;Movies produced by exactly two studios [Annot_DB01_Q02.qg2.xml]">Figure&nbsp;4.3</a> includes two numeric annotations,
+            <a class="indexterm" name="d0e3137"></a>
+            <a class="indexterm" name="d0e3143"></a>
+            one on the vertex representing studio objects, and one on
+            the adjacent edge. The <code class="token">[2]</code> annotation on the
+            <em class="token">studio</em> vertex
+            <a class="indexterm" name="d0e3155"></a>
+            indicates that the query can only
+            match subgraphs containing exactly two studio objects.
+            Of course, all the other parts of the query must also be
+            satisfied&#8212;those two studio objects must be linked to the same
+            actor object by produced links.  This annotation also serves to group
+            <a class="indexterm" name="d0e3161"></a>
+            the two studio-movie pairs in a single subgraph with one movie object
+            and two linked studio objects, rather than returning the
+            multiple subgraphs we saw in 
+            <a href="ch02.html" title="Chapter&nbsp;2.&nbsp;Query Basics">Chapter&nbsp;2, <i>Query Basics</i></a>.
+         </p>
+         <p>The <code class="token">[1..]</code> edge annotation is included because
+            we cannot assume that linked objects
+            in a database are connected by only a single link.  If a database
+            contains multiple links between objects, then we usually want to group
+            <a class="indexterm" name="d0e3172"></a>
+            these links, in addition to grouping the objects, in the query
+            results. Because we may not know how many links connect one object to
+            another, we use the unbounded annotation <code class="token">[1..]</code> on
+            the edge. For now, we&#8217;ll note that this is usually the correct
+            annotation for an adjacent
+            <a class="indexterm" name="d0e3181"></a>
+            <a class="indexterm" name="d0e3187"></a>
+            edge and simply follow this convention in
+            defining the next several queries.  The section on
+            <a href="ch04s03.html" title="Understanding Multiple Annotations">&#8220;Understanding Multiple Annotations&#8221;</a> later in this chapter provides a
+            more complete explanation of this edge annotation.
+            
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>The QGraph language includes specific requirements
+                        for annotated vertices and their adjacent edges.
+                        
+                     </p>
+                     <div class="itemizedlist">
+                        <ul type="disc" compact>
+                           <li>
+                              <p>QGraph requires that edges adjacent to annotated vertices
+                                     must themselves be annotated.
+                              </p>
+                           </li>
+                           <li>
+                              <p>QGraph requires that, at most, only one of two adjacent
+                                     vertices may be annotated.
+                              </p>
+                           </li>
+                        </ul>
+                     </div>
+                     <p>
+                        
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>Edges adjacent to annotated
+            vertices must be annotated for the reason cited above.
+            Only one of two adjacent vertices may be annotated because
+            annotating adjacent vertices can result in ambiguities in interpreting
+            the query.  Proximity enforces these requirements and will not execute
+            queries with illegal annotations.  See 
+            <a href="ch04s05.html" title="Adjacency Requirements">&#8220;Adjacency Requirements&#8221;</a>
+            later in this chapter for a more detailed explanation of the reasons
+            behind these requirements.
+         </p>
+         <p>When executing an annotated query, the vertex annotation takes
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e595"><span class="glossterm">precedence</span></a>
+            <a class="indexterm" name="d0e3216"></a>
+            over the edge annotation. That is, the query processor
+            first satisfies requirements on the vertex and then checks to see if
+            it can satisfy requirements on the corresponding edges.
+         </p>
+         <p>To see how Proximity handles the query shown in
+            <a href="ch04s02.html#fig_annot_db01_q02" title="Figure&nbsp;4.3.&nbsp;Movies produced by exactly two studios [Annot_DB01_Q02.qg2.xml]">Figure&nbsp;4.3</a>, consider the database
+            fragment shown in <a href="ch04s02.html#fig_annot_db01" title="Figure&nbsp;4.4.&nbsp;Database fragment [Annot_DB01.xml]">Figure&nbsp;4.4</a>.
+            This fragment contains information about studios that
+            produced some recent Academy Award winning pictures.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01.png" align="middle" width="603" alt="Database fragment [Annot_DB01.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.4.&nbsp;Database fragment [Annot_DB01.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The above fragment includes four different movies: two produced by a
+            single studio (<span class="emphasis"><em>Forrest Gump</em></span> and
+            <span class="emphasis"><em>Chicago</em></span>), one produced by two studios
+            (<span class="emphasis"><em>Titanic</em></span>), and one produced by three studios
+            (<span class="emphasis"><em>Shakespeare in Love</em></span>).
+            Executing the query shown in <a href="ch04s02.html#fig_annot_db01_q02" title="Figure&nbsp;4.3.&nbsp;Movies produced by exactly two studios [Annot_DB01_Q02.qg2.xml]">Figure&nbsp;4.3</a>
+            on this database fragment yields the matching subgraph shown in 
+            <a href="ch04s02.html#fig_annot_db01_q02_res" title="Figure&nbsp;4.5.&nbsp;Query results">Figure&nbsp;4.5</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_q02_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Q02_res.png" align="middle" width="328.50000000000006" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.5.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            Rather than returning two subgraphs, each with one movie and one
+            studio, this query returns a single subgraph containing the same data
+            that would have been spread across multiple matches had we omitted
+            the annotations from the query.
+            Because we used an exact annotation of <code class="token">[2]</code> on
+            the <em class="token">studio</em> vertex, the query does not match
+            subgraphs containing movies connected to a single studio or to more
+            than two studios. If we want to instead find all the movies produced
+            by two or more studios, we need to change the numeric annotation on
+            the <em class="token">studio</em> vertex to use the unbounded 
+            range <code class="token">[2..]</code>, as shown in
+            <a href="ch04s02.html#fig_annot_db01_q03" title="Figure&nbsp;4.6.&nbsp;Movies produced by two or more studios [Annot_DB01_Q03.qg2.xml]">Figure&nbsp;4.6</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_q03"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Q03.png" align="middle" width="328.50000000000006" alt="Movies produced by two or more studios [Annot_DB01_Q03.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.6.&nbsp;Movies produced by two or more studios [Annot_DB01_Q03.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The results of executing this modified query on the data shown in
+            <a href="ch04s02.html#fig_annot_db01" title="Figure&nbsp;4.4.&nbsp;Database fragment [Annot_DB01.xml]">Figure&nbsp;4.4</a> are shown below:
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_q03_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Q03_res.png" align="middle" width="630" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.7.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            This time, the unbounded annotation <code class="token">[2..]</code> on the
+            <em class="token">studio</em> vertex matches both the
+            subgraph containing the two studios that produced
+            <span class="emphasis"><em>Titanic</em></span> and the subgraph containing the
+            three studios that produced <span class="emphasis"><em>Shakespeare in
+                  Love</em></span>.
+            
+         </p>
+         <p>A variation on this query structure forms one of the most common
+            QGraph queries, the 
+            <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e733"><span class="glossterm">star query</span></a></em></span>.
+            <a class="indexterm" name="d0e3312"></a>
+            <a class="indexterm" name="d0e3316"></a>
+            Star queries
+            find all database elements linked to a core object.
+            <a class="indexterm" name="d0e3322"></a>
+            Star queries are typically used to find subgraphs such as &#8220;all
+            actors in a movie&#8221; or &#8220;all authors for a paper&#8221;
+            (assuming the corresponding database contains the appropriate objects
+            and links).
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_star"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_Star01.png" align="middle" width="328.50000000000006" alt="General star query"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.8.&nbsp;General star query</b></p>
+         </div>
+         <p><br class="figure-break">
+            Star queries can use either 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e279"><span class="glossterm">directed</span></a> or 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e803"><span class="glossterm">undirected edges</span></a>.
+            
+         </p>
+         <p>To create a star query for the movie and studio database,
+            we need to determine which <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e785"><span class="glossterm">type</span></a> of objects
+            should serve as the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e240"><span class="glossterm">core vertex</span></a>
+            <a class="indexterm" name="d0e3349"></a>
+            <a class="indexterm" name="d0e3353"></a>
+            for the query.  Because this database links multiple studios to
+            a single movie, we make the core vertex match 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">movie</span> objects.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_star01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Star.png" align="middle" width="328.50000000000006" alt="Star query with movies as core objects [Annot_DB01_Star.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.9.&nbsp;Star query with movies as core objects [Annot_DB01_Star.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The query above finds and returns a subgraph for each movie in the
+            database.  Each subgraph includes all the actors linked from that
+            movie.  The results of executing
+            this query on the database fragment in
+            <a href="ch04s02.html#fig_annot_db01" title="Figure&nbsp;4.4.&nbsp;Database fragment [Annot_DB01.xml]">Figure&nbsp;4.4</a> are shown below:
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_star_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Star_res.png" align="middle" width="630" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.10.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>Just as we can annotate vertices so that they match more than
+            one object, we can also annotate edges
+            <a class="indexterm" name="d0e3384"></a>
+            so that they match more than
+            one link. For example, the database fragment shown in 
+            <a href="ch04s02.html#fig_annot_db02" title="Figure&nbsp;4.11.&nbsp;Database fragment [Annot_DB02.xml]">Figure&nbsp;4.11</a> 
+            contains information on several actors and the roles they
+            played in the movie <span class="emphasis"><em>Angels in America</em></span>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB02.png" align="middle" width="576" alt="Database fragment [Annot_DB02.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.11.&nbsp;Database fragment [Annot_DB02.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The database fragment indicates that Al Pacino played a single role,
+            Justin Kirk played two different roles, and Meryl Streep played four
+            different roles in this movie.
+            
+         </p>
+         <p>It&#8217;s worth noting that the database fragment shown in
+            <a href="ch04s02.html#fig_annot_db02" title="Figure&nbsp;4.11.&nbsp;Database fragment [Annot_DB02.xml]">Figure&nbsp;4.11</a> uses a
+            different <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e709"><span class="glossterm">schema</span></a>
+            <a class="indexterm" name="d0e3411"></a>
+            <a class="indexterm" name="d0e3417"></a>
+            <a class="indexterm" name="d0e3423"></a>
+            <a class="indexterm" name="d0e3429"></a>
+            <a class="indexterm" name="d0e3435"></a>
+            to represent actors and roles from that used in
+            <a href="ch03s03.html#fig_cond_db02" title="Figure&nbsp;3.8.&nbsp;Database with multiple attribute values [Cond_DB02.xml]">Figure&nbsp;3.8</a>. The example in 
+            <a href="ch03.html" title="Chapter&nbsp;3.&nbsp;Conditions">Chapter&nbsp;3, <i>Conditions</i></a> used
+            multiple attribute values on a single link to indicate that an actor
+            played multiple roles in a movie. The example in this chapter uses
+            multiple links to represent the same kind of information. Proximity
+            does not requires any particular representational schema for a given
+            dataset, although consistency within a dataset is important.
+            You can determine the appropriate schema for your data.
+         </p>
+         <p>A query that uses edge annotations to find actors playing
+            multiple roles is shown in <a href="ch04s02.html#fig_annot_db02_q01" title="Figure&nbsp;4.12.&nbsp;Actors playing multiple roles [Annot_DB02_Q01.qg2.xml]">Figure&nbsp;4.12</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db02_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB02_Q01.png" align="middle" width="328.50000000000006" alt="Actors playing multiple roles [Annot_DB02_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.12.&nbsp;Actors playing multiple roles [Annot_DB02_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            Here we include the annotation <code class="token">[2..]</code> on the edge
+            connecting the <em class="token">actor</em> vertex to the
+            <em class="token">movie</em> vertex, indicating that the query
+            matches actor-movie pairs connected by two or more
+            role links.  Annotated edges can stand alone;
+            they do not require that any adjacent
+            <a class="indexterm" name="d0e3467"></a>
+            <a class="indexterm" name="d0e3473"></a>
+            vertices be annotated.
+            The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e340"><span class="glossterm">existence condition</span></a> on the 
+            <em class="token">role</em> edge 
+            requires that matching edges have a <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Role</span>
+            attribute, but doesn&#8217;t place any requirements on the specific
+            value of this attribute.
+            
+         </p>
+         <p>
+            The results of executing this query on the
+            database fragment shown in <a href="ch04s02.html#fig_annot_db02" title="Figure&nbsp;4.11.&nbsp;Database fragment [Annot_DB02.xml]">Figure&nbsp;4.11</a> are shown
+            below.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db02_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB02_Q01_res.png" align="middle" width="328.50000000000006" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.13.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>Just as vertex annotations group matching objects, the query&#8217;s
+            edge annotation groups matching links into a single subgraph in the
+            query&#8217;s results.  Without the edge annotation, this query
+            returns seven subgraphs&#8212;one for each unique actor-role-movie
+            subgraph in the database.
+         </p>
+         <p>An annotation of <code class="token">[1]</code> is not
+            equivalent
+            <a class="indexterm" name="d0e3506"></a>
+            to no 
+            <a class="indexterm" name="d0e3512"></a>
+            annotation.  A <code class="token">[1]</code>
+            annotation requires that the query only match subgraphs that contain
+            exactly one of the annotated entities.  A query with no annotation
+            will match each appropriate database entity regardless of number,
+            although it will not group the matches into a single subgraph.  This
+            can be seen by comparing the results for the two queries below.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_q04and5"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Q04and5.png" align="middle" width="630" alt="Annotated and unannotated queries"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.14.&nbsp;Annotated and unannotated queries</b></p>
+         </div>
+         <p><br class="figure-break">
+            The query on the right includes an exact <code class="token">[1]</code>
+            annotation on the <em class="token">studio</em> vertex (and
+            the standard <code class="token">[1..]</code> annotation on the
+            incident edge to satisfy QGraph&#8217;s adjacency requirements for
+            annotations).  The query on the left has no annotations.
+            Executing these queries on the database fragment shown in 
+            <a href="ch04s02.html#fig_annot_db01" title="Figure&nbsp;4.4.&nbsp;Database fragment [Annot_DB01.xml]">Figure&nbsp;4.4</a> yields distinctly different
+            results.  <a href="ch04s02.html#fig_annot_db01_q04_res" title="Figure&nbsp;4.15.&nbsp;Query results">Figure&nbsp;4.15</a> shows the
+            results from the unannotated query.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_q04_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Q04_res.png" align="middle" width="630" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.15.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            The query without annotations matches all the studio-movie pairs in the
+            database. Studios are not grouped; each match forms a separate
+            subgraph.  Compare these results to that for the query containing the
+            <code class="token">[1]</code> vertex annotation.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db01_q05_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB01_Q05_res.png" align="middle" width="630" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.16.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            The results of executing the annotated query include just
+            two subgraphs, matching the two
+            instances in the database where a movie is linked to exactly one
+            studio.
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;4.&nbsp;Numeric Annotations&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Understanding Multiple Annotations</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

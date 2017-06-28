@@ -1,0 +1,367 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Comparing Items in a Query</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="prev" href="ch05s04.html" title="Grouping Elements in a Query">
+      <link rel="next" href="ch05s06.html" title="Matching Complex Subgraphs with Subqueries">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Querying the Database</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_constraint"></a>Comparing Items in a Query
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_queries_const"></a><p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e162"><span class="glossterm">Conditions</span></a> let you
+            specify restrictions on individual items in a 
+            query. To place restrictions across different items we use 
+            <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e228"><span class="glossterm">constraints</span></a></em></span>.
+            Constraints compare one vertex or edge in the query to another
+            vertex or edge.
+         </p>
+         <p>QGraph permits two types of constraints:
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p><span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e385"><span class="glossterm">Identity constraints</span></a></em></span>
+                         <a class="indexterm" name="d0e8163"></a>
+                         compare the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e567"><span class="glossterm">identities</span></a>
+                         of two database objects or links.
+                         
+                  </p>
+               </li>
+               <li>
+                  <p><span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e41"><span class="glossterm">Attribute constraints</span></a></em></span>
+                         <a class="indexterm" name="d0e8176"></a>
+                         compare the attribute values of two database objects or links.
+                         <a class="indexterm" name="d0e8180"></a>
+                         
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            Identity constraints are typically used to ensure that the same
+            database entity does not match two different query elements.
+            <a href="ch05s06.html#ex_subquery" title="Exercise&nbsp;5.5.&nbsp;Using subqueries in a query:">Exercise&nbsp;5.5</a> illustrates a typical use of an identity
+            constraint.
+         </p>
+         <p>Attribute constraints
+            allow you to compare different 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attributes</span></a> as long as
+            their data types 
+            <a class="indexterm" name="d0e8194"></a>
+            <a class="indexterm" name="d0e8198"></a>
+            are <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e129"><span class="glossterm">comparable</span></a>.
+            In addition to comparing attribute values with the
+            same data type, Proximity also lets you to compare
+            <code class="code">DBL</code> with <code class="code">FLT</code> and
+            <code class="code">INT</code>, and <code class="code">FLT</code> with <code class="code">INT</code>.
+            This exercise uses an attribute constraint to compare values for the
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute across objects. 
+            
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>You cannot mix vertices and edges within a constraint.
+                        <a class="indexterm" name="d0e8226"></a>
+                        <a class="indexterm" name="d0e8232"></a>
+                        Vertices can only be compared to other vertices and edges can only be
+                        compared to other edges.
+                     </p>
+                     <p>QGraph only lets one of the two constrained items be
+                        <a href="go01.html#d18e555"><span class="glossterm">annotated</span></a>;
+                        constraints between two annotated items are not allowed.
+                        With one exception, Proximity also prohibits constraints between
+                        two edges when one of them is annotated. 
+                        Proximity allows such constraints only when the vertex adjacent to the
+                        annotated edge is<a href="go01.html#d18e573"><span class="glossterm">optional</span></a>
+                        (annotated with <code class="token">[0..]</code> or 
+                        <code class="token">[0..<em class="replaceable"><code>j</code></em>]</code>).
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>The following exercise creates a query that finds linked web pages
+            from different schools.  The example query uses an attribute constraint to
+            compare the value of the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute
+            for the two web page objects.
+         </p>
+         <div class="procedure"><a name="d0e8261"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;5.4.&nbsp;Adding constraints to a query:</b></p><a class="indexterm" name="d0e8264"></a><a class="indexterm" name="d0e8267"></a><p>
+               The query created in this exercise is also available in the
+               Proximity&nbsp;4.3 distribution in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/different-schools.qg2.xml</code>.
+            </p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+               
+            </p>
+            <ol type="1">
+               <li>
+                  <p>From the <span><strong class="guimenu">Query</strong></span> menu, choose
+                     <span><strong class="guimenuitem">New Query</strong></span>.
+                     Proximity starts the Query Editor.
+                  </p>
+               </li>
+               <li>
+                  <p>Create a vertex labeled <strong class="userinput"><code>start_page</code></strong>.
+                  </p>
+               </li>
+               <li>
+                  <p>Create a second vertex labeled <strong class="userinput"><code>linked_page</code></strong>.
+                  </p>
+               </li>
+               <li>
+                  <p>Add the numeric annotation <strong class="userinput"><code>[1..]</code></strong> to the
+                     <em class="token">linked_page</em> vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>Create a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e279"><span class="glossterm">directed edge</span></a> from
+                     <em class="token">start_page</em> to
+                     <em class="token">linked_page</em>. Label the edge
+                     <strong class="userinput"><code>linked_to</code></strong>.
+                  </p>
+               </li>
+               <li>
+                  <p>If you do not have automatic edge annotation enabled, add the
+                     numeric annotation <strong class="userinput"><code>[1..]</code></strong> to the 
+                     <em class="token">linked_to</em> edge.
+                  </p>
+               </li>
+               <li>
+                  <p>In the <span class="guilabel">Constraints</span> area at the bottom of
+                     the query properties pane, click <span><strong class="guibutton">Add</strong></span> 
+                     <a class="indexterm" name="d0e8344"></a>
+                     <a class="indexterm" name="d0e8348"></a>
+                     to add a new constraint 
+                     <a class="indexterm" name="idx_const_creating"></a>
+                     to the query.
+                  </p>
+                  <p>The Query Editor adds a temporary constraint, 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">item1&nbsp;&gt;&nbsp;item2</span>, as an
+                     example to be edited with the correct values.  (Because this temporary
+                     constraint uses vertex labels not present in the query, the status
+                     list shows that the query is invalid.)
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Replace the example constraint with
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p><strong class="userinput"><code>start_page.school&nbsp;&lt;&gt;&nbsp;linked_page.school</code></strong></p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     and press <span class="keycap">Tab</span>.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_NewConstraint.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     The query should now be <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e815"><span class="glossterm">valid</span></a>.
+                     
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>The general form of an attribute <a href="go01.html#d18e228"><span class="glossterm">constraint</span></a> is
+                                 
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p>
+                                       <em class="replaceable"><code>element1</code></em>.<em class="replaceable"><code>attribute1</code></em>
+                                       &nbsp;&nbsp;<em class="replaceable"><code>operator</code></em>&nbsp;&nbsp;
+                                       <em class="replaceable"><code>element2</code></em>.<em class="replaceable"><code>attribute2</code></em>
+                                       
+                                    </p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                 where
+                                 
+                              </p>
+                              <div class="itemizedlist">
+                                 <ul type="disc" compact>
+                                    <li>
+                                       <p><em class="replaceable"><code>element1</code></em> and
+                                          	<em class="replaceable"><code>element2</code></em> are the names of two
+                                          	vertices or two edges in the query
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>attribute1</code></em> is the
+                                          	name of an attribute for <em class="replaceable"><code>element1</code></em>
+                                                  
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>attribute2</code></em> is the
+                                          	name of an attribute for <em class="replaceable"><code>element2</code></em>
+                                                  
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>attribute1</code></em> and 
+                                                  <em class="replaceable"><code>attribute2</code></em> are of comparable types
+                                                  
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>operator</code></em> is one of
+                                          	<code class="literal">=</code>, <code class="literal">&lt;&gt;</code>,
+                                                  <code class="literal">&lt;</code>, <code class="literal">&lt;=</code>,
+                                          	<code class="literal">&gt;</code>, and <code class="literal">&gt;=</code>.
+                                          <a class="indexterm" name="d0e8467"></a>
+                                          <a class="indexterm" name="d0e8471"></a>
+                                          
+                                       </p>
+                                    </li>
+                                 </ul>
+                              </div>
+                              <p>
+                                 
+                                 
+                                 The general form of an identity constraint is
+                                 
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p>
+                                       <em class="replaceable"><code>element1</code></em>
+                                       &nbsp;&nbsp;<em class="replaceable"><code>operator</code></em>&nbsp;&nbsp;
+                                       <em class="replaceable"><code>element2</code></em>
+                                       
+                                    </p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                 
+                                 Surround vertex, edge, and attribute names and values
+                                 containing spaces with single quotes.
+                              </p>
+                              <p>
+                                 You can compare attribute values for two vertices or two
+                                 edges, but you cannot mix vertex and edge attributes in the same
+                                 constraint.  Proximity does not permit constraints between two
+                                 annotated elements.
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div><a class="indexterm" name="d0e8496"></a></li>
+               <li>
+                  <p>Make sure the query is valid by checking the status list at
+                     the bottom of the Query Editor window.  If the query is not valid,
+                     examine the errors in the drop-down list and fix any problems before
+                     continuing.
+                  </p>
+               </li>
+               <li>
+                  <p>[Optional] Add a name and description and save the
+                     query.
+                  </p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>The Proximity distribution includes the new query in the file
+                                 <code class="filename">$PROX_HOME/doc/user/tutorial/examples/different-schools.qg2.xml</code>.
+                                 <a class="indexterm" name="d0e8509"></a>
+                                 <a class="indexterm" name="d0e8513"></a>
+                                 Be careful not to overwrite this file.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">File</strong></span> menu, choose 
+                     <span><strong class="guimenuitem">Run</strong></span> or press the <span class="keycap">Ctrl-R</span> to
+                     execute your query.
+                     Proximity prompts you for a name for the results container. Enter
+                     <strong class="userinput"><code>different-schools</code></strong> and click
+                     <span><strong class="guibutton">OK</strong></span>.
+                  </p>
+                  <p>Proximity opens a window to show you a trace of the
+                     query execution. The last lines should be
+                     similar to the following excerpt
+                     
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                  </p><pre class="screen">INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; found 0 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; query results saved in
+   container: different-schools
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</pre><p>
+                     Close this window after the query finishes.
+                  </p>
+                  <p>The resulting container has no subgraphs&#8212;there are no
+                     web pages in this database that link to a page at another school.
+                     Proximity creates a container even when there are no matches
+                     to the query.
+                  </p>
+               </li>
+            </ol>
+         </div><a class="indexterm" name="d0e8548"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Grouping Elements in a Query&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Matching Complex Subgraphs with Subqueries</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

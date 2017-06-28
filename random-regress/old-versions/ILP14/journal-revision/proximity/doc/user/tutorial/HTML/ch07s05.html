@@ -1,0 +1,459 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Relational Dependency Networks</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch07.html" title="Chapter&nbsp;7.&nbsp;Learning Models">
+      <link rel="prev" href="ch07s04s03.html" title="Using temporal attributes in a relational probability tree">
+      <link rel="next" href="ch07s05s02.html" title="Viewing relational dependency networks">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch07s04s03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;7.&nbsp;Learning Models</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch07s05s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="models_rdn"></a>Relational Dependency Networks
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_models_RDN1"></a><a class="indexterm" name="idx_models_RDN2"></a><a class="indexterm" name="d0e15959"></a><p>A <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e685"><span class="glossterm">relational dependency network</span></a> (RDN)
+            [<a href="bi01.html#neville03_rdn"><abbr class="abbrev">Neville and Jensen, 2003</abbr></a>], [<a href="bi01.html#neville04_icdm"><abbr class="abbrev">Neville and Jensen, 2004</abbr></a>]
+            is a graphical model that extends the concept of a 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e273"><span class="glossterm">dependency network</span></a>
+            <a class="indexterm" name="d0e15976"></a>
+            [<a href="bi01.html#heckerman00"><abbr class="abbrev">Heckerman, et al., 2000</abbr></a>] for relational domains. RDNs approximate
+            a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e441"><span class="glossterm">joint probability distribution</span></a> over the
+            attributes of objects in a network with a set of 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e181"><span class="glossterm">conditional probability distributions</span></a>.
+            The RDN learning algorithm is based on 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e655"><span class="glossterm">pseudolikelihood</span></a> techniques, which
+            estimate a set of conditional probability distributions
+            independently. This approach avoids the complexities of estimating a 
+            full joint distribution and can incorporate existing techniques for
+            learning conditional probability distributions of relational
+            data (e.g., RPTs). <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e372"><span class="glossterm">Gibbs sampling</span></a>
+            <a class="indexterm" name="d0e15994"></a>
+            inference techniques are used to recover a full
+            joint distribution and to estimate probabilities of interest.
+         </p>
+         <p>The example below continues the task of classifying web
+            pages.  The web pages in the ProxWebKB database use the 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute to indicate a page&#8217;s
+            type.  We train a new RPT to use as the conditional probability
+            distribution for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute in the
+            RDN.  The RDN uses this conditional probability distribution (i.e.,
+            this RPT) to 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e123"><span class="glossterm">collectively infer</span></a>
+            <a class="indexterm" name="d0e16009"></a>
+            the value of the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span>
+            attribute for all of the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e240"><span class="glossterm">core objects</span></a> in the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e773"><span class="glossterm">test set</span></a>.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e16025"></a>Code example: run-1d-clusters-rdn.py
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e16028"></a><a class="indexterm" name="d0e16031"></a><p>This section describes the script found in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/run-1d-clusters-rdn.py</code>.
+               
+            </p>
+            <p>
+               Import the necessary class definitions.
+               
+               
+            </p><pre class="programlisting">from kdl.prox.model2.common.sources import *
+from kdl.prox.model2.rpt import RPT
+from kdl.prox.model2.rdn RDN
+from kdl.prox.model2.rdn.modules.listeners import LoggingListener
+</pre><p>
+               
+               Get the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e779"><span class="glossterm">training</span></a> and
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e773"><span class="glossterm">test sets</span></a>.  We use the same
+               containers for the training and test sets as we did for the previous
+               RBC and RPT examples.
+               
+               
+            </p><pre class="programlisting">trainContainer = prox.getContainer("1d-clusters/samples/0")
+testContainer = prox.getContainer("1d-clusters/samples/1")
+</pre><p>
+               
+            </p>
+            <p>Train an 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e691"><span class="glossterm">RPT</span></a> that
+               predicts the value of the 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute.
+               <a class="indexterm" name="d0e16065"></a>
+               <a class="indexterm" name="d0e16071"></a>
+               For this RPT, we also
+               consider the value of <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> for related 
+               objects in predicting its value for the core object.  
+               Because we may not know the value of <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> 
+               for the related objects during inference, the RDN uses the conditional
+               probability distribution represented by the RPT in a 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e372"><span class="glossterm">Gibbs sampling</span></a>
+               procedure to collectively infer the value of 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> for all core objects
+               simultaneously.
+            </p>
+            <p>See <a href="ch07s04.html#ex_models_rpt" title="Exercise&nbsp;7.2.&nbsp;Learning and applying the relational probability tree model:">Exercise&nbsp;7.2</a> for a more detailed
+               description of the data structures used in the RPT portion of this
+               script.
+               
+               
+            </p><pre class="programlisting">coreItemName = 'core_page'
+attrToPredict = 'pagetype'
+classLabel = AttributeSource(coreItemName, attrToPredict)
+</pre><p>
+               
+               Define the set of sources to be used in learning the RPT.
+               
+               
+            </p><pre class="programlisting">inputSources = [ \
+   AttributeSource('core_page', 'url_server_info'), \
+   AttributeSource('core_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_from_page', 'page_num_outlinks'), \
+   AttributeSource('linked_from_page', 'pagetype'), \
+   AttributeSource('linked_to_page', 'page_num_inlinks'), \
+   AttributeSource('linked_to_page', 'pagetype'), \
+   ItemSource('linked_from_page'), \
+   ItemSource('linked_to_page') ]
+</pre><p>
+               <a class="indexterm" name="d0e16097"></a>
+               <a class="indexterm" name="d0e16101"></a>
+               <a class="indexterm" name="d0e16107"></a>
+               <a class="indexterm" name="d0e16111"></a>
+               
+            </p>
+            <p>Begin the modeling portion of the script by 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e429"><span class="glossterm">instantiating</span></a> the
+               component RPT.  Set the maximum tree depth to three.
+               
+               
+            </p><pre class="programlisting">print "Beginning modeling section"
+print "Instantiating component RPT..."
+rpt = RPT()
+rpt.learningModule.stoppingModule.setMaxDepth(3)
+</pre><p>
+               <a class="indexterm" name="d0e16125"></a>
+               <a class="indexterm" name="d0e16129"></a>
+               
+               Train (learn) the tree.
+               
+               
+            </p><pre class="programlisting">print "Learning component RPT..."
+rpt.learn(trainContainer, classLabel, inputSources)
+</pre><p>
+               <a class="indexterm" name="d0e16138"></a>
+               <a class="indexterm" name="d0e16142"></a>
+               
+               Write the RPT to an XML file. The file is written to the current
+               <a class="indexterm" name="d0e16148"></a>
+               <a class="indexterm" name="d0e16154"></a>
+               <a class="indexterm" name="d0e16160"></a>
+               working directory, which is 
+               <code class="filename">$PROX_HOME</code> if you are following the tutorial.
+               
+               
+            </p><pre class="programlisting">xmlFileName = 'ProxWebKB_RPTforRDN.xml'
+rpt.save(xmlFileName)
+print "RPT written to ", xmlFileName
+</pre><p>
+               
+            </p>
+            <p>Begin the RDN portion of the script by instantiating the RDN
+               using the default constructor.
+               
+               
+            </p><pre class="programlisting">print "Instantiating RDN..."
+rdn = RDN()
+</pre><p>
+               <a class="indexterm" name="d0e16177"></a>
+               <a class="indexterm" name="d0e16181"></a>
+               
+               Like the RPT code, Proximity&#8217;s RDN code has been modularized to permit
+               easier maintenance and additions to the code. Use these modules to
+               override the default values for the model&#8217;s parameters.
+            </p>
+            <p>RDNs use <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e372"><span class="glossterm">Gibbs sampling</span></a>
+               <a class="indexterm" name="d0e16192"></a>
+               for inference.  Use the statistics module to specify the parameters
+               for the Gibbs sampling.  For this example, we skip the first 100
+               trials (<em class="parameter"><code>burnIn</code></em>) before 
+               beginning sampling and record every third trial.
+               A value of 2 means that we skip two trials between recordings.
+               
+               
+            </p><pre class="programlisting">rdn.statisticModule.setBurnInSteps = 100
+rdn.statisticModule.setSkipSteps = 2
+</pre><p>
+               
+               The example script
+               stops after 200 iterations to limit execution time for the purposes of
+               the this tutorial.  Determining the appropriate number of Gibbs
+               sampling iterations can require judgment and experience with
+               this technique.  Many more iterations will likely be needed in practice.
+               
+               
+            </p><pre class="programlisting">numIterations = 200
+</pre><p>
+               
+               Finally, to help us trace script execution, we print a logging
+               statement every 10 iterations.
+               
+            </p><pre class="programlisting">rdn.addListener(LoggingListener(10))
+</pre><p>
+               <a class="indexterm" name="d0e16208"></a>
+               <a class="indexterm" name="d0e16212"></a>
+               
+            </p>
+            <p>Because the RPT has already been trained, 
+               <a class="indexterm" name="d0e16220"></a>
+               <a class="indexterm" name="d0e16226"></a>
+               <a class="indexterm" name="d0e16230"></a>
+               there is no separate training step in this script and we can apply the
+               RDN to the test container.
+               <a class="indexterm" name="d0e16234"></a>
+               <a class="indexterm" name="d0e16238"></a>
+               <a class="indexterm" name="d0e16244"></a>
+               Each component RPT makes predictions about the subgraphs in the test
+               container.  Applying the RDN returns a map of RPTs to <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/predictions/Predictions.html"><code class="classname">Predictions</code></a>
+               <a class="indexterm" name="d0e16253"></a>
+               <a class="indexterm" name="d0e16257"></a>
+               objects. In this example, we have a single component RPT.
+               
+               
+            </p><pre class="programlisting">print "Applying RDN..."
+predictionMap = rdn.apply({rpt: testContainer}, numIterations)
+rptPredictions = predictionMap.get(rpt)
+</pre><p>
+               <a class="indexterm" name="d0e16266"></a>
+               <a class="indexterm" name="d0e16272"></a>
+               
+               As we saw in <a href="ch07s04.html#ex_models_rpt" title="Exercise&nbsp;7.2.&nbsp;Learning and applying the relational probability tree model:">Exercise&nbsp;7.2</a>, we
+               have to tell the RPT where to find the true values for the class labels.
+               
+            </p><pre class="programlisting">rptPredictions.setTrueLabels(testContainer, classLabel)
+</pre><p>
+               <a class="indexterm" name="d0e16281"></a>
+               <a class="indexterm" name="d0e16285"></a>
+               
+            </p>
+            <p>Write the predictions to the database as attributes on the
+               subgraphs in the training container. The RDN uses Gibbs sampling to
+               jointly estimate the marginal probabilities for each of its
+               component models (the single RPT in this case). The RDN then sets the
+               predictions in each component model.  Therefore, we write out the
+               predictions from this component RPT rather than the RDN.
+               
+               
+            </p><pre class="programlisting">print "Writing predictions..."
+rdnAttrName = "rdn_pagetype_prediction"
+rptPredictions.savePredictions(testContainer.getSubgraphAttrs(), rdnAttrName)
+</pre><p>
+               <a class="indexterm" name="d0e16296"></a>
+               <a class="indexterm" name="d0e16300"></a>
+               <a class="indexterm" name="d0e16306"></a>
+               <a class="indexterm" name="d0e16310"></a>
+               
+               Evaluate the RDN.
+               <a class="indexterm" name="d0e16316"></a>
+               <a class="indexterm" name="d0e16320"></a>
+               <a class="indexterm" name="d0e16326"></a>
+               
+            </p><pre class="programlisting">print "Computing accuracy..."
+acc = (1 - rptPredictions.getZeroOneLoss())
+</pre><p>
+               <a class="indexterm" name="d0e16333"></a>
+               <a class="indexterm" name="d0e16337"></a>
+               
+               To compute <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_auc"><span class="glossterm">area under the ROC curve</span></a>
+               <a class="indexterm" name="d0e16346"></a>
+               <a class="indexterm" name="d0e16350"></a>
+               we need to know which <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> value is
+               considered to be a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e589"><span class="glossterm">positive instance</span></a>.  A
+               student page (a positive 
+               instance) has a value of &#8220;Student&#8221; for the 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute.
+               
+            </p><pre class="programlisting">print "Computing area under ROC curve..."
+auc = rptPredictions.getAUC('Student')
+</pre><p>
+               <a class="indexterm" name="d0e16366"></a>
+               <a class="indexterm" name="d0e16372"></a>
+               
+               Print a summary of evaluation results.
+               
+            </p><pre class="programlisting">print "RDN results:"
+print "  Accuracy:                        ", str(acc)
+print "  Area under ROC curve (Student):  ", str(auc)
+</pre><p>
+               
+            </p>
+            <div class="procedure"><a name="ex_models_rdn"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;7.4.&nbsp;Learning and applying the relational dependency network model:</b></p>
+               <p>This script requires entities created in 
+                  <a href="ch06s05.html#ex_scripts_sampling" title="Exercise&nbsp;6.4.&nbsp;Creating training and test sets:">Exercise&nbsp;6.4</a> and
+                  <a href="ch07s04.html#ex_models_rpt" title="Exercise&nbsp;7.2.&nbsp;Learning and applying the relational probability tree model:">Exercise&nbsp;7.2</a>. You must have completed these
+                  exercises before running the script in the current exercise.
+               </p>
+               <p>Before beginning, make sure that you are serving the ProxWebKB
+                  database using Mserver. Start the Proximity Database Browser if it is not already
+                  running.
+               </p>
+               <ol type="1">
+                  <li>
+                     <p>If you have not already done so, copy 
+                        <code class="filename">rpt2.dtd</code> to the same directory as that containing
+                        the saved RPT XML file, <code class="filename">ProxWebKB_RPT.xml</code>.
+                        
+                     </p><pre class="synopsis">&gt; <strong class="userinput"><code>cp $PROX_HOME/resources/rpt2.dtd $PROX_HOME</code></strong>
+</pre><p>
+                        Proximity requires that the 
+                        <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e304"><span class="glossterm">DTD</span></a> 
+                        file <code class="filename">rpt2.dtd</code>
+                        <a class="indexterm" name="d0e16412"></a>
+                        <a class="indexterm" name="d0e16418"></a>
+                        be in the same directory as the RPT file to be read.
+                        
+                     </p>
+                  </li>
+                  <li>
+                     <p>From the <span><strong class="guimenu">Script</strong></span> menu, choose
+                        <span><strong class="guimenuitem">Run Script</strong></span>.
+                        Proximity displays the <span class="guilabel">Open</span> dialog.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory and
+                        choose <code class="filename">run-1d-clusters-rdn.py</code>.
+                        Click <span><strong class="guibutton">Open</strong></span>.
+                     </p>
+                     <p>Proximity opens a window to show you the output from the script
+                        along with a trace of the script execution.  The
+                        <code class="filename">run-1d-clusters-rdn.py</code> script may take many
+                        minutes to run.
+                        Your output should look similar to the following trace
+                        (a portion of the trace as well as leading information showing elapsed
+                        time and execution thread have been omitted from the trace for
+                        brevity):
+                        
+                        
+                     </p><pre class="screen">Status: starting running script:
+   /proximity/doc/user/tutorial/examples/run-1d-clusters-rdn.py
+Beginning modeling section
+Instantiating model...
+Inducing model...
+INFO kdl.prox.model2.rpt.RPT - Creating feature tables
+INFO kdl.prox.model2.rpt.RPT - Done creating feature tables: 908 features.
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule -
+   Choosing split for 2068 subgs
+
+    <span class="emphasis"><em>portion of trace deleted</em></span>
+
+RPT written to  ProxWebKB_RPTforRDN.xml
+Instantiating RDN...
+Applying RDN...
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 0
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 10
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 20
+
+    <span class="emphasis"><em>portion of trace deleted</em></span>
+
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 190
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 200
+Writing predictions...
+Computing accuracy...
+Computing area under ROC curve...
+RDN results: 
+  Accuracy:                        0.8180938558297048
+  Area under ROC curve (Student):  0.8578509392814735
+Status: finished running script
+</pre><p>
+                        
+                        Note that some parts of the RPT model used in creating the RDN are
+                        non-deterministic, so your results may differ slightly from that shown above.
+                        You can close this window after the script finishes.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Examine the values predicted by the
+                        RDN.  Drill down through the container hierarchy in the Proximity Database Browser
+                        to display the list of subgraphs for the
+                        <span class="token">/1d-clusters/samples/1</span> container.
+                        Click a subgraph ID, then click <span><strong class="guibutton">attrs</strong></span> to
+                        display the attributes for that subgraph.  The example below shows the
+                        value for subgraph&nbsp;<span class="token">0</span>, which shows
+                        that the model predicts that the core page for this subgraph
+                        (object&nbsp;<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1</span>) has a
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> of
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Other</span>
+                        You can compare this to the actual value of
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> by examining the
+                        attribute values for object&nbsp;<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1</span>.
+                        
+                     </p>
+                     <div class="informalfigure">
+                        <div class="mediaobject" align="center">
+                           <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                              <tr>
+                                 <td align="center" valign="bottom"><img src="images/GUI_RDNAttrs.png" align="middle" width="630"></td>
+                              </tr>
+                           </table>
+                        </div>
+                     </div>
+                     <p>
+                        
+                     </p>
+                     <p>Recall that the RDN only makes predictions for 
+                        <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e240"><span class="glossterm">core objects</span></a> in
+                        the test container.  Therefore, after learning the model,
+                        only the subgraphs in the 
+                        <span class="token">1d-clusters/samples/1</span> container have a 
+                        value for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">rdn_pagetype_prediction</span>
+                        attribute.
+                        
+                     </p>
+                  </li>
+               </ol>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch07s04s03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch07.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch07s05s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Using temporal attributes in a relational probability
+                  tree&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Viewing relational dependency networks</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

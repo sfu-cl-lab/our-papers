@@ -1,0 +1,1101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<!-- ============================================================== -->
+<!--                          CHAPTER 2:                            -->
+<!--                GETTING STARTED WITH PROXIMITY                  -->
+<!-- ============================================================== -->
+
+<chapter id="ch_overview">
+<title>Getting Started with Proximity</title>
+
+<!-- ============================================================== -->
+<!--                            OVERVIEW                            -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Overview</title>
+
+<para>Proximity provides a suite of applications to support 
+<glossterm>knowledge discovery</glossterm> in 
+<glossterm baseform="relational data">relational databases</glossterm>.  
+These applications let you manage 
+and browse databases, create and execute queries, and learn and apply
+models.  This chapter describes the general steps required to use any
+of these applications.  Each specific application is described in more
+detail in later chapters.</para>
+
+<para>
+<itemizedlist spacing="compact">
+<title>Objectives</title>
+
+<para>The text and exercises in this chapter demonstrate how to</para>
+
+<listitem>
+    <para>use this tutorial effectively</para>
+</listitem>
+<listitem>
+    <para>run the MonetDB database server</para>
+</listitem>
+<listitem>
+    <para>run Proximity applications</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                      USING THE TUTORIAL                        -->
+<!-- ============================================================== -->
+
+<sect1 id="intro_using">
+<title>Using the Tutorial</title>
+
+<para>The tutorial is designed to be read
+sequentially. Later chapters and sections assume that you
+are familiar with the preceding material, and earlier exercises
+create files and database entities that are used by later
+exercises.  If you plan to work through the tutorial
+exercises, make sure that you create the &webkb; 
+<indexterm><primary>&webkb; database</primary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>&webkb;</secondary></indexterm>
+database (see <xref linkend="ex_import_webkb"/>) used in most of the
+remaining tutorial exercises. 
+We suggest that you work through the chapters in order. To
+get the most benefit from the tutorial, complete the exercises using
+your local installation of Proximity.</para>
+
+<para>The examples in this chapter demonstrate how to use Proximity
+for both Linux/&macosx; and Windows systems.  The rest of the
+<citetitle>Tutorial</citetitle> provides only the Linux/&macosx;
+commands.  In most cases, the only differences are using a
+<filename>.bat</filename> file instead of <filename>.sh</filename>
+file for Proximity applications, substituting appropriate paths
+to files, and using the appropriate syntax for the operating system.
+Windows users should refer back to this chapter if they have questions
+about specific Proximity applications and commands.</para>
+
+<!-- .............................................................. -->
+<!--                    Tutorial conventions                        -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Tutorial conventions</title>
+
+<para>This tutorial uses the following typographic conventions:
+<variablelist>
+  <varlistentry>
+    <term><userinput>Constant width, bold</userinput></term>
+    <listitem>
+      <para>Text you type on the command line or in the &uiname;</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>Constant width, italics</replaceable></term>
+    <listitem>
+      <para>Text you replace with the appropriate value</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><literal>Constant width</literal></term>
+    <listitem>
+      <para>Output from the application or code fragments</para>
+    </listitem>
+  </varlistentry>
+</variablelist></para>
+
+<para>Code fragments, application output, and text you type on the
+command line are usually shown with a gray background. In some
+cases, the tutorial may include additional line breaks not present in
+actual application output so that the output fits within a standard
+page width.</para>
+
+<para>The tutorial uses UNIX-style paths as a generic path
+syntax. You may need to make appropriate syntax substitutions if you
+are running Proximity on a Windows platform.
+Windows-specific examples are included only when users must enter
+different information or perform different actions to use Proximity on
+Windows platforms.  Long command lines use continuation characters
+(<userinput>\</userinput>) to indicate that the following line is part
+of the same command. Enter such text on a single line, without the
+continuation character.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                   Setting up your environment                  -->
+<!-- .............................................................. -->
+
+<sect2 id="intro_setup">
+<title>Setting up your environment</title>
+<indexterm><primary>environment</primary></indexterm>
+
+<para>You must have Proximity installed locally to complete the
+exercises in the tutorial.  If you have not already installed the
+Proximity software, see the instructions in 
+<xref linkend="apx_install"/>
+for complete instructions on obtaining and installing
+Proximity.</para>
+
+<para>The tutorial uses the <envar>PROX_HOME</envar>
+<indexterm><primary>PROX_HOME</primary></indexterm>
+<indexterm><primary>environment variables</primary>
+           <secondary>PROX_HOME</secondary></indexterm>
+environment variable to refer to the location of your local Proximity
+installation. Windows 
+<indexterm><primary>environment variables</primary>
+           <secondary sortas="Windows">for Windows</secondary></indexterm>
+<indexterm><primary>Windows</primary>
+           <secondary>environment variables</secondary></indexterm>
+users must set this variable to use
+Proximity. Linux and Mac users may want to define this environment
+variable for their convenience in working through the tutorial. The
+exercises and examples in this tutorial show <envar>PROX_HOME</envar>
+set to <filename>/proximity</filename>; however, you can install
+Proximity in any directory.</para>
+
+<para>The exercises in this tutorial use the &webkb; 
+<indexterm><primary>&webkb; database</primary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>&webkb;</secondary></indexterm>
+database, which is included in the Proximity distribution.
+<xref xrefstyle="pageref" linkend="ex_import_webkb"/> 
+describes how to import this database into Proximity.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                 The Proximity software hierarchy               -->
+<!-- .............................................................. -->
+
+<!--
+<sect2>
+<title>The Proximity software hierarchy</title>
+
+<para></para>
+
+</sect2>
+-->
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                          USING PROXIMITY                       -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Using Proximity</title>
+
+<para>Most Proximity applications can be run either through the
+&uiname; or via shell 
+scripts (Linux/Mac&nbsp;OS&nbsp;X) or batch files (Windows) 
+that call the applications.</para>
+<para>Proximity applications are supported by a Java API.
+<indexterm><primary>API</primary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>API</secondary></indexterm>
+You can use the API as you would any other Java API in your own Java
+applications. Proximity also provides a scripting interface that lets
+you access the full API functionality through Python
+<indexterm><primary>Python</primary>
+           <secondary>scripting</secondary></indexterm>
+scripts. Proximity&rsquo;s scripting interface is an important mechanism for
+working in Proximity and is described in 
+<xref linkend="ch_scripts"/>.</para>
+
+<para>The following sections describe how to use the MonetDB server
+and run Proximity applications.  See <xref linkend="apx_quickref"/>
+for a convenient summary of this information.</para>
+
+<!-- .............................................................. -->
+<!--                Running the MonetDB database server               -->
+<!-- .............................................................. -->
+
+<sect2 id="ov_mserver">
+<title>Running the MonetDB database server</title>
+<indexterm id="idx_overview_server" class="startofrange">
+           <primary>MonetDB</primary>
+           <secondary>server</secondary></indexterm>
+<indexterm><primary>server</primary>
+           <see>MonetDB, server</see></indexterm>
+
+<para>Proximity uses a MonetDB 
+<indexterm><primary>MonetDB</primary>
+           <secondary>connecting to</secondary></indexterm>
+<indexterm><primary>connecting to databases</primary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>connecting to</secondary></indexterm>
+database to store its data. Unlike traditional
+database systems that start the server
+separately from connecting to a database, MonetDB attaches a server to a
+database. To connect to multiple databases, you must start multiple
+copies of the server.</para>
+
+<para>When you start the MonetDB server, you specify the database to
+serve.  MonetDB stores database files in different locations,
+depending on your platform:
+<itemizedlist spacing="compact">
+  <listitem>
+    <formalpara>
+      <title>Linux and &macosx;:</title>
+      <para><filename>&monetdbpath;</filename></para></formalpara>
+  </listitem>
+  <listitem>
+    <formalpara>
+      <title>Windows:</title>
+      <para><filename>&winmonetdbpath;</filename> where
+      <replaceable>username</replaceable> is the login name for the user
+      who installed MonetDB</para></formalpara>
+  </listitem>
+</itemizedlist>
+Database names correspond to the directories immediately under
+<filename>dbfarm</filename>.  When you create the &webkb;
+database in <xref linkend="ex_import_webkb"/>,
+MonetDB creates a&nbsp; <filename>&webkb;</filename> directory under
+<filename>dbfarm</filename>.</para> 
+
+<para>Proximity provides an MIL
+<indexterm><primary>MIL</primary></indexterm>
+<indexterm><primary>Monet Interpreter Language</primary>
+           <see>MIL</see></indexterm>
+(Monet Interpreter Language) script,
+<indexterm><primary><filename>init-mserver.mil</filename> script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>init-mserver.mil</secondary></indexterm>
+<filename>init-mserver.mil</filename>, that loads required modules and
+makes the server start listening for connections on a given port
+(30000 by default).</para>
+
+<sidebar>
+<para>Proximity&nbsp;&version; can be used with either the newer
+<indexterm><primary>MonetDB</primary>
+           <secondary>versions</secondary></indexterm>
+MonetDB&nbsp;&monetversion; (Linux/&macosx;) or
+MonetDB&nbsp;&monetwinversion; (Windows), collectively known as the
+&ldquo;Mars&rdquo; versions of MonetDB, or existing users can opt to
+continue using MonetDB&nbsp;&monetoldversion; with
+Proximity&nbsp;&version;.  Proximity uses the port number to select
+the appropriate protocol for the version of MonetDB being used.  You
+must use a port number&nbsp;<symbol role="Symbol">&le;</symbol>&nbsp;40000
+for the Mars versions and a port number&nbsp;&gt;&nbsp;40000
+for MonetDB&nbsp;&monetoldversion;.</para>
+</sidebar>
+
+<para>Full MonetDB documentation is available from
+<indexterm><primary>MonetDB</primary>
+           <secondary>documentation</secondary></indexterm>
+<indexterm><primary>documentation for MonetDB</primary></indexterm>
+CWI&rsquo;s website at <ulink url="http://monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html">monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html</ulink>.
+<!-- Although developers may want to understand MIL to create highly
+efficient code, you do not need to learn MIL to
+use Proximity effectively.-->
+</para>
+
+<!--
+   EXAMPLE: Starting the MonetDB server under Mac/Linux
+-->
+
+<?pagebreak?>
+<example id="ex_mserver">
+<title>Starting the MonetDB server under Linux/&macosx;</title>
+<indexterm><primary>starting</primary>
+           <secondary>MonetDB server</secondary></indexterm>
+
+<para>Start the MonetDB server by executing the <command>Mserver</command>
+command,
+<indexterm><primary>Mserver command</primary></indexterm>
+located in <filename>&monetpath;/bin</filename>.  You can add
+this directory to <envar>PATH</envar> 
+<indexterm><primary>PATH</primary></indexterm>
+<indexterm><primary>environment variables</primary>
+           <secondary>PATH</secondary></indexterm>
+as the examples in the <citetitle>Tutorial</citetitle> assume, or
+specify the full path on the command line.</para>
+
+<para>The command line below starts the MonetDB server the default
+port (30000)
+for a specified database, using the Proximity initialization script.
+<synopsis>&prompt; <userinput>Mserver --dbname <replaceable>name</replaceable> &proxpath;/resources/init-mserver.mil</userinput>
+</synopsis>
+where <replaceable>name</replaceable> is the name of the database to
+be served.</para>
+
+<para>To use a different port, add the port information to the command
+line as shown below:
+<synopsis>&prompt; <userinput>Mserver --dbname <replaceable>name</replaceable> &proxpath;/resources/init-mserver.mil --set port=<replaceable>nnnnn</replaceable></userinput>
+</synopsis>
+where <replaceable>nnnnn</replaceable> is the new port number.
+(Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+MonetDB&nbsp;&monetoldversion;.)</para>
+
+<para>MonetDB responds with a startup message:
+<screen># MonetDB Server v4.20.0
+# based on GDK   v1.20.0
+# Copyright (c) 1993-2007, CWI. All rights reserved.
+# Compiled for powerpc-apple-darwin8.10.0/32bit with 32bit OIDs; dynamically linked.
+# Visit http://monetdb.cwi.nl/ for further information.
+Listening on port 30000
+&monetprompt;
+</screen>
+The startup message may be slightly different depending on your
+operating system, the version of MonetDB you are using, and whether
+you elected to use the default port or specify a different port number
+on the command line.</para>
+
+<para>If the database does not 
+<indexterm><primary>databases</primary>
+           <secondary>new</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>MonetDB databases</secondary></indexterm>
+exist, the MonetDB server starts on the
+specified port to let you work interactively or to create new
+databases, but prints the following warning message:
+<screen>!WARNING: GDKlockHome: created directory
+    /usr/local/Monet-mars/var/MonetDB4/dbfarm/<replaceable>name</replaceable>/
+!WARNING: GDKlockHome: ignoring empty or invalid .gdk_lock.
+!WARNING: BBPdir: initializing BBP.
+</screen>
+where <replaceable>name</replaceable> is the name of the database.</para>
+
+</example>
+
+<!--
+   EXAMPLE: Starting the MonetDB server under Windows
+-->
+
+<example id="ex_mserver_windows">
+<title>Starting the MonetDB server under Windows</title>
+
+<para>The MonetDB server is run from a command (DOS) window.
+The <command>Mserver.bat</command> batch file is
+located in your local MonetDB installation directory
+(<filename>C:\Program Files\CWI\MonetDB4</filename> if you installed 
+MonetDB in the default location).  You can add this directory to
+<envar>PATH</envar> as the examples in the
+<citetitle>Tutorial</citetitle> assume, or specify the full path on
+the command line.</para>
+<indexterm><primary>Mserver.bat</primary>
+           <see>Mserver command</see></indexterm>
+
+<para>The command line below starts the MonetDB server on the default
+port (30000) for a specified database, using the Proximity
+initialization script. 
+<synopsis>&winprompt; <userinput>Mserver.bat --dbname <replaceable>name</replaceable> &winproxpath;\resources\init-mserver.mil</userinput>
+</synopsis>
+where <replaceable>name</replaceable> is the name of the database to
+be served.</para>
+
+<para>To use a different port, add the port information to the command
+line as shown below:
+<synopsis>&winprompt; <userinput>Mserver.bat --dbname <replaceable>name</replaceable> &winproxpath;\resources\init-mserver.mil \
+  --set port=<replaceable>nnnnn</replaceable></userinput>
+</synopsis>
+where <replaceable>nnnnn</replaceable> is the new port number.
+(Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+MonetDB&nbsp;&monetoldversion;.)</para>
+
+<para>
+MonetDB responds with a startup message:
+<screen># MonetDB Server v4.18.2
+# Copyright (c) 1993-2007, CWI. All rights reserved.
+# Compiled for i686-pc-win32/32bit; dynamically linked.
+# Visit http://monetdb.cwi.nl/ for further information.
+Listening on port 30000
+&monetprompt;
+</screen>
+The startup message may be slightly different depending on your
+operating system, the version of MonetDB you are using, and whether
+you elected to use the default port or specify a different port number
+on the command line.</para>
+
+<para>If the database does not exist, the MonetDB server starts on the
+specified port to let you work interactively or to create new
+databases, but prints the following warning message:
+<screen>!WARNING: GDKlockHome: created directory
+    C:\Documents and Settings\All Users\Application Data\MonetDB4\dbfarm\<replaceable>name</replaceable>\
+!WARNING: GDKlockHome: ignoring empty or invalid .gdk_lock.
+!WARNING: BBPdir: initializing BBP.
+</screen>
+where <replaceable>name</replaceable> is the name of the database.</para>
+
+</example>
+
+<!--
+   EXAMPLE: Stopping the MonetDB server
+-->
+
+<example>
+<title>Stopping the MonetDB server</title>
+
+<para>To close the MonetDB server,
+<indexterm><primary>closing the MonetDB server</primary></indexterm>
+<indexterm><primary>quitting the MonetDB server</primary></indexterm>
+<indexterm><primary>stopping the MonetDB server</primary></indexterm>
+enter
+<synopsis>&monetprompt; <userinput>quit();</userinput></synopsis>
+where <literal>&monetprompt;</literal> is the MonetDB server prompt.
+The parentheses and semi-colon are required.</para>
+<indexterm startref="idx_overview_server" class="endofrange"/>
+
+</example>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                 Running Proximity applications                 -->
+<!-- .............................................................. -->
+
+<sect2 id="overview_apps">
+<title>Running Proximity applications</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>applications</secondary>
+           <see>individual applications</see></indexterm>
+<indexterm><primary>applications</primary>
+           <seealso>individual applications</seealso></indexterm>
+<indexterm id="idx_shellscripts1" class="startofrange">
+           <primary>shell scripts</primary></indexterm>
+<indexterm id="idx_shellscripts2" class="startofrange">
+           <primary>Linux</primary>
+           <secondary>shell scripts</secondary>
+           <seealso>specific shell scripts</seealso></indexterm>
+<indexterm><primary>OS X</primary>
+           <see>Mac OS X</see></indexterm>
+<indexterm id="idx_shellscripts3" class="startofrange">
+           <primary>Mac OS X</primary>
+           <secondary>shell scripts</secondary>
+           <seealso>specific shell scripts</seealso></indexterm>
+<indexterm><primary>operating systems</primary>
+           <see>specific operating system</see></indexterm>
+<indexterm id="idx_batchfiles1" class="startofrange">
+           <primary>batch files (Windows)</primary></indexterm>
+<indexterm id="idx_batchfiles2" class="startofrange">
+           <primary>Windows</primary>
+           <secondary>batch files</secondary>
+           <seealso>specific batch files</seealso></indexterm>
+
+<para>Proximity supports several mechanisms for executing its
+component applications.  You can run applications from the &uiname; 
+<indexterm><primary>&uiname;</primary>
+           <secondary>running applications</secondary></indexterm>
+<indexterm><primary>database browser</primary>
+           <see>&uiname; and &dbviztool;</see></indexterm>
+or from the command line using shell scripts or batch files.  You can
+also access complete Proximity API functionality via Python
+<indexterm><primary>API</primary></indexterm>
+<indexterm><primary>accessing the API</primary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>API</secondary></indexterm>
+<indexterm><primary>Python</primary>
+           <secondary>scripting</secondary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>accessing API via</secondary></indexterm>
+scripts and Java programs. Python 
+scripting is considered to be a Proximity application
+and is supported through both the &uiname; and running scripts via
+the <command>script.sh</command> shell script or
+<command>script.bat</command> batch file. The
+examples in this tutorial provide instructions for running the
+Proximity applications both from the &uiname; and from the command line. 
+Executing Proximity applications and code from within Java programs
+is beyond the scope of this tutorial.  Users writing Proximity Java
+programs should refer to the Javadoc documentation available at
+<filename>&proxpath;/javadoc/index.html</filename>.</para>
+
+<para>Proximity provides the shell scripts and batch files listed in
+the following table.  These files are located in
+<filename>&proxpath;/bin</filename> and are described in more detail
+in the referenced chapters.
+
+<!-- The following table is in TU_ScriptTable.xml -->
+&scripttable;</para>
+
+<para>For <command>query.sh</command>, specifying the input 
+<glossterm>container</glossterm> is optional; the input container
+defaults to the <glossterm>root container</glossterm> (the 
+entire database) if it is omitted.
+See <xref linkend="query_queryingcontainers"/> in
+<xref xrefstyle="brief" linkend="ch_queries"/>for additional
+information on limiting query scope to the objects and links within an
+existing container.
+<!--
+To explicitly specify the input
+container, Proximity uses a path-like syntax that reflects the
+container hierarchy for the specified container. Container names are
+separated by forward slashes with the initial <literal>/</literal>
+representing the root container, e.g.,
+&ldquo;<literal>/c1/c2</literal>&rdquo;.
+-->
+</para>
+
+<para>For <command>export-xml.sh</command>, specifying the exportType
+and exportSpec is optional; the export defaults to the full database
+if they are omitted.</para>
+
+<para>For <command>db-util</command>, permitted commands are
+<itemizedlist spacing="compact">
+<listitem>
+<para><userinput>clear-db</userinput>
+<indexterm><primary>clear-db (db-util option)</primary></indexterm>
+ - clear the database</para>
+</listitem>
+<listitem>
+<para><userinput>init-db</userinput>
+<indexterm><primary>init-db (db-util option)</primary></indexterm>
+ - initialize the database</para>
+</listitem>
+<listitem>
+<para><userinput>test-db</userinput>
+<indexterm><primary>test-db (db-util option)</primary></indexterm>
+ - test the database configuration
+and print Proximity version information</para>
+</listitem>
+<listitem>
+<para><userinput>view-schema</userinput>
+<indexterm><primary>view-schema (<command>db-util</command> 
+           option)</primary></indexterm>
+ - print the schema log</para>
+</listitem>
+<listitem>
+<para><userinput>view-stats</userinput>
+<indexterm><primary>view-stats (db-util option)</primary></indexterm>
+ - print summary statistics for the database</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>All the Proximity shell scripts and batch files require a
+<varname>host:port</varname> 
+<indexterm><primary><replaceable>host:port</replaceable>
+           specification</primary></indexterm>
+specification as the first parameter.  The
+parameter specifies the host
+<indexterm><primary>host name</primary></indexterm>
+machine and port 
+<indexterm><primary>port number</primary></indexterm>
+number of the database server in the form 
+<blockquote><para>
+<replaceable>hostname</replaceable>:<replaceable>port_number</replaceable>
+</para></blockquote>
+If you run MonetDB Mars on your local machine and use the default
+<filename>init-mserver.mil</filename> script when you start the MonetDB
+server, this correct value for this parameter is
+<blockquote><para><userinput>localhost:30000</userinput></para></blockquote>
+If you are serving the database on <code>localhost</code> (your local
+machine), you can omit that portion of the parameter and use
+<blockquote><para><userinput>:30000</userinput></para></blockquote>
+for the
+<replaceable>hostname</replaceable>:<replaceable>port_number</replaceable>
+parameter.
+(Remember that you must specify a port number&nbsp;&gt;&nbsp;40000 if
+you are using MonetDB&nbsp;&monetoldversion;.)
+</para>
+
+<para>Proximity shell scripts and batch files set the classpath so
+you do not need to set <envar>CLASSPATH</envar> 
+<indexterm><primary>CLASSPATH</primary></indexterm>
+<indexterm><primary>environment variables</primary>
+           <secondary><envar>CLASSPATH</envar></secondary></indexterm>
+to use either the &uiname; or the shell
+scripts. The Proximity shell scripts and batch files are located in
+<filename>&proxpath;/bin</filename>. You can either add this directory
+to <envar>PATH</envar>,
+<indexterm><primary>PATH</primary></indexterm>
+<indexterm><primary>environment variables</primary>
+           <secondary>PATH</secondary></indexterm>
+or specify the path when executing the scripts.</para>
+
+<sidebar>
+<para>Proximity shell scripts and batch files, including the command
+<indexterm><primary>Proximity</primary>
+           <secondary>compiling</secondary></indexterm>
+<indexterm><primary>compiling Proximity</primary></indexterm>
+to run the &uiname;, include <filename>proximity.jar</filename> 
+<indexterm><primary><filename>proximity.jar</filename></primary></indexterm>
+in the classpath.
+If you edit Proximity source files or add new classes, you must recreate
+<filename>proximity.jar</filename> to have the changes available when
+you use these scripts. If you use the Ant build tool, you can use
+the &ldquo;jar&rdquo; target to create
+<filename>proximity.jar</filename>.</para> 
+</sidebar>
+
+<!--
+   EXAMPLE: Running Proxity applications from the command line
+-->
+
+<example>
+<title>Running Proximity applications from the command line</title>
+
+<para>In addition to running applications from the &uiname;, Proximity
+applications can be executed from the command line.
+<itemizedlist>
+  <listitem>
+    <formalpara>
+      <title>Linux and &macosx;:</title>
+      <para>Execute Proximity applications by
+    executing the corresponding shell script from a terminal
+    window.</para>
+    </formalpara>
+  </listitem>
+  <listitem>
+    <formalpara>
+      <title>Windows:</title>
+      <para>Execute Proximity applications by executing the
+    corresponding batch file from a DOS window.</para>
+    </formalpara>
+  </listitem>
+</itemizedlist>
+</para>
+
+<para>All Proximity commands interact with a database and thus require
+that you be serving the database using the MonetDB server. Proximity
+shell scripts and batch files require the MonetDB 
+server&rsquo;s host and port as the first argument and may require
+additional arguments.</para>
+
+<para>The examples in the tutorial assume that you are running the MonetDB
+server on your local machine and using the default port for Proximity.
+Substitute the appropriate host and port information if
+you are running the MonetDB server on a different machine or are using a
+different port.</para>
+
+<para>The general form of a Proximity command, when called from the
+<filename>&proxpath;</filename> directory, is:</para>
+
+<para>Linux/&macosx;:
+<synopsis>&prompt; <command>bin/<replaceable>shell_script hostname:port_number arguments</replaceable></command>
+</synopsis>
+Windows:
+<synopsis>&winprompt; <command>bin\<replaceable>batch_file hostname:port_number arguments</replaceable></command>
+</synopsis>
+(Remember that you must specify a port number&nbsp;&gt;&nbsp;40000 if
+you are using MonetDB&nbsp;&monetoldversion;.)
+</para></example>
+<indexterm startref="idx_shellscripts1" class="endofrange"/>
+<indexterm startref="idx_shellscripts2" class="endofrange"/>
+<indexterm startref="idx_shellscripts3" class="endofrange"/>
+<indexterm startref="idx_batchfiles1" class="endofrange"/>
+<indexterm startref="idx_batchfiles2" class="endofrange"/>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                              DTD files                         -->
+<!-- .............................................................. -->
+
+<sect2 id="overview_dtds">
+<title>DTD files</title>
+<indexterm><primary>DTDs</primary></indexterm>
+
+<para>Proximity uses XML 
+<indexterm><primary>XML</primary>
+           <secondary>query representation</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>XML representation</secondary></indexterm>
+to represent queries in files, to store model data,
+and as an off-line representation for database data. 
+Associated <glossterm baseform="document type definition">document
+type definitions</glossterm> 
+(DTDs) define the required syntax for these files:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><filename>graph-query.dtd</filename> 
+       <indexterm><primary>DTDs</primary>
+                  <secondary>graph-query.dtd</secondary></indexterm>
+       <indexterm><primary>graph-query.dtd</primary></indexterm>
+    defines the syntax for XML query files</para>
+  </listitem>
+  <listitem>
+    <para><filename>prox3db.dtd</filename>
+       <indexterm><primary>DTDs</primary>
+                  <secondary>prox3db.dtd</secondary></indexterm>
+       <indexterm><primary>prox3db.dtd</primary></indexterm>
+    defines the syntax for XML import data files</para>
+  </listitem>
+  <listitem>
+    <para><filename>rbc2.dtd</filename> 
+       <indexterm><primary>DTDs</primary>
+                  <secondary>rbc2.dtd</secondary></indexterm>
+       <indexterm><primary>rbc2.dtd</primary></indexterm>
+    defines the syntax for
+    <glossterm>relational Bayesian classifier</glossterm> data</para>
+  </listitem>
+  <listitem>
+    <para><filename>rpt2.dtd</filename> 
+       <indexterm><primary>DTDs</primary>
+                  <secondary>rpt2.dtd</secondary></indexterm>
+       <indexterm><primary>rpt2.dtd</primary></indexterm>
+    defines the syntax for 
+    <glossterm>relational probability tree</glossterm> data</para>
+  </listitem>
+  <listitem>
+    <para><filename>rdn.dtd</filename> 
+       <indexterm><primary>DTDs</primary>
+                  <secondary>rdn.dtd</secondary></indexterm>
+       <indexterm><primary>rdn.dtd</primary></indexterm>
+    defines the syntax for
+    <glossterm>relational dependency network</glossterm> 
+    wrapper files</para>
+  </listitem>
+</itemizedlist>
+</para>
+<sidebar>
+<para>Users of earlier versions of Proximity should note that the DTDs
+for the relational Bayesian classifier and the relational probability
+tree have been updated to newer versions,
+<filename>rbc2.dtd</filename> and <filename>rpt2.dtd</filename>.  Make
+sure that you use the newer versions of these DTDs.</para>
+</sidebar>
+
+<para>Proximity requires that the DTD be in the same directory as the
+corresponding query, data, or model file, or in the directory from
+which you launch the Proximity application:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Before editing or executing a saved query, copy
+    <filename>graph-query.dtd</filename> 
+    to the directory containing the query file.</para>
+  </listitem>
+  <listitem>
+    <para>Before importing data from an XML file, copy
+    <filename>prox3db.dtd</filename>
+    to the directory containing the XML data file.</para>
+  </listitem>
+  <listitem>
+    <para>Before viewing the originating query from the resulting
+    container page, copy <filename>graph-query.dtd</filename> to the
+    directory from which you launch the &uiname;.</para>
+  </listitem>
+  <listitem>
+    <para>Before displaying a relational probability tree or
+    relational dependency network, copy the corresponding DTD to
+    the directory containing the model file.</para>
+  </listitem>
+  <listitem>
+    <para>Before loading a saved model file (e.g., in a script or Java
+    program), copy the corresponding DTD to
+    the directory containing the model file.</para>
+  </listitem>
+</itemizedlist>
+DTD files are located in <filename>&proxpath;/resources</filename>.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                     File and directory shortcuts               -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>File and directory shortcuts</title>
+
+<para>Proximity lets you create shortcuts to commonly used files and
+directories.
+<indexterm><primary>shortcuts</primary>
+           <secondary>for file access</secondary></indexterm>
+<indexterm><primary>file shortcuts</primary></indexterm>
+<indexterm><primary>directory shortcuts</primary></indexterm>
+Shortcuts appear in one of the panes of the <guilabel>Open</guilabel>
+dialog that is 
+displayed when you open or save Proximity files.
+Shortcuts are stored in the file
+<filename>prox.accessory.dirs</filename>,
+<indexterm><primary>prox-accessory.dirs</primary></indexterm>
+which is stored in your home directory.</para>
+
+
+<!--
+   EXAMPLE: Creating a file or directory shortcut 
+-->
+
+<example id="ex_shortcuts">
+<title>Creating a file or directory shortcut</title>
+
+<para>The following steps require that you be running the &uiname;.
+See <xref linkend="ex_exploring1"/> for information on starting and using 
+the &uiname;.</para>
+<orderedlist>
+  <listitem>
+    <para>Perform an action that causes the <guilabel>Open</guilabel>
+    dialog to be displayed.  For example, choose <guimenuitem>Edit
+    Query</guimenuitem> from the <guimenu>Query</guimenu> menu.</para>
+  </listitem>
+  <listitem>
+    <para>Navigate to the directory containing the file or
+    directory to which you want to create a shortcut.</para>
+  </listitem>
+  <listitem>
+    <para>In the file list pane of the <guilabel>Open</guilabel> dialog,
+    choose the desired file or directory. Click <guibutton>Add</guibutton>.
+    The selected file or directory is added to the
+    Shortcuts list in the Shortcuts pane.</para>
+  </listitem>
+</orderedlist>
+
+<para>To further simplify file access, you can define aliases 
+<indexterm><primary>aliases for shortcuts</primary></indexterm>
+for commonly used files and directories.  These aliases are displayed
+in the shortcut pane instead of the path to the file or directory
+name.</para>
+
+<orderedlist continuation="continues">
+<listitem>
+  <para>[Optional] Choose the file or directory name in the shortcuts
+  pane.</para>
+</listitem>
+<listitem>
+  <para>[Optional] Enter the name you want to use for this file or
+  directory in the <guilabel>Alias</guilabel> text box. Click
+  <guibutton>Set</guibutton>.  Proximity replaces the path with the
+  designated alias.</para>
+</listitem>
+</orderedlist>
+</example>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                          Logging options                       -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Logging options</title>
+<indexterm><primary>logging options</primary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>logging options</secondary></indexterm>
+
+<para>Proximity uses the log4j package
+<indexterm><primary>log4j package</primary></indexterm>
+to provide logging
+messages during program execution.  Log4j is part of the Apache
+Logging Services project, an open-source library of tools for 
+cross-language logging services.  Designed to minimize the cost of
+logging, log4j permits output of log messages at arbitrary
+granularity.</para>
+
+<para>Log4j uses configuration files to determine the level of detail
+included in logging messages.  To set the logging level in Proximity,
+you can
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>use the default settings (do not specify a configuration
+    file)</para>
+  </listitem>
+  <listitem>
+    <para>use one of the configuration files included in the Proximity
+    distribution</para>
+  </listitem>
+  <listitem>
+    <para>write your own configuration file</para>
+  </listitem>
+</itemizedlist>
+Proximity log4j configuration files are included in the 
+<filename>&proxpath;/example/config</filename> directory.
+See the <citetitle>&proxcookbook;</citetitle> for additional
+information on creating log4j configuration files and for details on
+the example configurations files included in the Proximity distribution.
+Follow the instructions below to use one of the
+log4j configuration files in Proximity.</para>
+
+<!--
+   EXAMPLE: Using the Proximity log4j configuration files
+-->
+
+<example>
+<title>Using the Proximity log4j configuration files</title>
+
+<orderedlist>
+<listitem>
+  <para>Copy the configuration file to the directory from which you
+  launch Proximity applications.  (Tutorial exercises launch Proximity
+  applications from the <filename>&proxpath;</filename>
+  directory.)</para>
+</listitem>
+<listitem>
+  <para>Rename the configuration file to <filename>prox.lcf</filename>.
+  </para>
+  <para>Proximity automatically uses <filename>prox.lcf</filename> as
+  the log4j configuration file.</para>
+</listitem>
+</orderedlist>
+</example>
+
+<para>For additional information on log4j, including how to create new
+configuration files, see the project web pages
+at <ulink url="http://logging.apache.org/log4j/"><filename>logging.apache.org/log4j/docs/</filename></ulink>.
+</para>
+</sect2>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       CONTACT INFORMATION                      -->
+<!-- ============================================================== -->
+
+
+<sect1 id="overview_contact">
+<title>Contact information</title>
+<indexterm><primary>technical support</primary></indexterm>
+<indexterm><primary>bug reports</primary>
+           <see>technical support</see></indexterm>
+<indexterm><primary>support</primary>
+           <see>technical support</see></indexterm>
+
+<para>We welcome your comments and suggestions. Please use the
+following addresses to contact us about your experiences with
+Proximity:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><email>proximity-bugs@kdl.cs.umass.edu</email> - Proximity bug
+    reports and documentation errors</para>
+  </listitem>
+  <listitem>
+    <para><email>proximity-support@kdl.cs.umass.edu</email> - requests
+    for general assistance with Proximity software</para>
+  </listitem>
+  <listitem>
+    <para><email>proximity@kdl.cs.umass.edu</email> - general comments,
+    suggestions, and criticism</para>
+  </listitem>
+</itemizedlist></para>
+
+<para>You may also contact us at
+<blockquote><address format="linespecific">Knowledge Discovery Laboratory
+c/o Professor David Jensen, Director
+Department of Computer Science
+University of Massachusetts
+Amherst, Massachusetts 01003-9264</address></blockquote>
+The Knowledge Discovery Laboratory maintains two mailing
+lists for Proximity news and information.
+<itemizedlist>
+<listitem>
+  <para><emphasis>Proximity-announce</emphasis> is a low-volume list
+  carrying only announcements of significant project milestones, such
+  as new releases.  To subscribe, send an email message to
+  <email>majordom@cs.umass.edu</email> with the text
+  <userinput>subscribe proximity-announce</userinput>
+  in the body of the message.</para>
+</listitem>
+<listitem>
+  <para><emphasis>Proximity-list</emphasis> is a general forum for
+  discussing Proximity issues.  To subscribe, send an email message to
+  <email>majordom@cs.umass.edu</email> with the text
+  <userinput>subscribe proximity-list</userinput>
+  in the body of the message.</para>
+</listitem>
+</itemizedlist></para>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        TIPS AND REMINDERS                      -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Tips and Reminders</title>
+
+<para>
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Windows users must set the environment variable
+    <filename>&proxpath;</filename> to the root of the local Proximity
+    installation; Linux and Mac users may wish to set this environment
+    variable for convenience.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity shell scripts and batch files are located in
+    <filename>&proxpath;/bin</filename>.</para>
+  </listitem>
+  <listitem>
+    <para>Run Proximity applications from the &uiname; or from the
+    command line using shell scripts or batch files.</para>
+  </listitem>
+  <listitem>
+    <para>All Proximity shell scripts and batch files require a
+    <parameter>host:port</parameter> parameter.</para>
+  </listitem>
+  <listitem>
+    <para>The <filename>init-mserver.mil</filename> script sets the
+    port to <code>30000</code>.  You can change
+    this value using
+    <?linebreak?>
+    <code>--set port=</code><replaceable>nnnnn</replaceable>
+    when starting Mserver.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity&nbsp;&version; uses the port number to select the
+    appropriate protocol for the version of MonetDB being used. You
+    must use a port 
+    number&nbsp;<symbol role="Symbol">&le;</symbol>&nbsp;40000
+    for the Mars versions (4.18.2 and 4.20) and a port
+    number&nbsp;&gt;&nbsp;40000 for
+    MonetDB&nbsp;&monetoldversion;.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity 
+    <glossterm baseform="document type definition">DTD</glossterm>
+    files are located in
+    <filename>&proxpath;/resources</filename>.</para>
+  </listitem>
+  <listitem>
+    <para>Copy the appropriate DTD file to directories containing
+    query files, XML import data files, and model files.</para>
+  </listitem>
+  <listitem>
+    <para>If you edit or add source code, you must recreate
+    <filename>proximity.jar</filename> to have those changes available
+    when you use the Proximity shell scripts or batch files.</para>
+  </listitem>
+  <listitem>
+    <para>Define shortcuts to frequently used files and directories in
+    the <guilabel>Open</guilabel> dialog.</para>
+  </listitem>
+  <listitem>
+    <para>Choose the appropriate log4j configuration file to set
+    the level of detail included in logging messages.</para>
+  </listitem>
+  <listitem>
+    <para>Keep up to date with future Proximity news and releases by
+    subscribing to the <emphasis>proximity-announce</emphasis> mailing
+    list.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Additional information</title>
+  <listitem>
+    <para>See <xref linkend="apx_quickref"/> for a
+    summary of important Proximity commands.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref linkend="ch_import"/> for
+    information on using the database management utilities and
+    importing and exporting XML or plain text data.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref linkend="ch_queries"/> for
+    information on using the query runner.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref linkend="ch_scripts"/> for
+    information on using the Python script runner.</para>
+  </listitem>
+</itemizedlist></para>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

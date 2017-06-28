@@ -1,0 +1,59 @@
+$Id: smart-ascii-format.txt 2161 2005-06-30 18:23:41Z cornell $
+
+This file documents the 'Smart ASCII' file format.
+
+A smart ascii file consists of a series of text lines. There are four
+types of lines: comment, object definition, link definition, and
+attribute value. Each line starts at the first (zeroth) column,
+extends to the end of the line, and does not include the line's
+terminating \n character. Following are descriptions of the line types
+(including conditions on where the line can be used, and each type's
+format), followed by an example.
+
+1. comment line: Specifies a comment (ignored by the interpreter).
+  o usage: anywhere in the file
+  o format: '#' <comment> '\n'
+
+2. object definition line: Defines an object. Subsequent attribute
+   value lines apply to the object.
+  o located anywhere
+  o format: '*' <object nickname> '\n'
+
+3. link definition line: Defines a link between the two objects with
+   the specified names. Note that the object definitions can come *after*
+   the link if desired. Subsequent attribute value lines apply to the
+   link.
+  o located anywhere
+  o format: '*' <object1 nickname> '->' <object2 nickname> '\n'
+
+4. attribute value line: Specifies an attribute value for the most
+   recently-defined object or link.
+  o location: after an object or link definition
+  o format: <attribute-name> ':' <attribute value> '\n'
+
+
+Following is a simple example file that defines three objects named 'a',
+'b', and 'c', then creates two links, one from 'a' to 'c', and one
+from 'b' to 'c'. All objects and links have an 's' string
+attribute. Additionally, objects 'b' and 'c' have an 'i' integer
+attribute.
+
+----
+# example smart ascii file
+
+* a
+s:a
+
+* b
+s:b
+i:1
+
+* c
+i:2
+
+* a->c
+s:a->c
+
+* b->c
+s:b->c
+----

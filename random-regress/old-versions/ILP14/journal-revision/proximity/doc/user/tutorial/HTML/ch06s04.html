@@ -1,0 +1,580 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Using the Proximity Python Interpreter</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">
+      <link rel="prev" href="ch06s03.html" title="Running Proximity Scripts">
+      <link rel="next" href="ch06s05.html" title="Sampling the Database">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Using Scripts</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s05.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="scripts_interpreter"></a>Using the Proximity Python Interpreter
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e10681"></a><p>Proximity also lets you execute Python statements interactively
+            from a special Python interpreter. The interpreter provides the same
+            access to Proximity methods and to the special <em class="varname"><code>prox</code></em>
+            object available in the other scripting interfaces.
+         </p>
+         <p>The interpreter is a complete Jython interpreter and behaves
+            in much the same way as the command line Python interpreter:
+            
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p>Variables defined during an interpreter session remain available
+                          for use in later commands until you close the
+                          interpreter window. New interpreter windows have a separate
+                          namespace; variables defined in one interpreter window are not
+                          available in another.
+                  </p>
+               </li>
+               <li>
+                  <p>Nested blocks are indented as usual. You must indent
+                        lines with tabs.  As in other Python environments,
+                        all statements in a single block must be indented consistently.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <h4><a name="d0e10704"></a>Method name completion
+         </h4>
+         <p>The Proximity Python interpreter provides method name completion
+            <a class="indexterm" name="d0e10708"></a>
+            <a class="indexterm" name="d0e10712"></a>
+            for command lines that begin with a variable name.  Press
+            <span class="keycap">Ctrl-Space</span> to display a menu of possible methods for
+            the current context.  For example:
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p>Enter <code class="code">prox.</code> followed by
+                         <span class="keycap">Ctrl-Space</span> to show all the methods in the
+                         <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html"><code class="classname">Proximity</code></a> class. (Note the trailing period.)
+                  </p>
+               </li>
+               <li>
+                  <p>Enter <code class="code">prox.add</code> followed by
+                         <span class="keycap">Ctrl-Space</span> to show all the methods in the
+                         <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html"><code class="classname">Proximity</code></a> class that begin with <code class="literal">"add"</code>.
+                  </p>
+               </li>
+               <li>
+                  <p>Enter <code class="code">prox.addA</code> followed by
+                         <span class="keycap">Ctrl-Space</span> to complete the command line with the
+                         only <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html"><code class="classname">Proximity</code></a> class method that begins with
+                         <code class="literal">"addA"</code>
+                         (<a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#addAttribute(kdl.prox.db.Attributes,%20java.lang.String,%20java.lang.String)"><code class="methodname">addAttribute()</code></a>).
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            Method name completion works for variables other than the
+            <em class="varname"><code>prox</code></em> object and can be invoked recursively.  For
+            example, typing <code class="code">prox.getContainer().</code> followed by
+            <span class="keycap">Ctrl-Space</span> displays the methods in the
+            <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Container.html"><code class="classname">Container</code></a> class.
+         </p>
+         <h4><a name="d0e10781"></a>Parameter lists
+         </h4>
+         <p>Use <span class="keycap">Ctrl-P</span> (after an opening parenthesis) to
+            display a menu of parameter overloads for the current method.  For
+            example, typing <code class="code">prox.addAttribute(</code> followed by
+            <span class="keycap">Ctrl-P</span> shows the two signatures for the
+            <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#addAttribute(kdl.prox.db.Attributes,%20java.lang.String,%20java.lang.String)"><code class="methodname">addAttribute()</code></a> method.
+         </p>
+         <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+            <table border="0" summary="Caution">
+               <tr>
+                  <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                  <th align="left"></th>
+               </tr>
+               <tr>
+                  <td align="left" valign="top">
+                     <p>Method name completion and parameter list display are
+                        enabled only for command lines that begin with a variable name.  They
+                        do not work for variables elsewhere on the command line.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <h4><a name="d0e10803"></a>Command line history and editing
+         </h4>
+         <p>The Proximity Python interpreter also includes selected
+            functionality for working with the command-line
+            <a class="indexterm" name="d0e10807"></a>
+            history and editing the current command line.  The key bindings for
+            command-line editing in the Proximity 
+            Python interpreter follow those used for command-line editing in the
+            bash and csh shells.
+            <a class="indexterm" name="d0e10811"></a>
+            <a class="indexterm" name="d0e10817"></a>
+            
+            
+         </p>
+         <div class="informaltable">
+            <table border="1" width="100%">
+               <colgroup>
+                  <col width="16%" align="left">
+                  <col width="34%" align="left">
+                  <col width="16%" align="left">
+                  <col width="34%" align="left">
+               </colgroup>
+               <thead>
+                  <tr valign="top">
+                     <th align="left" valign="top">Command</th>
+                     <th align="left" valign="top">Description</th>
+                     <th align="left" valign="top">Command</th>
+                     <th align="left" valign="top">Description</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr valign="top">
+                     <td align="left" valign="top">Up arrow</td>
+                     <td align="left" valign="top">Previous command in history</td>
+                     <td align="left" valign="top">Down arrow</td>
+                     <td align="left" valign="top">Next command in history</td>
+                  </tr>
+                  <tr valign="top">
+                     <td align="left" valign="top">Right arrow, <span class="keycap">Ctrl-B</span></td>
+                     <td align="left" valign="top">Move backward one character</td>
+                     <td align="left" valign="top">Left arrow, <span class="keycap">Ctrl-F</span></td>
+                     <td align="left" valign="top">Move forward one character</td>
+                  </tr>
+                  <tr valign="top">
+                     <td align="left" valign="top"><span class="keycap">Ctrl-A</span></td>
+                     <td align="left" valign="top">Move to beginning of line</td>
+                     <td align="left" valign="top"><span class="keycap">Ctrl-E</span></td>
+                     <td align="left" valign="top">Move to end of line</td>
+                  </tr>
+                  <tr valign="top">
+                     <td align="left" valign="top"><span class="keycap">Del</span></td>
+                     <td align="left" valign="top">Delete one character backward</td>
+                     <td align="left" valign="top"><span class="keycap">Ctrl-D</span></td>
+                     <td align="left" valign="top">Delete one character forward</td>
+                  </tr>
+                  <tr valign="top">
+                     <td align="left" valign="top"><span class="keycap">Ctrl-K</span></td>
+                     <td align="left" valign="top">Kill to end of line</td>
+                     <td align="left" valign="top"><span class="keycap">Ctrl-Y</span></td>
+                     <td align="left" valign="top">Paste contents of clipboard</td>
+                  </tr>
+                  <tr valign="top">
+                     <td align="left" valign="top"><span class="keycap">Ctrl-Alt-S</span><sup>[<a name="d0e10897" href="#ftn.d0e10897">a</a>]</sup></td>
+                     <td align="left" valign="top">Save command history</td>
+                     <td align="left" valign="top"><span class="keycap">Ctrl-Alt-C</span></td>
+                     <td align="left" valign="top">Clear command history</td>
+                  </tr>
+                  <tr valign="top">
+                     <td align="left" valign="top"><span class="keycap">Ctrl-Alt-X</span></td>
+                     <td align="left" valign="top">Execute Jython file</td>
+                     <td align="left" valign="top"> </td>
+                     <td align="left" valign="top"> </td>
+                  </tr>
+               </tbody>
+               <tbody class="footnotes">
+                  <tr>
+                     <td colspan="4">
+                        <div class="footnote">
+                           <p><sup>[<a name="ftn.d0e10897" href="#d0e10897">a</a>] </sup>The Mac&nbsp;OS&nbsp;X
+                                equivalent to <span class="keycap">Ctrl-Alt</span> is
+                                <span class="keycap">Ctrl-Option</span>.
+                           </p>
+                        </div>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <p>After you have developed a sequence of commands for accomplishing
+            a task, you can save the command history to a file for future use.
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p>Use <span class="keycap">Ctrl-Alt-S</span> to save the current command
+                         history to a file.
+                  </p>
+               </li>
+               <li>
+                  <p>Use <span class="keycap">Ctrl-Alt-C</span> to clear the command history.
+                         (<span class="keycap">Ctrl-Alt-C</span> does not clear the interpreter
+                         window or change any variable values.)
+                  </p>
+               </li>
+               <li>
+                  <p>Use <span class="keycap">Ctrl-Alt-X</span> to execute a Jython file, such
+                         as a saved history file.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <p>The Proximity Python interpreter runs in the same thread as the
+            Proximity Database Browser. Statements that take a long time to execute will prevent
+            interacting with the browser until execution finishes.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e10953"></a>Code Example: Finding Selected Objects
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e10956"></a><a class="indexterm" name="d0e10961"></a><a class="indexterm" name="d0e10966"></a><p>This exercise walks through a series of interactive Python
+               commands that find objects with a specified attribute value. 
+               In this example, we find and explore objects with a value of 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ftp</span> for the 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_protocol</span> attribute.
+               The steps described below also show how to use the
+               interpreter&#8217;s history, command-line editing, and completion
+               features.
+            </p>
+            <p>This exercise
+               illustrates two methods in the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html"><code class="classname">Proximity</code></a> class
+               useful for exploring the information in a database:
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#find(java.lang.String)"><code class="methodname">find()</code></a>
+               <a class="indexterm" name="d0e10985"></a>
+               <a class="indexterm" name="d0e10989"></a>
+               and <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#browse(int)"><code class="methodname">browse()</code></a>.
+               <a class="indexterm" name="d0e10998"></a>
+               <a class="indexterm" name="d0e11002"></a>
+               The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#find(java.lang.String)"><code class="methodname">find()</code></a> method searches for objects
+               whose attribute values match the specified pattern.  This pattern
+               accepts the wildcards
+               <a class="indexterm" name="d0e11011"></a>
+               <code class="literal">_</code> (underscore, matches a single instance of any
+               character), and <code class="literal">%</code> (matches zero or more characters).
+               The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#browse(int)"><code class="methodname">browse()</code></a> method opens a new browser window
+               to display the specified object or container.
+            </p>
+            <div class="procedure"><a name="d0e11025"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;6.3.&nbsp;Running a script interactively:</b></p>
+               <p>Before beginning, make sure that you are serving the ProxWebKB
+                  database using Mserver. Start the Proximity Database Browser if it is not already
+                  running.
+               </p>
+               <ol type="1">
+                  <li>
+                     <p>If the interactive Python interpreter window is not already
+                        open, choose <span><strong class="guimenuitem">Open Interpreter</strong></span> from the
+                        <span><strong class="guimenu">Script</strong></span> menu.
+                        Proximity opens a Proximity Python interpreter window.
+                     </p>
+                     <p>
+                        
+                     </p>
+                     <div class="mediaobject" align="center">
+                        <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                           <tr>
+                              <td align="center" valign="bottom"><img src="images/GUI_InterpWelcome.png" align="middle" width="630"></td>
+                           </tr>
+                        </table>
+                     </div>
+                     <p>
+                        The initial Proximity Python interpreter window includes reminders of
+                        the keyboard commands for using the interpreter&#8217;s history,
+                        command-line editing, and completion features.  (The
+                        <code class="methodname">printNST</code> method operates on 
+                        <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e549"><span class="glossterm">NSTs</span></a>, an internal
+                        Proximity data structure described in 
+                        <a href="ch06s08.html" title="Working with Proximity Tables">&#8220;Working with Proximity Tables&#8221;</a>.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Use the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#find(java.lang.String)"><code class="methodname">find()</code></a>
+                        method to identify objects with an attribute value of 
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ftp</span>.
+                        
+                     </p>
+                     <div class="orderedlist">
+                        <ol type="a" compact>
+                           <li>
+                              <p>In the Proximity Python interpreter, type
+                                     <strong class="userinput"><code>prox.</code></strong> and press
+                                     <span class="keycap">Ctrl-Space</span>.  (Note the trailing period.)
+                                     Proximity displays a menu of applicable methods in the
+                                     <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html"><code class="classname">Proximity</code></a> class.
+                              </p>
+                              <div class="mediaobject" align="center">
+                                 <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                       <td align="center" valign="bottom"><img src="images/GUI_InterpMethods.png" align="middle" width="630"></td>
+                                    </tr>
+                                 </table>
+                              </div>
+                           </li>
+                           <li>
+                              <p>Choose <code class="methodname">find</code> from the menu.
+                                     Proximity adds the method name to the current command line.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Complete the method call by entering the pattern to match:
+                                     
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p><strong class="userinput"><code>prox.find("%ftp%")</code></strong></p>
+                                 </blockquote>
+                              </div>
+                              <p>The <code class="code">%</code> wildcards before and after <code class="code">ftp</code>
+                                     each match zero or more characters; this pattern
+                                     matches all attribute values that contain the
+                                     string <code class="code">"ftp"</code> anywhere in the value.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Press <span class="keycap">Return</span>.
+                              </p>
+                           </li>
+                        </ol>
+                     </div>
+                     <p>
+                        Proximity returns a map (Python dictionary) with attribute names as
+                        keys and a list of object IDs that match the specified pattern for
+                        that attribute as the value for each key.
+                        
+                     </p><pre class="screen">{url=[1086, 1087, 1088, 1089, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 
+1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111,
+1112, 1113, 1114, 1115, 1116, 1117, 1118, 1119, 1120, 1121, 1122, 3448], 
+url_protocol=[1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101,
+1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114,
+1115, 1116, 1117, 1118, 1119, 1120, 1121, 1122], url_server_info=[1086, 1087, 
+1088, 1089, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 
+1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114, 
+1115, 1116, 1117, 1118, 1119, 1120, 1121]}
+</pre><p>
+                        The returned value shows that three attributes
+                        (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url</span>, 
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_protocol</span>, and
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_server_info</span>) have values that
+                        contain the string <code class="code">"ftp"</code>.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Edit the previous command to find only those objects whose
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_protocol</span> attribute has a value of
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ftp</span>.  We use an overload of the
+                        <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#find(java.lang.String)"><code class="methodname">find()</code></a> method that accepts a second argument,
+                        the name of the attribute to search.
+                        
+                     </p>
+                     <div class="orderedlist">
+                        <ol type="a" compact>
+                           <li>
+                              <p>Press the <span class="keycap">up</span> arrow to display the previous
+                                     command.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Use the <span class="keycap">arrow</span> keys to change the cursor
+                                     position so that it is immediately after the opening
+                                     parenthesis.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Press <span class="keycap">Ctrl-K</span> to delete all text from the
+                                     cursor position to end of line. This text is placed on the
+                                     clipboard and can be pasted with <span class="keycap">Ctrl-Y</span>.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Press <span class="keycap">Ctrl-P</span> to display a menu of
+                                     parameter options for the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#find(java.lang.String)"><code class="methodname">find()</code></a> method.
+                                     
+                              </p>
+                              <div class="mediaobject" align="center">
+                                 <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                       <td align="center" valign="bottom"><img src="images/GUI_InterpParams.png" align="middle" width="630"></td>
+                                    </tr>
+                                 </table>
+                              </div>
+                              <p>
+                                     This time we use the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#find(java.lang.String)"><code class="methodname">find()</code></a> method that
+                                     takes two strings as arguments.  Press <span class="keycap">Return</span> or
+                                     <span class="keycap">Esc</span> to clear the parameter list menu.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Complete the command so that it now reads
+                                        
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p><strong class="userinput"><code>prox.find("ftp","url_protocol")</code></strong></p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                        Note that this time we are searching for exact matches as the
+                                        search pattern has no wildcards.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Press <span class="keycap">Return</span>.
+                              </p>
+                           </li>
+                        </ol>
+                     </div>
+                     <p>
+                        Proximity returns a map with the target attribute as the key and the
+                        list of object IDs with the specified attribute value as the value for
+                        that key.
+                        
+                     </p><pre class="screen">{url_protocol=[1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 
+1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114, 
+1115, 1116, 1117, 1118, 1119, 1120, 1121, 1122]}
+</pre></li>
+                  <li>
+                     <p>Create and execute a file containing the most recent
+                        <code class="methodname">find</code> command.
+                        
+                     </p>
+                     <div class="orderedlist">
+                        <ol type="a" compact>
+                           <li>
+                              <p>Press <span class="keycap">Ctrl-Alt-S</span> to save the command
+                                     history. Proximity displays the <span class="guilabel">Open</span>
+                                     dialog.  Save the history in the location of your choice.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Edit the saved file to remove the first
+                                     <code class="methodname">find</code> command and assign the results of
+                                     the remaining <code class="methodname">find</code> command to the
+                                     variable <em class="varname"><code>ftp_protocols</code></em>.  The file should now
+                                     read
+                                     
+                              </p><pre class="programlisting"># Proximity Interpreter History
+ftp_protocols=prox.find("ftp","url_protocol")</pre><p>
+                                     Save the edited file.
+                              </p>
+                           </li>
+                           <li>
+                              <p>In the Proximity Python interpreter, press 
+                                     <span class="keycap">Ctrl-Alt-C</span> to clear the command
+                                     history. Proximity displays a confirmation message in a pop-up
+                                     window.  Click <span><strong class="guibutton">OK</strong></span> to dismiss the
+                                     confirmation message.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Press <span class="keycap">Ctrl-Alt-X</span> to execute a saved Jython
+                                     file. Proximity displays the <span class="guilabel">Open</span> dialog.
+                                     Choose the file you just saved and edited.
+                                     Proximity responds by printing and executing the
+                                     <code class="code">execfile</code> command that runs the saved script file:
+                                     
+                              </p><pre class="screen">&gt;&gt;&gt; execfile("/proximity/saved-interpreter-history.py")</pre></li>
+                           <li>
+                              <p>To verify that the script completed successfully, enter 
+                                     <strong class="userinput"><code>ftp_protocols</code></strong> in the
+                                     Proximity Python interpreter window and press
+                                     <span class="keycap">Return</span>. Proximity returns the value of
+                                     <em class="varname"><code>ftp_protocols</code></em>.
+                              </p>
+                           </li>
+                        </ol>
+                     </div>
+                  </li>
+                  <li>
+                     <p>Examine one of the listed objects.
+                        
+                     </p>
+                     <div class="orderedlist">
+                        <ol type="a" compact>
+                           <li>
+                              <p>In the Proximity Python interpreter window, enter
+                                     <strong class="userinput"><code>prox.b</code></strong> and press 
+                                     <span class="keycap">Ctrl-Space</span>.  Proximity completes the method name
+                                     (<code class="methodname">browse</code>).
+                              </p>
+                           </li>
+                           <li>
+                              <p>Enter <strong class="userinput"><code>(</code></strong> and press
+                                     <span class="keycap">Ctrl-P</span> to display the parameter 
+                                     options for the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#browse(int)"><code class="methodname">browse()</code></a> method.  This
+                                     method takes either an <code class="code">int</code> (object ID) or
+                                     <code class="code">String</code> (container name) as its argument. Press
+                                     <span class="keycap">Return</span> or <span class="keycap">Esc</span> to dismiss the
+                                     list of parameter options.
+                              </p>
+                           </li>
+                           <li>
+                              <p>Complete the command line to read
+                                       
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p><strong class="userinput"><code>prox.browse(1091)</code></strong></p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                     and press <span class="keycap">Return</span>. 
+                              </p>
+                           </li>
+                        </ol>
+                     </div>
+                     <p>
+                        Proximity displays object&nbsp;1091 in a new browser window.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Click <span><strong class="guibutton">attrs</strong></span> to display the attribute
+                        values for object&nbsp;1091 and confirm that the value of the 
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_protocol</span> attribute is 
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ftp</span>.
+                     </p>
+                  </li>
+               </ol>
+            </div>
+            <p>Close the second browser window when you have finished exploring
+               object&nbsp;1091.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s05.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Running Proximity Scripts&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Sampling the Database</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

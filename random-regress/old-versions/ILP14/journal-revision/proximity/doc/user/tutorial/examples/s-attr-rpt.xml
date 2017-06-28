@@ -1,0 +1,67 @@
+<!DOCTYPE rpt2 SYSTEM "rpt2.dtd">
+<!-- Created by Proximity 4.2 -->
+
+<rpt2>
+    <class-label>
+        <source>
+            <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+            <data-type>str</data-type>
+            <is-continuous>false</is-continuous>
+            <is-single-value>true</is-single-value>
+            <source-elements>
+                <item-name>S</item-name>
+                <attr-name>attr0</attr-name>
+            </source-elements>
+        </source>
+    </class-label>
+    <rpt-body>
+        <node>
+            <class-label-distr>
+                <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                <class-label-info class="blue" count="40.0"/>
+                <class-label-info class="green" count="20.0"/>
+                <class-label-info class="red" count="40.0"/>
+            </class-label-distr>
+            <split>
+                <feature-setting>
+                    <fs-class>kdl.prox.model2.rpt.featuresettings.UnfilteredFeatureSetting</fs-class>
+                    <source>
+                        <source-class>kdl.prox.model2.common.sources.AttributeSource</source-class>
+                        <data-type>str</data-type>
+                        <is-continuous>false</is-continuous>
+                        <is-single-value>false</is-single-value>
+                        <source-elements>
+                            <item-name>S</item-name>
+                            <attr-name>class</attr-name>
+                        </source-elements>
+                    </source>
+                    <aggregator>
+                        <aggregator-class>kdl.prox.model2.rpt.aggregators.ModeAggregator</aggregator-class>
+                    </aggregator>
+                    <threshold>+</threshold>
+                    <fs-elements/>
+                </feature-setting>
+            </split>
+            <yes-branch>
+                <node>
+                    <class-label-distr>
+                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                        <class-label-info class="blue" count="0.0"/>
+                        <class-label-info class="green" count="0.0"/>
+                        <class-label-info class="red" count="100.0"/>
+                    </class-label-distr>
+                </node>
+            </yes-branch>
+            <no-branch>
+                <node>
+                    <class-label-distr>
+                        <distr-class>kdl.prox.model2.common.probdistributions.DiscreteProbDistribution</distr-class>
+                        <class-label-info class="blue" count="33.0"/>
+                        <class-label-info class="green" count="33.0"/>
+                        <class-label-info class="red" count="0.0"/>
+                    </class-label-distr>
+                </node>
+            </no-branch>
+        </node>
+    </rpt-body>
+</rpt2>

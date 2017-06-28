@@ -1,0 +1,321 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>3.1.&nbsp;Importing Data with Mismatched IDs</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Cookbook">
+      <link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Data Import">
+      <link rel="prev" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Data Import">
+      <link rel="next" href="ch03s02.html" title="3.2.&nbsp;Converting Databases to 64-Bit MonetDB">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;3.&nbsp;Data Import</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="section" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="recipe_mismatched_ids"></a>3.1.&nbsp;Importing Data with Mismatched IDs
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e1812"></a><a class="indexterm" name="d0e1819"></a><a class="indexterm" name="d0e1824"></a><a class="indexterm" name="d0e1829"></a><a class="indexterm" name="d0e1834"></a><a class="indexterm" name="d0e1839"></a><a class="indexterm" name="d0e1844"></a><a class="indexterm" name="d0e1849"></a><a class="indexterm" name="d0e1854"></a><a class="indexterm" name="d0e1859"></a><a class="indexterm" name="d0e1866"></a><a class="indexterm" name="d0e1873"></a><a class="indexterm" name="d0e1878"></a><a class="indexterm" name="d0e1883"></a><a class="indexterm" name="d0e1888"></a><a class="indexterm" name="d0e1893"></a><a class="indexterm" name="d0e1898"></a><a class="indexterm" name="d0e1903"></a><a class="indexterm" name="d0e1908"></a><a class="indexterm" name="d0e1913"></a><a class="indexterm" name="d0e1919"></a><a class="indexterm" name="d0e1922"></a><a class="indexterm" name="d0e1928"></a><a class="indexterm" name="d0e1931"></a><a class="indexterm" name="d0e1936"></a><a class="indexterm" name="d0e1939"></a><a class="indexterm" name="d0e1944"></a><a class="indexterm" name="d0e1947"></a><a class="indexterm" name="d0e1952"></a><a class="indexterm" name="d0e1955"></a><a class="indexterm" name="d0e1960"></a><a class="indexterm" name="d0e1963"></a><div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1971"></a>Problem
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>You have a table in a MySQL database that you would like to
+               import as a Proximity attribute. However, you realize that the IDs
+               from that table no longer correspond to the object IDs in Proximity:
+               The original IDs were replaced by new Proximity OIDs during the
+               import.  But, luckily, you saved the old ones in an
+               attribute.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1979"></a>Solution
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Suppose you have an attribute in a MySQL database called <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">class_label</span> that you want to import, with the
+               following contents:
+               
+            </p>
+            <div class="informaltable">
+               <table border="1" width="33%">
+                  <colgroup>
+                     <col width="50%">
+                     <col width="50%">
+                  </colgroup>
+                  <thead>
+                     <tr>
+                        <th align="center">member_id</th>
+                        <th align="center">class_label</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td align="center">15</td>
+                        <td align="center">+</td>
+                     </tr>
+                     <tr>
+                        <td align="center">25</td>
+                        <td align="center">+</td>
+                     </tr>
+                     <tr>
+                        <td align="center">35</td>
+                        <td align="center">-</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <p>
+               
+            </p>
+            <p>The <code class="token">member_id</code> column is, in fact, a
+               foreign key that references the <code class="token">id</code> of
+               another table&#8212;let&#8217;s call it the 
+               <span class="token">persons</span> table. Let&#8217;s 
+               assume that when you originally imported the data, the rows from the
+               <span class="token">persons</span> table were assigned object IDs
+               starting from 200. Let&#8217;s also assume that you saved the original 
+               <code class="token">persons.id</code> column as an attribute in
+               Proximity called <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">persons_id</span>. The contents
+               of that attribute might look like 
+               this:<sup>[<a name="d0e2036" href="#ftn.d0e2036">1</a>]</sup>
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>printNST(DB.getObjectAttrs().getAttrDataNST("persons_id"))</code></strong>
+</pre><p>
+               
+            </p><pre class="screen">[SHOWING head,id,value WHERE * LIMIT *]
+[ 1@0,   200@0,   15    ]
+[ 2@0,   201@0,   16    ]
+[ 3@0,   202@0,   25    ]
+[ 4@0,   205@0,   35    ]
+</pre><p>Your task is to combine the <code class="token">id</code> from
+               the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">persons_id</span> attribute with the 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">class_label</span> from the new, imported data
+               to create a new attribute with the rows shown below:
+               
+               
+            </p>
+            <div class="informaltable">
+               <table border="1" width="33%">
+                  <colgroup>
+                     <col width="50%">
+                     <col width="50%">
+                  </colgroup>
+                  <thead>
+                     <tr>
+                        <th align="center">id</th>
+                        <th align="center">value</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td align="center">200</td>
+                        <td align="center">+</td>
+                     </tr>
+                     <tr>
+                        <td align="center">202</td>
+                        <td align="center">+</td>
+                     </tr>
+                     <tr>
+                        <td align="center">205</td>
+                        <td align="center">-</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <p>
+               
+            </p>
+            <p>Start by saving the MySQL table into a text file that Proximity
+               can read. There are many ways to do this, for example:
+            </p><pre class="synopsis">$ <strong class="userinput"><code>echo 'select * from class_label;' | mysql -u <em class="varname"><code>usrname</code></em> -p <em class="varname"><code>dbname</code></em> &gt; class_label.txt</code></strong></pre><p>Now you can go to Proximity and read that file directly into a new
+               NST.
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>importedNST = NST("old_member_id, value", "int, str").fromfile("<em class="varname"><code>datafile</code></em>")</code></strong>
+</pre><p>
+               where <em class="varname"><code>datafile</code></em> includes the full path to the
+               file. See the <a href="ch03s01.html#mismatched_ids_files" title="Supporting Files">&#8220;Supporting Files&#8221;</a> section, below,
+               for an example data file you can use to test this recipe.
+            </p>
+            <p>The resulting NST is shown below.
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>printNST(importedNST)</code></strong>
+</pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,old_member_id,value WHERE * LIMIT *]
+[ 1@0,   15,   "+"    ]
+[ 2@0,   25,   "+"    ]
+[ 3@0,   35,   "-"    ]</pre><p>If you were to save this NST as an attribute, the 
+               <code class="token">id</code> column
+               would be referencing object IDs that don&#8217;t exist. You must first
+               join it with the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">persons_id</span> attribute, to
+               get the correct Proximity IDs. Recall that the 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">persons_id</span> attribute has the following values:
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>printNST(DB.getObjectAttrs().getAttrDataNST("persons_id"))</code></strong>
+</pre><p>
+               
+            </p><pre class="screen">[SHOWING head,id,value WHERE * LIMIT *]
+[ 1@0,   200@0,   15    ]
+[ 2@0,   201@0,   16    ]
+[ 3@0,   202@0,   25    ]
+[ 4@0,   205@0,   35    ]</pre><p>You can do a simple join between the two tables, keeping the
+               <code class="token">id</code> of the 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">persons_id</span> attribute and the 
+               <code class="token">value</code> column from the 
+               <span class="token">importedNST</span> table.
+               Because both tables have a <code class="token">value</code> column,
+               you must write <code class="code">B.value</code> to indicate that you want to keep
+               the one from the second (<span class="token">personIDs</span>) table.
+               Only the first (<span class="token">importedNST</span>) table
+               contains an <code class="token">id</code> column, so no prefix is used.
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>personIDs = DB.getObjectAttrs().getAttrDataNST("persons_id")</code></strong>
+ <strong class="userinput"><code>classNST = importedNST.join(personIDs, "A.old_member_id = B.value", "id, A.value")</code></strong>
+ <strong class="userinput"><code>printNST(classNST)</code></strong>
+</pre><p>
+               
+            </p><pre class="screen">[SHOWING head,id,A.value WHERE * LIMIT *]
+[ 0@0,   200@0,   "+"    ]
+[ 1@0,   202@0,   "+"    ]
+[ 2@0,   205@0,   "-"    ]</pre><p>This is exactly what you wanted. At this point, you can save the
+               new NST as an attribute, using the techniques described in the 
+               recipe <a href="ch02s02.html" title="2.2.&nbsp;Creating Attributes from Arbitrary Data">&#8220;Creating Attributes from Arbitrary Data&#8221;</a>.
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>DB.getObjectAttrs().defineAttributeWithData("class_label", "str", classNST)</code></strong>
+</pre><p>
+               
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e2207"></a>Discussion
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>This is a very simple recipe, but quite powerful. The key concept
+               is that you can do incremental imports from an SQL
+               database as long as you keep around Proximity attributes like
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">persons_id</span>, which map MySQL IDs to
+               Proximity IDs. With those attributes in place, you can read in new
+               table dumps and always be able to convert from old to new IDs.
+            </p>
+            <p>This technique is not restricted to new attributes. For
+               example, you can use the same technique to import new links.
+               
+            </p>
+            <div class="orderedlist">
+               <ol type="1" compact>
+                  <li>
+                     <p>Read in the dump for the new links.</p>
+                  </li>
+                  <li>
+                     <p>Join the <code class="token">o1_id</code> and 
+                            <code class="token">o2_id</code> endpoints with the attributes
+                            that allow you to convert from MySQL to Proximity OIDs.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Insert the new table into the Proximity
+                            <span class="token">links</span> NST.
+                     </p>
+                  </li>
+               </ol>
+            </div>
+            <p>
+               
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="mismatched_ids_files"></a>Supporting Files
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Download the following XML database file and new data file
+               to create the database and attribute used above to demonstrate this
+               recipe:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p>Database:
+                             <code class="filename"><a href="../examples/Import_MismatchedIDs_DB.xml" target="_top">Import_MismatchedIDs_DB.xml</a></code>
+                          
+                     </p>
+                  </li>
+                  <li>
+                     <p>New data file:
+                             <code class="filename"><a href="../examples/Import_MismatchedIDs_NewData.txt" target="_top">Import_MismatchedIDs_NewData.txt</a></code>
+                          
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               You may also want to examine the unit test file for this recipe at
+               <code class="filename">$PROX_HOME/test/java/kdl/prox/cookbook/ImportAttributeTest.java</code>.
+               
+            </p>
+         </div>
+         <div class="footnotes"><br><hr width="100" align="left">
+            <div class="footnote">
+               <p><sup>[<a name="ftn.d0e2036" href="#d0e2036">1</a>] </sup>You can use the
+                  &#8220;shortcut&#8221; <code class="code">prox.objectAttrs</code>
+                  in place of <code class="code">DB.getObjectAttrs()</code> in
+                  Proximity scripts and in the interactive Proximity Python
+                  interpreter.
+               </p>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;3.&nbsp;Data Import&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;3.2.&nbsp;Converting Databases to 64-Bit MonetDB</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

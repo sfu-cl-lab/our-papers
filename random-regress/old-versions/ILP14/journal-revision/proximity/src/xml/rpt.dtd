@@ -1,0 +1,57 @@
+<!--
+
+  Proximity Relational Probability Tree (RPT) DTD
+  Version: 1.1
+
+  Part of the open-source Proximity system
+  (see LICENSE for copyright and license information).
+
+  -->
+
+<!-- rpt -->
+
+<!ELEMENT rpt (rpt-info, rpt-body)>
+<!ATTLIST rpt name CDATA #REQUIRED>
+
+
+<!-- rpt-info -->
+
+<!ELEMENT rpt-info (description, class-label, author-name, author-email)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT author-name (#PCDATA)>
+<!ELEMENT author-email (#PCDATA)>
+<!ELEMENT class-label (item, attribute, is-object, is-continuous) >
+<!ELEMENT item (#PCDATA)>
+<!ELEMENT attribute (#PCDATA)>
+<!ELEMENT is-object (#PCDATA)>
+<!ELEMENT is-continuous (#PCDATA)>
+
+<!-- rpt-body -->
+<!ENTITY % rpt-content "( node , (node | edge | leaf)* ) | leaf">
+<!ELEMENT rpt-body (%rpt-content;)>
+
+<!-- Assuming at least 2 class-labels per node -->
+<!ELEMENT node (feature , yes-proportion, class-label-info , (class-label-info)+) >
+<!ATTLIST node name CDATA #REQUIRED>
+<!ELEMENT yes-proportion (#PCDATA)>
+
+<!ELEMENT edge (node1, (node2|leaf), label) >
+<!ELEMENT node1 (#PCDATA)>
+<!ELEMENT node2 (#PCDATA)>
+<!ELEMENT label (#PCDATA)>
+
+<!ELEMENT leaf (class-label-info, (class-label-info)+)>
+<!ATTLIST leaf name CDATA #REQUIRED>
+
+<!ELEMENT class-label-info (count, probability) >
+<!ATTLIST class-label-info name CDATA #REQUIRED>
+<!ELEMENT count (#PCDATA) >
+<!ELEMENT probability (#PCDATA)>
+
+<!ELEMENT feature (aggregator, attribute, operator, item, value, threshold, is-object, (interval)?, (subg-attr)?) >
+<!ELEMENT aggregator (#PCDATA)>
+<!ELEMENT operator (#PCDATA)>
+<!ELEMENT value (#PCDATA)>
+<!ELEMENT threshold (#PCDATA)>
+<!ELEMENT interval (#PCDATA)>
+<!ELEMENT subg-attr (#PCDATA)>

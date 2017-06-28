@@ -1,0 +1,196 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Attribute Constraints</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Constraints">
+      <link rel="prev" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Constraints">
+      <link rel="next" href="ch05s03.html" title="Multiple Constraints">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Constraints</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="d0e5286"></a>Attribute Constraints
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_attrconst0"></a><a class="indexterm" name="idx_attrconst1"></a><p>Attribute constraints are used to compare attribute values
+            across different database entities.  (See <a href="ch05s06.html" title="Implementation in Proximity">&#8220;Implementation in Proximity&#8221;</a>
+            later in this chapter, however, for important restrictions 
+            regarding mixing object and link attributes in a constraint in
+            Proximity.)
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>The general form
+                        <a class="indexterm" name="d0e5304"></a>
+                        of an attribute constraint is
+                        
+                     </p>
+                     <div class="blockquote">
+                        <blockquote class="blockquote">
+                           <p>
+                                <em class="replaceable"><code>element1</code></em>.<em class="replaceable"><code>attribute1</code></em>
+                                &nbsp;&nbsp;<em class="replaceable"><code>operator</code></em>&nbsp;&nbsp;
+                                <em class="replaceable"><code>element2</code></em>.<em class="replaceable"><code>attribute2</code></em>
+                                
+                           </p>
+                        </blockquote>
+                     </div>
+                     <p>
+                        where
+                        
+                     </p>
+                     <div class="itemizedlist">
+                        <ul type="disc" compact>
+                           <li>
+                              <p><em class="replaceable"><code>element1</code></em> and
+                                 	<em class="replaceable"><code>element2</code></em> are the names of two
+                                 	vertices or two edges in the query
+                              </p>
+                           </li>
+                           <li>
+                              <p><em class="replaceable"><code>attribute1</code></em> is the
+                                 	name of an attribute for <em class="replaceable"><code>element1</code></em>
+                                         
+                              </p>
+                           </li>
+                           <li>
+                              <p><em class="replaceable"><code>attribute2</code></em> is the
+                                 	name of an attribute for <em class="replaceable"><code>element2</code></em>
+                                         
+                              </p>
+                           </li>
+                           <li>
+                              <p><em class="replaceable"><code>operator</code></em> is one of
+                                 <a class="indexterm" name="d0e5359"></a>
+                                 <a class="indexterm" name="d0e5365"></a>
+                                 	<code class="literal">=</code>, <code class="literal">&lt;&gt;</code>,
+                                         <code class="literal">&lt;</code>, <code class="literal">&lt;=</code>,
+                                         <code class="literal">&gt;</code>, and <code class="literal">&gt;=</code></p>
+                           </li>
+                        </ul>
+                     </div>
+                     <p>
+                        
+                        <em class="replaceable"><code>Attribute1</code></em> and
+                        <em class="replaceable"><code>attribute2</code></em> must be comparable types, but
+                        need not be the same attribute name.
+                        
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p><a href="ch05s02.html#fig_const_db03" title="Figure&nbsp;5.14.&nbsp;Sample database fragment [Const_DB03.xml]">Figure&nbsp;5.14</a> shows a fragment of a
+            database containing information about movies released as DVDs.
+            Note that Proximity databases
+            <a class="indexterm" name="d0e5398"></a>
+            <a class="indexterm" name="d0e5406"></a>
+            <a class="indexterm" name="d0e5414"></a>
+            <a class="indexterm" name="d0e5420"></a>
+            do not necessarily have to be fully
+            connected; as this example illustrates, discontinuities are
+            permitted.
+            
+         </p>
+         <div class="figure"><a name="fig_const_db03"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Const_DB03.png" align="middle" width="594" alt="Sample database fragment [Const_DB03.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.14.&nbsp;Sample database fragment [Const_DB03.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>Suppose that we want to find movies released as DVDs in the same year
+            as their theatrical release.
+            <a href="ch05s02.html#fig_const_db03_q01" title="Figure&nbsp;5.15.&nbsp;Query: Movies and DVDs released in the same year&#xA;[Const_DB03_Q01.qg2.xml]">Figure&nbsp;5.15</a> shows the QGraph query
+            for this task.
+            
+         </p>
+         <div class="figure"><a name="fig_const_db03_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Const_DB03_Q01.png" align="middle" width="328.50000000000006" alt="Query: Movies and DVDs released in the same year [Const_DB03_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.15.&nbsp;Query: Movies and DVDs released in the same year
+                  [Const_DB03_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+            The query&#8217;s constraint requires that the value of the
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ReleaseYear</span> attribute of the object corresponding to
+            the <em class="token">movie</em> vertex be the same as the value of the
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubYear</span> attribute of the object corresponding to 
+            the <em class="token">DVD</em> vertex.
+            <a href="ch05s02.html#fig_const_db03_q01_res" title="Figure&nbsp;5.16.&nbsp;Query results: Movies and DVDs released in the same year">Figure&nbsp;5.16</a> shows the results of
+            executing the above query on the database fragment shown in 
+            <a href="ch05s02.html#fig_const_db03" title="Figure&nbsp;5.14.&nbsp;Sample database fragment [Const_DB03.xml]">Figure&nbsp;5.14</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_const_db03_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Const_DB03_Q01_res.png" align="middle" width="594" alt="Query results: Movies and DVDs released in the same year"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.16.&nbsp;Query results: Movies and DVDs released in the same year</b></p>
+         </div>
+         <p><br class="figure-break">
+            The query finds two subgraphs where a movie&#8217;s DVD release
+            occurred in the same year as its theatrical release.
+            <a class="indexterm" name="d0e5471"></a>
+            <a class="indexterm" name="d0e5473"></a>
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;5.&nbsp;Constraints&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Multiple Constraints</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

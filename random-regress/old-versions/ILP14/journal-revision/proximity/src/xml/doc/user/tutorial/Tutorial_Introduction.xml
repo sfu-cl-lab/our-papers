@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<!-- ============================================================== -->
+<!--                          CHAPTER 1:                            -->
+<!--                         INTRODUCTION                           -->
+<!-- ============================================================== -->
+
+<chapter id="ch_intro">
+<title>Introduction</title>
+
+<para>
+Proximity is an environment for 
+<glossterm>knowledge discovery</glossterm>
+<indexterm><primary>knowledge discovery</primary></indexterm>
+in <glossterm>relational data</glossterm>.
+<indexterm><primary>data</primary>
+           <secondary>relational</secondary></indexterm>
+<indexterm><primary>relational data</primary></indexterm>
+It helps human analysts discover new knowledge by analyzing 
+complex data sets about people, places, things, and events. New
+developments in this area are vital because of the growing interest in
+analyzing the Web, social networks, telecommunications and computer
+networks, relational and object-oriented databases,  multi-agent
+systems, and other sources of structured and semi-structured data.
+</para>
+
+<para>
+Proximity consists of novel algorithms that help manage, explore,
+sample, model, and visualize data.  Proximity implements methods for
+learning statistical models that describe the probabilistic dependencies
+in relational data and can estimate probability distributions over
+unseen data.  Proximity is an open-source application developed in
+Java, and it makes substantial use of MonetDB
+<xref linkend="boncz95"/>, <xref linkend="boncz02"/>, an
+open-source, 
+<glossterm>vertical database</glossterm>
+system designed for high performance on
+semi-structured data.
+</para>
+
+<!-- ============================================================== -->
+<!--               CONVENTIONAL KNOWLEDGE DISCOVERY                 -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Conventional Knowledge Discovery</title>
+
+<para>
+First-generation tools for knowledge discovery are already widely
+deployed in business, science, and government. These tools help
+epidemiologists identify emerging diseases, help engineers improve
+industrial processes, and help credit-card companies spot fraud.
+</para>
+
+<para>
+Unfortunately, much of the technical work in knowledge discovery, and
+its underlying statistical theory, assumes that data records are
+structurally
+<indexterm><primary>independence assumption</primary></indexterm>
+<indexterm><primary>homogeneity assumption</primary></indexterm>
+<indexterm><primary>statistical</primary>
+           <secondary>independence</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>structure</secondary></indexterm>
+homogeneous and 
+<glossterm baseform="statistical independence">statistically independent</glossterm>. 
+For example,
+to analyze a set of patient records to determine useful diagnostic
+rules for a new disease, traditional techniques would assume that the
+records provide the same type of information about each patient and
+that knowing something about one patient tells you nothing about
+another.  Good work in epidemiology, however, regularly considers
+records of many types (e.g., patients, workplaces, industrial
+chemicals) as well as relationships among those records (genetic
+and social relationships among patients, occupational exposure of
+patients to chemicals, etc.).
+</para>
+
+<para>
+Ignoring this relational information vastly oversimplifies many
+problems and can make their deep structure all but
+undiscoverable. Indeed, the importance of such relational information
+is precisely what led computer scientists to create relational
+databases and knowledge representations based on first-order logic. To
+date, however, most technologies for knowledge discovery have lagged
+behind these decades-old innovations, only addressing the data
+contained in a single database table and only expressing concepts in
+representations roughly equivalent to propositional logic.
+</para>
+
+<para>
+Addressing fully relational tasks has raised a remarkable array of new
+problems in statistical inference, required the development of new
+technologies for knowledge discovery, and raised new questions about
+the assessment and management of these technologies. The need to
+investigate these interconnected questions has driven the work of the
+Knowledge Discovery Laboratory (KDL) at the University of
+Massachusetts Amherst, and the desire to disseminate our findings led
+us to create Proximity.
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--               RELATIONAL KNOWLEDGE DISCOVERY                   -->
+<!-- ============================================================== -->
+
+<sect1 id="relational_kd">
+<title>Relational Knowledge Discovery</title>
+
+<!-- This was the third paragraph in this section, but with the change
+     in the models (they no longer correct for autocorrelation and
+     degree disparity), that part's been commented out.  It seems to
+     make more sense at the beginning of the section now. Also added
+     the phrase "To enable efficient model creation and use" at the
+     beginning of the second paragraph.  (Extensive notes about this
+     change as this chapter was written by David and he did not make
+     these changes so I want themdocumented.) -->
+<para>
+Traditional machine learning and knowledge discovery techniques
+identify probabilistic dependencies among the attributes of a single
+record only.  Proximity&rsquo;s modeling algorithms extend this to
+include attributes of related entities and characteristics of the
+surrounding relational structure of the data.
+<!--
+In addition,
+Proximity&rsquo;s modeling algorithms adjust for statistical
+<indexterm><primary>bias</primary></indexterm>
+<indexterm><primary>statistical</primary>
+           <secondary>biases</secondary></indexterm>
+biases that can occur when traditional
+techniques are applied to relational data.  In particular, they adjust
+for the effects of <glossterm>autocorrelation</glossterm>
+<indexterm><primary>autocorrelation</primary>
+           <secondary>model corrections for</secondary></indexterm>
+<xref linkend="jensen02_ilp"/> 
+and <glossterm>degree disparity</glossterm>
+<indexterm><primary>degree disparity</primary></indexterm>
+<xref linkend="jensen03_icml"/>.
+Autocorrelation occurs when an attribute 
+on one object is statistically correlated with values of that same
+attributes on related objects.  Degree disparity occurs when the
+<glossterm>degree</glossterm> (number of links or edges) of an object
+is related to an attribute of that object.-->
+</para>
+
+<para>
+To enable efficient model creation, Proximity employs unusual
+technologies for data storage and
+access. Its core database uses the decomposition storage model
+<xref linkend="copeland85"/>, a method of 
+<glossterm baseform="vertical database">vertical fragmentation</glossterm>
+that allows for a highly flexible data schema. Knowledge
+discovery virtually requires such a
+schema, because substantial reinterpretations of the data are frequent
+and highly desirable. Proximity also uses 
+<glossterm>QGraph</glossterm><indexterm><primary>QGraph</primary></indexterm>, 
+a visual query language that returns graph fragments with highly
+variable structure, rather than returning sets of individual records
+with homogeneous structure. Visualization tools in Proximity allow
+users to browse the data as a graph, examining both the attributes of
+individual records as well as the higher-level structure of
+relationships that interconnect records.
+</para>
+
+<para>
+Algorithms for constructing statistical
+<indexterm><primary>models</primary>
+           <secondary>statistical</secondary></indexterm>
+<indexterm><primary>statistical</primary>
+           <secondary>models</secondary></indexterm>
+models that estimate
+conditional and joint probability distributions are implemented on top
+of Proximity&rsquo;s database infrastructure. These algorithms construct
+<glossterm baseform="relational probability tree">relational probability trees</glossterm>
+<xref linkend="neville03_rpt"/>,
+<glossterm baseform="relational dependency network">relational dependency networks</glossterm>
+<xref linkend="neville03_rdn"/>,
+<xref linkend="neville04_icdm"/>,
+and <glossterm baseform="relational Bayesian classifier">relational Bayesian classifiers</glossterm>
+<xref linkend="neville03_rbc"/>. Each of these models is
+constructed by analyzing a data sample created using a QGraph
+query and is implemented as a set of operations run on the underlying
+database.
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                      PROXIMITY ADVANTAGES                      -->
+<!-- ============================================================== -->
+
+<sect1 id="intro_kd">
+<title>Proximity Advantages</title>
+
+<para>
+Proximity&rsquo;s data representation and modeling techniques provide
+several advantages over traditional methods:
+</para>
+
+<para>
+<itemizedlist>
+<listitem>
+<formalpara>
+<title>Relational models</title>
+<para>Conventional tools cannot exploit the relational
+structure of data sets.  Analysts have to encode the relational
+structure as propositional features, rather than having the algorithm
+automatically search over all such features.  In addition, such
+propositional encoding makes it impossible to adjust for relational
+characteristics of data such as <glossterm>autocorrelation</glossterm>
+and <glossterm>degree disparity</glossterm>.
+</para></formalpara>
+</listitem>
+
+<listitem>
+<formalpara>
+<title>Graph query language</title>
+<para>Conventional query languages such as SQL make
+it difficult to retrieve arbitrary 
+<glossterm baseform="subgraph">subgraphs</glossterm>.  Instead, users are
+limited to retrieving individual records or constructing new records
+that summarize relational structure.  <glossterm>QGraph</glossterm>
+makes it easy to retrieve 
+and examine arbitrary portions of the graph and thus eases the process
+of relational <glossterm>knowledge discovery</glossterm>.
+</para></formalpara>
+</listitem>
+
+<listitem>
+<formalpara>
+<title>Flexible data representation</title>
+<para>In a conventional relational database, transforming the
+<glossterm>schema</glossterm> of a database is a difficult and 
+time-consuming process.  A Proximity database does not have a fixed
+schema.  Instead, QGraph queries are used to define the schema for a
+particular analysis.  This can substantially improve the ability to
+discover knowledge in <glossterm>relational data</glossterm>
+<xref linkend="jensen02_kdd"/>.
+</para></formalpara>
+</listitem>
+
+<listitem>
+<formalpara>
+<title>Efficient scaling</title>
+<para>In a traditional database system, increasing the
+number of <glossterm baseform="attribute">attributes</glossterm> on an
+object decreases the number of records that 
+can be paged into memory at once.  In Proximity, each attribute is
+stored in its own table. While most operations require a join, MonetDB
+makes such operations very efficient. As a result, an analyst can
+create hundreds or even thousands of attributes with little or no
+impact on query speed.
+</para></formalpara>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

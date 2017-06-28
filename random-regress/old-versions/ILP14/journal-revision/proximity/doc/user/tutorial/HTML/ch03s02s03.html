@@ -1,0 +1,191 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Importing XML data using noChecks</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch03s02.html" title="Importing XML Data">
+      <link rel="prev" href="ch03s02s02.html" title="Importing database elements using XML">
+      <link rel="next" href="ch03s03.html" title="Transforming Tabular Data to XML">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s02s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Importing XML Data</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="import_nocheck"></a>Importing XML data using <code class="code">noChecks</code></h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e2562"></a><p>To ensure that any new data does not conflict with existing
+            data, Proximity&#8217;s import process restricts when and how you can
+            add additional elements to an existing database.  In many instance,
+            however, careful data management can eliminate such conflicts.  In
+            such cases, users can override the default import restrictions by
+            setting the <code class="code">noChecks</code> import option to true.
+         </p>
+         <p>When
+            <code class="code">noChecks</code> is true, Proximity makes no checks to see if
+            the imported data conflicts with the existing database.  If imported
+            objects or links already exist 
+            in the database, Proximity creates duplicate entries for these items.
+            When <code class="code">noChecks</code> is
+            false or not specified, adding new objects or links to a database that
+            already contains such items results in an error.  You can also use the
+            <code class="code">noChecks</code> option to import additional values for previously
+            defined attributes (an error without this option).  The only check in
+            this case is ensuring that the &#8220;new&#8221; attribute is of the
+            same type as the previously defined attribute.
+         </p>
+         <p>When <code class="code">noChecks</code> is true, Proximity automatically
+            recodes container
+            <a class="indexterm" name="d0e2588"></a>
+            identifiers when imported containers conflict with
+            containers already present in the database.  For example, if the
+            database already has a container with an ID of 2, and the XML data
+            file to be imported also includes a container with an ID of 2, the
+            import process assigns a new, non-conflicting identifier to the imported
+            container.  Any associated data (container attributes and nesting
+            relationships) are similarly recoded.
+         </p>
+         <p>The following exercise adds a small number of new 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">link_tag</span> attribute values to the database.
+            The new values are added solely for illustrative purposes; they are
+            not used in later <em class="citetitle">Tutorial</em> exercises.
+         </p>
+         <div class="procedure"><a name="ex_import_nocheck"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;3.3.&nbsp;Importing additional link_tag attribute values:</b></p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database (created in <a href="ch03s02.html#ex_import_webkb" title="Exercise&nbsp;3.1.&nbsp;Importing the ProxWebKB data into Proximity:">Exercise&nbsp;3.1</a>) using
+               Mserver.  You must have completed <a href="ch03s02.html#ex_import_webkb" title="Exercise&nbsp;3.1.&nbsp;Importing the ProxWebKB data into Proximity:">Exercise&nbsp;3.1</a>
+               before running the current exercise. Data files must be on the same
+               machine as that serving the database.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>Try to import the new <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">link_tag</span>
+                     attribute values without using the <code class="code">noChecks</code> option.
+                     (Substitute the appropriate port number if you are using a
+                     different port.)
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>bin/import-xml.sh localhost:30000 \
+  $PROX_HOME/doc/user/tutorial/examples/more-linktag-values.xml</code></strong>
+</pre><p>
+                     <a class="indexterm" name="d0e2628"></a>
+                     <a class="indexterm" name="d0e2632"></a>
+                     
+                     Proximity attempts to import the new attribute values, but
+                     reports an error because the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">link_tag</span>
+                     attribute already exists.
+                     
+                  </p><pre class="screen">ERROR app.ImportXMLApp: java.lang.IllegalArgumentException:
+Attribute already exists in the database: link_tag. You may use the
+noChecks flag if you want to ignore this check.
+</pre></li>
+               <li>
+                  <p>Import the additional <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">link_tag</span> attribute
+                     values, specifying that <code class="code">noChecks</code> is true.
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>bin/import-xml.sh localhost:30000 \
+  $PROX_HOME/doc/user/tutorial/examples/more-linktag-values.xml true</code></strong>
+</pre><p>
+                     
+                     When the import process is finished, Proximity reports on the number
+                     of database entities created 
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                     
+                  </p><pre class="screen">INFO  app.ImportXMLApp: * importing database from
+   /proximity/doc/user/tutorial/examples/more-linktag-values.xml
+   NOT CHECKING FOR DUPLICATES 
+INFO  app.ImportXMLApp: * converting xml to bulk import text files;
+   dir: /tmp/prox-xml-import62294
+INFO  app.ImportXMLApp:   attributes
+INFO  app.ImportXMLApp:   attribute: link_tag, L, str
+INFO  app.ImportTextApp: * importing database from /tmp/prox-xml-import62294
+INFO  app.ImportTextApp:   Loading object table
+INFO  app.ImportTextApp:   Loading link table
+INFO  app.ImportTextApp:   Loading attributes
+INFO  app.ImportTextApp:   Loading attribute: av_0
+INFO  app.ImportTextApp:   Loading containers
+INFO  app.ImportTextApp: * done importing
+INFO  app.ImportXMLApp: * done importing; counts:
+   0 objects, 0 links, 1 attributes, 5 attribute values,
+   0 containers, 0 subgraph items
+</pre><p>
+                     
+                     Note that the start of the trace includes a warning that the import
+                     process is not checking for duplicates.
+                  </p>
+               </li>
+               <li>
+                  <p>If you want, examine link&nbsp;1 in the Proximity Database Browser to see its
+                     attribute values.  (A summary of steps for examining
+                     link&nbsp;1&#8217;s attribute values is included, below. See
+                     <a href="ch04.html" title="Chapter&nbsp;4.&nbsp;Exploring Data">Chapter&nbsp;4, <i>Exploring Data</i></a> for complete information on using the
+                     Proximity Database Browser.)
+                  </p>
+                  <div class="orderedlist">
+                     <ol type="a" compact>
+                        <li>
+                           <p>From the Proximity Database Browser start page, click
+                                      <span><strong class="guibutton">Links</strong></span>.
+                           </p>
+                        </li>
+                        <li>
+                           <p>Click <span><strong class="guibutton">1</strong></span>.
+                           </p>
+                        </li>
+                        <li>
+                           <p>Click <span><strong class="guibutton">attrs</strong></span>.
+                           </p>
+                        </li>
+                     </ol>
+                  </div>
+                  <div class="informalfigure">
+                     <div class="mediaobject" align="center">
+                        <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                           <tr>
+                              <td align="center" valign="bottom"><img src="images/GUI_NewLinktagValue.png" align="middle" width="630"></td>
+                           </tr>
+                        </table>
+                     </div>
+                  </div>
+                  <p>Because link&nbsp;1 already had a value of
+                     &#8220;<code class="literal">OFFSITE</code>&#8221; for the 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">link_tag</span> attribute, the new data is added
+                     as an additional value for this attribute.
+                  </p>
+               </li>
+            </ol>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s02s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03s02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Importing database elements using XML&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Transforming Tabular Data to XML</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

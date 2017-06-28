@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<appendix id="apx_install">
+<title>Installation</title>
+
+<!-- ============================================================== -->
+<!--                      OBTAINING PROXIMITY                       -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_install_obtain">
+<title>Obtaining Proximity</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>obtaining</secondary></indexterm>
+<indexterm><primary>MonetDB</primary>
+           <secondary>obtaining</secondary></indexterm>
+<indexterm><primary>downloading Proximity and MonetDB</primary></indexterm>
+
+<para>The Proximity distribution includes the Proximity client and the
+required Monet database system (MonetDB).
+<indexterm><primary>Proximity</primary>
+           <secondary>client</secondary></indexterm>
+The Proximity client is implemented in Java and can be run on any
+<indexterm><primary>Java requirements</primary></indexterm>
+<indexterm><primary>requirements for Java</primary></indexterm>
+platform that supports Java&nbsp;2 Platform, Standard
+Edition&nbsp;v1.5 (J2SE) or later.  The distribution
+includes both binaries and source files for the Proximity client.
+MonetDB binaries are available for &macosx; (10.2 or higher),
+Linux&nbsp;i86 (glib&nbsp;2.3), and Windows (Windows&nbsp;2000
+Professional or later).  Proximity&nbsp;&version; operates with
+MonetDB&nbsp;&monetoldversion;
+<indexterm><primary>MonetDB</primary>
+           <secondary>versions</secondary></indexterm>
+and selected later versions.</para>
+
+<para>We recommend that new users download and install
+MonetDB&nbsp;&monetversion; (Linux and &macosx;) or
+MonetDB&nbsp;&monetwinversion; (Windows), collectively known as the
+&ldquo;Mars&rdquo; versions.  Proximity&nbsp;&version; is
+<emphasis>not</emphasis> yet fully compatible with the latest release
+of MonetDB&nbsp;5.</para>
+
+<para>Current Proximity users upgrading to Proximity&nbsp;&version;
+can continue to use MonetDB&nbsp;&monetoldversion; (provided with the
+current release) or update to MonetDB Mars and recreate their
+databases. Proximity databases can be easily recreated for use with
+later versions of MonetDB by exporting existing databases as plain
+text or XML, then importing the data into the new
+database.  See <xref linkend="apx_updatingdbs"/> later in this
+appendix for instructions on converting MonetDB&nbsp;&monetoldversion;
+databases for use with MonetDB Mars.</para>
+
+<para>Users updating from Proximity&nbsp;3.1 or earlier must update
+both the Proximity client and MonetDB installation, including updating
+the database schema (a step not covered in this appendix). Please
+contact technical support at
+<email>proximity-support@kdl.cs.mass.edu</email> for assistance if you
+are updating from Proximity&nbsp;3.1 or earlier.</para>
+
+<!--
+   EXAMPLE: Obtaining the Proximity distribution files
+-->
+
+<example>
+<title>Obtaining the Proximity distribution files</title>
+
+<orderedlist>
+<listitem>
+<para>In a web browser, go to 
+<ulink
+url="http://kdl.cs.umass.edu/proximity/downloads.html">kdl.cs.umass.edu/proximity/downloads.html</ulink>.
+</para>
+</listitem>
+
+<listitem>
+<para>Download the MonetDB binaries for your operating system:
+<!--
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para>&macosx; on PPC: 
+        <filename>monet-mars-distr-mac-ppc.tgz</filename></para>
+    </listitem>
+    <listitem>
+      <para>&macosx; on PPC-64: 
+        <filename>monet-mars-distr-mac-ppc-64.tgz</filename></para>
+    </listitem>
+    <listitem>
+      <para>&macosx; on Intel:
+        <filename>monet-mars-distr-mac-intel.tgz</filename></para>
+    </listitem>
+    <listitem>
+      <para>Linux on Intel:
+        <filename>monet-mars-distr-linux.tgz</filename></para>
+    </listitem>
+    <listitem>
+      <para>Linux on Intel 64:
+        <filename>monet-mars-distr-linux-64.tgz</filename></para>
+    </listitem>
+    <listitem>
+      <para>Windows:
+        <filename>monet-mars-distr-win.msi</filename></para>
+    </listitem>
+  </itemizedlist>
+-->
+<informaltable frame="none" colsep="0" rowsep="0">
+<tgroup cols="3">
+<colspec colwidth="0.25*"/>
+<colspec colwidth="1.0*"/>
+<colspec colwidth="2.0*"/>
+<tbody>
+<row>
+  <entry>  </entry>
+  <entry>&macosx; on PPC:</entry>
+  <entry><filename>monet-mars-distr-mac-ppc.tgz</filename></entry>
+</row>
+<row>
+  <entry></entry>
+  <entry>&macosx; on PPC-64:</entry>
+  <entry><filename>monet-mars-distr-mac-ppc-64.tgz</filename></entry>
+</row>
+<row>
+  <entry></entry>
+  <entry>&macosx; on Intel:</entry>
+  <entry><filename>monet-mars-distr-mac-intel.tgz</filename></entry>
+</row>
+<row>
+  <entry></entry>
+  <entry>Linux on Intel:</entry>
+  <entry><filename>monet-mars-distr-mac-linux.tgz</filename></entry>
+</row>
+<row>
+  <entry></entry>
+  <entry>Linux on Intel-64:</entry>
+  <entry><filename>monet-mars-distr-mac-linux-64.tgz</filename></entry>
+</row>
+<row>
+  <entry></entry>
+  <entry>Windows:</entry>
+  <entry><filename>monet-mars-distr-win.msi</filename></entry>
+</row>
+<row>
+  <entry></entry>
+  <entry>Windows 64:</entry>
+  <entry><filename>monet-mars-distr-win-64.msi</filename></entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+</listitem>
+
+<listitem>
+<para>All supported platforms: Download
+<filename>proximity-&fullversion;.tgz</filename>.
+</para>
+</listitem>
+
+</orderedlist>
+</example>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       INSTALLING MONETDB                       -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_install_monet">
+<title>Installing MonetDB</title>
+<indexterm id="idx_apx_geninstall" class="startofrange">
+           <primary>installation</primary></indexterm>
+<indexterm id="idx_apx_mdb" class="startofrange">
+           <primary>MonetDB</primary>
+           <secondary>installing</secondary></indexterm>
+
+<para>Users updating from Proximity&nbsp;4.0 or later versions may
+choose to stay with their current MonetDB installation
+(MonetDB&nbsp;&monetoldversion;) or update to MonetDB Mars (4.20 for
+Linux/&macosx;, 4.18.2 for Windows).  The later MonetDB versions
+provide some performance improvements, but as the underlying database
+formats are not compatible, using these versions also requires converting
+existing databases to the newer format.  See 
+<xref linkend="apx_updatingdbs"/> later in this appendix for
+instructions on converting MonetDB&nbsp;&monetoldversion; databases
+for use with MonetDB Mars.</para>
+
+<para>See <xref linkend="ov_mserver"/> in 
+<xref xrefstyle="brief" linkend="ch_overview"/> for information on
+using the MonetDB server with Proximity.
+Full MonetDB documentation is available from
+<indexterm><primary>MonetDB</primary>
+           <secondary>documentation</secondary></indexterm>
+<indexterm><primary>documentation for MonetDB</primary></indexterm>
+CWI&rsquo;s website at <ulink url="http://monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html">monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html</ulink>.
+</para>
+
+<!--
+   EXAMPLE: MonetDB installation for Mac/Linux
+-->
+
+<?pagebreak?>
+<example>
+<title>Installing MonetDB for Linux/&macosx; platforms</title>
+<indexterm><primary>Linux</primary>
+           <secondary>MonetDB installation</secondary></indexterm>
+<indexterm><primary>Mac OS X</primary>
+           <secondary>MonetDB installation</secondary></indexterm>
+
+<para>You must have administrator privileges (either by using
+<code>sudo</code> or being logged in as &ldquo;root&rdquo;)
+to install MonetDB.</para>
+
+<orderedlist>
+<listitem>
+<para>Change directories to <filename>/usr/local</filename>.
+<synopsis>&prompt; <command>cd /usr/local</command>
+</synopsis>
+The Linux/&macosx; binary distribution of MonetDB is not
+relocatable.</para>
+</listitem>
+
+<listitem>
+<para>Extract the distribution. You must have a version of tar (e.g.,
+GNU tar) that supports long file names.
+<synopsis>&prompt; <userinput>tar xvfz <replaceable>path-to-tarfile</replaceable>/monet-mars-distr-<replaceable>platform</replaceable>.tgz</userinput>
+</synopsis>
+where <replaceable>platform</replaceable> reflects your operating system.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Change permissions for the <filename>Monet-mars/var</filename>
+directory to permit write access.
+<synopsis>&prompt; <userinput>cd &monetpath;</userinput>
+&prompt; <userinput>chmod -R a+w var</userinput>
+</synopsis>
+</para>
+</listitem>
+
+<listitem>
+<para>[Optional] Add <filename>&monetpath;/bin</filename> to
+<envar>PATH</envar>.
+<indexterm><primary>PATH</primary></indexterm>
+<indexterm><primary>environment variables</primary>
+           <secondary>PATH</secondary></indexterm>
+</para>
+</listitem>
+</orderedlist>
+
+</example>
+
+<!--
+   EXAMPLE: MonetDB installation for Windows
+-->
+
+<example>
+<title>Installing MonetDB for Windows platforms</title>
+<indexterm><primary>Windows</primary>
+           <secondary>MonetDB installation</secondary></indexterm>
+
+<para>The Windows version of the MonetDB sever requires
+Windows&nbsp;2000 Professional or later. You must be logged in as a
+user with administrator privileges to install MonetDB.</para>
+
+<orderedlist>
+<listitem>
+<para>If you have an older version of MonetDB already installed on your
+system, remove the following DLL  files from the
+<filename>C:\WINDOWS\System32\</filename> directory:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><filename>libstream.dll</filename></para>
+  </listitem>
+  <listitem>
+    <para><filename>libmutils.dll</filename></para>
+  </listitem>
+  <listitem>
+    <para><filename>libMonetODBCs.dll</filename></para>
+  </listitem>
+  <listitem>
+    <para><filename>libMonetODBS.dll</filename></para>
+  </listitem>
+  <listitem>
+    <para><filename>libMapi.dll</filename></para>
+  </listitem>
+</itemizedlist>
+</para>
+</listitem>
+
+<listitem>
+<para>Extract the installation files using WinZip or an equivalent
+application.</para>
+</listitem>
+
+<listitem>
+<para>Run the Microsoft installer for MonetDB,
+<filename>monet-mars-distr-win.msi</filename>, by 
+double-clicking the file name
+to start the installation wizard. Follow the instructions to install
+the MonetDB server in the desired location.  The default installation
+directory is <filename>C:\Program Files\CWI\MonetDB</filename>.</para>
+
+<para>Proximity does not require the MonetDB ODBC driver. You can
+unselect this option on the third page of the installation wizard if
+you plan to only use MonetDB to serve Proximity databases.  You can
+ignore warnings that &ldquo;installation will fail if this component is not
+installed&rdquo; if you are not installing the MonetDB ODBC driver;
+this warning refers to installing the MonetDB ODBC driver without
+having other required software already installed.
+</para>
+
+<para>Your choice of installing MonetDB for &ldquo;Just me&rdquo;
+versus &ldquo;All users&rdquo; affects only whether MonetDB is added
+to the Start Menu for the current user or for all users.  In all cases
+MonetDB stores its databases in
+<blockquote>
+<para><filename>&winmonetdbpath;</filename></para>
+</blockquote>
+where <replaceable>username</replaceable> is the login name for the
+current user.</para>
+</listitem>
+
+<listitem>
+<para>Run <command>Mserver.bat</command>
+(located in the installation directory).
+<synopsis>&winprompt; <userinput>&winmonetdbpath;Mserver.bat</userinput>
+</synopsis>
+where <replaceable>username</replaceable> is the login name of the
+current user.
+This creates the required directory hierarchy for MonetDB data files.
+Substitute the appropriate path if you installed the Monet
+server someplace other than the default location.
+</para>
+</listitem>
+
+<listitem>
+<para>Enter <userinput>quit();</userinput> at the Monet server prompt to
+quit the server (note the parentheses and semi-colon).</para>
+</listitem>
+
+<listitem>
+<para>[Optional] Add the MonetDB installation directory to
+<envar>PATH</envar>.
+</para>
+</listitem>
+
+</orderedlist>
+
+</example>
+<indexterm startref="idx_apx_mdb" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                      INSTALLING PROXIMITY                      -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_install_prox">
+<title>Installing Proximity</title>
+<indexterm id="idx_apx_install1"><primary>Proximity</primary>
+           <secondary>installing</secondary></indexterm>
+
+<!--
+   EXAMPLE: Proximity installation for Mac/Linux
+-->
+
+<example>
+<title>Installing Proximity for Linux/&macosx; platforms</title>
+<indexterm><primary>Linux</primary>
+           <secondary>Proximity installation</secondary></indexterm>
+<indexterm><primary>Mac OS X</primary>
+           <secondary>Proximity installation</secondary></indexterm>
+
+<orderedlist>
+<listitem>
+<para>Extract the distribution to the location of your
+choice.
+<synopsis>&prompt; <userinput>cd <replaceable>directory</replaceable></userinput>
+&prompt; <userinput>tar xvfz <replaceable>path-to-tarfile</replaceable>/proximity-&fullversion;.tgz</userinput>
+</synopsis>
+where <replaceable>directory</replaceable> is the directory in which
+you want to install Proximity and
+<replaceable>path-to-tarfile</replaceable> is the relative path from
+the current directory to the directory containing the tar file.
+You must use a version of tar (e.g., GNU tar) that
+supports long filenames.
+</para>
+</listitem>
+
+<listitem>
+<para>Change permissions for the shell scripts in
+<indexterm><primary>file permissions</primary></indexterm>
+<indexterm><primary>permissions</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>file permissions for</secondary></indexterm>
+<filename>proximity/bin</filename> to make them executable.
+<synopsis>&prompt; <userinput>cd proximity</userinput>
+&prompt; <userinput>chmod -R a+x bin</userinput>
+</synopsis>
+</para>
+</listitem>
+
+<listitem>
+<para>[Optional] 
+If you plan to work through the Proximity tutorial, set the
+environment variable <envar>PROX_HOME</envar> to your Proximity
+<indexterm><primary>PROX_HOME</primary></indexterm>
+<indexterm><primary>environment variables</primary>
+           <secondary>PROX_HOME</secondary></indexterm>
+installation directory.
+</para>
+</listitem>
+
+<listitem>
+<para>[Optional]
+Add <filename>&proxpath;/bin</filename> to <envar>PATH</envar>.
+<indexterm><primary>PATH</primary></indexterm>
+<indexterm><primary>environment variables</primary>
+           <secondary>PATH</secondary></indexterm>
+</para>
+</listitem>
+
+</orderedlist>
+</example>
+
+<!--
+   EXAMPLE: Proximity installation for Windows
+-->
+
+<example>
+<title>Installing Proximity for Windows platforms</title>
+<indexterm><primary>Windows</primary>
+           <secondary>Proximity installation</secondary></indexterm>
+
+<orderedlist>
+<listitem>
+<para>Extract the distribution to the location of your
+choice using WinZip or an equivalent application.</para>
+</listitem>
+
+<listitem>
+<para>Create a new environment variable, <envar>PROX_HOME</envar>,
+
+and set it to the location where you installed Proximity.  For example,
+if you installed Proximity in <filename>C:\Proximity</filename>, then you
+would set <envar>PROX_HOME</envar> = <filename>C:\Proximity\</filename>.
+Setting <envar>PROX_HOME</envar> is required for using the
+Proximity client on Windows. You may need to restart your command
+(DOS) window to make the new environment variable available.
+<indexterm><primary>environment variables</primary>
+           <secondary sortas="Windows">for Windows</secondary></indexterm>
+<indexterm><primary>Windows</primary>
+           <secondary>environment variables</secondary></indexterm>
+</para>
+</listitem>
+
+<listitem>
+<para>[Optional]
+Add <filename>&winproxpath;\bin</filename> to <envar>PATH</envar>.
+</para>
+</listitem>
+
+</orderedlist>
+</example>
+<indexterm startref="idx_apx_install1" class="endofrange"/>
+<indexterm startref="idx_apx_geninstall" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                   UPDATING MONETDB DATABSES                    -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_updatingdbs">
+<title>Updating MonetDB Databases</title>
+
+<para>Proximity&nbsp;&version; is fully compatible with
+MonetDB&nbsp;&monetoldversion;, the version of MonetDB
+<indexterm><primary>MonetDB</primary>
+           <secondary>versions</secondary></indexterm>
+distributed with
+Proximity&nbsp;4.0 through 4.2.  Users updating from Proximity&nbsp;4.0 or
+later versions can continue to use their existing MonetDB installation
+and databases and safely ignore this section.  However, if you choose
+to update your MonetDB installation to one of the &ldquo;Mars&rdquo;
+versions, you must also update your databases to use the new database
+format.  Users updating from Proximity&nbsp;3.1
+<indexterm><primary>Proximity</primary>
+           <secondary>updating</secondary></indexterm>
+<indexterm><primary>updating</primary>
+           <secondary>Proximity</secondary></indexterm>
+or earlier should contact technical support at
+<email>proximity-support@kdl.cs.umass.edu</email> for assistance.</para>
+
+<para>Updating databases from MonetDB&nbsp;&monetoldversion;
+<indexterm><primary>databases</primary>
+           <secondary>updating</secondary></indexterm>
+<indexterm><primary>updating</primary>
+           <secondary>databases</secondary></indexterm>
+to Monet Mars (4.18.2 or 4.20) requires exporting the current database to
+the Proximity plain text or XML data format and then importing
+the data into the new version of MonetDB.
+For most import or export operations, we
+recommend using the more robust Proximity XML format in order to take
+advantage of its error checking capabilities.  In this case, because
+you are importing unchanged data exported from Proximity, the use of
+the plain text format is recommended for performance reasons.
+See <xref linkend="ch_import"/>, for additional information on
+exporting and importing data using Proximity&rsquo;s plain text and
+XML data formats.</para>
+
+<para>Databases converted to MonetDB Mars may not be usable in older
+versions of MonetDB.  We recommend that you backup any database that
+you might want to use in an older version of MonetDB before converting
+it to MonetDB Mars.</para>
+
+<sidebar>
+<para>Do not delete your current MonetDB&nbsp;&monetoldversion;
+installation until you have completed updating all databases.</para>
+</sidebar>
+
+<!-- .............................................................. -->
+<!--              Updating databases using plain text               -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Updating databases using plain text</title>
+
+<orderedlist>
+<listitem>
+<para>If you have not already done so, install the new versions of
+Proximity and MonetDB. Do not delete MonetDB&nbsp;&monetoldversion;.</para>
+</listitem>
+
+<listitem>
+<para>Serve the database using MonetDB&nbsp;&monetoldversion;.
+<synopsis>&prompt;<userinput>/usr/local/Monet-46/bin/Mserver  --dbname <replaceable>db-name</replaceable> \
+&proxpath;/resources/init-mserver.mil --set port=45678</userinput></synopsis>
+where <replaceable>db-name</replaceable> is the database name and
+<code>&proxpath;</code> is the location of your local Proximity
+installation. Using a port number&nbsp;&gt;&nbsp;4000 tells Proximity
+to use the MonetDB&nbsp;&monetoldversion; protocol.</para>
+<para>Windows users should substitute the appropriate path to their
+MonetDB&nbsp;&monetoldversion; installation&rsquo;s Mserver command.
+</para>
+</listitem>
+
+<listitem>
+<para>Export the data to plain text files.
+<indexterm><primary>exporting data</primary>
+           <secondary sortas="text">to text</secondary></indexterm>
+You can only export data to the same machine as that serving the database.
+<synopsis>&prompt;<userinput>&proxpath;/bin/export-text.sh localhost:45678 <replaceable>data-dir</replaceable></userinput></synopsis>
+<indexterm><primary>export-text.sh/export-text.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>export-text.sh</secondary></indexterm>
+where <replaceable>data-dir</replaceable> is the absolute path to the
+directory that will hold the exported plain text data  files.</para>
+<para>Windows users should use <command>export-text.bat</command>
+instead of <command>export-text.sh</command>.
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>export-text.bat</secondary></indexterm>
+</para>
+</listitem>
+
+<listitem>
+<para>Quit the MonetDB server.
+<synopsis>&monetprompt; <userinput>quit();</userinput></synopsis>
+</para>
+</listitem>
+
+<listitem>
+<para>Serve the new (empty) database.  Make sure that you use the
+correct path to your new Mserver command either by changing
+<envar>PATH</envar> or by explicitly including the path on the command
+line.
+<synopsis>&prompt; <userinput>&monetpath;/bin/Mserver --dbname <replaceable>db-name</replaceable> \
+&proxpath;/resources/init-mserver.mil.</userinput></synopsis>
+where <replaceable>db-name</replaceable> is the database name.  Note
+that Proximity&nbsp;&version; changes the default port number to
+30000.  Proximity&nbsp;&version; requires a port 
+number&nbsp;<symbol role="Symbol">&le;</symbol>&nbsp;40000 for MonetDB
+Mars.</para>
+<para>Windows users should substitute the appropriate path to their
+MonetDB&nbsp;4.18.2 installation&rsquo;s Mserver command.</para>
+</listitem>
+
+<listitem>
+<para>Initialize the new database.
+<indexterm><primary>initializing databases</primary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>initializing</secondary></indexterm>
+<synopsis>&prompt; <userinput>&proxpath;/bin/db-util.sh localhost:45678 init-db</userinput></synopsis>
+<indexterm><primary>db-util.sh/db-util.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>db-util.sh</secondary></indexterm>
+Windows users should use <command>db-util.bat</command> instead of <command>db-util.sh</command>.
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>db-util.bat</secondary></indexterm>
+</para>
+</listitem>
+
+<listitem>
+<para>Import the plain text data.
+<indexterm><primary>import-text.sh/import-text.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>import-text.sh</secondary></indexterm>
+<indexterm><primary>importing</primary>
+           <secondary>text data</secondary></indexterm>
+You can only import data residing on the same machine as that serving
+the database.
+<synopsis>&prompt; <userinput>&proxpath;/bin/import-text.sh localhost:30000 <replaceable>data-dir</replaceable></userinput></synopsis>
+where <replaceable>data-dir</replaceable> is the absolute path to the
+directory containing the plain text data files created in
+step&nbsp;3.</para>
+<para>Windows users should use <command>import-text.bat</command>
+instead of <command>import-text.sh</command>.
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>import-text.bat</secondary></indexterm>
+</para>
+</listitem>
+</orderedlist>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                    Location of database files                  -->
+<!-- .............................................................. -->
+
+<?pagebreak?>
+<sect2>
+<title>Location of database files</title>
+<indexterm><primary>databases</primary>
+           <secondary>file locations</secondary></indexterm>
+
+<para>MonetDB Mars stores database files in a different directory that
+that used by earlier versions of MonetDB.
+<itemizedlist spacing="compact">
+<listitem>
+<para>Database files for Linux and &macosx; installations are stored
+in <filename>&monetpath;/var/MonetDB4/dbfarm</filename>.</para>
+</listitem>
+
+<listitem>
+<para>Database files for Windows installations are stored in
+<filename>&winmonetdbpath;</filename> where
+<replaceable>username</replaceable> is the login name of the user who
+installed MonetDB.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+</sect1>
+
+</appendix>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

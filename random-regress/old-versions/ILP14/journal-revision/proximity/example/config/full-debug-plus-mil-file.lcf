@@ -1,0 +1,25 @@
+# $Id: full-debug-plus-mil-file.lcf 3664 2007-10-16 17:31:32Z schapira $
+#
+# Sets the logging level to DEBUG EVERYTHING,
+# and also sends the MIL output to the console and to a prox.log.mil file
+
+log4j.rootLogger=DEBUG, A1
+
+log4j.appender.A1=org.apache.log4j.ConsoleAppender
+log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+# Send MIL to the console
+log4j.additivity.mil=true
+
+# And to a file appender
+log4j.logger.mil=DEBUG, A3
+log4j.logger.milMessages=DEBUG, A3
+
+# Create the prox.log.mil file with RAW instructions 
+log4j.appender.A3=org.apache.log4j.FileAppender
+log4j.appender.A3.File=prox.log.mil
+log4j.appender.A3.Append=false
+log4j.appender.A3.layout=org.apache.log4j.PatternLayout
+log4j.appender.A3.layout.ConversionPattern=%m%n
+

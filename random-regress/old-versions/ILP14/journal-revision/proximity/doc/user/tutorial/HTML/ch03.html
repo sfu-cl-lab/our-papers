@@ -1,0 +1,215 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Chapter&nbsp;3.&nbsp;Importing and Exporting Proximity Data</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="prev" href="ch02s05.html" title="Tips and Reminders">
+      <link rel="next" href="ch03s02.html" title="Importing XML Data">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02s05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">&nbsp;</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="chapter" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title"><a name="ch_import"></a>Chapter&nbsp;3.&nbsp;Importing and Exporting Proximity Data
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <div class="toc">
+            <p><b>Table of Contents</b></p>
+            <dl>
+               <dt><span class="sect1"><a href="ch03.html#d0e1941">Overview</a></span></dt>
+               <dt><span class="sect1"><a href="ch03s02.html">Importing XML Data</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch03s02.html#d0e2171">Importing databases using XML</a></span></dt>
+                     <dt><span class="sect2"><a href="ch03s02s02.html">Importing database elements using XML</a></span></dt>
+                     <dt><span class="sect2"><a href="ch03s02s03.html">Importing XML data using <code class="code">noChecks</code></a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch03s03.html">Transforming Tabular Data to XML</a></span></dt>
+               <dt><span class="sect1"><a href="ch03s04.html">Exporting Data to XML</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch03s04.html#d0e2946">Exporting databases to XML</a></span></dt>
+                     <dt><span class="sect2"><a href="ch03s04s02.html">Exporting database elements to XML</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch03s05.html">Importing Plain Text Data</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch03s05.html#d0e3222">Importing databases using plain text</a></span></dt>
+                     <dt><span class="sect2"><a href="ch03s05s02.html">Importing database elements using plain text</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch03s06.html">Exporting Plain Text Data</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch03s06.html#d0e3616">Exporting databases using plain text</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch03s07.html">Specialized Data Export</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch03s07.html#d0e3683">Exporting attribute values</a></span></dt>
+                     <dt><span class="sect2"><a href="ch03s07s02.html">Exporting NST data</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch03s08.html">Deleting Proximity Databases</a></span></dt>
+               <dt><span class="sect1"><a href="ch03s09.html">Tips and Reminders</a></span></dt>
+            </dl>
+         </div>
+         <div class="sect1" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h2 class="title" style="clear: both"><a name="d0e1941"></a>Overview
+                     </h2>
+                  </div>
+               </div>
+            </div>
+            <p>Proximity provides two text formats for importing and exporting
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e679"><span class="glossterm">relational data</span></a> to and from a Proximity database:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p>an XML format 
+                          
+                     </p>
+                  </li>
+                  <li>
+                     <p>a plain text format 
+                          
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               In general, because the associated import and export utilities provide
+               better error checking, we recommend using the XML format when
+               feasible.  The use of plain text may be appropriate
+               when the task does not require error checking or
+               the database is too large for satisfactory use of XML.
+            </p>
+            <p>These formats let you define
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_object"><span class="glossterm">objects</span></a>, 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_link"><span class="glossterm">links</span></a>, and arbitrary 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attributes</span></a>
+               on those objects and links as well as specifying 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">containers</span></a> and 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraphs</span></a>
+               for databases 
+               that include these structures. (Containers and subgraphs are created
+               as a result of executing queries and are described
+               in more detail in <a href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">Chapter&nbsp;5, <i>Querying the Database</i></a>.)
+               Proximity also provides utilities for importing and exporting data
+               using these formats.
+            </p>
+            <p>This chapter describes how to import and export both XML and
+               plain text data.  You can import and export individual containers and
+               attributes as well as complete databases.
+               Proximity also supports the export of selected data to tab-delimited
+               text files from the Proximity Database Browser; these specialized export operations are
+               described in <a href="ch03s07.html" title="Specialized Data Export">&#8220;Specialized Data Export&#8221;</a> later in this chapter.
+               The XML data format is described in <a href="apc.html" title="Appendix&nbsp;C.&nbsp;Proximity XML Format">Appendix&nbsp;C, <i>Proximity XML Format</i></a>.
+               The DTD for this XML format is located in
+               <a class="indexterm" name="d0e1986"></a>
+               <a class="indexterm" name="d0e1992"></a>
+               <code class="filename">$PROX_HOME/resources/prox3db.dtd</code>.
+               The plain text data format is described in
+               <a href="apd.html" title="Appendix&nbsp;D.&nbsp;Proximity Text Data Format">Appendix&nbsp;D, <i>Proximity Text Data Format</i></a>.
+               
+            </p>
+            <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p>For all import and export operations, the data files must reside
+                           on the same machine as that serving the database.
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <p>
+               
+            </p>
+            <div class="itemizedlist">
+               <p xmlns:exsl="http://exslt.org/common" class="title"><b>Objectives</b></p>
+               <p>The text and exercises in this chapter demonstrate how to</p>
+               <ul type="disc" compact>
+                  <li>
+                     <p>import XML data into Proximity</p>
+                  </li>
+                  <li>
+                     <p>import plain text data into Proximity</p>
+                  </li>
+                  <li>
+                     <p>create the sample database used for the tutorial
+                            exercises
+                     </p>
+                  </li>
+                  <li>
+                     <p>convert standard, tabular data to Proximity&#8217;s XML import
+                            format
+                     </p>
+                  </li>
+                  <li>
+                     <p>export Proximity data to XML</p>
+                  </li>
+                  <li>
+                     <p>export Proximity data to plain text</p>
+                  </li>
+                  <li>
+                     <p>export attribute values to a tab-delimited text file</p>
+                  </li>
+                  <li>
+                     <p>export NST data to a tab-delimited text file (see
+                            <a href="ch03s07s02.html" title="Exporting NST data">&#8220;Exporting NST data&#8221;</a> for a description
+                            of NSTs)
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02s05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center">&nbsp;</td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Tips and Reminders&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Importing XML Data</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

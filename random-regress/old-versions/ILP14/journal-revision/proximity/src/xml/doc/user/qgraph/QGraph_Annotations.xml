@@ -1,0 +1,1997 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="qg_ch_annotations">
+<title>Numeric Annotations</title>
+<indexterm><primary>annotations</primary>
+           <see>numeric annotations</see></indexterm>
+
+<sect1>
+<title>The Need for Counting</title>
+
+<para>The queries we&rsquo;ve examined so far work fine when we know the
+exact structure of the subgraphs we want to find in the database. For
+example, if we want to find movies produced by two different studios, we
+create a query that includes two studio vertices, one for each studio
+credited with producing the movie, as shown in 
+<xref linkend="fig_annot_db01_q01"/>
+<figure id="fig_annot_db01_q01">
+<title>Movies produced by two studios [Annot_DB01_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q01.png"
+               width="3.3in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q01.png"
+               contentwidth="4.05in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+But this query has some problems.  As we saw in 
+<xref xrefstyle="brief" linkend="qg_ch_basics"/>, in addition to
+returning the desired subgraphs, this query&rsquo;s results will include
+subgraphs with duplicated
+<indexterm><primary>duplicates in subgraphs</primary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>duplicated elements in</secondary></indexterm>
+elements, that is, with the same studio
+matching both the <token role="vertex">studio1</token> and 
+<token role="vertex">studio2</token> 
+vertices.  And what if we want to instead
+find movies produced by two or more studios?  We have to create
+separate queries for movies produced by three studios, by four
+studios, and so on.  How high do we go?  In many cases, we won&rsquo;t know
+the upper bound ahead of time.  How can we create a query that finds
+all movies and their  associated studios, without including duplicated
+elements, regardless of the number of studios involved?</para>
+
+<para>Recall, as well, that the queries described so far return
+separate subgraphs for each match. Consider the author-book query
+shown in <xref linkend="fig_annot_unannotquery"/>.
+<figure id="fig_annot_unannotquery">
+<title>Simple author-book query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_UnannotQuery.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_UnannotQuery.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+If our database contains 40 different books written by Stephen
+King, the query will return 40 different subgraphs, one for each
+author-book pair, even though all contain the same author.  How can we
+create a query that collapses all the resulting subgraphs into a
+structure that more closely resembles the underlying structure of the
+data?</para>
+
+<para>These cases are handled by 
+<emphasis><glossterm baseform="numeric annotation">numeric annotations</glossterm></emphasis>.
+Numeric annotations place limits
+<indexterm><primary>queries</primary>
+           <secondary>limiting matches</secondary></indexterm>
+<indexterm><primary>limiting query matches</primary></indexterm>
+on the number of <glossterm>isomorphic</glossterm>
+structures that can occur in matching portions of the database. Limits
+can involve lower bounds, upper bounds, or both.  Numeric annotations
+also serve to group
+<indexterm><primary>grouping in query results</primary></indexterm>
+<indexterm><primary>matching queries</primary>
+           <secondary>grouping isomorphic structures</secondary></indexterm>
+isomorphic structures into a single subgraph that
+would otherwise produce multiple matches in the query results. &qgraph;
+does not provide any mechanism for limiting the 
+number of matching substructures without grouping
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary></indexterm>
+<indexterm><primary>results of queries</primary></indexterm>
+the results.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                      ANNOTATION BASICS                         -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_annot_basics">
+<title>Annotation Basics</title>
+
+<para>A numeric annotation specifies how many database entities must
+match a particular query element. Both 
+<glossterm baseform="vertex">vertices</glossterm> and 
+<glossterm baseform="edge">edges</glossterm> 
+may be annotated.
+(<glossterm baseform="subquery">Subqueries</glossterm> are
+also annotated, as described in <xref linkend="qg_ch_subqueries"/>.) 
+Numeric annotations can specify a &nbsp;<emphasis>range</emphasis> of
+values, giving them a great deal more flexibility than the alternative
+of specifying exact structural matches.</para>
+
+<!-- ~~~~~~~~~~~~~~~~ SIDEBAR: ANNOTATION FORM ~~~~~~~~~~~~~~~~~~~~ -->
+<sidebar>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>general form</secondary></indexterm>
+<para>Numeric annotations take the form
+<blockquote><para>
+<userinput>[<replaceable>min</replaceable>..<replaceable>max</replaceable>]
+</userinput>
+</para></blockquote>
+where
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>&min; specifies the minimum number of database elements
+    required to match the query</para>
+  </listitem>
+  <listitem>
+    <para>&max; specifies the maximum number of database elements that
+    can be present to match the query</para>
+  </listitem>
+</itemizedlist>
+That is, to match the query the database must contain at least &min;
+and at most &max; of the annotated entity.  The value for &max; can be
+left unspecified.</para>
+</sidebar>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~ END SIDEBAR ~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<para>There are three legal forms of numeric annotation:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>An <emphasis><glossterm>unbounded range</glossterm></emphasis>
+    <indexterm><primary>numeric annotations</primary>
+               <secondary>unbounded ranges</secondary></indexterm>
+    <indexterm><primary>unbounded ranges for numeric annotations</primary></indexterm>
+    <indexterm><primary>ranges in numeric annotations</primary></indexterm>
+    [<replaceable>i</replaceable>..] on a vertex or edge means that at
+    least <replaceable>i</replaceable> instances of the corresponding
+    database element must be present to match the query.  An unbounded
+    range will match any number greater than or equal to
+    <replaceable>i</replaceable> of database elements.
+    </para>
+  </listitem>
+  <listitem>
+    <para>A <emphasis><glossterm>bounded range</glossterm></emphasis>
+    <indexterm><primary>numeric annotations</primary>
+               <secondary>bounded ranges</secondary></indexterm>
+    <indexterm><primary>bounded ranges for numeric annotations</primary></indexterm>
+    [<replaceable>i</replaceable>..<replaceable>j</replaceable>] means
+    that at least <replaceable>i</replaceable> and no more than
+    <replaceable>j</replaceable> instances are required for a
+    match. The query will not match database structures that have
+    fewer than or more than the specified number of elements.</para>
+  </listitem>
+  <listitem>
+    <para>An <emphasis><glossterm>exact annotation</glossterm></emphasis>
+    <indexterm><primary>numeric annotations</primary>
+               <secondary>exact annotation</secondary></indexterm>
+    <indexterm><primary>exact annotation</primary></indexterm>
+    means that exactly
+    the specified number of database elements must be present to match
+    the query. For example, if you specify a vertex annotation of
+    <token role="annot">[2]</token>, the query will not match database
+    structures that have one, three, or more matching vertices.</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+<para>We can use numeric annotations to restate the query with which
+we began this chapter, finding movies produced by exactly two studios:
+<figure id="fig_annot_db01_q02">
+<title>Movies produced by exactly two studios [Annot_DB01_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q02.png"
+               contentwidth="3.65in"
+               format="PNG"/>
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para><xref linkend="fig_annot_db01_q02"/> includes two numeric annotations,
+<indexterm><primary>numeric annotations</primary>
+           <secondary>graphical representation</secondary></indexterm>
+<indexterm><primary>graphical representation</primary>
+           <secondary>numeric annotation</secondary></indexterm>
+one on the vertex representing studio objects, and one on
+the adjacent edge. The <token role="annot">[2]</token> annotation on the
+<token role="vertex">studio</token> vertex
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="vertices">on vertices</secondary></indexterm>
+indicates that the query can only
+match subgraphs containing exactly two studio objects.
+Of course, all the other parts of the query must also be
+satisfied&mdash;those two studio objects must be linked to the same
+actor object by produced links.  This annotation also serves to group
+<indexterm><primary>grouping in query results</primary></indexterm>
+the two studio-movie pairs in a single subgraph with one movie object
+and two linked studio objects, rather than returning the
+multiple subgraphs we saw in 
+<xref xrefstyle="brief" linkend="qg_ch_basics"/>.</para>
+
+<para>The <token role="annot">[1..]</token> edge annotation is included because
+we cannot assume that linked objects
+in a database are connected by only a single link.  If a database
+contains multiple links between objects, then we usually want to group
+<indexterm><primary>links</primary>
+           <secondary>grouping in query results</secondary></indexterm>
+these links, in addition to grouping the objects, in the query
+results. Because we may not know how many links connect one object to
+another, we use the unbounded annotation <token role="annot">[1..]</token> on
+the edge. For now, we&rsquo;ll note that this is usually the correct
+annotation for an adjacent
+<indexterm><primary>numeric annotations</primary>
+           <secondary>adjacency requirements</secondary></indexterm>
+<indexterm><primary>adjacency requirements</primary></indexterm>
+edge and simply follow this convention in
+defining the next several queries.  The section on
+<xref linkend="qg_annot_multiple"/> later in this chapter provides a
+more complete explanation of this edge annotation.
+</para>
+
+<?pagebreak?>
+<!-- ~~~~~~~~~~~~~~~~ SIDEBAR: ADJACENCY RULES ~~~~~~~~~~~~~~~~~~~ -->
+<sidebar>
+<para>The &qgraph; language includes specific requirements
+for annotated vertices and their adjacent edges.
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>&qgraph; requires that edges adjacent to annotated vertices
+    must themselves be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; requires that, at most, only one of two adjacent
+    vertices may be annotated.</para>
+  </listitem>
+</itemizedlist>
+</para>
+</sidebar>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~ END SIDEBAR ~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<para>Edges adjacent to annotated
+vertices must be annotated for the reason cited above.
+Only one of two adjacent vertices may be annotated because
+annotating adjacent vertices can result in ambiguities in interpreting
+the query.  Proximity enforces these requirements and will not execute
+queries with illegal annotations.  See 
+<xref xrefstyle="pageref" linkend="query_adjreason"/>
+later in this chapter for a more detailed explanation of the reasons
+behind these requirements.</para> 
+
+<para>When executing an annotated query, the vertex annotation takes
+<glossterm>precedence</glossterm>
+<indexterm><primary>precedence of vertex and edge annotations</primary></indexterm>
+over the edge annotation. That is, the query processor
+first satisfies requirements on the vertex and then checks to see if
+it can satisfy requirements on the corresponding edges.</para>
+
+<para>To see how Proximity handles the query shown in
+<xref linkend="fig_annot_db01_q02"/>, consider the database
+fragment shown in <xref linkend="fig_annot_db01"/>.
+This fragment contains information about studios that
+produced some recent Academy Award winning pictures.
+<figure id="fig_annot_db01">
+<title>Database fragment [Annot_DB01.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01.png"
+               width="5.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01.png"
+               contentwidth="6.7in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The above fragment includes four different movies: two produced by a
+single studio (<emphasis>Forrest Gump</emphasis> and
+<emphasis>Chicago</emphasis>), one produced by two studios
+(<emphasis>Titanic</emphasis>), and one produced by three studios
+(<emphasis>Shakespeare in Love</emphasis>).
+Executing the query shown in <xref linkend="fig_annot_db01_q02"/>
+on this database fragment yields the matching subgraph shown in 
+<xref linkend="fig_annot_db01_q02_res"/>.
+<figure id="fig_annot_db01_q02_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q02_res.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q02_res.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Rather than returning two subgraphs, each with one movie and one
+studio, this query returns a single subgraph containing the same data
+that would have been spread across multiple matches had we omitted
+the annotations from the query.
+Because we used an exact annotation of <token role="annot">[2]</token> on
+the <token role="vertex">studio</token> vertex, the query does not match
+subgraphs containing movies connected to a single studio or to more
+than two studios. If we want to instead find all the movies produced
+by two or more studios, we need to change the numeric annotation on
+the <token role="vertex">studio</token> vertex to use the unbounded 
+range <token role="annot">[2..]</token>, as shown in
+<xref linkend="fig_annot_db01_q03"/>.
+<figure id="fig_annot_db01_q03">
+<title>Movies produced by two or more studios [Annot_DB01_Q03.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q03.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q03.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The results of executing this modified query on the data shown in
+<xref linkend="fig_annot_db01"/> are shown below:
+<figure id="fig_annot_db01_q03_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q03_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q03_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This time, the unbounded annotation <token role="annot">[2..]</token> on the
+<token role="vertex">studio</token> vertex matches both the
+subgraph containing the two studios that produced
+<emphasis>Titanic</emphasis> and the subgraph containing the
+three studios that produced <emphasis>Shakespeare in
+Love</emphasis>.
+</para>
+
+<para>A variation on this query structure forms one of the most common
+&qgraph; queries, the 
+<emphasis><glossterm>star query</glossterm></emphasis>.
+<indexterm><primary>star queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>star</secondary></indexterm>
+Star queries
+find all database elements linked to a core object.
+<indexterm><primary>core object or vertex</primary></indexterm>
+Star queries are typically used to find subgraphs such as &ldquo;all
+actors in a movie&rdquo; or &ldquo;all authors for a paper&rdquo;
+(assuming the corresponding database contains the appropriate objects
+and links).
+<figure id="fig_annot_db01_star">
+<title>General star query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_Star01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_Star01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Star queries can use either 
+<glossterm baseform="directed edge">directed</glossterm> or 
+<glossterm baseform="undirected edge">undirected edges</glossterm>.
+</para>
+
+<para>To create a star query for the movie and studio database,
+we need to determine which <glossterm>type</glossterm> of objects
+should serve as the <glossterm>core vertex</glossterm>
+<indexterm><primary>core object or vertex</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>core vertex</secondary></indexterm>
+for the query.  Because this database links multiple studios to
+a single movie, we make the core vertex match 
+<token role="object">movie</token> objects.
+<figure id="fig_annot_star01">
+<title>Star query with movies as core objects [Annot_DB01_Star.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Star.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Star.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The query above finds and returns a subgraph for each movie in the
+database.  Each subgraph includes all the actors linked from that
+movie.  The results of executing
+this query on the database fragment in
+<xref linkend="fig_annot_db01"/> are shown below:
+<figure id="fig_annot_db01_star_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Star_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Star_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Just as we can annotate vertices so that they match more than
+one object, we can also annotate edges
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="edges">on edges</secondary></indexterm>
+so that they match more than
+one link. For example, the database fragment shown in 
+<xref linkend="fig_annot_db02"/> 
+contains information on several actors and the roles they
+played in the movie <emphasis>Angels in America</emphasis>.
+<figure id="fig_annot_db02">
+<title>Database fragment [Annot_DB02.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB02.png"
+               width="5.25in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB02.png"
+               contentwidth="6.4in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The database fragment indicates that Al Pacino played a single role,
+Justin Kirk played two different roles, and Meryl Streep played four
+different roles in this movie.
+</para>
+
+<para>It&rsquo;s worth noting that the database fragment shown in
+<xref linkend="fig_annot_db02"/> uses a
+different <glossterm>schema</glossterm>
+<indexterm><primary>databases</primary>
+           <secondary>Proximity</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>schema</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>databases</secondary></indexterm>
+<indexterm><primary>schema</primary>
+           <see>database schema</see></indexterm>
+<indexterm><primary>representation in Proximity</primary>
+           <secondary>database design</secondary></indexterm>
+to represent actors and roles from that used in
+<xref linkend="fig_cond_db02"/>. The example in 
+<xref xrefstyle="brief" linkend="qg_ch_conditions"/> used
+multiple attribute values on a single link to indicate that an actor
+played multiple roles in a movie. The example in this chapter uses
+multiple links to represent the same kind of information. Proximity
+does not requires any particular representational schema for a given
+dataset, although consistency within a dataset is important.
+You can determine the appropriate schema for your data.</para>
+
+<para>A query that uses edge annotations to find actors playing
+multiple roles is shown in <xref linkend="fig_annot_db02_q01"/>.
+<figure id="fig_annot_db02_q01">
+<title>Actors playing multiple roles [Annot_DB02_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB02_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB02_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Here we include the annotation <token role="annot">[2..]</token> on the edge
+connecting the <token role="vertex">actor</token> vertex to the
+<token role="vertex">movie</token> vertex, indicating that the query
+matches actor-movie pairs connected by two or more
+role links.  Annotated edges can stand alone;
+they do not require that any adjacent
+<indexterm><primary>numeric annotations</primary>
+           <secondary>adjacency requirements</secondary></indexterm>
+<indexterm><primary>adjacency requirements</primary></indexterm>
+vertices be annotated.
+The <glossterm>existence condition</glossterm> on the 
+<token role="edge">role</token> edge 
+requires that matching edges have a <token role="attr">Role</token>
+attribute, but doesn&rsquo;t place any requirements on the specific
+value of this attribute.
+</para>
+
+<para>
+The results of executing this query on the
+database fragment shown in <xref linkend="fig_annot_db02"/> are shown
+below.
+<figure id="fig_annot_db02_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB02_Q01_res.png"
+               width="3.35in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB02_Q01_res.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Just as vertex annotations group matching objects, the query&rsquo;s
+edge annotation groups matching links into a single subgraph in the
+query&rsquo;s results.  Without the edge annotation, this query
+returns seven subgraphs&mdash;one for each unique actor-role-movie
+subgraph in the database.</para>
+
+<para>An annotation of <token role="annot">[1]</token> is not
+equivalent
+<indexterm><primary>numeric annotations</primary>
+           <secondary>exact annotation</secondary></indexterm>
+to no 
+<indexterm><primary>numeric annotations</primary>
+           <secondary>omitted</secondary></indexterm>
+annotation.  A <token role="annot">[1]</token>
+annotation requires that the query only match subgraphs that contain
+exactly one of the annotated entities.  A query with no annotation
+will match each appropriate database entity regardless of number,
+although it will not group the matches into a single subgraph.  This
+can be seen by comparing the results for the two queries below.
+<figure id="fig_annot_db01_q04and5">
+<title>Annotated and unannotated queries</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q04and5.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q04and5.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The query on the right includes an exact <token role="annot">[1]</token>
+annotation on the <token role="vertex">studio</token> vertex (and
+the standard <token role="annot">[1..]</token> annotation on the
+incident edge to satisfy &qgraph;&rsquo;s adjacency requirements for
+annotations).  The query on the left has no annotations.
+Executing these queries on the database fragment shown in 
+<xref linkend="fig_annot_db01"/> yields distinctly different
+results.  <xref linkend="fig_annot_db01_q04_res"/> shows the
+results from the unannotated query.
+<figure id="fig_annot_db01_q04_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q04_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q04_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The query without annotations matches all the studio-movie pairs in the
+database. Studios are not grouped; each match forms a separate
+subgraph.  Compare these results to that for the query containing the
+<token role="annot">[1]</token> vertex annotation.
+<figure id="fig_annot_db01_q05_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q05_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB01_Q05_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The results of executing the annotated query include just
+two subgraphs, matching the two
+instances in the database where a movie is linked to exactly one
+studio.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--               UNDERSTANDING MULTIPLE ANNOTATIONS               -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_annot_multiple">
+<title>Understanding Multiple Annotations</title>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>multiple</secondary></indexterm>
+<indexterm><primary>multiple annotations</primary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>adjacency requirements</secondary></indexterm>
+<indexterm><primary>adjacency requirements</primary></indexterm>
+
+<para>It&rsquo;s important to understand how vertex and
+link annotations combine to create the desired query. This section examines
+several specific examples to see how these annotations work
+together.</para>
+
+<para>Recall that the annotation <token role="annot">[1..]</token> means that
+the query matches if the database contains one or more of the
+annotated elements.   We&rsquo;ve seen the common usage of annotating a
+vertex and adjacent edge with this annotation to find simple clusters 
+(<glossterm baseform="star query">stars</glossterm>)
+around a central object in the database. But what happens if one or
+both of these annotations has a different value?</para>
+
+<para>We consider such queries in the context of finding clusters of
+actors and the movies they&rsquo;ve appeared in.  We know that 
+actors usually appear in more than one movie, and that actors
+occasionally play multiple roles in a single movie.  The database
+fragment in <xref linkend="fig_annot_db03"/> illustrates the type of
+data we might find in a target database for such queries.
+As we can see from this fragment, <token role="object">Peter
+Sellers</token>, <token role="object">Alec Guinness</token>, and
+<token role="object">Dennis Price</token> have all played multiple
+roles in a single movie.  <token role="object">Alec Guinness</token>
+played three roles in <citetitle>Kind Hearts and Coronets</citetitle>,
+<token role="object">Dennis Price</token> played two roles
+in <citetitle>Kind Hearts and Coronets</citetitle>, and 
+<token role="object">Peter Sellers</token> played multiple roles in
+two movies, <citetitle>Dr.&nbsp;Strangelove</citetitle> and
+<citetitle>The Mouse That Roared</citetitle>.  Both 
+<token role="object">Peter Sellers</token> and 
+<token role="object">Alec Guinness</token> have also appeared in other
+movies where they played only a single role, but this fragment
+doesn&rsquo;t tell us whether <token role="object">Dennis
+Price</token> ever did the same.
+<figure id="fig_annot_db03">
+<title>Database fragment [Annot_DB03.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>As we&rsquo;ve seen before, we can use a query like that shown in 
+<xref linkend="fig_annot_db03_q01"/> to
+find actors connected to at least two movies.
+<figure id="fig_annot_db03_q01">
+<title>Requiring multiple object matches [Annot_DB03_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The vertex annotation of <token role="annot">[2..]</token> tells the query to
+match clusters with actors as 
+<glossterm baseform="core vertex">core objects</glossterm>,
+where those 
+<token role="object">actor</token> objects are linked to at least two movies.
+Our use of the standard <token role="annot">[1..]</token> edge
+annotation groups multiple links
+<indexterm><primary>links</primary>
+           <secondary>multiple</secondary>
+           <tertiary sortas="annotations">and annotations</tertiary></indexterm>
+connecting a particular actor and
+movie in the same subgraph, as shown in
+<xref linkend="fig_annot_db03_q01_res"/>.
+<figure id="fig_annot_db03_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q01_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q01_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Two subgraphs are returned, one with Peter Sellers as the core
+<token role="object">actor</token> object and one with
+Alec Guinness as the core <token role="object">actor</token>.
+Both of these actors are linked to two or more movies.
+The subgraphs surrounding the actors George&nbsp;C.&nbsp;Scott
+and Dennis Price are not included in the query results because
+the actor is only linked to a single movie in both of these
+instances.</para>
+
+<para>In contrast, if we reverse these annotations to create
+the query shown in <xref linkend="fig_annot_db03_q02"/>, we now
+must find subgraphs where each movie is connected to an actor by at
+least two role links.
+<figure id="fig_annot_db03_q02">
+<title>Requiring multiple link matches [Annot_DB03_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q02.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This query identifies subgraphs containing an actor and any movies in
+which that actor played at least two roles. Any movies in which the
+actor played only a single role 
+are not included in the query results, shown in
+<xref linkend="fig_annot_db03_q02_res"/>. The <token role="annot">[1..]</token>
+annotation on the <token role="vertex">movie</token> vertex groups the
+matching movies for a specific actor into a single subgraph.
+<figure id="fig_annot_db03_q02_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q02_res.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q02_res.png"
+               contentwidth="6.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The new annotation results in the elimination of the movie
+<emphasis>The Pink Panther</emphasis> and <emphasis>The
+Ladykillers</emphasis> from the subgraph containing Peter Sellers, and
+the elimination of <emphasis>The Ladykillers</emphasis> from the subgraph
+containing Alec Guinness.  The actors played only one role in these
+movies. And because he played two roles in <emphasis>Kind Hearts and
+Coronets</emphasis>, the subgraph containing Dennis Price is now
+included in the results.  This subgraph was omitted from the first
+query&rsquo;s results because the first query required that each actor
+be linked to two or more movies but this database only includes
+information about one movie in which Dennis Price acted.</para>
+
+<para>If we change the query again to include a numeric annotation of
+<token role="annot">[2..]</token> for both the <token role="vertex">movie</token>
+vertex and its adjacent edge, as shown in 
+<xref linkend="fig_annot_db03_q03"/>, then matching subgraphs must
+include at least two movie objects connected to an actor object, and
+each of those movie objects must be connected to their
+corresponding actor by at least two distinct role links.
+<figure id="fig_annot_db03_q03">
+<title>Requiring multiple object and link matches [Annot_DB03_Q03.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q03.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q03.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+As we can see in <xref linkend="fig_annot_db03_q03_res"/>, this query
+finds only a single subgraph that satisfies the query&rsquo;s
+requirements. Only one actor in this database fragment is linked to at
+least two movies in which he played two or more roles.
+<figure id="fig_annot_db03_q03_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q03_res.png"
+               width="3.3in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB03_Q03_res.png"
+               contentwidth="4.05in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                NEGATED AND OPTIONAL ELEMENTS                   -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Negated and Optional Elements</title>
+<indexterm><primary>negated</primary>
+           <secondary>query elements</secondary></indexterm>
+<indexterm><primary>optional</primary>
+           <secondary>query elements</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>negated elements</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>optional elements</secondary></indexterm>
+
+<para>Numeric annotations can also be used to indicate that a database
+element must not or need not be present to match the query.
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><emphasis><glossterm baseform="negated element">Negated elements</glossterm></emphasis>
+    must not be present in
+    the matching subgraph. Negated elements are specified by the
+    numeric annotation <token role="annot">[0]</token>, indicating
+    that exactly zero database elements can match this query
+    element.</para>
+  </listitem>
+  <listitem>
+    <para><emphasis><glossterm baseform="optional element">Optional elements</glossterm></emphasis>
+    may be but are not
+    required to be present in the matching subgraph. Optional elements
+    are specified by the numeric annotation 
+    <token role="annot">[0..]</token> or 
+    <token role="annot">[0..<replaceable>j</replaceable>]</token>,
+    indicating that zero or more database elements can match this
+    query element.</para>
+  </listitem>
+</itemizedlist>
+To be <glossterm>well formed</glossterm>,
+<indexterm><primary>queries</primary>
+           <secondary>well-formedness</secondary></indexterm>
+a query must remain a connected
+<indexterm><primary>queries</primary>
+           <secondary>disconnected</secondary></indexterm>
+<indexterm><primary>disconnected queries</primary></indexterm>
+graph after removing any negated or optional elements.</para>
+
+<para>The database fragment shown in <xref linkend="fig_annot_db04"/>
+includes information on movies and any awards they have won.
+<figure id="fig_annot_db04">
+<title>Database fragment [Annot_DB04.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04.png"
+               width="5.1in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04.png"
+               contentwidth="6.2in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This fragment contains information on three movies, all directed by
+Ron Howard.  <emphasis>A Beautiful Mind</emphasis> was nominated for
+and won the Academy Award for Best Picture for 2002;
+<emphasis>Apollo&nbsp;13</emphasis> was nominated for the Academy
+Award for Best Picture for 1995, but the Oscar was awarded to
+<emphasis>Forrest Gump</emphasis> that year; and <emphasis>Far and
+Away</emphasis> was not nominated for any Academy Awards.</para>
+
+<para>
+Suppose we want to find all movies that have <emphasis>not</emphasis>
+been nominated for an Academy Award.  One way to do so is to only match
+subgraphs that do not include any Academy Award objects.
+<figure id="fig_annot_db04_q01">
+<title>Query [Annot_DB04_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_Q01.png"
+               width="3.25in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_Q01.png"
+               contentwidth="4.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The <token role="annot">[0]</token> annotation on the 
+<token role="vertex">award</token> object means that this query
+matches only those movies that are not linked to any Academy Awards.
+For now we&rsquo;ll simply note that the <token role="annot">[1..]</token>
+edge annotation is usually the correct annotation for edges adjacent
+<indexterm><primary>numeric annotations</primary>
+           <secondary>adjacency requirements</secondary>
+           <tertiary sortas="negated">for negated/optional vertices</tertiary></indexterm>
+<indexterm><primary>vertices</primary>
+           <secondary>negated (and adjacent edges)</secondary></indexterm>
+<indexterm><primary>adjacency requirements</primary>
+           <secondary sortas="negated">for negated/optional vertices</secondary></indexterm>
+to negated or optional vertices and proceed accordingly.  Additional
+information on choosing the correct annotation for edges adjacent to
+negated or optional vertices is included in the section
+<xref linkend="ch_annot_opt_elements"/> later in this chapter.</para>
+
+<para>The result of executing this query on the database fragment
+shown in <xref linkend="fig_annot_db04"/> is shown below.
+<figure id="fig_annot_db04_q01_res">
+<title>Query results</title>
+<mediaobject>
+<!-- dimensions adjusted by hand for better appearance; formula makes
+image too small -->
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_Q01_res.png"
+               width="1.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_Q01_res.png"
+               contentwidth="1.2in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Only a single movie, <emphasis>Far and Away</emphasis>, matches the
+query. Note that negated query elements do not appear in the query
+results. 
+<indexterm><primary>negated</primary>
+           <secondary>query elements</secondary>
+           <tertiary sortas="query">effect on query results</tertiary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary></indexterm>
+<indexterm><primary>results of queries</primary>
+           <secondary sortas="negated">and negated elements</secondary></indexterm>
+Because the query includes a <token role="annot">[0]</token>
+annotation on the <token role="vertex">award</token> vertex, there
+can be no corresponding object in order to match
+<indexterm><primary>matching queries</primary>
+           <secondary sortas="negated">with negated elements</secondary></indexterm>
+the query, and
+therefore no <token role="object">award</token> objects can appear in
+the matching subgraphs.</para>
+
+<para>Compare this query to a similar query where we don&rsquo;t care
+whether the movie has been nominated for an Academy Award.
+<figure id="fig_annot_db04_q02">
+<title>Query [Annot_DB04_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_Q02.png"
+               width="3.25in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_Q02.png"
+               contentwidth="4.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+In this example, the <token role="vertex">award</token> vertex is
+annotated with <token role="annot">[0..]</token>, making matches to
+this vertex optional.  That is, subgraphs in the database will match
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary></indexterm>
+<indexterm><primary>optional</primary>
+           <secondary>query elements</secondary>
+           <tertiary sortas="query">effect on query results</tertiary></indexterm>
+<indexterm><primary>results of queries</primary>
+           <secondary sortas="optional">and optional elements</secondary></indexterm>
+<indexterm><primary>matching queries</primary>
+           <secondary sortas="optional">with optional elements</secondary></indexterm>
+this query regardless of whether or not the corresponding movie has
+been nominated for an Academy Award.  The results
+of executing the new query with the optional
+<token role="vertex">award</token> vertex are shown below.
+<figure id="fig_annot_db04_q02_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_Q02_res.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_Q02_res.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This time, all three movies appear in the query results.  The optional
+<token role="vertex">award</token> vertex lets the query match both
+movies that have received nominations and movies that have not
+received any nominations.  Because <emphasis>Far and Away</emphasis> has
+no nominations, its subgraph does not include any award
+objects.</para>
+
+<para>Although not yet supported by Proximity, &qgraph; queries can
+include negated and optional edges
+<indexterm><primary>negated</primary>
+           <secondary>edges</secondary></indexterm>
+<indexterm><primary>edges</primary>
+           <secondary>negated</secondary></indexterm>
+<indexterm><primary>optional</primary>
+           <secondary>edges</secondary></indexterm>
+<indexterm><primary>edges</primary>
+           <secondary>optional</secondary></indexterm>
+in addition to negated and optional
+vertices.  Care must be taken to avoid 
+<glossterm baseform="disconnected query">disconnected queries</glossterm>;
+<indexterm><primary>queries</primary>
+           <secondary>disconnected</secondary></indexterm>
+<indexterm><primary>disconnected queries</primary></indexterm>
+queries with negated or optional edges must also include
+required alternate paths to all query elements.</para>
+
+<para><xref linkend="fig_annot_db04_negedge"/> illustrates a query that
+includes a negated edge.  This query finds movies that have been
+nominated for, but not won an Academy Award.  The 
+<token role="edge">won</token> edge is annotated with 
+<token role="annot">[0]</token> indicating that matching subgraphs
+must not include a matching link.
+<figure id="fig_annot_db04_negedge">
+<title>Query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_NegEdge.png"
+               width="3.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_NegEdge.png"
+               contentwidth="4.25in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+To prevent the
+query from becoming disconnected, the <token role="edge">nominated</token>
+edge is required.  The <token role="annot">[1..]</token> edge annotation
+means that the query only matches subgraphs that contain one or more
+<token role="link">nominated</token>
+ links connecting the movie to any 
+<token role="object">Academy Award</token> objects.</para>
+
+<para>The expected results, had we been able to execute this query in
+Proximity, are shown below.
+<figure id="fig_annot_db04_negedge_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_NegEdge_res.png"
+               width="3.40in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB04_NegEdge_res.png"
+               contentwidth="3.65in"
+               format="PNG"/>
+</imageobject>
+</mediaobject>
+</figure>
+Only one movie in our database fragment,
+<emphasis>Apollo&nbsp;13</emphasis> has been nominated for but not
+won an Academy Award.</para>
+
+<?pagebreak?>
+<!-- .............................................................. -->
+<!--  Annotating edges adjacent to negative and optional vertices   -->
+<!-- .............................................................. -->
+
+<sect2 id="ch_annot_opt_elements">
+<title>Annotating edges adjacent to negative and optional
+vertices</title>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>adjacency requirements</secondary>
+           <tertiary sortas="negated">for negated/optional vertices</tertiary></indexterm>
+<indexterm><primary>adjacency requirements</primary>
+           <secondary sortas="negated">for negated vertices</secondary></indexterm>
+<indexterm><primary>negated</primary>
+           <secondary>vertices</secondary></indexterm>
+<indexterm><primary>optional</primary>
+           <secondary>vertices</secondary></indexterm>
+
+<para>Because edges adjacent to annotated vertices must themselves be
+annotated, how are we to annotate the edge adjacent to a negated or
+optional vertex? In general, the usual annotation of
+<token role="annot">[1..]</token> remains appropriate. We require the
+presence of the query edge to avoid having the query become
+disconnected.
+<indexterm><primary>queries</primary>
+           <secondary>disconnected</secondary></indexterm>
+<indexterm><primary>disconnected queries</primary></indexterm>
+For example, an optional edge connected to an optional
+vertex could result in a disconnected subgraph when the matching
+vertex is present but the matching edge is not.  Optional or negated
+edges are usually inappropriate in most queries, although they may
+be safely used if other elements in the query ensure that the query remains
+connected after removing any optional or negated elements.</para>
+
+<para>For example, consider the database fragment shown in 
+<xref linkend="fig_annot_dbsk"/>.
+<figure id="fig_annot_dbsk">
+<title>Stephen King books and movies</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DBSK.png"
+               width="4.7in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DBSK.png"
+               contentwidth="5.75in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+If we wanted to identify author-book pairs and
+also include movie adaptations, if any, we might initially (and
+incorrectly) create a query
+that looks like that shown in <xref linkend="fig_annot_dbsk_badquery"/>.
+<figure id="fig_annot_dbsk_badquery">
+<title>Improperly annotated query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DBSK_BadQuery.png"
+               width="5.15in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DBSK_BadQuery.png"
+               contentwidth="6.3in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This query uses the improper annotation <token role="annot">[0..]</token> for
+both the <token role="vertex">movie</token> vertex and adjacent
+<token role="edge">adapted-to</token> edge.  Such a query can match
+disconnected subgraphs.  Consider the highlighted subset of elements
+from this database shown in <xref linkend="fig_annot_dbsk_badsubgr"/>.
+<figure id="fig_annot_dbsk_badsubgr">
+<title>Disconnected subgraph</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DBSK_BadSubgr.png"
+               width="4.7in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DBSK_BadSubgr.png"
+               contentwidth="5.75in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The highlighted set of objects and links matches the query shown in 
+<xref linkend="fig_annot_dbsk_badquery"/>.  
+The <token role="annot">[0..]</token>
+annotation on the <token role="vertex">movie</token> vertex and
+<token role="annot">[0..]</token> annotation on the 
+<token role="edge">adapted-to</token> edge mean that the query is
+allowed to match database structures that include a matching 
+<token role="object">movie</token> object but that omit the matching 
+<token role="link">adapted-to</token> link.  This can
+produce disconnected subgraphs like the highlighted elements shown
+above, which clearly isn&rsquo;t what was intended by the query.
+To prevent the possibility of matching such disconnected subgraphs,
+use the <token role="annot">[1..]</token> annotation on edges adjacent to a
+vertex annotated with <token role="annot">[0]</token> or
+<token role="annot">[0..]</token>.
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--          Negated elements versus inequality conditions         -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Negated elements versus inequality conditions</title>
+<indexterm><primary>negated</primary>
+           <secondary>query elements</secondary>
+           <tertiary>vs. conditions</tertiary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>compared to negated annotations</secondary></indexterm>
+
+<para>Although they represent conceptually similar concepts, 
+<glossterm baseform="negated element">negated elements</glossterm>
+cannot substitute for conditions that express inequalities.
+Each has a different effect on how the query matches
+<indexterm><primary>matching queries</primary>
+           <secondary>negated elements vs. conditions</secondary></indexterm>
+<indexterm><primary>matching queries</primary>
+           <secondary sortas="negated">with negated elements</secondary></indexterm>
+<indexterm><primary>results of queries</primary>
+           <secondary sortas="negated">and negated elements</secondary></indexterm>
+the database. Consider the database fragment shown in
+<xref linkend="fig_annot_db05"/>.
+<figure id="fig_annot_db05">
+<title>Database fragment [Annot_DB05.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+If we want to find books not written by Stephen King, we have
+at least two options, depending on our intent.  As our first option,
+the query in <xref linkend="fig_annot_db05_q01"/> seems to satisfy
+this goal. 
+
+<figure id="fig_annot_db05_q01">
+<title>Query using inequality condition [Annot_DB05_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+
+The inequality in the condition on the
+<token role="vertex">author</token> vertex,
+<token role="condition">Name&nbsp;&lt;&gt;&nbsp;Stephen&nbsp;King</token>, 
+specifies that only books linked to persons that are not Stephen King
+are to be included in the query results.  The results of running this
+query on the database fragment in <xref linkend="fig_annot_db05"/>
+are shown below:
+<figure id="fig_annot_db05_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05_Q01_res.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05_Q01_res.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The results of this query include both person and book objects. As 
+specified in the query, we only match books linked to 
+<token role="object">person</token> objects with a
+<token role="attr">Name</token> attribute not equal to 
+Stephen King.
+To be more precise, because &qgraph; works with set-valued
+attributes, the query&rsquo;s <token role="vertex">author</token>
+vertex matches <token role="object">person</token> objects if their
+<token role="attr">Name</token> attribute includes at least one value
+other than <token role="attr">Stephen King</token>.
+The query uses numeric annotations to group the results into a single
+subgraph, so both books written by Peter Straub are included in the
+subgraph.</para>
+
+<para>The query shown in <xref linkend="fig_annot_db05_q02"/> also
+appears to satisfy our goal of finding books not written by Stephen
+King.
+<figure id="fig_annot_db05_q02">
+<title>Query using inequality condition [Annot_DB05_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05_Q02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05_Q02.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+In this case, the negated <token role="vertex">author</token> vertex
+specifies that we can only match book objects that are not connected
+to a person 
+named Stephen King.  This is different than matching
+books connected to people not named Stephen King, as
+seen in the results of the second query, below.</para>
+
+<para>
+<figure id="fig_annot_db05_Q02_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05_Q02_res.png"
+               width="0.85in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB05_Q02_res.png"
+               contentwidth="1.05in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Because Stephen King is one of the authors of <emphasis>The
+Talisman</emphasis>, this book is not included in the query results.
+<emphasis>The Talisman</emphasis> is included in the results of the
+first query because it is connected to a second author, satisfying the
+inequality condition.  Also, remember that 
+<glossterm baseform="negated element">negated elements</glossterm> 
+are not included in query
+<indexterm><primary>negated</primary>
+           <secondary>query elements</secondary>
+           <tertiary sortas="query">effect on query results</tertiary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary></indexterm>
+<indexterm><primary>results of queries</primary>
+           <secondary sortas="negated">and negated elements</secondary></indexterm>
+<indexterm><primary>matching queries</primary>
+           <secondary sortas="negated">with negated elements</secondary></indexterm>
+results, therefore the second query&rsquo;s results
+do not include an author object (and associated links).
+</para>
+
+<para>Both queries can be viewed as satisfying our goal of
+identifying books not written by Stephen King.  Each makes us aware of
+an unstated assumption in this initial goal&mdash;do we want books
+written exclusively by someone else or books that are not solely
+written by Stephen King?  And each query also has a different impact
+on the form of the resulting subgraphs.  The inequality condition
+must still match an object in the database so the corresponding
+objects appear in the results. But a negated element cannot match a
+database entity and therefore there can be no corresponding element in
+the query results.
+</para>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       ADJACENCY REQUIREMENTS                   -->
+<!-- ============================================================== -->
+
+<sect1 id="query_adjreason">
+<title>Adjacency Requirements</title>
+<indexterm id="idx_query_adjreason0" class="startofrange">
+           <primary>numeric annotations</primary>
+           <secondary>adjacency requirements</secondary></indexterm>
+<indexterm id="idx_query_adjreason1" class="startofrange">
+           <primary>adjacency requirements</primary></indexterm>
+
+<para>We saw before that an edge adjacent to an annotated vertex must
+itself be annotated. To illustrate the reason for this rule, let&rsquo;s
+examine what happens without such a requirement. 
+<xref linkend="fig_annot_db06"/> shows a 
+part of the database shown in <xref linkend="fig_annot_db03"/>.
+This fragment includes multiple links from an actor to a
+single movie, representing Alec Guinness&rsquo;s multiple roles in
+<emphasis>Kind Hearts and Coronets</emphasis>.
+<figure id="fig_annot_db06">
+<title>Database fragment [Annot_DB06.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06.png"
+               width="3.4in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06.png"
+               contentwidth="4.15in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The (illegal) query shown in <xref linkend="fig_annot_db06_badquery"/>
+finds actor-movie pairs but omits the required edge annotation.
+<figure id="fig_annot_db06_badquery">
+<title>Illegal query omitting adjacent edge annotation</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06_BadQuery.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06_BadQuery.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+How are we to interpret this query? One 
+interpretation would be to retain the
+ability of numeric annotations to collapse the subgraphs containing
+the same actor and different movies but let each
+<token role="edge">role</token> edge define a distinct match, much as
+we saw in <xref xrefstyle="brief" linkend="qg_ch_basics"/>.
+If we could execute such a query on the database fragment in 
+<xref linkend="fig_annot_db06"/>, we would see the results shown in
+<xref linkend="fig_annot_db06_badquery_res"/>.
+<figure id="fig_annot_db06_badquery_res">
+<title>Hypothetical results for improperly annotated query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06_BadQuery_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06_BadQuery_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>In this interpretation, the unannotated edge results in three
+different matching 
+subgraphs instead of one subgraph that groups the three links. Each
+contains the same objects, but they differ in 
+the link connecting the actor Alec Guinness with the movie
+<emphasis>Kind Hearts and Coronets</emphasis>.
+But annotating the edge as shown in <xref linkend="fig_annot_db06_q02"/>
+<figure id="fig_annot_db06_q02">
+<title>Legal query including adjacent edge annotation [Annot_DB06_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06_Q02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06_Q02.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+collapses these three subgraphs into the single subgraph shown below:
+<figure id="fig_annot_db06_q02_res">
+<title>Results for properly annotated query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06_Q02_res.png"
+               width="3.4in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB06_Q02_res.png"
+               contentwidth="4.15in"
+               format="PNG"/>
+</imageobject>
+</mediaobject>
+</figure>
+This subgraph best corresponds to our intuitive understanding of the
+query as identifying actor-movie clusters, regardless of
+how many roles the actor played in each movie.
+</para>
+
+<para>&qgraph; also requires that, at most, only one of two adjacent
+vertices may be annotated. 
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="vertices">on vertices</secondary></indexterm>
+Another way of stating this is that there
+can be no edge connecting two annotated vertices in a query.
+To see why this is the case, consider the database fragment
+and (illegal) query shown in 
+<xref linkend="fig_adjvert_db"/>.
+<figure id="fig_adjvert_db">
+<title>Database fragment and illegal query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB_and_BadQuery.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_DB_and_BadQuery.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>How are we to match the query against this database fragment?
+We have many instances where an actor is connected to two or more
+movies, and where a movie is connected to two or more actors, but
+matching these database elements to the query is far from
+straightforward.</para>
+
+<para>Can we include the actor Mary Astor in the query results?  She is
+connected to two movies, satisfying the annotation on the
+<token role="vertex">movie</token> vertex, but those movies must also be part
+of a subgraph that satisfies the query&rsquo;s other conditions and
+annotations, thus each movie she is connected to must be connected to
+two or more actors (one of which can be Mary Astor).</para>
+
+<para>One of the movies linked to Mary Astor, <emphasis>Little
+Women</emphasis>, is only linked to a single actor, Mary Astor
+herself, and therefore does not satisfy the 
+<token role="vertex">actor</token> vertex annotation, so it does not match the
+query&rsquo;s requirements.  And if we cannot include
+<emphasis>Little Women</emphasis>, then Mary Astor cannot be included
+because she no longer links to two movies that satisfy the query.</para>
+
+<para>A similar situation arises with respect to the movie <emphasis>The
+Maltese Falcon</emphasis>.  At first glance, it appears to satisfy the
+query&mdash;it is linked to two actors, and each of those actors is
+linked to at least two movies.  But as we&rsquo;ve seen, at least one of
+those actors, Mary Astor, does not satisfy the query&rsquo;s requirements,
+so it cannot be included, and therefore <emphasis>The Maltese
+Falcon</emphasis> also cannot be included in the query&rsquo;s results.</para>
+
+<para>This query is <glossterm>ambiguous</glossterm>
+<indexterm><primary>ambiguous queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>ambiguous</secondary></indexterm>
+because neither vertex annotation takes
+<glossterm>precedence</glossterm>
+<indexterm><primary>precedence of vertex and edge annotations</primary></indexterm>
+over the other. In effect, we don&rsquo;t know where to start
+when evaluating the query&rsquo;s match to a specific part of the database,
+and the choice of a starting point effects how we determine whether an
+object in the database satisfies the requirements of the query.
+To avoid this ambiguity of interpretation, &qgraph; requires that
+at most one of two adjacent vertices be annotated.</para>
+
+<para>&qgraph; also places additional restrictions in numeric annotations
+when used in queries that include 
+<glossterm baseform="constraint">constraints</glossterm>
+(<xref linkend="qg_ch_constraints"/>)
+or <glossterm baseform="subquery">subqueries</glossterm>
+(<xref linkend="qg_ch_subqueries"/>).
+These rules are discussed in later chapters.
+<indexterm startref="idx_query_adjreason0" class="endofrange"/>
+<indexterm startref="idx_query_adjreason1" class="endofrange"/>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                  IMPLEMENTATION IN PROXIMITY                   -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_annot_impl">
+<title>Implementation in Proximity</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>QGraph implementation</secondary>
+           <tertiary>numeric annotations</tertiary></indexterm>
+
+<!-- .............................................................. -->
+<!--                   Implementation restrictions                  -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Implementation restrictions</title>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>implementation restrictions</secondary></indexterm>
+
+<para>Proximity places an additional implementation restriction on the
+use of numeric annotations in a query.  Proximity cannot process
+queries in which an annotated vertex is connected to more than one
+unannotated vertex.  For example, the query shown below is a legal
+&qgraph; query, but it cannot currently be executed in Proximity.
+<figure id="fig_annot_notimpl">
+<title>Unimplemented query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_NotImpl.png"
+               width="4.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_NotImpl.png"
+               contentwidth="5.5in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+
+Proximity currently prohibits edge annotations with a lower
+bound of <token role="annot">0</token>.
+<indexterm><primary>optional</primary>
+           <secondary>edges</secondary></indexterm>
+<indexterm><primary>edges</primary>
+           <secondary>optional</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="edges">on edges</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>optional elements</secondary></indexterm>
+Query edges may not be
+annotated with <token role="annot">[0]</token>,
+<token role="annot">[0..]</token>, or
+<token role="annot">[0..<replaceable>j</replaceable>]</token>.
+This prohibition applies regardless of whether the edge annotation is
+used alone, or is applied to an edge adjacent to an annotated
+vertex.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                      Efficiency considerations                 -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Efficiency considerations</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>query efficiency</secondary></indexterm>
+<indexterm><primary>efficiency in Proximity</primary></indexterm>
+
+<para>For some database 
+<glossterm baseform="schema">schemas</glossterm>,
+annotations may duplicate other query
+requirements.  For example, consider a database containing
+information about movies and their DVD releases.  If we want to find
+movie-DVD subgraphs we might normally create a query like that shown
+in <xref linkend="fig_annot_withannot"/>.
+<figure id="fig_annot_withannot">
+<title>Annotated query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_WithAnnot.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_WithAnnot.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+
+If the target database always contains exactly one link from a movie
+object to its corresponding DVD object, then annotating the
+<token role="vertex">DVD</token> vertex and adjacent link will have no effect
+on the query&rsquo;s matches.  The annotation will, however, require
+additional computation and is therefore less efficient than the
+equivalent unannotated query, shown below.
+<figure id="fig_annot_withoutannot">
+<title>Potentially equivalent unannotated query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_WithoutAnnot.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Annot_WithoutAnnot.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Importantly, the second query is only equivalent if the database
+enforces the link restrictions described above.  If we later add
+additional objects or links for subsequent DVD releases, the annotated
+and unannotated queries will no longer match the same set of subgraphs.
+</para>
+
+<para>In most cases, the difference in processing speed will not be of
+concern, but such efficiency modifications may be worthwhile for
+complex queries or queries run on extremely large databases.  Taking
+advantage of such efficiency improvements can require perfect
+knowledge of the corresponding database schema and data, however, and
+thus may not be practical in many situations.
+</para>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                              SUMMARY                           -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_annot_summary">
+<title>Summary</title>
+<indexterm><primary>queries</primary>
+           <secondary>rule summaries</secondary></indexterm>
+
+<itemizedlist spacing="compact">
+<title>Annotation uses</title>
+  <listitem>
+    <para>Numeric annotations serve to place limits on the number of
+    <glossterm>isomorphic</glossterm> structures that can occur in
+    matching portions of the database.</para> 
+  </listitem>
+  <listitem>
+    <para>Numeric annotations also serve to group isomorphic
+    structures that would otherwise produce multiple matches into a
+    single subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; does not provide any mechanism for limiting the 
+    number of matching substructures without grouping the results.</para>
+  </listitem>
+  <listitem>
+    <para>A numeric annotation can be specified on a vertex or edge in
+    a &qgraph; query.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Annotation format</title>
+  <listitem>
+    <para>An <glossterm>unbounded range</glossterm>
+    [<replaceable>i</replaceable>..] on a vertex or edge means that at
+    least <replaceable>i</replaceable> instances of the corresponding
+    database element must be present to match the query.  An unbounded
+    range will match any number greater than or equal to
+    <replaceable>i</replaceable> of database elements.</para>
+  </listitem>
+  <listitem>
+    <para>A <glossterm>bounded range</glossterm>
+    [<replaceable>i</replaceable>..<replaceable>j</replaceable>] means
+    that at least <replaceable>i</replaceable> and no more than
+    <replaceable>j</replaceable> instances are required for a
+    match. The query will not match database structures that have
+    fewer than <replaceable>i</replaceable> or more than 
+    <replaceable>j</replaceable> of the annotated element.</para>
+  </listitem>
+  <listitem>
+    <para>An <glossterm>exact annotation</glossterm>
+    [<replaceable>i</replaceable>] means that exactly
+    the specified number of database elements must be present to match
+    the query.  The query will not match database structures that have
+    fewer than or more than the specified number of elements.</para>
+  </listitem>
+  <listitem>
+    <para>To group substructures without limit, we use the annotation
+    <token role="annot">[1..]</token>.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Adjacency requirements</title>
+  <listitem>
+    <para>Edges adjacent to annotated vertices must themselves be
+    annotated.</para>
+  </listitem>
+  <listitem>
+    <para>Annotated edges can stand alone; they do not require that
+    any adjacent vertices be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>The <token role="annot">[1..]</token> annotation is often the
+    appropriate choice for annotating an edge adjacent to an annotated
+    vertex.</para>
+  </listitem>
+  <listitem>
+    <para>The vertex annotation takes <glossterm>precedence</glossterm>
+    over the edge annotation.</para>
+  </listitem>
+  <listitem>
+    <para>At most, only one of two adjacent vertices can be
+    annotated.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Negated and optional elements</title>
+  <listitem>
+    <para>A <glossterm>negated element</glossterm> is annotated with
+    <token role="annot">[0]</token>, indicating that the corresponding database
+    element must not be present in the matching subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>An <glossterm>optional element</glossterm> is annotated with
+    <token role="annot">[0..]</token> or
+    <token role="annot">[0..<replaceable>j</replaceable>]</token>, indicating
+    that the corresponding database element may be present but is not
+    required in the matching subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>To be <glossterm>well formed</glossterm>, a query must
+    remain a connected graph
+    after removing any negated or optional elements.</para>
+  </listitem>
+  <listitem>
+    <para>The annotation <token role="annot">[1..]</token> is usually
+    appropriate for annotating edges adjacent to a negated or optional
+    vertex.</para>
+  </listitem>
+  <listitem>
+    <para>Negated query elements do not appear in the query&rsquo;s
+    results.</para>
+  </listitem>
+  <listitem>
+    <para>Negated elements cannot substitute for conditions that
+    express inequalities.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Implementation restrictions</title>
+  <listitem>
+    <para>Proximity cannot process queries in which an annotated
+    vertex is connected to more than one unannotated vertex.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity prohibits edge annotations with a lower
+    bound of <token role="annot">0</token>.</para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

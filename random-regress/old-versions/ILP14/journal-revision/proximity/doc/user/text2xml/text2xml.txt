@@ -1,0 +1,198 @@
+$Id: text2xml.txt 2734 2006-09-12 13:51:16Z cornell $
+Part of the open-source Proximity system (see LICENSE for copyright
+and license information).
+
+This file describes the command-line arguments and input requirements
+for the perl script text2xml.pl.  text2xml.pl translates data from
+appropriately formatted text files into an xml file that can be
+imported into Proximity 3.
+
+***********************************************************************
+
+System requirements: A Unix-like environment that supports typical
+command-line tools (cat, perl, etc,) e.g., Linux.
+
+The script assumes that all its input files and prox3db.dtd are
+located in the working directory along with the script itself.  The
+script writes its output file to the same directory.  The XML file is
+currently saved using a latin-1 encoding.  If you want to switch to
+UTF-8, uncomment the UTF-8 line in the perl script and comment out the
+latin-1 line.
+
+Example usage:
+   perl text2xml.pl new-db objspec lnkspec tab
+
+The four command line parameters are
+1. name of database to be created
+2. name of object specification file
+3. name of link specification file
+4. separator character (which separates fields in the text files):
+this is one of the words {comma, tab, space}
+
+The output of the script is a file new-db.xml containing the xml
+required to import into Proximity 3 the specified objects and links
+(with their attributes).
+
+See the directory proximity3/example/text2xml for a complete set of
+example input and output files.
+
+***********************************************************************
+
+Input to text2xml.pl consists of an object specification file, a link
+specification file, and a set of text files extracted from an RDBMS
+such as Oracle or Informix.
+
+The set of text files includes
+   one or more text files containing objects
+   zero or more text files containing links
+You can have objects with no links, but if you have links you must
+include text files for the objects connected by those links.  Objects
+and links might or might not have attributes.
+
+The names (and contents) of the text files must match the filenames in
+the object(link) specification file.  If you have no links, create an
+empty link specification file.
+
+The separator character specified on the command line is used between
+fields in the object and link text files.  Note that the separator
+character must not occur as part of any attribute value.  Do not
+include any leading or trailing whitespace characters in text file
+fields; the script will not strip them away.
+
+***********************************************************************
+
+Format for the object(link) specification file
+
+object-text-filename-1<eol>
+<tab>attribute-11-name<whitespace>attribute-11-datatype<eol>
+<tab>attribute-12-name<whitespace>attribute-12-datatype<eol>
+...
+<tab>attribute-1M-name<whitespace>attribute-1M-datatype<eol>
+[optional blank line]
+object-text-filename-2<eol>
+<tab>attribute-21-name<whitespace>attribute-21-datatype<eol>
+<tab>attribute-22-name<whitespace>attribute-22-datatype<eol>
+...
+<tab>attribute-2N-name<whitespace>attribute-2N-datatype<eol>
+
+etc. for as many object text files as there are to be processed
+
+No spaces allowed in filenames or attribute names.
+Datatype must be one of: BIGINT DATE DATETIME DOUBLE INTEGER VARCHAR.
+
+If the same attribute name occurs in two different object text files,
+Proximity will treat it as the same attribute, not two distinct ones.
+If an attribute name occurs in both object text files and link text
+files, Proximity will treat it as two distinct attributes, one for
+objects and the other for links.
+
+Format of link specification file is same as for objects.
+
+***********************************************************************
+
+Special options for object/link specification files
+
+1. Only attributes
+
+If the line describing the filename ends in "onlyAttrs," as shown:
+object-text-filename-1<tab>onlyAttrs<eol>
+then only the attributes from that file are processed; the objects or links are 
+assumed to already have been loaded.
+
+2. Column specifications
+
+If the line describing the attribute ends in a number, as shown:
+<tab>attribute-11-name<whitespace>attribute-11-datatype<whitespace>3<eol>
+then the attribute is to be found in the corresponding column of the text file.
+The column numbers start at 0 for the prox id, and 1 for the first attribute,
+and they auto-increment when not otherwise specified.
+
+***********************************************************************
+
+Format for object text file
+
+No file header --- the object specification file provides all
+necessary information.
+
+Each line of the text file corresponds to one object with its
+attribute values.  The first field of each line must be an identifier
+for the object; this identifier is NOT included in the list of
+attributes in the object specification file.  The identifier must be
+an integer >= 0.  The object identifier must be unique across ALL
+objects: that is, not just unique among all objects in that particular
+text file, but unique among all objects in all the object text files.
+
+If the user's source database has another identifier for the objects
+(a unique alphanumeric code, for example) this can be included as an
+attribute like any other attribute.  It will not be treated as an
+object identifier in Proximity, but the user can always retrieve it as
+an attribute.
+
+After the object identifier, each line contains attribute values for
+that object, separated by the separator character (a space, tab, or
+comma).  The order of the values must match the order of attributes in
+the object specification file.  If a value is missing, don't put
+anything in that field and there will be two consecutive separator
+characters in the text file.  In other words, a null attribute value
+is represented in the text file by a null string.
+
+Note that the objecttype attribute is not supplied by default.  If the
+user wishes to give a type label to the Proximity objects created from
+his text files, he should include a type attribute, even though the
+value of this attribute will be the same for all objects in a given
+text file.  For example, if one text file contains books and another
+text file contains authors, these will both be treated as objects in
+Proximity.  To retain the type distinction between books and authors,
+the user can add a type attribute with the value "book" or "author" as
+appropriate.
+
+***********************************************************************
+
+Format for link text file
+
+As for objects, no file header.  Each line of the text file
+corresponds to one link with its attribute values.  The first three
+fields of each line in the link text file are special, NOT included
+in the list of attributes in the link specification file.  The first
+field must be an identifier for the link, an integer >= 0.  The link
+identifier must be unique across ALL links: that is, not just unique
+among all links in that particular text file, but unique among all
+links in all the link text files.  Object identifiers and link
+identifiers may overlap, for example one could have object 0 and link
+0 so long as no other object or link bears the identifier 0.
+
+The second and third fields on each line are identifiers for the
+source and destination objects connected by the link.  These
+identifiers must match identifiers that occur somewhere in the object
+text files.
+
+The remaining fields on each line of the text file are attribute
+values for that link.  The formatting is the same as for object
+attributes.  Note that the linktype attribute is not supplied by
+default.  As explained above for objecttype, the user should add a
+linktype attribute if he wishes to distinguish among links coming from
+different link text files.
+
+***********************************************************************
+
+Limitations of the current version
+
+Does not support multiple values for the same attribute of a given
+object (or link), although this is perfectly legal in Proximity 3.
+
+No comments allowed in any of the input files.
+
+text2xml.pl does no format checking on its input files.  If the input
+requirements are violated, various inscrutable perl error messages
+will result.  For example, the message
+
+     Use of uninitialized value in concatenation (.) at text2xml.pl
+     line 124, <TEXTFILE> line 23.
+
+might indicate that there is an extra blank line at the end of one of
+the text files (a file that should contain exactly 22 lines).
+
+Another error that can cause a similar message is the object or link
+spec file not having a tab before each attribute (e.g. using spaces
+instead of tabs will cause an error).
+

@@ -1,0 +1,962 @@
+;; -*- mode: outline -*-
+$Id: HISTORY 3751 2007-11-13 20:17:19Z schapira $
+
+This file contains a history of Proximity's major enhancements and bug
+fixes.
+
+
+Revision History
+================
+
+* Version 4.3, 2007-10-30
+------------------------------------
+
+** summary
+
+This is a major release of Proximity, with many improvements: it adds
+support for newer and more efficient versions of Monet, it features a
+complete rewrite of all the modeling code (RBC, RPT, and RDN), it
+provides more powerful data generation tools, and it includes a new
+visualization engine for exploring graph databases. It also fixes
+several bugs, contains a deep rewrite of the low-level APIs, and
+provides important speed improvements.
+
+
+** new features
+
+o Added support for newer versions of Monet (4.16 to 4.20). The new
+versions fix important problems with TCP/IP communication, effectively
+making Proximity almost an order of magnitude faster. Also, several
+NST operations (such as GROUP BY) are much faster now, and Proximity
+now supports threaded communication with the server, which makes it
+possible to keep a pool of connections to Monet for applications that
+need concurrent access to the database (such as web serving).
+
+o Rewrote the model/ code (RBC, RPT, RDN) to create a much cleaner,
+more modular, and faster implementation of the modeling engine. There
+are more types of Sources (attributes, subgraph attributes, items in
+subgraphs, temporal attributes), more and faster aggregators
+(including modes, degrees, random aggregators, no-op aggregators),
+better support for continuous variables, and a more configurable RDN.
+
+o Added a new RPT Viewer that displays more detailed information of
+the new RPTs built, such as the percentage of cases that fall on each
+branch of splits.
+
+o Added new DataGeneration package, capable of generating several
+different kinds of graphs (random graphs, lattices, grids, forest
+fires, etc), as well as attributes on objects and links.
+
+o Added utilities to export a database to text files, and to import
+from text files.
+
+o Added a new visualization tool for displaying the database in a
+radial layout, with animation. Used also to visualize subgraphs.
+
+o Created Proximity Cookbook documentation containing "recipes" for
+common/prototypical Proximity tasks (in development; preliminary
+version released)
+
+
+
+** bugs fixed
+
+o NST.addArithmeticColumn now casts columns before operations, to
+prevent errors due to mismatching column types.
+
+o Fixed bug in NST.insertRowsFromNST, which was creating a extra
+column in the destination NST, and also made it much faster.
+
+o Fixed bug in NST.join and NST.insertRowsFromNST which was causing an
+exception with Monet 4.6.2 when the result of the join was empty.
+
+o Fixed error in Container.getChildrenCount; now returns the correct
+number of children of a given container.
+
+o Fixed bug in Social Network Analysis methods, that were breaking
+with certain double-precision computations.
+
+o Fixed exception in GUI when viewing filtered links.
+
+o Fixed bug in the GUI that affected the display of objects and links
+filtered by an attribute value
+
+o Fixed query validation error: if one of the two items in a
+constraint is annotated, then the other one cannot be part of an
+annotated sub-query.
+
+o Deletes temporary directory after an XML import, and make sure that
+the names of those temporary directories are truly random
+
+
+** miscellaneous changes
+
+o Changed the file-chooser in the GUI to remember the directory of the
+previously-opened file.
+
+o Added a button to export an attribute to a tab-delimited file from
+the GUI. Also added a button to create new attributes directly from
+the GUI.
+
+o Made the NSTBrowser and Interactive Interpreter now easily
+accessible from GUI.
+
+o Added paging, filtering, and export to the NSTBrowser.
+
+o Changed keystrokes for history function in the Interactive
+Interpreter from standard editing ones (Ctrl-ZXCV) to Alt-based ones,
+to re-enable Ctrl-C and other cut-paste functions.
+
+o Added prev/next buttons to the subpgrah visualization, so that users
+can more easily navigate and explore the results of a query.
+
+o Added QGraph support to add links after given pairs of nodes that
+match portions of a query. Supported via XML query, and though the
+query editor.
+
+o QGraph now saves the XML query as an attribute on the container it
+creates, which is also accessible from the GUI.
+
+o After executing a query, QGraph now displays the name of the
+Container where the results have been saved.
+
+o Added support for <or> elements in Parameterquery. <and> elements
+can be nested within <or> conditions.
+
+o Added noCheck flag to the ImportXML utility, which allows for faster
+import and also makes it possible to add new attribute values. No
+consistency checks, though!
+
+o Created addInDegreeAttr, addOutDegreeAttr,
+AddRandomBinaryAttributeWithPrior methods to the attribute creation
+utilities.
+
+o Added more examples of possible configuration files for Proximity
+logging, under example/config.
+
+o Made 'localhost' be the default location of the Monet server, so
+that now :<port> is enough to specify the server running on the local
+machine on the given port.
+
+
+** API changes
+
+o ProxDB and ProxDBMgr have been combined into a single, static class,
+and the Connection class has also been made static.
+
+o Added convenience methods to DB class: getObjectsWithAttrs,
+getLinksWithAttrs, createLinks, deleteObjects, deleteLinks,
+populateDB.
+
+o Added support for user-level NSTs. Added ls method to DB class.
+
+o Added methods to NST class: describe, save, delete,
+insertRow(String), toFile, fromFile, sort, addConditionColumn,
+aggregate with mode, getColumnHistogram. Cleaned up the API greatly,
+and gave it more consistency and speed.
+
+o NST join, selects, and filters now allow an 'AS' keyword, to rename
+columns in the resulting NST.
+
+o Removed all references to Filter objects. NST.filter method now
+receives a textual representation of the condition, a-la SQL.
+
+o Added named columns to ResultSet, so now it's possible for example
+to say resultSet.getFloat('salary'). Also added size method to
+ResultSet.
+
+o Removed BATs and direct MIL code from all code base, now limited to
+NST and other low-level database classes.
+
+o Added rename, makeChildOf, getParentOID methods to Container class.
+
+o Added rename method to Attribute class.
+
+o Greatly improved performance of low-level database bridge, with
+better string parsing and ResultSet processing.
+
+o Updated most classes to take advantage of Java 1.5 generics.
+
+o Upgraded to newer versions of third-party libraries: log4j, spin,
+Jung.
+
+o Refactored files, changed location of some utility classes such as
+ProbDistribution (now under model2/common), NormalDistribution (now
+under util/stat/) and StatUtil (now under util/stat/).
+
+
+
+
+* Version 4.2, 2006-04-25
+------------------------------------
+
+** summary
+
+This is a minor release of Proximity, introducing temporal features in RPTs
+along with user interface improvements, bug fixes, API changes, and
+documentation updates.
+
+
+** new features
+
+o Added support for temporal features in RPTs. See Models Chapter in Proximity
+  Tutorial for more information
+
+o Added a new CountDistinct feature, which counts the distinct values of an
+  attribute in a subgraph
+
+o Added 'filter' screen to GUI, which lists objects/links that have a
+  particular value for a particular attribute. This screen is accessed from
+  the links in the values in the corresponding attribute's histogram page
+
+o Added [delete] action to object and link attribute pages, to delete an
+  attribute and all its values
+
+o Added a view-stats method to DBUtil, which prints the number of objects,
+  links, containers, and attributes in a database
+
+
+** bugs fixed
+
+o Fixed bug in exportXML application, by which a carriage return in an NST row
+  threw off export utility, causing the dumpNST method to generate files with
+  extra rows, which in turn led to sync problems trying to re-create the
+  original file
+
+o Fixed bug in FilterFactory class, which caused it to fail with negative or
+  floating point numbers
+
+o Fixed bug in FeatureClassFinderUtil that made it fail when the path had two
+  consecutive slashes (e.g. "proximity3/bin//../classes")
+
+o Fixed problems with the release of internal NSTs: do not mark Proximity NSTs
+  as released; otherwise they cannot be used again
+
+o Fixed bug in RPT and DataGenerator that caused Monet errors with processes
+  that run for a long time --some released variables should have been kept
+
+o Fixed bug by which canceling "Run Query..." caused a NPE.
+
+
+** miscellaneous changes
+
+o Changed Monet initialization scripts in resources/. Port number is now passed
+  in the command line, as in
+   Monet --dbname <db> <prox_home>/resources/init-mserver.mil --set port=45666
+  (port 45678 is still the default). See Tutorial for more information
+
+o Redesigned the way requests are processed in the GUI. Added support for page
+  'actions', which depend on the URL. This provides a much more flexible way to
+  add new behaviors to the GUI. Also, added a menu bar to the GUI for common
+  actions (e.g. 'Run Model', 'Run Script', etc.)
+
+o Moved some GUI functionality from links in the interface to menus
+
+o GUI now sorts subgraphs by ID in Container View page
+
+o Modified GUI to give error if it tries to display an object that doesn't
+  exist in the database
+
+o Added methods to import and export FeatureSettings
+
+o Added method NST.dumpToFile(), which exports an NST as a tab-delimited file,
+  to make it easier to talk to other programs
+
+o Added option in text2xml.pl script to load only the attributes from a file,
+  not the obj/links as well. Also, you can now specify which columns of the
+  text files contain the desired attributes
+
+o Updated RPNode.toString() to print "<= threshold" for continuous features,
+  and "= threshold" for discrete ones. Improves the display of RPTs in
+  the viewer
+
+
+** API changes
+
+o AddAtribute class methods now make use of a keepPrevAttrVals flag, indicating
+  whether an existing attribute should be replaced with new values, or
+  extended.
+
+o Added method AddAttribute.addDegreeAttr()
+
+o Added methods to DataGenerator to write out generated probabilities to an
+  atttribute.
+
+o Added specialized AUC measure Predictions.getAUCBoundedRegion()
+
+o Added method Predictions.getNonRandAUC(), which returns points with 3
+  coordinates: FP, TP (as usual for graphing), and threshold (from which we
+  generated this point)
+
+o Added method Container.changeItemName(), which renames items in subgraphs
+
+o Added a 'connection' variable in proximiy.py file, so that all scripts can
+  access the DB connection directly.
+
+o Added method in Connection class to get the results of a query that returns
+  a single row.
+
+o ParameterQuery.java: Added overload to ParameterQuery.queryGraph so it can
+  take a PyList condition argument (and be called from Python)
+
+o Created PopulateDB utility, which imports data (obj, link, attrs, containers,
+  subgs, subgattrs) from a file with a very simple format.
+  See kdl.prox.util.PopulateDB and kdl.prox.util.PopulateDBTest
+
+o Added method ShrinkDB() to Proximity class. Takes all the objects and links
+  in a given container, and removes from the DB all those that are not listed
+
+o Added overloads to API for NST class, to pass in comma-separated list of
+  columns to methods such as filter, groupBy, list, etc.
+
+o Added ability to delimit values of type 'long' in MonetUtil.delimitValue
+
+o Added generic methods to QGraph.QGVertex class, including neighbors,
+  numEdges, numVertices. Also, added methods to AbstractQuery to access
+  subquery elements.
+
+
+
+
+
+* Version 4.1, 2005-12-15
+------------------------------------
+
+** summary
+
+This version of Proximity introduces new features, bug fixes, and user
+interface improvements. The Proximity Tutorial has been updated to
+document new Proximity features including interface and scripting
+changes. The QGraph Guide adds a quick reference guide to using the
+Proximity Query Editor.
+
+
+** new features
+
+o Added new, more powerful Jython interpreter. Supports:
+  o Editing on the same line
+  o Emacs keybindings
+  o Command completion and argument listing with popup menu
+  o Multi-line input
+  o Colored input and output text
+  o History : Clear, Save, Execute from file
+
+  Largely based on the interpreter provided in the GUESS
+  project (http://www.graphexploration.cond.org/))
+
+o Added location bar to GUI to provide direct access to database
+  entities.
+
+o Added Google-style pager for GUI.
+
+o Resurrected the venerable NSTBrowser and app for low-level Proximity
+  developers
+
+
+** bugs fixed
+
+o Fixed serious bug in GUI app: now checks for modified query editor
+  files and allows discard or cancel
+
+o Fixed bug in subgraph viewer - users can no longer disconnect edges
+
+o Fixed query editor bug in which '<>' was converted to 'ne'
+
+o Bug fix for QGraph: TFM09 now deals correctly with [0..]
+  annotations.
+
+o Fixed bug in query validator - now checks for empty vertex and edge
+  names
+
+o Fixed memory leak in connection with Monet database. 
+
+o Added check to make sure that there's only a single core object in
+  each subgraph.
+
+o Added random seed to estimators so the same element of the multiset
+  will be picked for each class in the conditional estimator (affects
+  Mode, StochasticMode estimators)
+
+o MultiValEstimator: Deal better with nil values from the database:
+  warn about them, and accept them in the estimators.
+
+o Add filter to updatePredictionsWithAttr so that we only update
+  subgraphs with core objects.
+
+o Changed ImportXMLApp to lower-case attribute data types (fixes bug
+  in which some hand-typed XML files had uppercase types)
+
+o Changed PreferencesJFrame to use getAttributesOfType() (fixes bug in
+  which str attributes with explicit column names weren't listed)
+
+
+** miscellaneous changes
+
+o Print fatal error messages to STDOUT, instead of to log file, which
+  may not exist.
+
+o ExportXMLApp: Show error message when the import or export apps
+  fails --it was only logging an error, without necessarily writing it
+  to STDERR
+
+o Changed "schema" action in DBUtil to "view-schema", so that they are
+  all verbs
+
+o Renamed db-util commands, to make them compatible with the db-util,
+  import-xml, export-xml, etc. naming convention. New commands are
+  clear-db init-db test-db schema Old commands (clearDB, initDB,
+  testDB) still work, for compatibility, but they are not documented.
+
+o Removed [] in display of attributes in GUI.
+
+o Fixed RBC.readFromXML so that it will work for multival estimators.
+  Cleaned up induceModel and applyModels so that NSTs are released.
+
+o Changed runScript() to handle python system exit calls -
+  'sys.exit(xx)'. extracts exit status code (e.g., 'xx') if possible
+  (integer or null). You can still use Java System.exit() if
+  preferred.
+
+o Add more information to error message printed out when reading a nil
+  string from the database --now shows row number and headID.
+
+
+** API changes
+
+o Added NST.addArithmeticColumn()
+
+o Tweaked NST.getNSTColumn() to print better error message
+
+o NST class now has a join() method, which lets you quickly write
+  a.join(b, "col1", "col2")
+
+o NST class now has a filter command, which is equivalent to the old
+  constructors with filter but easier to use. Supports:
+      o LIKE "value%"
+      o GT/GE/LT/LE/EQ (columnName or Value)
+      o BETWEEN minValue-maxValue
+      o IN/NOT IN batName
+      o DISTINCT ROWS / RANDOM number
+       
+o NST class now supports SQL-like column and row selection for joins,
+  filters, selects, and deleted
+      o * : all columns, all rows
+      o col1, col2, ... colN 
+      o 10-20 : rows 10 to 20
+      o 20? : 20 rows selected randomly
+
+o Added method to dump an NST to a file, via a script or a Python
+  interpreter. Writes output in format compatible with R: header row
+  with column names, and then tab-separated values.
+
+o Added print method to NST that mimics the Python method, but the
+  output goes to the logger; for debugging purposes, more functional
+  than the MonetUtil,printNST method
+
+o Added AddAttribute.addRandomBinaryAttribute()
+
+o Added Attributes.getAttributesOfType()
+
+o Added Attributes.copyAttribute() overload that creates a new
+  attribute by casting the type of a single-column attribute. useful
+  for creating a 'str' attribute from an 'int' (or other) one
+
+o Added utility method getObjectsAndLinksNST() for a container, which
+  returns an NST with both objects and links in the subgraphs (and a
+  'type' column). To be used from scripts and python interpreter.
+
+o Container class provides more appropriately-named methods to get
+  handles to its object and link tables: getObjectsNST() and
+  getLinksNST() (used to be getItems(true/false)
+
+o Added Proximity.browse() overloads for ints (object IDs) and strings
+  (container paths).  useful with prox.find().
+
+o Added Proximity.find() method, which returns a list of all the objects
+  that have a single-column string attribute with a value that matches
+  an input pattern (which may contain % as a wildcard). Overload
+  receives a (list of) valid attribute names to search.
+
+o Defined Proximity.getContainer(String), which takes a container path
+  from root (e.g., "/a/b/c") and returns a Container for it
+
+o Proximity class now automatically loads the proximity.py file under
+  src/java/kdl/prox3/script/. As it is now, this file loads a few
+  standard imports, defines the printNST method, and defines some
+  shortdcuts to frequently used variables (objectNST, linkNST,
+  etc). After customizing the proximity.py, developers will need to
+  rebuild the Proximity.jar file.
+
+o Implmented RBC apply() method to use during Gibbs sampling with
+  partitions.
+
+o RDN: Added a method to measure AUC and squared loss convergence
+  (during Gibbs sampling).
+
+o Added ShrinkDB class: Gets a container as a view of the database and
+  uses it to delete objects, links, and attribute values that are not
+  included in the container.
+
+
+* Version 4.0.1, 2005-04-06
+------------------------------------
+
+** summary
+
+This is a minor release to fix a serious bug when running on Windows.
+
+
+** bugs fixed
+
+o Fixed a serious problem with Feature search when running on Windows
+  from proximity.jar. this fix is needed to run RPTs on Windows.
+
+
+* Version 4.0, 2005-03-02
+------------------------------------
+
+** summary
+
+This version of Proximity introduces many new features, bug fixes, and
+performance improvements. It also includes a new QGraph Guide.
+
+
+** new features
+
+o Relational Dependency Network (RDN) implementation.
+
+o RDN viewer: added RDN [view] [graph] functionality to GUI. no RDN
+  creation means yet - must hand-code xml file - see examples in
+  rdnview test directory.
+
+o Completely re-written QGraph Editor (based on Piccolo)
+
+o Relational data generator functionality.
+
+o Added ACORA code to Proximity (contributed by NYU).
+  Implemented ReferenceVector Feature, computing cosine distances and the
+  difference between positive and negative classes.
+  The ReferenceVector feature is turned off by default (see
+  Features.generateAllFeatures) so that it doesn't change the results
+  of some experiments that are already running.  This feature works in
+  a slightly different way than others. It saves some persistent
+  tables after training, which are based on the training container,
+  and then uses them during testing (other features do not require any
+  extra tables for testing). Those tables are named after the
+  item-attribute pair, which means that if another tree is trained on
+  a different container between the training of the first one and its
+  application, then the results are going to be based on wrong
+  tables. -Use with caution.
+
+o Finished implementation of QGraph TFM22, to deal with constraints on annotated
+  edges (whose incident vertex is [0..])
+
+o Added support for GT and LT operators in qGraph.
+
+o Added SNA method to calculate betweenness centrality on a container
+  or db graph.
+
+o Added methods/classes to facilitate analysis --includes new SUM
+  feature for RPTs, new aggregation function that creates items
+  attributes (instead of sugb attrs), and attribute creation methods for
+  dates
+
+  Added method to write the predicted probabilities on a particular
+  class as an attribute to the db.
+
+  Comparison of attributes of different types now supported (dbl with
+  flt and int, and flt with int).
+
+
+** bugs fixed
+
+o Fixed instabilities (and errors!) when storing NSTs made up of reverse'd BATs
+  by calling str() instead of bbpname() to get the names of BATs that make up the
+  NST. Also, it makes the use of copy() unnecessary.
+
+o Fixed MAJOR bug in ProxDB... insertObject and insertLink now get the
+  next ID correctly (before it was getting the next ID from the head
+  of the ID column, not the tail, which caused some objects or links
+  to be inserted twice!)
+
+o Fixed check of annotation in edges... min cannot be 0 (in theory it
+  is possible if there are other edges between the same vertices, but
+  our implementation does not support that yet).
+
+o Fixed bug in qGraph's handling of constraints when the two compared
+  items belong to the same sub-query. Now the constraint has to be processed
+  before the sub-query is joined with the rest of the query; this is enforced by
+  preventing TFM13 (remove-subquery-box) from being applied until all
+  the constraints that refer to items inside the sub-query have been
+  processed.
+
+  Added check for resolved constraints in TFM13 o TFM20 and TFM21 now
+  look for constraints (and resolve them) from the rootQuery, not just
+  the parent.
+
+  TFM21 only applies to elements that are annotated (this check should
+  have always been there).
+
+o Fixed bug in the code that connects two tables via undirected links.
+
+o Fixed bug in RDN/RPT code that wasn't remapping feature values
+  correctly
+
+  Attributes can now contain any non-space characters (fixing bug #0000086)
+
+  Fixed bug in Mode mil that causes error when none of the subgraphs
+  have attribute values. Now we check for this and return an empty
+  BAT. (Fix caused slight change to export method in Feature.)
+
+  Fixed bug in RPT initialization, weights are now assigned only to
+  subgraphs with core items (to be classified)
+
+
+
+** performance improvements
+
+o Cleaned up generation of MIL code: Hide tmp_ table names, so that
+  MIL output can be re-run as scripts.
+
+o Compute filters as they are created, for speed improvements.
+
+o Fixed deletion of tables, speed improvements due to less I/O.
+
+
+
+** miscellaneous changes
+
+! Moved definition of Proximity MIL routines out of the loader and
+  into the MIL script files used to start Monet. (Have to re-start
+  server after upgrade.)
+
+! Changed to schema version 1.6. Users must run conversion script in
+  resources/ on existing databases.
+
+! Now supports Monet 4.6: all variables have to be initialized, and
+  function calls require ().
+
+o Changed graph-query.dtd to disallow constraints within subqueries;
+  all constraints must be located within the query itself. Also
+  changed dtd to disallow edges with 0 as max annotation.
+
+
+
+** API changes
+
+o Model API cleanup (features and estimators, dynamic Feature loading,
+  etc.). Features now have a plug-in interface: in order to create a new feature,
+  all you have to do is write a class that extends the Feature class and defines
+  the required methods. Proximity will look for classes ending in *Feature
+  in its classpath and instantiate them as required. Estimators package in much
+  cleaner now, in preparation for soon-to-be-released KernelDensity Estimators.
+  Also, optimization of particular Estimators (change to operations being made in
+  MIL and not in Java) now is made at the Estimator/ level, not in the RBC code.
+
+o Added Proximity.copyAttributeFromSubgraph().
+
+o Added removeObject() method that removes objects with particular names
+  in the subgraph (instead of just oid)
+
+o Added a new overload to addAttribute() that takes a list of
+  attribute names as its second parameter.
+
+o Added a new overload to addAttribute() that operates only on objects
+  or links in a specified container.
+
+o Updated log4j jar to 1.2.9, and jdom jar to 1.0.
+
+
+* Version 3.1, 2004-09-15
+------------------------------------
+
+** summary
+
+This release introduces many bug fixes, performance enhancements, and
+important new features. The tutorial has been updated to reflect
+additions and updates described below, including new examples for data
+import/export, social network analysis methods, querying containers,
+using the RPT viewer, and setting display preferences.
+
+
+** new features
+
+o GUI: Added link to delete a container.
+
+o GUI: New RPT Viewer window for visualizing RPT models.
+
+o GUI: Added Preferences Panel, and ability to display labels (coming from
+  selected attributes) instead of simple Object and Link IDs.
+
+o model: Added new Kernel Density Estimator
+
+o Added the ability to run python commands interactively from a
+  command-line window in the GUI (look under scripts: [interact]).
+
+o qgraph: Added support for queries on containers, including calls
+  from GUI, scripts, and command-line query application. NB:
+  command-line query app takes a new optional arg with new container
+  path syntax.
+
+o script: Defined Swing-based GUI input methods for scripts, including
+  yes/no and string inputs (Proximity.getStringFromUser(),
+  Proximity.getYesNoFromUser()).
+
+o Social Network Analysis tools: Added utilities for computing Hubs
+  and Authorities coefficients, for finding Connected Components, and
+  computing Clustering Coefficient.
+
+o XML Import and Export utilities: Added support for exporting an
+  entire database or portions of it into an XML file, and also for
+  importing an entire database or subsets of it.
+
+
+** bugs fixed
+
+o API: Fixed bug in AddAttribute method, by which using a switch
+  statement with string literals caused a regular expression error
+  (due to non-greedy matching)
+
+o gui: Fixed bug on Mac OS X by which the GUI didn't shutdown properly
+  (leaving uncommitted changes) when closing the application window
+  directly instead of using the Quit command.
+
+o model: Fixed bug #96: Changed RPNode string to use correct
+  operators.
+
+o qgraph: Fixed problem in join of tables in
+  QGLinkUtil.reCheckLinks(), which affected transformations 02, 09,
+  and 21. Joins now work correctly, using Monet's ds_link methods, but
+  transformation 21 has a bug (it doesn't remove some of the links if
+  the deleted objects are copies of other objects that remain in the
+  subgraph with a different name --see bug report # 83). Note that the
+  Monet init scripts had to be modified, to load the mkey module
+  needed for ds_link. Other misc changes: Use bat.mark(0@0) instead of
+  [oid](bat.number) in NST and TFM01.
+
+o qgraph: Fixed bug in TFM 21 by which some duplicate links persisted
+  even if their endpoints had been removed by the application of the
+  constraint. This, incidentally, also fixes the same problem in TFM02
+  and TFM09. Also, did some refactoring and added a few new utilities:
+  o Added ProxDBMgr.makeTempBATFromList() o Added
+  MonetUtil.getDistinctTails() o Changed way in which TFM 02 and TFM09
+  re-compute their links o Re-factored way in which TFM20 and TFM21
+  compare the objects that make up a constraint --extracted shared
+  code to a general utility.
+
+o qgraph: Fixed bug by which some valid queries were causing
+  validation errors.
+
+o query editor: 1) Fixed bug 0000082: where exact annotations
+  (e.g. [2]) were handled correctly. 2) Improved error handling so
+  future errors of that type generate a dialog box instead of a hidden
+  exception. 3) Fixed bug 0000080: Existing constraints now edit
+  correctly. 4) Fixed bug 0000081: Title bar now updates consistently
+  with user actions. Default setting is now '[Untitled.qg2.xml]. 5)
+  Added a query layout hook to fix problems where moving the location
+  of an edge didn't update the location of the edge labels. 5) Updated
+  to better support the updating of edge label locations. 6) Fixed bug
+  0000091: '<>' is now output as 'ne'. 7) Fixed bug 0000093:
+  startConstraint() is no longer called if there are no constraints in
+  an abstract query. 8) Better handling of edge labels and subquery
+  sizes. 9) Put quotes around attribute value strings in conditions.
+
+
+** performance improvements
+
+o qgraph: Optimized transformations 02, 09 and 21, to make
+  memory-usage more efficient. Large queries involving constraint can
+  now run --they no longer make the Mserver run out of memory. TFM 21
+  is also much faster now. Misc. changes: o Clean-up NST class a
+  little bit o Release some NSTs in TFM 12 o Added ColumnNotInFilter
+  filter class.
+
+o qgraph: Optimized transformations 12 and 18, to make memory-usage
+  much more efficient. Large queries involving sub-queries can now run
+  --they no longer make the Mserver run out of memory.
+
+o qgraph: Rewrote QGUtil.reCheckLinks() to make it faster and use less
+  memory. Instead of calling insertDistinctRows() at the end (to avoid
+  duplicates with self-loops), we now keep the distinct keys in a
+  separate BAT, and insert after filtering by key.
+
+o xml import: Changed parameter to load_data from 9.99 million to 2
+  billion. Needed to support database with 22 million rows.
+
+
+** miscellaneous changes
+
+o Added debug statements that shows when RPT features are being
+  initialized with null data (i.e. when it can't find the named items,
+  or attribute values).
+
+o Changed addRandomAttribute() to really use random numbers based on a
+  stored MIL procedure (rnd).
+
+o API: Renamed geItemNST() to getItemNST() (note the addition of the
+  't' on the word get). Wanted to keep API calls consistent.
+
+o API: added method mergeContainers() to Container class
+
+o API: added method to copy a subset of all the subgraphs from one
+  container to another
+
+o API: Changed Subgraph.getLinks() so that it returns ProxLink
+  instances with correct values for o1_id and o2_id endpoints.
+
+o GUI: Added tooltips to buttons in toolbars
+
+o model: Added Classifier methods for calculating accuracy using
+  squared loss and absolute loss
+
+o model: Added wrapper to call RPT.induceModel() with a List (and not
+  just a Pylist)
+
+o model: Added Feature methods to propositionalize data from RPT
+  features and export to FeatureVector data structures. The
+  getHeader() and toString() methods in FeatureVector can be used to
+  write the data to a file.
+
+
+* Version 3.0.2, 2004-06-01
+------------------------------------
+
+** summary
+
+This release primarily adds tutorial instructions for installing and
+using both MonetDB and Proximity under Windows. The other major
+tutorial change is that it is now indexed. Finally, there are a few
+minor new features, some small bug fixes, a performance improvement,
+and some important GUI bug fixes.
+
+
+** new features
+
+o scripting: added methods to create a constant attribute for items in
+  a collection and a random attribute for items in a collection. call
+  from Jython scripts via addConstantAttribute() and
+  addRandomAttribute()
+
+o query editor: improved Save and Save As... actions (these now prompt
+  if overwriting existing file). these actions now use same file
+  chooser as rest of GUI
+
+o GUI: subgraph visualization: changed layout to run in a separate
+  thread (UI no longer freezes during graphing of subgraphs)
+
+o GUI: added support for paging of subgraph items
+
+
+** bugs fixed
+
+o GUI: subgraph visualization: fixed bug number 0000076, "graphing an
+  empty subgraph causes IndexOutOfBoundsException"
+
+o query editor: 1) fixed unreported bug by which New or Open were
+  preserving the old filename. 2) the query is laid out properly when
+  opened. 3) replaced '(' ')' with '[' ']' when showing numeric
+  annotations of re-opened queries.
+
+o GUI: fixed critical bug: on some Java platforms prior to JDK 1.4.2
+  the 'Links' and 'Link Attributes' HTML links on the home page were
+  underlined but not responsive to clicks
+
+o GUI: fixed bug in paging of subgraph items (removed page # from
+  Graph and Attrs actions)
+
+o compiling: removed addAttribute(String, double) from estimators, now
+  all calls are to addAttributeValue(Object,double). this allows
+  compilation under Java compliers stricter than Sun's, such as that
+  of Eclipse
+
+o xml import: restored Xerces XML parser (xercesImpl.jar) to
+  lib/. updated scripts in bin/ to include it in the CLASSPATH. (this
+  works around limitations of the parser built-in to Sun's JDK)
+
+o text2xml: modified to: 1) switch to latin-1 encoding 2) delete all
+  troublesome characters causing the parser to die ('&' and '<' so
+  far)
+
+
+** performance improvements
+
+o fixed problem of MonetDB getting increasingly slower with
+  time. speed improvements are general, but should be especially
+  noticeable for models (RBC, RPT, etc.)
+
+
+* Version 3.0.1, 2004-04-29
+------------------------------------
+
+** summary
+
+This is a minor release to add Windows client compatibility. It also
+includes small tutorial improvements and a few small bug fixes.
+
+
+** bugs fixed
+
+Query Editor:
+ Fixed Bug #0000073 - Query now update edge information properly when changing a vertex
+ Fixed Bug #0000074 - Vertex names now match in display and in file output
+ Fixed Bug #0000075 - Able to select and delete  constraints in same manner as other cells
+
+
+* Version 3.0, 2004-04-15
+------------------------------------
+
+** summary
+
+This is a new release of Proximity, completely re-written to use
+MonetDB. Please see http://kdl.cs.umass.edu/proximity for more
+information.
+
+
+** new features
+
+o Higher Performance
+
+PROXIMITY 3.0 uses the MonetDB server, a fast, open-source vertical
+database. MonetDB allows PROXIMITY to be orders of magnitude faster
+than systems hosted on SQL databases for the kinds of operations
+needed by relational knowledge discovery.
+       
+
+o Extended QGraph Implementation
+
+PROXIMITY's graphical query language (QGraph) supports computing fast
+matches to high-level descriptions of data patterns. The version of
+QGraph implemented in PROXIMITY 3.0 allows execution of queries that
+contain subqueries and global constraints. A graphical editor supports
+interactive creation of QGraph queries.
+       
+
+o Improved RPTs
+
+A relational probability tree (RPT) selectively considers attributes
+of nearby objects and links as well as complex aggregates of these
+attributes to build a probabilistic model. Advantages of this model
+include a correction for the autocorrelation and degree disparity
+properties found in many relational data sets as well as ease of model
+understanding. These models can be saved and reloaded for later use.
+       
+
+o Browser-Style GUI
+
+PROXIMITY's user interface has been completely re-written for version
+3.0 to be simpler to use, faster, and easier to add new features
+to. Also, it no longer requires ?type attribute map? files.
+       
+
+o XML Text Import
+
+PROXIMITY 3.0 supports a simple, but flexible, XML format for
+importing data from version 2, or from other databases or
+applications.
+
+
+** compatibility
+
+Existing version two databases must be exported as XML and imported
+into version three.
+ 

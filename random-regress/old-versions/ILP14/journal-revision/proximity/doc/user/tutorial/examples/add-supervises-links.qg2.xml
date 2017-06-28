@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information). -->
+
+<graph-query name="add-supervises-links">
+  <description>Adds links from faculty to students when both are linked to the same research project</description>
+  <query-body>
+    <vertex name="professor">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>pagetype</attribute-name>
+          <value>Faculty</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </vertex>
+    <vertex name="project">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>pagetype</attribute-name>
+          <value>ResearchProject</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="student">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>pagetype</attribute-name>
+          <value>Student</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </vertex>
+    <edge name="directs">
+      <vertex1>professor</vertex1>
+      <vertex2>project</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <edge name="has-member">
+      <vertex1>project</vertex1>
+      <vertex2>student</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <add-link attrname="link_type" attrval="supervises">
+      <vertex1>professor</vertex1>
+      <vertex2>student</vertex2>
+    </add-link>
+  </query-body>
+  <editor-data>
+    <vertex-location name="professor" x="99.0" y="50.0" />
+    <vertex-location name="project" x="231.0" y="156.0" />
+    <vertex-location name="student" x="385.0" y="66.0" />
+  </editor-data>
+</graph-query>
+

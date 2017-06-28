@@ -1,0 +1,90 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Efficiency considerations</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch02s05.html" title="Implementation in Proximity">
+      <link rel="prev" href="ch02s05.html" title="Implementation in Proximity">
+      <link rel="next" href="ch02s06.html" title="Summary">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02s05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Implementation in Proximity</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch02s06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e1141"></a>Efficiency considerations
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e1144"></a><a class="indexterm" name="d0e1149"></a><p>In general, the efficiency considerations described in this
+            <span class="emphasis"><em>Guide</em></span> may improve processing speed for extremely
+            complex queries or queries run against an extremely large database.
+            They are unlikely to have a noticeable effect on query processing
+            speed under normal circumstances.
+            Taking advantage of some of these efficiency improvements may require
+            perfect information about a database&#8217;s data and design. However,
+            in practice, we frequently do not have thorough enough information about
+            a database to be able to use efficiency improvements with confidence
+            that any modifications made for efficiency do not also affect query results.
+            
+         </p>
+         <div class="sect3" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h4 class="title"><a name="d0e1158"></a>Directed versus undirected edges
+                     </h4>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e1161"></a><p>Queries containing 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e803"><span class="glossterm">undirected edges</span></a> can be
+               much more computationally expensive than those that contain only
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e279"><span class="glossterm">directed edges</span></a>.
+               Because the underlying database model uses only 
+               directed links, Proximity must check for links in both directions
+               when the query specifies an undirected edge, increasing the processing
+               time accordingly.
+            </p>
+            <p>For those instances where a directed and
+               undirected edge would return identical matches (such as when some
+               links only occur in a specific direction), use the directed
+               edge for more efficient processing. For example, in a database 
+               where links only go from actors to movies (and never from movies to
+               actors), queries should use directed edges to match these links, even
+               though an undirected edge would return the same results.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02s05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02s05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch02s06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Implementation in Proximity&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Summary</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,157 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>3.2.&nbsp;Converting Databases to 64-Bit MonetDB</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Cookbook">
+      <link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Data Import">
+      <link rel="prev" href="ch03s01.html" title="3.1.&nbsp;Importing Data with Mismatched IDs">
+      <link rel="next" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Queries">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s01.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;3.&nbsp;Data Import</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="section" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="recipe_monet64"></a>3.2.&nbsp;Converting Databases to 64-Bit MonetDB
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e2275"></a><a class="indexterm" name="d0e2280"></a><a class="indexterm" name="d0e2287"></a><a class="indexterm" name="d0e2290"></a><a class="indexterm" name="d0e2295"></a><a class="indexterm" name="d0e2298"></a><a class="indexterm" name="d0e2301"></a><a class="indexterm" name="d0e2304"></a><a class="indexterm" name="d0e2307"></a><a class="indexterm" name="d0e2312"></a><div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e2320"></a>Problem
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>MonetDB is giving you &#8220;Out of memory&#8221; errors, and you
+               realize that your database no longer fits within the 2GB memory
+               limit. What can do you?
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e2328"></a>Solution
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>The obvious solution is to switch to the version of MonetDB that
+               supports 64-bit pointers, which allows you to use much more memory
+               than you will ever need
+               (<a href="http://www.isbc.com/business/mistakes.cfm" target="_top">famous last
+                  words</a>). The problem is that the database files are not
+               compatible across the two versions&#8212;because one stores its
+               data using longer words&#8212;so you will have to use a conversion
+               utility before you can switch servers.
+            </p>
+            <p>One alternative is to dump your 32-bit database into an XML file
+               band then re-import it into a clean 64-bit version. Since XML is too
+               verbose and too slow for large databases, we have created another pair
+               of import and export utilities that use plain text files
+               instead. These files are saved in a format that MonetDB can
+               read directly, without much intervention from Proximity.  These files
+               don&#8217;t have the extra structure from XML files, take up less
+               space, and don&#8217;t need to be parsed.  Using this file format, the
+               conversion from 32 to 64 bits can be done simply, and in a matter of
+               minutes.
+            </p>
+            <p>You can use these import and export utilities directly from the
+               command line. First, create a temporary directory to hold the converted
+               files:
+            </p><pre class="synopsis">$ <strong class="userinput"><code>mkdir <em class="varname"><code>temp-dir</code></em></code></strong>
+$ <strong class="userinput"><code>cd <em class="varname"><code>temp-dir</code></em></code></strong></pre><p>Then start the 32-bit version of MonetDB on your original data,
+               and export its contents into the current directory:
+            </p><pre class="synopsis">$ <strong class="userinput"><code>$PROX_HOME/bin/export-text.sh <em class="varname"><code>host:post</code></em> `pwd`</code></strong></pre><p>where <em class="varname"><code>host:port</code></em> will be
+               <code class="literal">localhost:30000</code> if you are running this script from
+               the same machine as the MonetDB server (which is required, see
+               <a href="ch03s02.html#64bit_disc" title="Discussion">&#8220;Discussion&#8221;</a>, below) and using the default
+               <code class="filename">init-mserver.mil</code> MonetDB initialization
+               script.
+            </p>
+            <p>Quit the MonetDB server and start a 64-bit server on a new
+               database. Initialize the database with Proximity&#8217;s schema, and
+               import the data saved in the current directory:
+            </p><pre class="synopsis">$ <strong class="userinput"><code>$PROX_HOME/bin/db-util.sh <em class="varname"><code>host:port</code></em> init-db</code></strong>
+$ <strong class="userinput"><code>$PROX_HOME/bin/import-text.sh <em class="varname"><code>host:port</code></em> `pwd`</code></strong></pre><p>Your 64-bit database is now ready to be used. The entire
+               operation should be quick&#8212;dumping and reloading one
+               database containing 5GB worth of data took less than 30 minutes
+               on one of our servers.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="64bit_disc"></a>Discussion
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>These utilities are convenient because they create an
+               intermediate representation of your data that is succinct and can be
+               easily reloaded. You can use them any time that you need to transport
+               or convert data.  Example uses include creating a tarball of your data
+               (where the text dump of your database will be noticeably smaller than
+               its XML counterpart) and porting a database from a little-endian
+               platform to a big-endian architecture (for example, to switch between
+               Mac&nbsp;OS&nbsp;X and Linux/Windows).
+            </p>
+            <p>Note that these utilities must be run on the same machine as
+               your MonetDB servers&#8212;otherwise, MonetDB won&#8217;t be able to
+               write or read into the <em class="varname"><code>temp-dir</code></em> where the
+               conversion files live.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e2407"></a>Supporting Files
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>There are no files for this recipe, but you can take a look at
+               the unit tests for these two utilities:
+               <code class="filename">$PROX_HOME/test/java/kdl/prox/app/ExportTextTest.java</code> and
+               <code class="filename">$PROX_HOME/test/java/kdl/prox/app/ImportTextTest.java</code>.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s01.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">3.1.&nbsp;Importing Data with Mismatched IDs&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;4.&nbsp;Queries</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

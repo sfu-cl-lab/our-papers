@@ -1,0 +1,328 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>2.2.&nbsp;Creating Attributes from Arbitrary Data</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Cookbook">
+      <link rel="up" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Database Manipulation">
+      <link rel="prev" href="ch02s01.html" title="2.1.&nbsp;Creating Shortcut Links">
+      <link rel="next" href="ch02s03.html" title="2.3.&nbsp;Aggregation in NSTs">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02s01.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;2.&nbsp;Database Manipulation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch02s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="section" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="recipe_attrsfromdata"></a>2.2.&nbsp;Creating Attributes from Arbitrary Data
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e505"></a><a class="indexterm" name="d0e510"></a><a class="indexterm" name="d0e515"></a><a class="indexterm" name="d0e520"></a><a class="indexterm" name="d0e525"></a><a class="indexterm" name="d0e530"></a><a class="indexterm" name="d0e535"></a><a class="indexterm" name="d0e538"></a><a class="indexterm" name="d0e543"></a><a class="indexterm" name="d0e549"></a><a class="indexterm" name="d0e552"></a><a class="indexterm" name="d0e557"></a><a class="indexterm" name="d0e560"></a><a class="indexterm" name="d0e566"></a><a class="indexterm" name="d0e569"></a><a class="indexterm" name="d0e574"></a><a class="indexterm" name="d0e577"></a><a class="indexterm" name="d0e582"></a><a class="indexterm" name="d0e585"></a><a class="indexterm" name="d0e590"></a><a class="indexterm" name="d0e593"></a><a class="indexterm" name="d0e598"></a><a class="indexterm" name="d0e601"></a><a class="indexterm" name="d0e606"></a><a class="indexterm" name="d0e609"></a><a class="indexterm" name="d0e614"></a><a class="indexterm" name="d0e617"></a><div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e625"></a>Problem
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p><a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/AddAttribute.html"><code class="classname">AddAttribute</code></a> is a powerful class that allows you to create new
+               attributes based on complex expressions. It provides if/then
+               capabilities, aggregation of values, comparisons, and regular
+               arithmetic operations. But what if you want to create an attribute
+               based on an expression that <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/AddAttribute.html"><code class="classname">AddAttribute</code></a> doesn&#8217;t
+               support?
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e638"></a>Solution
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>We&#8217;ll use an example to show how to create an arbitrary
+               attribute. Suppose, for instance, that you want to create a subgraph
+               attribute that counts the distinct kinds of items in each subgraph of
+               a given container. If your container has the following elements:
+               
+            </p>
+            <div class="informaltable">
+               <table border="1" width="50%">
+                  <colgroup>
+                     <col width="25%">
+                     <col width="25%">
+                     <col width="50%">
+                  </colgroup>
+                  <thead>
+                     <tr>
+                        <th align="center">item_id</th>
+                        <th align="center">subg_id</th>
+                        <th align="center">name</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td align="center">1</td>
+                        <td align="center">0</td>
+                        <td align="center">Movie</td>
+                     </tr>
+                     <tr>
+                        <td align="center">2</td>
+                        <td align="center">0</td>
+                        <td align="center">Movie</td>
+                     </tr>
+                     <tr>
+                        <td align="center">3</td>
+                        <td align="center">0</td>
+                        <td align="center">Studio</td>
+                     </tr>
+                     <tr>
+                        <td align="center">4</td>
+                        <td align="center">0</td>
+                        <td align="center">Actor</td>
+                     </tr>
+                     <tr>
+                        <td align="center">5</td>
+                        <td align="center">0</td>
+                        <td align="center">Actor</td>
+                     </tr>
+                     <tr>
+                        <td align="center">6</td>
+                        <td align="center">1</td>
+                        <td align="center">Movie</td>
+                     </tr>
+                     <tr>
+                        <td align="center">7</td>
+                        <td align="center">1</td>
+                        <td align="center">Studio</td>
+                     </tr>
+                     <tr>
+                        <td align="center">8</td>
+                        <td align="center">1</td>
+                        <td align="center">Director</td>
+                     </tr>
+                     <tr>
+                        <td align="center">9</td>
+                        <td align="center">1</td>
+                        <td align="center">Actor</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <p>
+               then you want to create an attribute that says that the first subgraph
+               has three different kinds of items 
+               (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Movie</span>, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Studio</span>,
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Actor</span>) and that the
+               second subgraph has four (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Movie</span>, 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Studio</span>, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Director</span>,
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Actor</span>), like this:
+               
+            </p>
+            <div class="informaltable">
+               <table border="1" width="35%">
+                  <colgroup>
+                     <col width="50%">
+                     <col width="50%">
+                  </colgroup>
+                  <thead>
+                     <tr>
+                        <th align="center">subg_id</th>
+                        <th align="center">value</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td align="center">0</td>
+                        <td align="center">3</td>
+                     </tr>
+                     <tr>
+                        <td align="center">1</td>
+                        <td align="center">4</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <p>
+               
+            </p>
+            <p>You can create a new attribute by first computing an NST with
+               the desired rows, and then saving that NST using methods in the
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Attributes.html"><code class="classname">Attributes</code></a> class. In this case, you can create the attribute NST using
+               the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#addDistinctCountColumn(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">addDistinctCountColumn()</code></a> method. Assume that the container is
+               named <span class="token">studio-clusters</span> and get its
+               <span class="token">objects</span> NST. 
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>studioClusters = DB.getContainer("studio-clusters")
+ containerObjects = studioClusters.getObjectsNST()</code></strong>
+</pre><p>
+               Use the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#addDistinctCountColumn(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">addDistinctCountColumn()</code></a> method to find, for every
+               <code class="token">subg_id</code>, the count of distinct values of 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">name</span> and save it as the 
+               <code class="token">cnt</code> column.
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>containerObjects.addDistinctCountColumn("subg_id", "name", "cnt")</code></strong>
+</pre><p>
+               
+            </p>
+            <p>The <span class="token">containerObjects</span> NST will now
+               have a new column with the same value for all the rows with a common 
+               <code class="token">subg_id</code>.
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>printNST(containerObjects)</code></strong>
+</pre><p>
+               
+               
+               
+            </p><pre class="screen">[SHOWING head,item_id,subg_id,name,cnt WHERE * LIMIT *]
+[ 0@0,   3@0,   0@0,   "studio",     3    ]
+[ 1@0,   7@0,   1@0,   "studio",     4    ]
+[ 2@0,   1@0,   0@0,   "movie",      3    ]
+[ 3@0,   2@0,   0@0,   "movie",      3    ]
+[ 4@0,   6@0,   1@0,   "movie",      4    ]
+[ 5@0,   4@0,   0@0,   "actor",      3    ]
+[ 6@0,   5@0,   0@0,   "actor",      3    ]
+[ 7@0,   9@0,   1@0,   "actor",      4    ]
+[ 8@0,   8@0,   1@0,   "director",   4    ]
+</pre><p>
+               
+            </p>
+            <p>However, attribute tables normally have two columns (called 
+               <code class="token">id</code> and 
+               <code class="token">value</code>, such that the first one
+               stores the ID of the item or subgraph that the second one
+               applies to), and a single row for each unique ID (except
+               for multi-valued attributes, but that is not the case in this
+               example).  Use the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#projectDistinct(java.lang.String)"><code class="methodname">projectDistinct()</code></a> method to get
+               the distinct (<code class="token">subg_id</code>,
+               <code class="token">cnt</code>) pairs.  The <code class="code">AS</code> keyword
+               renames the columns in the resulting NST to the expected <code class="code">id</code> and 
+               <code class="code">value</code> without requiring a separate method call.  The new
+               attribute will get its values from a projection of 
+               distinct (<code class="token">subg_id</code>, 
+               <code class="token">cnt</code>) pairs, stored in a new NST
+               with columns named <code class="token">id</code> and 
+               <code class="token">value</code>.
+               
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>attrNST = containerObjects.projectDistinct("subg_id AS id, cnt AS value")
+ printNST(attrNST)</code></strong>
+</pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,id,value WHERE * LIMIT *]
+[ 0@0,   0@0,    3     ]
+[ 1@0,   1@0,    4     ]
+</pre><p>At this point, you are ready to create the new attribute. The
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Attributes.html"><code class="classname">Attributes</code></a> class provides several public methods to manipulate its
+               internal tables.  In particular, the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Attributes.html#defineAttributeWithData(java.lang.String,%20java.lang.String,%20kdl.prox.dbmgr.NST)"><code class="methodname">defineAttributeWithData()</code></a> method
+               allows you to define a new attribute based on an arbitrary NST
+               that you pass to it, which is what you need in this case.
+               Save the new NST as a subgraph attribute inside the container, with
+               the name <code class="code">distinct_types</code> and of type <code class="code">int</code>.
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>studioClusters.getSubgraphAttrs().defineAttributeWithData("distinct_types","int",attrNST)</code></strong>
+</pre><p>
+               
+            </p>
+            <p>And you&#8217;re done. Just remember to remove the
+               <code class="token">cnt</code> column that you added to the
+               objectsNST:
+               
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>containerObjects.removeColumn("cnt")</code></strong>
+</pre><p>
+               
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e905"></a>Discussion
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>The combination of NST operations with the
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Attributes.html#defineAttributeWithData(java.lang.String,%20java.lang.String,%20kdl.prox.dbmgr.NST)"><code class="methodname">defineAttributeWithData()</code></a> method give you a lot of power to create all
+               kinds of attributes. The example above focused on the creation of a
+               standard single-column, single-value attribute, but in fact you can
+               create any kind of attribute. Just remember to match the structure and
+               content of your NST to the kind of attribute you want to create, and
+               to make the first column of the NST be of type <code class="code">oid</code> and
+               be named <code class="code">id</code>.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e922"></a>Supporting Files
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Download the following XML data file and query
+               to create the database and container used above to demonstrate this
+               recipe:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p>Database:
+                             <code class="filename"><a href="../examples/DBManip_AttrsFromData_DB.xml" target="_top">DBManip_AttrsFromData_DB.xml</a></code>
+                          
+                     </p>
+                  </li>
+                  <li>
+                     <p>Query:
+                             <code class="filename"><a href="../examples/DBManip_AttrsFromData_Query.qg2.xml" target="_top">DBManip_AttrsFromData_Query.qg2.xml</a></code>
+                          
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               You may also want to examine the unit test file for this recipe at
+               <code class="filename">$PROX_HOME/test/java/kdl/prox/cookbook/AddAttributeTest.java</code>.
+               
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02s01.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch02s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">2.1.&nbsp;Creating Shortcut Links&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;2.3.&nbsp;Aggregation in NSTs</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

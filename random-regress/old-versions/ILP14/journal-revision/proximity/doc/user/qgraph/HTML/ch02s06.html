@@ -1,0 +1,149 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Summary</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Query Basics">
+      <link rel="prev" href="ch02s05s02.html" title="Efficiency considerations">
+      <link rel="next" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Conditions">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02s05s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;2.&nbsp;Query Basics</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="qg_basics_summary"></a>Summary
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e1182"></a><div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Query format</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>Every query must have at least one 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e824"><span class="glossterm">vertex</span></a> and every <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e310"><span class="glossterm">edge</span></a>
+                         must have vertices at both ends.
+                  </p>
+               </li>
+               <li>
+                  <p>A QGraph query must be a connected graph.</p>
+               </li>
+               <li>
+                  <p>QGraph queries can be as simple as a single vertex.
+                         
+                  </p>
+               </li>
+               <li>
+                  <p>QGraph supports both 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e279"><span class="glossterm">directed</span></a> and 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e803"><span class="glossterm">undirected edges</span></a>
+                         but requires that the underlying database use directed
+                         links.
+                  </p>
+               </li>
+               <li>
+                  <p>Each vertex and edge in a QGraph query has a unique 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e528"><span class="glossterm">name</span></a> (label)
+                         used within the context of the query. These names are used to
+                         identify the elements in the query and resulting subgraphs but
+                         have no effect on what the query matches.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Query results</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>QGraph queries return their results in the form of a
+                         collection of 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e749"><span class="glossterm">subgraphs</span></a> called a 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e234"><span class="glossterm">container</span></a>.
+                  </p>
+               </li>
+               <li>
+                  <p>Query results include all 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e35"><span class="glossterm">attributes</span></a> for the
+                         objects and 
+                         links in the container&#8217;s subgraphs, even if those attributes are
+                         not explicitly included in the query.
+                         
+                  </p>
+               </li>
+               <li>
+                  <p>QGraph does not require that distinct query elements match
+                         distinct database entities, therefore individual database items
+                         may appear more than once in a subgraph.
+                  </p>
+               </li>
+               <li>
+                  <p>QGraph does not return links in the database that are not
+                         specified in the query, even when both link ends are in the same
+                         subgraph.
+                  </p>
+               </li>
+               <li>
+                  <p>Loops (links that point back to the originating object) in
+                         the database are treated identically to other links.
+                         
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Proximity implementation</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e749"><span class="glossterm">Subgraphs</span></a>
+                         and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e234"><span class="glossterm">containers</span></a> are
+                         added as persistent items to the database.
+                  </p>
+               </li>
+               <li>
+                  <p>Subgraphs include the actual database objects and links
+                         that match the originating query, not copies.
+                  </p>
+               </li>
+               <li>
+                  <p>Queries containing 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e803"><span class="glossterm">undirected edges</span></a>
+                         are more computationally expensive than those that contain only 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e279"><span class="glossterm">directed edges</span></a>.
+                  </p>
+               </li>
+            </ul>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02s05s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Efficiency considerations&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;3.&nbsp;Conditions</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/local/sgml/docbook-xml-4.5/docbookx.dtd" [
+<!ENTITY % entities SYSTEM "../../ProxCommonEntities.ent">
+<!ENTITY % recipeentities SYSTEM "ProxCookbookEntities.ent">
+%entities;
+%recipeentities;
+]>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+
+<!-- CHAPTER: Proximity Development -->
+
+<!-- ============================================================== -->
+<!--                            RECIPE:                             -->
+<!--                       CONFIGURING LOG4J                        -->
+<!-- ============================================================== -->
+
+<section id="cb_log4j">
+<title>Configuring Log4j</title>
+
+<!-- All index terms at top -->
+<indexterm><primary>log4j</primary></indexterm>
+<indexterm><primary>logging</primary></indexterm>
+<indexterm><primary>debugging</primary>
+           <seealso>logging</seealso></indexterm>
+<indexterm><primary>packages</primary>
+           <secondary>logging levels for</secondary></indexterm>
+<indexterm><primary>prox.lcf (logging configuration file)</primary></indexterm>
+<indexterm><primary>configuring</primary>
+           <secondary>log4j</secondary></indexterm>
+<indexterm><primary>appenders for log4j</primary></indexterm>
+<indexterm><primary>verbosity</primary>
+           <secondary>logging level</secondary></indexterm>
+<indexterm><primary>MIL</primary>
+           <secondary>logging for</secondary></indexterm>
+<indexterm><primary>output</primary>
+           <secondary>logging destinations</secondary></indexterm>
+<indexterm><primary>INFO logging level</primary></indexterm>
+<indexterm><primary>DEBUG logging level</primary></indexterm>
+<indexterm><primary>WARN logging level</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>logging levels for</secondary></indexterm>
+<indexterm><primary>formatting</primary>
+           <secondary>log messages</secondary></indexterm>
+
+<!-- classes used in the recipe -->
+
+<!-- methods used in this recipe -->
+
+
+<!-- ============================================================== -->
+<!-- PROBLEM                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Problem</title>
+
+<para>You are testing code that you&rsquo;ve written, and you want to
+output detailed debugging information while the program runs. However,
+turning debugging on shows you information about
+<emphasis>all</emphasis> packages, making it difficult to trace the
+execution of your code.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SOLUTION                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Solution</title>
+
+<para>Proximity uses 
+<ulink url="http://logging.apache.org/log4j/">log4j</ulink>, a
+powerful tool that allows programmatic control of the debugging
+information that your program displays. Using log4j, you can send your
+output to different <emphasis>loggers</emphasis> using different
+<emphasis>levels</emphasis> of verbosity, you can dynamically change
+those levels, and you can associate different
+<emphasis>appenders</emphasis> to the loggers to send the
+output to different destinations such as the console, a file, a TCP/IP
+socket, or a database. Regretfully, log4j can also be hard to
+configure. In this recipe, we explain how Proximity uses log4j and guide
+you through the process of configuring log4j with some example
+setups.</para>
+
+<para>Proximity currently uses three different loggers:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><code>rootLogger</code>, the main logger, which receives the
+    messages from all the classes in the system</para></listitem>
+  <listitem>
+    <para><code>mil</code>, a logger for MIL
+    statements</para></listitem>
+  <listitem>
+    <para><code>milMessages</code>, another logger for MIL
+    statements</para></listitem>
+</itemizedlist>
+The two MIL loggers are used exclusively by the low-level database
+classes.  By default, all messages from the main logger are routed to
+the console at a low level of verbosity (<code>INFO</code>).
+However, if you want to see more or less debugging output,
+you can change the verbosity level, or attach new appenders with a
+different verbosity and send their output to a different location
+(for example, a file where you save all the <code>DEBUG</code>
+statements).  Alternately, it is also possible to use different
+appenders for individual packages or classes, thereby having a finer
+control of the output.</para>
+
+<para>Changing verbosity levels, changing or adding output
+destinations, and much more, is done through the
+<filename>prox.lcf</filename> configuration file.  Proximity looks for
+this file in the directory from where it&rsquo;s launched, and uses it
+to configure log4j before execution begins.  The Proximity
+distribution includes examples of different configuration files under
+the <filename>example/config</filename> directory.</para>
+
+<para>The most basic configuration file,
+<filename>info.lcf</filename>, is equivalent to the default
+setup:
+
+<programlisting><userinput> log4j.rootLogger=INFO, A1
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+</userinput></programlisting>
+
+The first line sets the verbosity level of the main logger
+(<code>rootLogger</code>) to <code>INFO</code>, and attaches an
+appender named <code>A1</code> to it. The other lines define the
+<code>A1</code> appender, send its output to the console, and
+specify a particular format for the messages.</para>
+
+<para>You can save a copy of all the logging output to a file, as
+the configuration file <filename>info-plus-file.lcf</filename> shows:
+
+<programlisting><userinput> log4j.rootLogger=INFO, A1, A2
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+ log4j.appender.A2=org.apache.log4j.FileAppender
+ log4j.appender.A2.File=prox.log
+ log4j.appender.A2.Append=false
+    log4j.appender.A2.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A2.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+</userinput></programlisting>
+
+The first line attaches an additional appender (<code>A2</code>) to
+the main logger, which is configured to send the output to a file
+named <filename>prox.log</filename>, using the same format as the
+<code>A1</code> appender.</para>
+
+<para>What if you want to get more detailed debugging information for
+a particular package or individual file?  Simply
+increase the verbosity level for that class, as is shown in the
+<filename>module-debug.lcf</filename> configuration file:
+
+<programlisting><userinput> log4j.rootLogger=INFO, A1
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+ log4j.logger.kdl.prox.dbmgr.NST=DEBUG
+ log4j.logger.kdl.prox.sample=DEBUG
+</userinput></programlisting>
+
+In this particular case, the output will be the same as before except
+for the <code>NST</code> class and all the classes in the
+<code>sample</code> package, which will report their information at
+the highest level of verbosity (<code>DEBUG</code>). Notice that the
+output won&rsquo;t be sent to a 
+<filename>prox.log</filename> file, as in the previous example. 
+To do that, add a second appender and configure it as 
+<code>A2</code> in the configuration file above.</para>
+
+<para>If you want to get as much debugging information as possible
+without getting distracted by the exhaustive logging of the
+database layers, you can set the default level to 
+<code>DEBUG</code> and selectively decrease the level for the
+database loggers, following the technique demonstrated above.  An
+example of this configuration is shown in
+<filename>debug-except-db.lcf</filename>:
+
+<programlisting><userinput> log4j.rootLogger=DEBUG, A1
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+ # reduce monet-related debug output, and output from the DB classes
+ log4j.logger.mil=WARN
+ log4j.logger.milMessages=WARN
+ log4j.logger.kdl.prox.db=WARN
+ log4j.logger.kdl.prox.dbmgr=WARN
+ log4j.logger.kdl.prox.monet.Connection=WARN
+ log4j.logger.kdl.prox.util.MonetUtil=WARN
+</userinput></programlisting>
+
+Note that the level for the root logger is set to <code>DEBUG</code>,
+the most verbose level, while all the database-related classes are set
+to <code>WARN</code>, the least verbose of all levels.</para>
+
+<para>As a final example, consider the extremely rare situation in which the
+lower database layer is failing. In such a case, you want to use
+the highest level of debugging possible and also save a log of the
+Monet statements (MIL commands).  The file
+<filename>full-debug-plus-mil-file.lcf</filename> illustrates the
+corresponding configuration:
+
+<programlisting><userinput> log4j.rootLogger=DEBUG, A1
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+ # Send MIL to the console
+ log4j.additivity.mil=true
+
+ # And to a file appender
+ log4j.logger.mil=DEBUG, A3
+ log4j.logger.milMessages=DEBUG, A3
+
+ # Create the prox.log.mil file with RAW instructions
+ log4j.appender.A3=org.apache.log4j.FileAppender
+ log4j.appender.A3.File=prox.log.mil
+ log4j.appender.A3.Append=false
+ log4j.appender.A3.layout=org.apache.log4j.PatternLayout
+ log4j.appender.A3.layout.ConversionPattern=%m%n
+</userinput></programlisting>
+
+Note the use of the database-related loggers,
+<code>mil</code> and <code>milMessages</code>. They are configured
+such that their output is added to that of the main logger, and such
+that the MIL commands get saved to a <filename>prox.log.mil</filename>
+file in a raw format.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- DISCUSSION                                                     -->
+<!-- ============================================================== -->
+
+<section>
+<title>Discussion</title>
+
+<para>The examples above cover all the configuring options that we
+have ever had to use while writing and debugging Proximity:  They use
+different loggers, create one or more appenders, and change the level of
+verbosity for individual classes and packages. You can combine these
+options to suit your needs, including writing the output of
+different packages to separate files, or setting different verbosity
+levels for groups of classes in the same package.</para>
+
+<sidebar><para>Whatever your needs, remember that Proximity looks for
+configuration information in the file <filename>prox.lcf</filename>,
+which must be present in the directory from which Proximity is
+launched.</para>
+</sidebar>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SUPPORTING FILES                                                -->
+<!-- ============================================================== -->
+
+<section>
+<title>Supporting Files</title>
+
+<para>All the examples above are included in the Proximity
+distribution, under the <filename>/example/config/</filename>
+directory.</para> 
+
+<para>For more information and configuration options,
+consult the 
+<ulink url="http://logging.apache.org/log4j/">log4j</ulink>
+documentation.</para>
+
+</section>
+
+<!-- === End of recipe ============================================ -->
+</section>
+
+<!--
+</chapter>
+-->
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("ProxCookbook.xml" "chapter" "section")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

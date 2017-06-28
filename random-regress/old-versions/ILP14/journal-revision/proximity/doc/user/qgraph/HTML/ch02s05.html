@@ -1,0 +1,96 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Implementation in Proximity</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Query Basics">
+      <link rel="prev" href="ch02s04.html" title="Handling Database Self-Links">
+      <link rel="next" href="ch02s05s02.html" title="Efficiency considerations">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02s04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;2.&nbsp;Query Basics</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch02s05s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="qg_basics_impl"></a>Implementation in Proximity
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e1059"></a><a class="indexterm" name="d0e1064"></a><div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1072"></a>Query results
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Query matches
+               <a class="indexterm" name="d0e1077"></a>
+               are returned as a collection of subgraphs called a
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e234"><span class="glossterm">container</span></a>.  Containers and subgraphs are
+               structural views of the data 
+               that are added as persistent items to the database.
+            </p>
+            <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e749"><span class="glossterm">Subgraphs</span></a> include the
+               database objects and links that match the 
+               originating query. Importantly, these are the actual objects
+               and links in the database and not copies. If you modify
+               <a class="indexterm" name="d0e1090"></a>
+               <a class="indexterm" name="d0e1096"></a>
+               <a class="indexterm" name="d0e1102"></a>
+               <a class="indexterm" name="d0e1108"></a>
+               a database entity, every subgraph that includes that entity will be
+               correspondingly modified. Similarly, if you modify an object or link
+               in a subgraph, you are modifying the underlying database
+               entity.  Deleting
+               <a class="indexterm" name="d0e1114"></a>
+               an object or link from the database will similarly
+               impact existing subgraphs, potentially resulting in disconnected
+               <a class="indexterm" name="d0e1120"></a>
+               <a class="indexterm" name="d0e1126"></a>
+               or invalid subgraphs.
+            </p>
+            <p>Changes that delete database entities or alter attribute values
+               may change subgraphs so that they no longer satisfy the original
+               query. Proximity does not re-evaluate the query to update containers
+               <a class="indexterm" name="d0e1132"></a>
+               when the underlying database changes.  Any subgraphs rendered invalid
+               by database changes remain in the container until the query is
+               re-executed.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02s04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch02s05s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Handling Database Self-Links&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Efficiency considerations</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

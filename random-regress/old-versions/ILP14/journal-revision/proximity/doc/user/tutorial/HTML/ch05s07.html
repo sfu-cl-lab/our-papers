@@ -1,0 +1,377 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Adding Links to Data with Queries</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="prev" href="ch05s06.html" title="Matching Complex Subgraphs with Subqueries">
+      <link rel="next" href="ch05s08.html" title="Executing a Query from the Proximity Database Browser">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s06.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Querying the Database</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s08.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_addlinks"></a>Adding Links to Data with Queries
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_updatedb1"></a><a class="indexterm" name="idx_updatedb2"></a><a class="indexterm" name="idx_updatedb3"></a><a class="indexterm" name="idx_addlinks1"></a><a class="indexterm" name="idx_addlinks2"></a><a class="indexterm" name="idx_addlinks3"></a><p>In addition to being able to extract data in the form of
+            subgraphs, the QGraph language provides the ability to 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e809"><span class="glossterm">update</span></a>
+            data&#8212;add or delete objects, links, or attributes&#8212;by
+            executing queries. Although much of this functionality remains to be
+            implemented in Proximity, you can currently use QGraph queries
+            to add new links to the data.
+         </p>
+         <p>QGraph query processing separates the match phase
+            <a class="indexterm" name="d0e9005"></a>
+            <a class="indexterm" name="d0e9011"></a>
+            from the update phase,
+            <a class="indexterm" name="d0e9015"></a>
+            thus any new links added to the database are
+            <span class="emphasis"><em>not</em></span> included in the query&#8217;s results.
+            Importantly, the match phase applies to the data as it exists at the
+            start of query execution.  Applying an update cannot add new matches
+            to the current query&#8217;s results.
+         </p>
+         <p>The query created in the following exercise continues some
+            of the assumptions we made in <a href="ch05s06.html#ex_subquery" title="Exercise&nbsp;5.5.&nbsp;Using subqueries in a query:">Exercise&nbsp;5.5</a>
+            about how the data in the ProxWebKB database correspond to
+            entities and relationships in the world.  Specifically, we interpret
+            links from <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Faculty</span> pages to 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ResearchProject</span> pages to mean that this
+            faculty member directs the project.  Similarly, we interpret links
+            from <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ResearchProject</span> pages to 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Student</span> pages to mean that that those
+            students work on the project.  Therefore, we infer that the
+            faculty member supervises these students, allowing us to add links
+            that make this relationship explicit.
+            Although these assumptions may seem
+            reasonable, it&#8217;s important to remember that we might be
+            wrong in some or all of these assumptions. If we go on to use the
+            results of this query in a model, appropriate care must be taken in
+            applying the models&#8217;s predictions to real world
+            situations.
+         </p>
+         <div class="procedure"><a name="ex_addlinks"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;5.6.&nbsp;Adding links with a query:</b></p><a class="indexterm" name="d0e9041"></a><a class="indexterm" name="d0e9044"></a><p>The query created in this exercise is also available in the
+               Proximity&nbsp;4.3 distribution in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/add-supervises-links.qg2.xml</code>.
+            </p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+               
+            </p>
+            <ol type="1">
+               <li>
+                  <p>From the <span><strong class="guimenu">Query</strong></span> menu, choose
+                     <span><strong class="guimenuitem">New Query</strong></span>.
+                     Proximity starts the Query Editor.
+                  </p>
+               </li>
+               <li>
+                  <p>Create an unannotated <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e824"><span class="glossterm">vertex</span></a> labeled
+                     <strong class="userinput"><code>project</code></strong>. Add the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e162"><span class="glossterm">condition</span></a>
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p><strong class="userinput"><code>pagetype&nbsp;=&nbsp;ResearchProject</code></strong></p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     to this vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>Create another vertex labeled
+                     <strong class="userinput"><code>professor</code></strong>. Add the condition
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p><strong class="userinput"><code>pagetype&nbsp;=&nbsp;Faculty</code></strong></p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     to this vertex.  Add the 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e555"><span class="glossterm">annotation</span></a>
+                     <strong class="userinput"><code>[1..]</code></strong> to this vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>Create a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e279"><span class="glossterm">directed edge</span></a>
+                     labeled <strong class="userinput"><code>directs</code></strong>
+                     from the <em class="token">professor</em> vertex to the
+                     <em class="token">project</em> vertex.  If you do not have
+                     automatic edge annotation enabled, add the annotation
+                     <strong class="userinput"><code>[1..]</code></strong> to this edge.
+                  </p>
+               </li>
+               <li>
+                  <p>Create a vertex labeled <strong class="userinput"><code>student</code></strong>.  Add the
+                     condition
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p><strong class="userinput"><code>pagetype&nbsp;=&nbsp;Student</code></strong></p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     to this vertex.  Add the annotation <strong class="userinput"><code>[1..]</code></strong> to
+                     this vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>Create a directed edge labeled <strong class="userinput"><code>has-member</code></strong>
+                     from the <em class="token">project</em> vertex to the
+                     <em class="token">student</em> vertex.  If you do not have
+                     automatic edge annotation enabled, add the annotation
+                     <strong class="userinput"><code>[1..]</code></strong> to this edge.
+                  </p>
+                  <p>The query should look similar to that shown below:
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_AddLink_1.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>In the <span class="guilabel">Add-links</span> area
+                     <a class="indexterm" name="d0e9163"></a>
+                     <a class="indexterm" name="d0e9169"></a>
+                     at the bottom of
+                     the query properties pane, click <span><strong class="guibutton">Add</strong></span> to specify
+                     the new links to be added.
+                  </p>
+                  <p>The Query Editor creates a temporary link specification,
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">vertex1,&nbsp;vertex2,&nbsp;attrname,&nbsp;"attrval"</span>,
+                     as an example to be edited with the correct values.  (Because this
+                     temporary link specification uses vertex labels not present in the
+                     query, the status indicator now shows that the query is
+                     invalid.)
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>The general form of a new 
+                                 <a href="go01.html#d18e491"><span class="glossterm">link specification</span></a> is
+                                 <a class="indexterm" name="d0e9187"></a>
+                                 
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p>
+                                       <em class="replaceable"><code>starting-vertex</code></em><code class="literal">,</code>
+                                       <em class="replaceable"><code>ending-vertex</code></em><code class="literal">,</code>
+                                       <em class="replaceable"><code>attribute-name</code></em><code class="literal">,</code>
+                                       <em class="replaceable"><code>attribute-value</code></em>
+                                       
+                                    </p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                 where
+                                 
+                              </p>
+                              <div class="itemizedlist">
+                                 <ul type="disc" compact>
+                                    <li>
+                                       <p><em class="replaceable"><code>starting-vertex</code></em> is the name of the
+                                            query vertex that corresponds to the link&#8217;s starting object
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>ending-vertex</code></em> is the name of the
+                                            query vertex that corresponds to the link&#8217;s ending object
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>attribute-name</code></em> is the name of an
+                                            <a href="go01.html#d18e35"><span class="glossterm">attribute</span></a> that will be placed on each new
+                                            link.  The specified attribute can be a new attribute or it
+                                            can already exist as a link attribute in the database.
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>attribute-value</code></em> is the value of
+                                            <em class="replaceable"><code>attribute-name</code></em> to be assigned to each new
+                                            link. The new attribute value must be the
+                                            same for all links created by this specification.
+                                       </p>
+                                    </li>
+                                 </ul>
+                              </div>
+                              <p>
+                                 The attribute name and value are required&#8212;all new links must be
+                                 assigned a value for a new or existing link attribute.
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>Replace the example link specification with
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p>
+                           <strong class="userinput"><code>professor,&nbsp;student,&nbsp;link_type,&nbsp;"supervises"</code></strong>
+                           
+                        </p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     and press <span class="keycap">Tab</span>.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_AddLink_LinkSpec.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <p>The link specification states that we want to add links from
+                     objects matching the <em class="token">professor</em> vertex to
+                     objects matching the <em class="token">student</em> vertex,
+                     assigning the value <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">supervises</span> to a new
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">link_type</span> attribute for that 
+                     link.
+                  </p>
+                  <p>If the resulting container includes more than one subgraph that
+                     would create the same new link, only one instance of the new link is
+                     created. However, re-running the query creates a new container and
+                     thus a new set of identical links.
+                  </p>
+               </li>
+               <li>
+                  <p>Make sure the query is <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e815"><span class="glossterm">valid</span></a>
+                     by checking the status list at
+                     the bottom of the Query Editor window.  If the query is not valid,
+                     examine the errors in the drop-down list and fix any problems before
+                     continuing.
+                  </p>
+               </li>
+               <li>
+                  <p>[Optional] Add a name and description and save the query.</p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>The Proximity distribution includes the new query in the file
+                                 <code class="filename">$PROX_HOME/doc/user/tutorial/examples/add-supervises-links.qg2.xml</code>.
+                                 Be careful not to overwrite this file.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">File</strong></span> menu, choose 
+                     <span><strong class="guimenuitem">Run</strong></span> or press <span class="keycap">Ctrl-R</span>
+                     to execute your query.
+                     Proximity prompts you for a name for the results
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">container</span></a>. Enter 
+                     <strong class="userinput"><code>project-teams</code></strong> and click
+                     <span><strong class="guibutton">OK</strong></span>.
+                  </p>
+                  <p>Proximity opens a window to show you the a trace of the
+                     query execution. The last lines should be
+                     similar to the following excerpt
+                     
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                  </p><pre class="screen">INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; found 20 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; query results saved in
+   container: project-teams
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - Adding links to database
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; Adding add-link
+   professor, student, link_type, "supervises":49 links created
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</pre><p>
+                     The trace includes a count of the number of links created.  In this
+                     example, we added 49 new links to the database.
+                  </p>
+                  <p>Close this window after the query finishes.</p>
+               </li>
+               <li>
+                  <p>To explore the newly added links, browse the links having a
+                     value of <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">supervises</span> for the new
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">link_type</span> attribute by drilling down through
+                     the <span class="guilabel">Link Attributes</span> area in the Proximity Database Browser
+                     or typing
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p>
+                           <strong class="userinput"><code>filter:/links/link_type/value/'supervises'</code></strong>
+                           
+                        </p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     in the Proximity Database Browser location bar and pressing <span class="keycap">Return</span>.
+                     Proximity displays a list of the new links.
+                     
+                  </p>
+               </li>
+            </ol>
+         </div><a class="indexterm" name="d0e9346"></a><a class="indexterm" name="d0e9347"></a><a class="indexterm" name="d0e9348"></a><a class="indexterm" name="d0e9349"></a><a class="indexterm" name="d0e9350"></a><a class="indexterm" name="d0e9351"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s06.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s08.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Matching Complex Subgraphs with Subqueries&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Executing a Query from the Proximity Database Browser</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

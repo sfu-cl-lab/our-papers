@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<appendix id="apx_textformat">
+<title>Proximity Text Data Format</title>
+<indexterm id="idx_textdataa" class="startofrange">
+           <primary>text data</primary>
+           <secondary>format</secondary></indexterm>
+<indexterm id="idx_textdatab" class="startofrange">
+           <primary>data</primary>
+           <secondary>text representation</secondary></indexterm>
+<indexterm><primary>importing</primary>
+           <secondary>text data</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm><primary>exporting data</primary>
+           <secondary sortas="text">to text</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>exporting</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>exporting</secondary></indexterm>
+
+<para>This appendix describes the plain text format for importing data
+into and exporting data out of Proximity.  This format is commonly
+used to export data from Proximity and then re-import it into a new
+database requiring a different format, such as when upgrading to a
+non-compatible version of MonetDB.</para>
+
+<para>
+<caution>
+<para>The utilities that use the Proximity plain text data format
+perform no error checking.  Although this format requires less disc
+space than the XML format and its use can improve import and export
+speed, users are solely responsible for maintaining data consistency
+when using this format.</para>
+</caution>
+</para>
+
+<sidebar>
+<para>For compatibility with MonetDB, we recommend that all single and
+double quotes and newline characters
+<indexterm><primary>special characters</primary>
+           <secondary sortas="text">in text data representation</secondary></indexterm>
+<indexterm><primary>characters</primary>
+           <secondary>special</secondary>
+           <tertiary sortas="text">in text data representation</tertiary></indexterm>
+be converted
+<indexterm><primary>MonetDB</primary>
+           <secondary>character conversion for</secondary></indexterm>
+<indexterm><primary>characters</primary>
+           <secondary>converting for MonetDB</secondary></indexterm>
+<indexterm><primary>converting</primary>
+           <secondary>characters for MonetDB</secondary></indexterm>
+to underscores. This 
+substitution is performed automatically when importing XML data but
+must be performed as a pre-processing step when importing text data.
+Note that values such as &ldquo;<literal>&amp;quot;</literal>&rdquo;
+are treated as strings and not XML entities.  A string value of
+<literal>&amp;quot;</literal> will not be converted to a double
+quote.</para>
+</sidebar>
+
+<para>All files referenced in the set of data files must be present
+and in the same directory.  For example, the
+<filename>container.data</filename> file references
+data files (e.g., <filename>si_0_attrs.data</filename>) that define the
+attributes for each container&rsquo;s subgraphs.  If the specified
+container has no subgraph attributes, these files may be empty but
+they must still be present.  The required files are created
+automatically during export but may need to be constructed by hand for
+some import applications.</para>
+
+<para>In addition to handling complete
+databases, Proximity can import and export individual attributes and
+containers to and from existing databases.  Users are solely
+responsible for ensuring that imported attribute and container data
+correctly matches the identifiers and data types
+<indexterm><primary>data type</primary></indexterm>
+in the existing database.</para>
+
+<para>See <xref linkend="ch_import" /> for
+details on using the <command>import-text.sh</command> and
+<command>export-text.sh</command> scripts
+(<command>import-text.bat</command> and
+<command>export-test.bat</command> for Windows) to import data using
+this format.</para>
+
+<para>The examples in this appendix are designed to illustrate the
+relevant data format and are not intended to represent, in whole or in
+part, a valid or semantically meaningful database.</para>
+
+<!-- ============================================================== -->
+<!--                             OVERVIEW                           -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Overview</title>
+
+<para>The Proximity text data format stores data in multiple
+files.
+One set of files stores structure information:
+
+<!-- start table -->
+<informaltable frame="none">
+<tgroup cols="2" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="2.5*"/>
+<tbody valign="top">
+
+<row>
+<entry><filename>objects.data</filename></entry>
+<entry>stores the IDs for objects in the database</entry>
+</row>
+
+<row>
+<entry><filename>links.data</filename></entry>
+<entry>stores the IDs and starting and ending point IDs for
+links in the database</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+<!-- end table -->
+
+Another set of files stores attribute data:
+
+<!-- start table -->
+<informaltable frame="none">
+<tgroup cols="2" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="2.5*"/>
+<tbody valign="top">
+
+<row>
+<entry><filename>attributes.data</filename></entry>
+<entry>stores the name, item type (object, link, or container) and
+data type for attributes in the database and includes pointers to the
+files containing the corresponding attribute values; subgraph attribute
+data are stored in a separate set of files</entry>
+</row>
+
+<row>
+<entry><filename>O_attr_<replaceable>attrname</replaceable>.data</filename></entry>
+<entry>stores the object IDs and attribute values for the
+<replaceable>attrname</replaceable> object attribute</entry>
+</row>
+
+<row>
+<entry><filename>L_attr_<replaceable>attrname</replaceable>.data</filename></entry>
+<entry>stores the link IDs and attribute values for the
+<replaceable>attrname</replaceable> link attribute</entry>
+</row>
+
+<row>
+<entry><filename>C_attr_<replaceable>attrname</replaceable>.data</filename></entry>
+<entry>stores the container IDs and attribute values for the
+<replaceable>attrname</replaceable> container attribute</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+<!-- end table -->
+
+The names for the attribute data files are suggested conventions,
+which Proximity uses for naming exported data files.
+Proximity uses whatever filenames you provide in
+<filename>attributes.data</filename> when importing data.</para>
+
+<para>Finally, container data (subgraph members and attributes) are
+stored in a separate series of files:
+
+<!-- start table -->
+<informaltable frame="none">
+<tgroup cols="2" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="2.5*"/>
+<tbody valign="top">
+
+<row>
+<entry><filename>containers.data</filename></entry>
+<entry>stores the ID, name, and location in the container hierarchy
+of the containers in the database and includes pointers to the files
+storing subgraph data for these containers</entry>
+</row>
+
+<row>
+<entry><filename>si_<replaceable>n</replaceable>.objects.data</filename></entry>
+<entry>stores the object ID, subgraph ID, and label assigned by the
+originating query of the objects in container
+<replaceable>n</replaceable></entry>
+</row>
+
+<row>
+<entry><filename>si_<replaceable>n</replaceable>.links.data</filename></entry>
+<entry>stores the link ID, subgraph ID, and label assigned by the
+originating query of the links in container
+<replaceable>n</replaceable></entry>
+</row>
+
+<row>
+<entry><filename>si_<replaceable>n</replaceable>_attrs.data</filename></entry>
+<entry>stores the attribute name and data type of subgraph attributes in
+container <replaceable>n</replaceable> and points to the files
+containing the corresponding attribute values</entry>
+</row>
+
+<row>
+<entry><filename>si_<replaceable>n</replaceable>_<replaceable>attrname</replaceable>.data</filename></entry>
+<entry>stores the subgraph IDs and values for subgraph attribute
+<replaceable>attrname</replaceable> in container
+<replaceable>n</replaceable></entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+<!-- end table -->
+
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                          FILE FORMATS                          -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>File Formats</title>
+
+<para>All text data files are tab-delimited, plain text files.  Each
+line in the file corresponds to a single data item.</para>
+
+<!-- .............................................................. -->
+<!--                           objects.data                         -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>objects.data</title>
+<indexterm><primary>objects</primary>
+           <secondary>text representation</secondary></indexterm>
+<para>The <filename>objects.data</filename> file stores the IDs for
+the objects in the database.</para>
+
+<bridgehead renderas="sect4">Format</bridgehead>
+<para>
+<screen><replaceable>id</replaceable></screen>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>id</replaceable> is an integer-valued object
+  ID</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<bridgehead renderas="sect4">Example</bridgehead>
+<para>
+This example defines three objects having IDs 1, 2, and 3.
+<programlisting>1
+2
+3
+</programlisting>
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                            links.data                          -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>links.data</title>
+<indexterm><primary>links</primary>
+           <secondary>text representation</secondary></indexterm>
+
+<para>The <filename>links.data</filename> file stores the IDs and starting
+and ending point information for the links in the 
+database.</para>
+
+<bridgehead renderas="sect4">Format</bridgehead>
+<para>
+<screen><replaceable>id      o1_id      o2_id</replaceable></screen>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>id</replaceable> is an integer-valued link ID</para>
+</listitem>
+<listitem>
+  <para><replaceable>o1_id</replaceable> is the object ID for the
+  link&rsquo;s start point</para>
+</listitem>
+<listitem>
+  <para><replaceable>o2_id</replaceable> is the object ID for the
+  link&rsquo;s end point</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<bridgehead renderas="sect4">Example</bridgehead>
+<para>This example defines three links having IDs
+<literal>1</literal>, <literal>2</literal>, and <literal>3</literal>.
+The first line in the example specifies that link <literal>1</literal>
+starts at object <literal>1</literal> and ends at object
+<literal>3</literal>.
+<programlisting>1       1       3
+2       1       2
+3       3       1
+</programlisting>
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                         attributes.data                        -->
+<!-- .............................................................. -->
+
+<sect2 id="apx_textformat_attrs">
+<title>attributes.data</title>
+<indexterm><primary>attributes</primary>
+           <secondary>text representation</secondary></indexterm>
+
+<para>The <filename>attributes.data</filename> file defines the object,
+link, and container attributes in the database.  The file specifies
+the name, item type and data type for each attribute
+and includes pointers to the files containing 
+the corresponding attribute values. (See
+<xref linkend="apx_textformat_subgattrs" /> in this appendix
+for information on defining subgraph attributes.)
+</para>
+
+<bridgehead renderas="sect4">Format</bridgehead>
+<para>
+<screen><replaceable>attr-name     item-type     data-type     filename</replaceable></screen>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>attr-name</replaceable> is the name of the
+  attribute</para>
+</listitem>
+<listitem>
+  <para><replaceable>item-type</replaceable> is one of
+  <literal>O</literal> (object), <literal>L</literal> (link), or
+  <literal>C</literal> (container)</para>
+</listitem>
+<listitem>
+  <para><replaceable>data-type</replaceable> is one of the types listed
+  in the &DataTypeEnum; class; see below for instructions for
+  specifying attribute type for multi-dimensional attributes</para>
+</listitem>
+<listitem>
+  <para><replaceable>filename</replaceable> is the base name (filename
+  without extension) of the file containing the corresponding
+  attribute values; filenames typically follow the naming conventions
+  described in <xref linkend="apx_textformat_attrdata"/>, below.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>For multi-dimensional attributes (also known as multi-column
+attributes), the <replaceable>data-type</replaceable> specification
+is a comma-separated list of data types, one for each of the
+attribute&rsquo;s dimensions.  Proximity requires
+that each dimension in a multi-dimensional attribute be named.  For
+example, a <token role="attr">location</token> object attribute might
+include an <token role="attr">x</token> and 
+<token role="attr">y</token> dimension, both of type
+<code>dbl</code>.  The specification for this multi-dimensional
+attribute would be
+<screen>location       O       x:dbl, y: dbl       O_attr_location</screen>
+</para>
+
+<bridgehead renderas="sect4">Example</bridgehead>
+<para>
+This example defines three database attributes&mdash;an 
+<token role="attr">objtype</token> object attribute, a
+<token role="attr">linktype</token> link attribute, and a
+<token role="attr">count</token> container attribute.
+<programlisting>objtype        O        str        O_attr_objtype
+linktype       L        str        L_attr_linktype
+count          C        int        C_attr_count
+</programlisting>
+</para>
+
+</sect2>
+
+<?pagebreak?>
+<!-- .............................................................. -->
+<!--                      Attribute data files                      -->
+<!-- .............................................................. -->
+
+<sect2 id="apx_textformat_attrdata">
+<title>Attribute data files</title>
+<para>Attribute data files store the values for a single
+object, link, or container attribute. (See
+<xref linkend="apx_textformat_subgattrs" /> later in this appendix
+for information on handling subgraph attributes.)</para>
+
+<para>Attribute data files typically obey the following filename format:
+<blockquote>
+<para><filename><replaceable>type</replaceable>_attr_<replaceable>attrname</replaceable>.data</filename>
+</para></blockquote>
+where
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><replaceable>type</replaceable> is one of
+    <literal>O</literal> (object), <literal>L</literal> (link), or
+    <literal>C</literal> (container)</para>
+  </listitem>
+  <listitem>
+    <para><replaceable>attrname</replaceable> is the name of the
+    attribute</para>
+  </listitem>
+</itemizedlist>
+For example, a file storing attribute values for the object attribute
+<token role="attr">objtype</token> would be called
+<filename>O_attr_objtype.data</filename>.</para>
+
+<para>The names for the attribute data files are suggested conventions,
+which Proximity uses for naming exported data files.
+Proximity uses whatever filenames you provide in
+<filename>attributes.data</filename> when importing data.</para>
+
+<bridgehead renderas="sect4">Format</bridgehead>
+<para>
+<screen><replaceable>item-id       value       [value]</replaceable></screen>
+where
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><replaceable>item-id</replaceable> is the ID of a
+    database object, link, or container</para>
+  </listitem>
+  <listitem>
+    <para><replaceable>value</replaceable> is a value of this
+    attribute for the specified database entity; string values must be quoted</para>
+  </listitem>
+</itemizedlist>
+Item IDs may be used more
+than once in the file when the corresponding entity has
+multiple values for the specified attribute.  Additional
+tab-separated value columns are used when providing data for
+multi-dimensional attributes.</para>
+
+<para>The following example provides values for the 
+<token role="attr">name</token> object attribute.  Note that
+object&nbsp;2 has two values for this attribute.
+</para>
+
+<bridgehead renderas="sect4">Example</bridgehead>
+<para>
+<programlisting>1       "Peter"
+2       "James"
+2       "Jimmy"
+</programlisting>
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                        containers.data                         -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>containers.data</title>
+<indexterm><primary>containers</primary>
+           <secondary>text representation</secondary></indexterm>
+
+<para>The <filename>containers.data</filename> file defines the
+containers in the database. The file specifies the container ID,
+name, and location in the container hierarchy and includes pointers to
+the files storing subgraph data for these containers.</para>
+
+<bridgehead renderas="sect4">Format</bridgehead>
+<para>
+<screen><replaceable>id    cont-name    parent-id    subg-attrs-file    subg-data-file</replaceable></screen>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>id</replaceable> is an integer-valued container
+  ID</para>
+</listitem>
+<listitem>
+  <para><replaceable>cont-name</replaceable> is the name of the
+  container</para>
+</listitem>
+<listitem>
+  <para><replaceable>parent-id</replaceable> is the ID of the parent
+  container for the current container; a value of
+  <literal>-1</literal> means that the current container is under the
+  root container (has no parent container)</para>
+</listitem>
+<listitem>
+  <para><replaceable>subg-attrs-file</replaceable> is the base
+  name (filename without extension) of the data file that defines
+  attributes on subgraphs in this container; filenames must follow the
+  naming conventions described in 
+  <xref linkend="apx_textformat_subgattrs" />.  This file is required
+  but may be empty if the container has no subgraph attributes.</para>
+</listitem>
+<listitem>
+  <para><replaceable>subg-data-file</replaceable> is the base name
+  (filename without extensions) of the data files containing the object
+  and link data for the subgraphs in the current container; filenames
+  must follow the naming conventions described in 
+  <xref linkend="apx_textformat_subgdata" />.
+<!--  For example, a value of <literal>si_0</literal> in this column
+  indicates that the object and link data for the current
+  container&rsquo;s subgraphs are found in the files
+  <filename>si_0.objects.data</filename> and
+  <filename>si_0.links.data</filename>, respectively.-->
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<bridgehead renderas="sect4">Example</bridgehead>
+<para>
+The following example describes two containers:
+<itemizedlist spacing="compact">
+<listitem>
+  <para>A top-level container named 
+  <token role="container">c1</token></para>
+</listitem>
+<listitem>
+  <para>A container under <token role="container">c1</token>
+  named <token role="container">samples</token></para>
+</listitem>
+</itemizedlist>
+The first line defines container <token role="container">c1</token>
+and specifies that subgraph attributes used in this
+container are defined in <filename>si_0_attrs.data</filename>, and the
+objects and links for these subgraphs are specified in
+<filename>si_0.objects.data</filename> and
+<filename>si_0.links.data</filename>, respectively.
+<programlisting>0       c1          -1       si_0_attrs       si_0
+1       samples     0        si_1_attrs       si_1
+</programlisting>
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                      Subgraph data files                       -->
+<!-- .............................................................. -->
+
+<sect2 id="apx_textformat_subgdata">
+<title>Subgraph data files</title>
+<indexterm><primary>subgraphs</primary>
+           <secondary>text representation</secondary></indexterm>
+
+<para>Subgraph data files store the IDs of objects and links in a
+container&rsquo;s subgraphs.  Note that each container has two
+associated subgraph data files, one for objects and one for links.</para>
+
+<para>Subgraph data files obey the following filename format:
+<blockquote>
+<para>Object data: 
+<filename>si_<replaceable>n</replaceable>_objects.data</filename>
+<?linebreak?>
+Link data: <filename>si_<replaceable>n</replaceable>_links.data</filename>
+</para></blockquote>
+where
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><replaceable>n</replaceable> is the ID of the encompassing
+    container
+    </para>
+  </listitem>
+</itemizedlist>
+For example, the subgraph data files for container 0
+would be called <filename>si_0_objects.data</filename> and
+<filename>si_0_links.data</filename>.
+</para>
+
+<bridgehead renderas="sect4">Format</bridgehead>
+<para>
+<screen><replaceable>item-id       subgraph-id       item-label</replaceable></screen>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>item-id</replaceable> is the object or
+  link ID</para>
+</listitem>
+<listitem>
+  <para><replaceable>subgraph-id</replaceable> is the ID of the
+  subgraph containing the specified object or link</para>
+</listitem>
+<listitem>
+  <para><replaceable>item-label</replaceable> is the label
+  assigned to the object or link by the generating query; labels are
+  strings and must be quoted</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<bridgehead renderas="sect4">Example</bridgehead>
+<para>
+The following examples define two subgraphs with IDs 0 and 1.
+Each subgraph contains an actor object linked to a movie in which he
+or she appeared.
+<!-- In this example, subgraph 
+<token role="subgraph">0</token> contains objects
+<token role="object">1</token> and <token role="object">3</token> and
+link <token role="link">1</token>.  The &ldquo;actor,&rdquo;
+&ldquo;movie,&rdquo; and &ldquo;acted-in&rdquo; labels were assigned
+by the originating query. -->
+</para>
+
+<para>Subgraph object data file:
+<programlisting>1       0       "actor"
+3       0       "movie"
+2       1       "actor"
+3       1       "movie"
+</programlisting>
+</para>
+
+<?pagebreak?>
+<para>Subgraph link data file:
+<programlisting>1       0       "acted-in"
+2       1       "acted-in"
+</programlisting>
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--              Subgraph attribute specification files            -->
+<!-- .............................................................. -->
+
+<sect2 id="apx_textformat_subgattrs">
+<title>Subgraph attribute specification files</title>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="subgraphs">of subgraphs</secondary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>attributes of</secondary></indexterm>
+
+<para>A subgraph attribute specification file defines the subgraph
+attributes used 
+in the corresponding container.  The file specifies the name and data
+type for each attribute and includes pointers to the files containing
+the corresponding attribute values.  (See
+<xref linkend="apx_textformat_attrs" /> in this appendix
+for information on handling object, link, and container attributes.)</para>
+
+<para>Subgraph attribute specification files obey the following
+filename format:
+<blockquote>
+<para><filename>si_<replaceable>n</replaceable>_attrs.data</filename>
+</para></blockquote>
+where
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><replaceable>n</replaceable> is the ID of the encompassing
+    container
+    </para>
+  </listitem>
+</itemizedlist>
+For example, a file defining subgraph attributes for container 1
+would be called <filename>si_1_attrs.data</filename>.
+</para>
+
+<bridgehead renderas="sect4">Format</bridgehead>
+<para>
+<screen><replaceable>attr-name       data-type       subg-attr-data-file</replaceable></screen>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>attr-name</replaceable> is the name of the
+  attribute</para>
+</listitem>
+<listitem>
+  <para><replaceable>data-type</replaceable> is one of the types listed
+  in the &DataTypeEnum; class</para>
+</listitem>
+<listitem>
+  <para><replaceable>subg-attr-data-file</replaceable> is the
+  name of the file that contains the
+  corresponding attribute values; this file may be omitted if
+  the container has no subgraph attributes</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<bridgehead renderas="sect4">Example</bridgehead>
+<para>
+The following example defines two subgraph attributes,
+<token role="attr">sample-num</token> of type <code>int</code> with
+values specified in <filename>si_0_attr_sample.data</filename> and
+<token role="attr">avg-age</token> of type <code>dbl</code> with
+values specified in <filename>si_0_attr_avg-age.data</filename>.
+<programlisting>sample-num     int       si_0_attr_sample.data
+avg-age        dbl       si_0_attr_avg-age.data
+</programlisting>
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                   Subgraph attribute data files                -->
+<!-- .............................................................. -->
+
+<sect2 id="apx_textformat_subgattrdata">
+<title>Subgraph attribute data files</title>
+
+<para>A subgraph attribute data file provides the values for a single
+subgraph attribute.
+</para>
+
+<para>Subgraph attribute data files typically obey the following
+filename format:
+<blockquote>
+<para><filename>si_<replaceable>n</replaceable>_attr_<replaceable>attrname</replaceable>.data</filename>
+</para></blockquote>
+where
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><replaceable>n</replaceable> is the ID of the encompassing
+    container
+    </para>
+  </listitem>
+  <listitem>
+    <para><replaceable>attrname</replaceable> is name of the subgraph
+    attribute
+    </para>
+  </listitem>
+</itemizedlist>
+For example, a file storing values for subgraph attribute 
+<token role="attr">sample</token> in container 2
+would be called <filename>si_2_attr_sample.data</filename>.
+</para>
+
+<para>The names for the subgraph attribute data files are suggested
+conventions, which Proximity uses for naming exported data files.
+Proximity uses whatever filenames you provide in the corresponding
+subgraph attribute specification file when importing data.</para>
+
+<?pagebreak?>
+<bridgehead renderas="sect4">Format</bridgehead>
+<para>
+<screen><replaceable>subg-id       value       [value]</replaceable></screen>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>subg-id</replaceable> is the subgraph ID</para>
+</listitem>
+<listitem>
+  <para><replaceable>value</replaceable> is the value of this
+  attribute for the specified subgraph; string values must be quoted</para>
+</listitem>
+</itemizedlist>
+Subgraph IDs may be used more than once in the file when the
+corresponding entity has multiple values for the specified attribute.
+Additional tab-separated value columns are used when providing data
+for multi-dimensional subgraph attributes.</para>
+
+<bridgehead renderas="sect4">Example</bridgehead>
+<para>
+The following example provides the values for a
+<token role="link">sample-role</token> subgraph attribute.  The first
+line specifies that subgraph&nbsp;0 has a value of
+<literal>"test"</literal> for this attribute.
+<programlisting>0       "test"
+1       "train"
+2       "train"
+3       "test"
+</programlisting>
+</para>
+
+<indexterm startref="idx_textdataa" class="endofrange"/>
+<indexterm startref="idx_textdatab" class="endofrange"/>
+</sect2>
+
+<!-- .................. end of format descriptions ............. -->
+
+</sect1>
+
+</appendix>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

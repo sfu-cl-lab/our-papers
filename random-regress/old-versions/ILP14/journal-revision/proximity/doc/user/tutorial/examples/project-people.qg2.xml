@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information). -->
+
+<graph-query name="Subquery example">
+  <description>2d-star query</description>
+  <query-body>
+    <vertex name="prof">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>pagetype</attribute-name>
+          <value>Faculty</value>
+        </test>
+      </condition>
+    </vertex>
+    <edge name="supervises">
+      <vertex1>prof</vertex1>
+      <vertex2>project</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <subquery>
+      <vertex name="project">
+        <condition>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>pagetype</attribute-name>
+            <value>ResearchProject</value>
+          </test>
+        </condition>
+      </vertex>
+      <vertex name="person">
+        <condition>
+          <or>
+            <test>
+              <operator>eq</operator>
+              <attribute-name>pagetype</attribute-name>
+              <value>Faculty</value>
+            </test>
+            <test>
+              <operator>eq</operator>
+              <attribute-name>pagetype</attribute-name>
+              <value>Student</value>
+            </test>
+            <test>
+              <operator>eq</operator>
+              <attribute-name>pagetype</attribute-name>
+              <value>Staff</value>
+            </test>
+          </or>
+        </condition>
+        <numeric-annotation>
+          <min>0</min>
+        </numeric-annotation>
+      </vertex>
+      <edge name="associated-with">
+        <vertex1>project</vertex1>
+        <vertex2>person</vertex2>
+        <directed>false</directed>
+        <numeric-annotation>
+          <min>1</min>
+        </numeric-annotation>
+      </edge>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </subquery>
+    <constraint>
+      <and>
+        <test>
+          <operator>ne</operator>
+          <item>
+            <item-name>prof</item-name>
+            <id />
+          </item>
+          <item>
+            <item-name>person</item-name>
+            <id />
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="prof" x="33.0" y="122.0" />
+    <vertex-location name="project" x="185.0" y="36.0" />
+    <vertex-location name="person" x="293.0" y="162.0" />
+  </editor-data>
+</graph-query>
+

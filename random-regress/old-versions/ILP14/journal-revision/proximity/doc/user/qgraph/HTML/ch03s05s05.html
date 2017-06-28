@@ -1,0 +1,201 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Efficiency considerations</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch03s05.html" title="Implementation in Proximity">
+      <link rel="prev" href="ch03s05s04.html" title="Complex conditions in Proximity">
+      <link rel="next" href="ch03s06.html" title="Summary">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s05s04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Implementation in Proximity</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e2645"></a>Efficiency considerations
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e2648"></a><a class="indexterm" name="d0e2653"></a><p>The efficiency considerations described below are unlikely to
+            have a noticeable effect on query processing speed under normal
+            circumstances. You may find some of these points helpful, however, if
+            you need to use extremely complex queries, or execute the query against an
+            extremely large database.
+         </p>
+         <div class="sect3" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h4 class="title"><a name="d0e2659"></a>Redundant information in conditions
+                     </h4>
+                  </div>
+               </div>
+            </div>
+            <p>In many cases, databases contain redundant information. For
+               example, an <em class="token">acted-in</em> link might only be legally
+               used to connect actors to movies.  Thus if we require this 
+               link type in a query edge condition, we know that the linked objects
+               will always be actors and movies.  Given such limits on the how the
+               database is structured, the queries shown in 
+               <a href="ch03s05s05.html#fig_cond_maybeequiv" title="Figure&nbsp;3.20.&nbsp;Potentially equivalent queries">Figure&nbsp;3.20</a> are equivalent.
+               
+            </p>
+            <div class="figure"><a name="fig_cond_maybeequiv"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_MaybeEquiv.png" align="middle" width="630" alt="Potentially equivalent queries"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.20.&nbsp;Potentially equivalent queries</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>Although both forms yield the same results,
+               it is generally more efficient to include more
+               rather than less information when adding conditions.
+               The additional information prunes the candidate entities for the join
+               needed to execute the query and thus reduces the number of items
+               involved in the join.
+            </p>
+            <p>In general, reducing the number of items
+               involved in a join improves processing speed, so adding additional
+               information in the form of conditions to your query is usually a good
+               idea, even when such information doesn&#8217;t change the anticipated
+               query results.  Even if you know that
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">acted-in</span> links only 
+               connect actors to movies, it&#8217;s still worthwhile to include the
+               conditions for these objects when query efficiency is
+               a concern.
+            </p>
+         </div>
+         <div class="sect3" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h4 class="title"><a name="d0e2686"></a>Existence conditions versus attribute value conditions
+                     </h4>
+                  </div>
+               </div>
+            </div>
+            <p>Checking for the existence of an attribute in Proximity is
+               extremely efficient.  Use 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e340"><span class="glossterm">existence conditions</span></a>
+               instead of 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e49"><span class="glossterm">attribute value conditions</span></a>
+               when they match the same data.
+            </p>
+            <p>For example, suppose our database uses a 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Series</span> attribute to 
+               indicate whether a book is part of a series, as shown in 
+               <a href="ch03s05s05.html#fig_cond_db04" title="Figure&nbsp;3.21.&nbsp;Database fragment [Cond_DB04.xml]">Figure&nbsp;3.21</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db04"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB04.png" align="middle" width="549" alt="Database fragment [Cond_DB04.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.21.&nbsp;Database fragment [Cond_DB04.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               As shown in this example, <span class="emphasis"><em>Wolves of the Calla</em></span> is
+               part of the <span class="emphasis"><em>Dark 
+                     Tower</em></span> series, and <span class="emphasis"><em>Night Journey</em></span> is
+               part of the <span class="emphasis"><em>Green Mile</em></span> series, so both have the
+               attribute value <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Series&nbsp;=&nbsp;true</span>.
+               To find authors and their books that are part of a series, we
+               might initially create the query shown in 
+               <a href="ch03s05s05.html#fig_cond_db04_q01" title="Figure&nbsp;3.22.&nbsp;Query using attribute value condition [Cond_DB04_Q01.qg2.xml]">Figure&nbsp;3.22</a>. 
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db04_q01"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB04_Q01.png" align="middle" width="328.50000000000006" alt="Query using attribute value condition [Cond_DB04_Q01.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.22.&nbsp;Query using attribute value condition [Cond_DB04_Q01.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               This typical query looks for book objects whose 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Series</span> attribute has a value of 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">true</span>.  But because of how this database is
+               designed, all 
+               books that are part of a series have this same attribute value, while
+               books that are not part of a series have no value for this attribute.
+               This means that, for this database, the query above
+               is equivalent to that shown in
+               <a href="ch03s05s05.html#fig_cond_db04_q02" title="Figure&nbsp;3.23.&nbsp;Query using existence condition [Cond_DB04_Q02.qg2.xml]">Figure&nbsp;3.23</a>, below.
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db04_q02"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB04_Q02.png" align="middle" width="328.50000000000006" alt="Query using existence condition [Cond_DB04_Q02.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.23.&nbsp;Query using existence condition [Cond_DB04_Q02.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               Because existence conditions are more efficiently processed than
+               attribute value conditions, the second query is faster than the first, while
+               yielding identical results.
+            </p>
+            <p>It&#8217;s important to note that the efficiency considerations described
+               above are only applicable when choosing which of a set of equivalent
+               queries to execute.  Such a determination often relies on a thorough
+               understanding of the target database.  In practice, we are often faced
+               with unknown or ill-defined database schemas making this kind of
+               choice moot&#8212;we simply have to design a query that finds the
+               matches we want without being able to take advantage of such
+               efficiency considerations.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s05s04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03s05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Complex conditions in Proximity&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Summary</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

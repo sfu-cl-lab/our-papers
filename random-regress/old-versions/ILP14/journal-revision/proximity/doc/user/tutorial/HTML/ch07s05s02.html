@@ -1,0 +1,235 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Viewing relational dependency networks</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch07s05.html" title="Relational Dependency Networks">
+      <link rel="prev" href="ch07s05.html" title="Relational Dependency Networks">
+      <link rel="next" href="ch07s06.html" title="Tips and Reminders">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch07s05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Relational Dependency Networks</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch07s06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e16511"></a>Viewing relational dependency networks
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_rdns_viz1"></a><a class="indexterm" name="idx_rdns_viz2"></a><a class="indexterm" name="idx_rdns_viz3"></a><p>Proximity provides an RDN viewer to graphically illustrate the
+            dependencies in the RDN.  The figure below shows an artificial RDN
+            constructed to illustrate its components.
+            
+         </p>
+         <div class="informalfigure">
+            <div class="mediaobject" align="center">
+               <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                  <tr>
+                     <td align="center" valign="bottom"><img src="images/RDN_Example.png" align="middle" width="387"></td>
+                  </tr>
+               </table>
+            </div>
+         </div>
+         <p>
+            This RDN describes the probabilistic dependencies between attributes
+            of movies and actors. Each plate corresponds to an 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e785"><span class="glossterm">object type</span></a>,
+            circles represent attributes on those types, and arrows indicate
+            probabilistic dependencies among these attributes.
+         </p>
+         <p>In the example above, movie genre depends on movie
+            success (represented by the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isOWBlockbuster</span> attribute, which indicates whether
+            the movie is an opening weekend blockbuster).  That is, if we know
+            whether a movie grossed over 
+            two million dollars in its opening weekend, we are better able to
+            predict its genre.  (Strictly speaking, the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e181"><span class="glossterm">conditional probability distribution</span></a> for genre
+            includes movie success.)  Similarly, predicting genre also 
+            depends on whether the movie&#8217;s actors have won any awards.  In
+            this case, the arrow points in both directions indicating that
+            predicting whether a movie&#8217;s actors have won any awards depends
+            on genre, as well.
+            
+         </p>
+         <p>The loop leaving and re-entering the movie plate connecting
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isOWBlockbuster</span> 
+            to itself indicates <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e57"><span class="glossterm">autocorrelation</span></a>.
+            <a class="indexterm" name="d0e16557"></a>
+            The success of a movie can be
+            predicted more accurately if we know the success of other movies that
+            link directly or indirectly to the target object.  In this
+            case, we link indirectly through <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">studio</span>
+            objects&#8212;if 
+            other movies made by the same studio are successful, we are more
+            likely to predict that the current movie will have a big opening
+            weekend.  Because RPTs do not represent these intermediate objects,
+            the RDN viewer does not show these connecting studio objects.
+         </p>
+         <p>The arrow from the large dot on the actor plate to movie genre
+            indicates that genre also depends on the degree of related actor
+            objects (how many actors are linked to this movie in the database).
+            Linking to the dot indicates that this dependency involves a graph
+            feature (degree) rather than one based on attribute values.
+         </p>
+         <p>To view an RDN, you must construct an RDN &#8220;wrapper&#8221; 
+            <a class="indexterm" name="d0e16570"></a>
+            file that lists the RPTs that were used by the RDN
+            and identifies different labels (from these RPTs) that refer to the
+            same object class.  The example below shows such a wrapper file for the
+            RDN created in <a href="ch07s05.html#ex_models_rdn" title="Exercise&nbsp;7.4.&nbsp;Learning and applying the relational dependency network model:">Exercise&nbsp;7.4</a>.
+            
+         </p><pre class="programlisting">&lt;!DOCTYPE rdn SYSTEM "rdn.dtd"&gt;
+&lt;rdn&gt;
+  &lt;rpt-files&gt;
+    &lt;file&gt;ProxWebKB_RPTforRDN.xml&lt;/file&gt;
+  &lt;/rpt-files&gt;
+  &lt;item-maps&gt;
+    &lt;map&gt;
+      &lt;from&gt;core_page&lt;/from&gt;
+      &lt;to&gt;linked_to_page&lt;/to&gt;
+    &lt;/map&gt;
+    &lt;map&gt;
+      &lt;from&gt;core_page&lt;/from&gt;
+      &lt;to&gt;linked_from_page&lt;/to&gt;
+    &lt;/map&gt;
+  &lt;/item-maps&gt;
+&lt;/rdn&gt;
+</pre><p>
+            The <code class="sgmltag-starttag">&lt;rpt-files&gt;</code> element lists the
+            component RPTs, each enclosed by
+            <code class="sgmltag-starttag">&lt;file&gt;</code> tags.  Our RDN uses only a
+            single RPT, <code class="filename">ProxWebKB_RPTforRDN.xml</code>.
+         </p>
+         <p>The <code class="sgmltag-starttag">&lt;item-map&gt;</code> section
+            contains a sequence of <code class="sgmltag-starttag">&lt;map&gt;</code>
+            elements. Each <code class="sgmltag-starttag">&lt;map&gt;</code> element
+            contains a pair of <code class="sgmltag-starttag">&lt;item&gt;</code> names from
+            the RPT, where both names refer to the same type of object in the
+            database.  In this example, all database objects are web pages, so we
+            map all the object labels to <code class="code">core_object</code>.  The name in
+            the <code class="sgmltag-starttag">&lt;from&gt;</code> element is used to label
+            the corresponding plate in the RDN viewer.
+         </p>
+         <div class="procedure"><a name="d0e16609"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;7.5.&nbsp;Viewing relational dependency network graphs:</b></p>
+            <p>This script requires entities created in 
+               <a href="ch07s05.html#ex_models_rdn" title="Exercise&nbsp;7.4.&nbsp;Learning and applying the relational dependency network model:">Exercise&nbsp;7.4</a>. You must have completed this
+               exercise before running the script in the current exercise.
+            </p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>All files required for viewing the RDN must be in the same directory.
+                     If you have not already done so, copy
+                     <code class="filename">rpt2.dtd</code> and <code class="filename">rdn.dtd</code>
+                     to the directory containing the
+                     saved RPT XML file, <code class="filename">ProxWebKB_RPTforRDN.xml</code>.
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cp $PROX_HOME/resources/rpt2.dtd $PROX_HOME</code></strong>
+&gt; <strong class="userinput"><code>cp $PROX_HOME/resources/rdn.dtd $PROX_HOME</code></strong>
+</pre><p>
+                     Proximity requires that <code class="filename">rpt2.dtd</code> 
+                     <a class="indexterm" name="d0e16642"></a>
+                     <a class="indexterm" name="d0e16646"></a>
+                     be in the same directory as 
+                     the component RPT XML files and that <code class="filename">rdn.dtd</code>
+                     <a class="indexterm" name="d0e16655"></a>
+                     <a class="indexterm" name="d0e16659"></a>
+                     be in the same directory as the RDN wrapper file.
+                  </p>
+               </li>
+               <li>
+                  <p>Copy the RDN wrapper file to the same directory.
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cp $PROX_HOME/doc/user/tutorial/examples/1d-clusters-rdn.xml $PROX_HOME</code></strong>
+</pre><p>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">Model</strong></span> menu, choose
+                     <span><strong class="guimenuitem">Graph RDN</strong></span>.
+                     Proximity displays the <span class="guilabel">Open</span> dialog.
+                  </p>
+               </li>
+               <li>
+                  <p>Navigate to the directory containing the RDN files
+                     (<code class="filename">$PROX_HOME</code> if you are following the tutorial)
+                     and choose <code class="filename">1d-clusters-rdn.xml</code>. Click
+                     <span><strong class="guibutton">Open</strong></span>.
+                  </p>
+                  <p>Proximity opens a window showing a graph of the RDN learned
+                     for this data.
+                     
+                  </p>
+                  <div class="informalfigure">
+                     <div class="mediaobject" align="center">
+                        <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                           <tr>
+                              <td align="center" valign="bottom"><img src="images/GUI_ProxWebKB_RDN.png" align="middle" width="630"></td>
+                           </tr>
+                        </table>
+                     </div>
+                  </div>
+                  <p>
+                     You may need to drag some of the RDN elements to see the overlapping
+                     lines more clearly.
+                     
+                  </p>
+                  <p>The RDN for the ProxWebKB data shows the probabilistic
+                     dependencies used to predict the value of a page&#8217;s 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute.  Specifically, the value
+                     of a page&#8217;s <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute
+                     depends on the the known values of <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page_num_inlinks</span>
+                     and <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page_num_outlinks</span> for related pages and
+                     the inferred value of <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> for related
+                     pages.
+                     The link from the core_page dot in the upper left corner to the 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute indicates that 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> is also dependent on structural
+                     features (i.e., the degree) of neighboring pages.
+                     All of the links in the RDN graph leave and re-enter the
+                     core_page plate, indicating that we use the attributes of related
+                     pages to predict the value of <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span>, rather
+                     than the attributes of the target page itself.
+                     
+                     
+                  </p>
+               </li>
+            </ol>
+         </div><a class="indexterm" name="d0e16735"></a><a class="indexterm" name="d0e16736"></a><a class="indexterm" name="d0e16737"></a><a class="indexterm" name="d0e16738"></a><a class="indexterm" name="d0e16739"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch07s05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch07s05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch07s06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Relational Dependency Networks&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Tips and Reminders</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>
