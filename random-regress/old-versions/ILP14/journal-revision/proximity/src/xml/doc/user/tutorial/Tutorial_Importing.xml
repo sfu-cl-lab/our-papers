@@ -1,0 +1,1871 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="ch_import">
+<title>Importing and Exporting Proximity Data</title>
+
+<!-- ============================================================== -->
+<!--                            OVERVIEW                            -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Overview</title>
+
+<para>Proximity provides two text formats for importing and exporting
+<glossterm>relational data</glossterm> to and from a Proximity database:
+<itemizedlist spacing="compact">
+<listitem>
+  <para>an XML format <!-- used by the preferred import and export
+  utilities -->
+  </para>
+</listitem>
+<listitem>
+  <para>a plain text format <!-- supported by utilities lacking the
+  error checking found in the XML import and export applications -->
+  </para>
+</listitem>
+</itemizedlist>
+In general, because the associated import and export utilities provide
+better error checking, we recommend using the XML format when
+feasible.  The use of plain text may be appropriate
+when the task does not require error checking or
+the database is too large for satisfactory use of XML.</para>
+
+<para>These formats let you define
+<glossterm baseform="object">objects</glossterm>, 
+<glossterm baseform="link">links</glossterm>, and arbitrary 
+<glossterm baseform="attribute">attributes</glossterm>
+on those objects and links as well as specifying 
+<glossterm baseform="container">containers</glossterm> and 
+<glossterm baseform="subgraph">subgraphs</glossterm>
+for databases 
+that include these structures. (Containers and subgraphs are created
+as a result of executing queries and are described
+in more detail in <xref linkend="ch_queries"/>.)
+Proximity also provides utilities for importing and exporting data
+using these formats.</para>
+
+<para>This chapter describes how to import and export both XML and
+plain text data.  You can import and export individual containers and
+attributes as well as complete databases.
+Proximity also supports the export of selected data to tab-delimited
+text files from the &uiname;; these specialized export operations are
+described in <xref linkend="export_special"/> later in this chapter.
+The XML data format is described in <xref linkend="apx_xmlformat"/>.
+The DTD for this XML format is located in
+<indexterm><primary>DTDs</primary>
+           <secondary>prox3db.dtd</secondary></indexterm>
+<indexterm><primary>prox3db.dtd</primary></indexterm>
+<filename>&proxpath;/resources/prox3db.dtd</filename>.
+The plain text data format is described in
+<xref linkend="apx_textformat" />.
+</para>
+
+<sidebar>
+<para>For all import and export operations, the data files must reside
+on the same machine as that serving the database.</para>
+</sidebar>
+
+<!-- removed support for format 08/2006
+<para>If you have existing &prox2; 
+<indexterm><primary>databases</primary>
+           <secondary>Proximity 2.0 format</secondary></indexterm>
+<indexterm><primary>Proximity 2.0 databases</primary></indexterm>
+databases that you want to import
+into Proximity 3.0 or later, see the section &prox2changes; for
+instructions for importing your data into Proximity.</para>
+-->
+
+<para>
+<itemizedlist spacing="compact">
+<title>Objectives</title>
+<para>The text and exercises in this chapter demonstrate how to</para>
+  <listitem>
+    <para>import XML data into Proximity</para>
+  </listitem>
+  <listitem>
+    <para>import plain text data into Proximity</para>
+  </listitem>
+  <listitem>
+    <para>create the sample database used for the tutorial
+    exercises</para>
+  </listitem>
+  <listitem>
+    <para>convert standard, tabular data to Proximity&rsquo;s XML import
+    format</para>
+  </listitem>
+  <listitem>
+    <para>export Proximity data to XML</para>
+  </listitem>
+  <listitem>
+    <para>export Proximity data to plain text</para>
+  </listitem>
+  <listitem>
+    <para>export attribute values to a tab-delimited text file</para>
+  </listitem>
+  <listitem>
+    <para>export NST data to a tab-delimited text file (see
+    <xref xrefstyle="pageref" linkend="export_nst"/> for a description
+    of NSTs)</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        IMPORTING XML DATA                      -->
+<!-- ============================================================== -->
+
+<sect1 id="import_webkb">
+<title>Importing XML Data</title>
+<indexterm id="idx_import1" class="startofrange">
+           <primary>importing</primary>
+           <secondary>XML data</secondary></indexterm>
+<indexterm id="idx_import2" class="startofrange">
+           <primary>data</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm id="idx_import3" class="startofrange">
+           <primary>XML data</primary>
+           <secondary>importing</secondary></indexterm>
+
+<para>This section describes how to import XML data
+into Proximity using the provided &webkb;
+<indexterm><primary>databases</primary>
+           <secondary>&webkb;</secondary></indexterm>
+<indexterm><primary>&webkb; database</primary></indexterm>
+database as an example.
+Proximity lets you import a complete database, including any
+<glossterm baseform="subgraph">subgraphs</glossterm> and 
+<glossterm baseform="container">containers</glossterm>, or you can
+import individual <glossterm baseform="attribute">attributes</glossterm>
+or containers.</para>
+
+<para>By default, Proximity restricts the structure of the XML data
+file to ensure that you cannot accidentally create identity
+conflicts.  For example, Proximity prohibits adding additional objects
+to a database once the initial set of objects has been defined;
+therefore, the XML data file can contain only a single objects section
+and you cannot add more objects with a subsequent import.  Similarly,
+you cannot add new links or add more values to an attribute once you have
+completed importing the initial set of links or attribute
+values. You can override these restrictions by using the
+<code>noChecks</code> 
+<indexterm><primary>noChecks import option</primary></indexterm>
+option to the import script, described in 
+<xref xrefstyle="pageref" linkend="import_nocheck"/>.</para>
+
+<para>
+<caution>
+<para>You are responsible for ensuring the integrity of the data in an
+XML file.  Proximity makes no checks to ensure that attributes are
+assigned to items (objects, links, subgraphs, or containers) that are
+actually present in the database.  Assigning attribute values to
+non-existent items does not trigger an exception or warning.</para>
+</caution> 
+</para>
+
+<sidebar>
+<para>Proximity automatically converts all attribute names to lower
+case
+<indexterm><primary>case of attribute names and values</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>case of names and values</secondary></indexterm>
+when importing XML data; attribute values retain their original
+case.  (Proximity ignores case when matching attribute names but obeys
+case when matching attribute values.)</para>
+
+<para>The characters <literal>&lt;</literal>, <literal>&gt;</literal>,
+and <literal>&amp;</literal> must be represented by the corresponding
+XML entities, <literal>&amp;lt;</literal>,
+<literal>&amp;gt;</literal>, and <literal>&amp;amp;</literal>. 
+For compatibility with &monet;, single quotes, double quotes, 
+<indexterm><primary>MonetDB</primary>
+           <secondary>character conversion for</secondary></indexterm>
+<indexterm><primary>characters</primary>
+           <secondary>converting for MonetDB</secondary></indexterm>
+<indexterm><primary>converting</primary>
+           <secondary>characters for MonetDB</secondary></indexterm>
+<indexterm><primary>special characters</primary>
+           <secondary sortas="XML">in XML data representation</secondary></indexterm>
+<indexterm><primary>characters</primary>
+           <secondary>special</secondary>
+           <tertiary sortas="XML">in XML data representation</tertiary></indexterm>
+the pipe symbol (<literal>|</literal>),
+and newline characters in the XML data are automatically
+changed to underscores during import.</para>
+</sidebar>
+
+<para>The sections below walk through the process of first
+importing a database and then importing values for a new
+attribute on the existing database objects.</para>
+
+<!-- .............................................................. -->
+<!--                  Importing databases using XML                 -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Importing databases using XML</title>
+<indexterm id="idx_import5" class="startofrange">
+           <primary>databases</primary>
+           <secondary>importing</secondary></indexterm>
+
+<para>The exercise below walks through the process of importing the XML
+version of the &webkb; database. &webkb; was developed from the WebKB
+<indexterm><primary>WebKB data set</primary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>WebKB</secondary></indexterm>
+<glossterm>relational data</glossterm> set <xref linkend="craven99"/>
+available from 
+<ulink url="http://www-2.cs.cmu.edu/~WebKB/">www-2.cs.cmu.edu/~WebKB/</ulink>.
+The version used for the Proximity tutorial has been modified from the
+public distribution to meet the needs of this tutorial. Modifications
+include some data clean up and the the creation of additional object
+attributes based on the data in the distributed version.</para>
+
+<!--
+   EXERCISE: Importing the &webkb; XML data into Proximity
+-->
+
+<sidebar>
+<para>Most of the remaining tutorial exercises require that you use
+the &webkb; database. Make sure you complete <xref
+linkend="ex_import_webkb"/> to create the &webkb;
+database.</para>
+</sidebar>
+
+<procedure id="ex_import_webkb">
+<title>Importing the &webkb; data into Proximity</title>
+
+<step>
+<para>Uncompress the compressed &webkb; XML data file.</para>
+
+<para><synopsis>&prompt; <userinput>cd &importpath;</userinput>
+&prompt; <userinput>gunzip proxwebkb.xml.gz</userinput>
+</synopsis></para>
+</step>
+
+<step>
+<para>Copy the file <filename>prox3db.dtd</filename> from
+<filename>&proxpath;/resources</filename> to the directory containing
+the XML data file, <filename>&importpath;</filename>.
+</para>
+<sidebar>
+<para>Proximity requires that the 
+<glossterm baseform="document type definition">DTD</glossterm> file, 
+<indexterm><primary>DTDs</primary>
+           <secondary>prox3db.dtd</secondary></indexterm>
+<indexterm><primary>prox3db.dtd</primary></indexterm>
+<filename>prox3db.dtd</filename>, be present in the directory
+containing the XML data file. The DTD file is included in
+<filename>&proxpath;/resources</filename>. Make sure you copy the DTD
+to any other directories containing XML data files you want to import
+into Proximity.</para>
+</sidebar>
+
+<para><synopsis>&prompt; <userinput>cp &proxpath;/resources/prox3db.dtd &importpath;/</userinput>
+</synopsis></para>
+</step>
+
+
+<step>
+<para>Start the &monet; server.  Data files must be on the same
+machine as that serving the database.</para>
+
+<para><synopsis>&prompt; <userinput>Mserver --dbname &webkb; &proxpath;/resources/init-mserver.mil</userinput>
+</synopsis>
+<indexterm><primary>Mserver command</primary></indexterm>
+
+The <filename>init-mserver.mil</filename> 
+<indexterm><primary><filename>init-mserver.mil</filename> script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>init-mserver.mil</secondary></indexterm>
+script sets the port 
+<indexterm><primary>port number</primary></indexterm>
+for the server to 30000.  To use a different port, add 
+<userinput>--set port=<replaceable>nnnnn</replaceable></userinput>
+(where <replaceable>nnnnn</replaceable> is the new port number) to
+the command line.  For example:
+<synopsis>&prompt; <userinput>Mserver --dbname &webkb; &proxpath;/resources/init-mserver.mil \
+  --set port=45678</userinput>
+</synopsis>
+Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+MonetDB&nbsp;&monetoldversion;.
+See <xref xrefstyle="pageref" linkend="ov_mserver"/> for more
+information on starting and using the &monet; server.</para>
+
+<para>Because the database does not exist, 
+<indexterm><primary>databases</primary>
+           <secondary>new</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>MonetDB databases</secondary></indexterm>
+&monet; prints warning statements along with its usual startup message:
+
+<screen>!WARNING: GDKlockHome: created directory
+    /usr/local/Monet-mars/var/MonetDB4/dbfarm/ProxWebKB/
+!WARNING: GDKlockHome: ignoring empty or invalid .gdk_lock.
+!WARNING: BBPdir: initializing BBP.
+# MonetDB Server v4.20.0
+# based on GDK   v1.20.0
+# Copyright (c) 1993-2007, CWI. All rights reserved.
+# Compiled for powerpc-apple-darwin8.10.0/32bit with 32bit OIDs; dynamically linked.
+# Visit http://monetdb.cwi.nl/ for further information.
+Listening on port 30000
+&monetprompt;
+</screen>
+
+The startup message may be slightly different depending on your
+operating system and the version of &monet; you are using.
+</para>
+<para>
+&monet; also creates a <filename>&webkb;</filename> directory in its
+<filename>dbfarm</filename> 
+directory to hold the new database.</para>
+<para>Leave the &monet; server running for the remainder of the import
+process. You must be serving the database for any Proximity action
+that interacts with database data.</para>
+</step>
+
+<step>
+<para><glossterm baseform="initialization">Initialize</glossterm>
+<indexterm><primary>databases</primary>
+           <secondary>initializing</secondary></indexterm>
+<indexterm><primary>initializing databases</primary></indexterm>
+the new Proximity
+database. (Substitute the appropriate port number if you are using a
+different port.)</para>
+
+<para><synopsis>&prompt; <userinput>cd &proxpath;</userinput>
+&prompt; <userinput>bin/db-util.sh localhost:30000 init-db</userinput>
+</synopsis>
+<indexterm><primary>db-util.sh/db-util.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>db-util.sh</secondary></indexterm>
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>db-util.bat</secondary></indexterm>
+<indexterm><primary>init-db (db-util option)</primary></indexterm>
+</para>
+
+<para>
+Proximity outputs the following trace 
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+
+<screen>INFO  app.DBUtil: * connecting to db
+INFO  app.DBUtil: * database opened; initializing Prox tables
+INFO  db.DB: * initializing Proximity database
+INFO  app.DBUtil: * tables initialized
+INFO  app.DBUtil: * disconnecting from db
+INFO  app.DBUtil: * done
+</screen></para></step>
+
+<step>
+<para>Import the XML data file into the new Proximity
+database. (Substitute the appropriate port number if you are using a
+different port.)</para>
+
+<para>
+<synopsis>&prompt; <userinput>bin/import-xml.sh localhost:30000 \
+  &importpath;/proxwebkb.xml</userinput>
+</synopsis>
+<indexterm><primary>import-xml.sh/import-xml.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>import-xml.sh</secondary></indexterm>
+
+When the import process is finished, Proximity reports on the
+number of database entities created.
+
+<screen>INFO  app.ImportXMLApp: * done importing; counts:
+  4135 objects, 10934 links, 13 attributes, 222052 attribute values,
+  0 containers, 0 subgraph items
+</screen>
+<indexterm startref="idx_import5" class="endofrange"/>
+</para>
+
+</step>
+
+</procedure>
+</sect2>
+
+<!-- .............................................................. -->
+<!--               Importing database elements using XML            -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Importing database elements using XML</title>
+<indexterm><primary>attributes</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm><primary>containers</primary>
+           <secondary>importing</secondary></indexterm>
+
+<para>In addition to importing a complete database, Proximity lets you
+import individual <glossterm baseform="container">containers</glossterm>
+and <glossterm baseform="attribute">attributes</glossterm>.  This
+feature lets 
+Proximity users share data and results and store data off line.  To
+import additional data 
+into an existing database, use the <command>import-xml.sh</command>
+script (<command>import-xml.bat</command> for Windows) to import a
+Proximity XML data file containing the new data.</para>
+
+<para>By default, you cannot import 
+<glossterm baseform="object">objects</glossterm> or 
+<glossterm baseform="link">links</glossterm>
+<indexterm><primary>objects</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>importing</secondary></indexterm>
+into an existing database if
+it already contains any items of that type.  That is, you cannot
+import any additional objects if you have previously created at least one
+object in the database and you cannot import any additional links if
+you have previously created at least one link in the database.
+Similarly, you can only import new attributes.  Once an attribute has
+been defined for a database, you cannot add additional values for
+that attribute.  This behavior can be overridden through use of the
+<code>noChecks</code> flag, described in
+<xref xrefstyle="pageref" linkend="import_nocheck"/>.
+</para>
+
+<para>Imported containers are always created at the top level
+(directly under the root container), regardless of where the container
+lived in the source database.  Any nested containers within the
+imported container retain their relative nesting, however.  For 
+example, if you exported the <literal>/1d-clusters/samples</literal>
+container, which includes nested containers
+<literal>/1d-clusters/samples/0</literal> and
+<literal>/1d-clusters/samples/1</literal>, and later imported that container
+into another database, the destination database ends up with the
+containers <literal>/samples/0</literal> and
+<literal>/samples/1</literal> without the parent
+1d-clusters container, regardless of whether the
+destination database already includes a 1d-clusters container.
+(The container hierarchy notation used in this paragraph is explained
+in <xref linkend="export_xml"/>.)
+</para>
+
+<para>
+<caution>
+<para>When importing attributes and containers, you are responsible
+for ensuring that object, link, subgraph, and container 
+<glossterm baseform="object identifier">identifiers</glossterm>
+match those in the existing database.  Proximity makes no checks to
+ensure that attributes are assigned to items that are actually present
+in the database.  Errors in identifiers may result in inaccurate data
+being stored in the database.</para>
+</caution>
+</para>
+
+<sidebar>
+<para>All containers must have a unique identifier. You cannot import
+a container if its identifier matches an existing container identifier
+in the database.</para>
+</sidebar>
+
+<para>The following exercise walks through the process of importing a new
+attribute, <token role="attr">url_hierarchy3</token>, and its values
+into the existing &webkb; 
+database. This attribute stores the third directory in the path after the
+domain name, extracted from the object&rsquo;s URL.
+We can import this attribute into an existing database because the
+&webkb; database created in <xref linkend="ex_import_webkb"/> does not
+include any values for the <token role="attr">url_hierarchy3</token>
+attribute.</para>
+
+<!--
+   EXERCISE: Importing attribute values using XML
+-->
+
+<procedure id="ex_import_attr">
+<title>Importing attribute values using XML</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database (created in <xref linkend="ex_import_webkb"/>) using
+Mserver.  You must have completed <xref linkend="ex_import_webkb"/>
+before running the current exercise.  Data files must be on the same
+machine as that serving the database.</para>
+
+<step>
+<para>Uncompress the file containing the 
+<token role="attr">url_hierarchy3</token>
+attribute values.</para>
+
+<para><synopsis>&prompt; <userinput>cd &importpath;</userinput>
+&prompt; <userinput>gunzip url_hierarchy3_attr.xml.gz</userinput>
+</synopsis></para>
+</step>
+
+<step>
+<para>Change to the <filename>&proxpath;</filename> directory.</para>
+</step>
+
+<step>
+<para>Import the <token role="attr">url_hierarchy3</token> attribute
+data.  (Substitute the appropriate port number if you are using a
+different port.)</para>
+
+<para><synopsis>&prompt; <userinput>bin/import-xml.sh localhost:30000 \
+  &importpath;/url_hierarchy3_attr.xml</userinput>
+</synopsis>
+
+When the import process is finished, Proximity reports on the number
+of database entities created.
+
+<screen>INFO  app.ImportXMLApp: * done importing; counts:
+   0 objects, 0 links, 1 attributes, 868 attribute values,
+   0 containers, 0 subgraph items
+</screen>
+
+Because many URLs do not include three levels of directories after
+the domain name, only 868 out of 4135 objects have a value for this
+attribute.
+</para>
+</step>
+
+</procedure>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                 Importing XML data using noChecks              -->
+<!-- .............................................................. -->
+
+<sect2 id="import_nocheck">
+<title>Importing XML data using <code role="heading">noChecks</code></title>
+<indexterm><primary>importing</primary>
+           <secondary>noChecks option</secondary></indexterm>
+
+<para>To ensure that any new data does not conflict with existing
+data, Proximity&rsquo;s import process restricts when and how you can
+add additional elements to an existing database.  In many instance,
+however, careful data management can eliminate such conflicts.  In
+such cases, users can override the default import restrictions by
+setting the <code>noChecks</code> import option to true.</para>
+
+<para>When
+<code>noChecks</code> is true, Proximity makes no checks to see if
+the imported data conflicts with the existing database.  If imported
+objects or links already exist 
+in the database, Proximity creates duplicate entries for these items.
+When <code>noChecks</code> is
+false or not specified, adding new objects or links to a database that
+already contains such items results in an error.  You can also use the
+<code>noChecks</code> option to import additional values for previously
+defined attributes (an error without this option).  The only check in
+this case is ensuring that the &ldquo;new&rdquo; attribute is of the
+same type as the previously defined attribute.</para>
+
+<para>When <code>noChecks</code> is true, Proximity automatically
+recodes container
+<indexterm><primary>containers</primary>
+           <secondary>importing</secondary></indexterm>
+identifiers when imported containers conflict with
+containers already present in the database.  For example, if the
+database already has a container with an ID of 2, and the XML data
+file to be imported also includes a container with an ID of 2, the
+import process assigns a new, non-conflicting identifier to the imported
+container.  Any associated data (container attributes and nesting
+relationships) are similarly recoded.</para>
+
+<para>The following exercise adds a small number of new 
+<token role="attr">link_tag</token> attribute values to the database.
+The new values are added solely for illustrative purposes; they are
+not used in later <citetitle>Tutorial</citetitle> exercises.</para>
+
+<!--
+   EXERCISE: Importing additional link_tag attribute values
+-->
+
+<procedure id="ex_import_nocheck">
+<title>Importing additional link_tag attribute values</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database (created in <xref linkend="ex_import_webkb"/>) using
+Mserver.  You must have completed <xref linkend="ex_import_webkb"/>
+before running the current exercise. Data files must be on the same
+machine as that serving the database.</para>
+
+<step>
+<para>Try to import the new <token role="attr">link_tag</token>
+attribute values without using the <code>noChecks</code> option.
+(Substitute the appropriate port number if you are using a
+different port.)</para>
+
+<para><synopsis>&prompt; <userinput>bin/import-xml.sh localhost:30000 \
+  &importpath;/more-linktag-values.xml</userinput>
+</synopsis>
+<indexterm><primary>import-xml.sh/import-xml.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>import-xml.sh</secondary></indexterm>
+
+Proximity attempts to import the new attribute values, but
+reports an error because the <token role="attr">link_tag</token>
+attribute already exists.
+<screen>ERROR app.ImportXMLApp: java.lang.IllegalArgumentException:
+Attribute already exists in the database: link_tag. You may use the
+noChecks flag if you want to ignore this check.
+</screen></para>
+</step>
+
+<step>
+<para>Import the additional <token role="attr">link_tag</token> attribute
+values, specifying that <code>noChecks</code> is true.</para>
+
+<para><synopsis>&prompt; <userinput>bin/import-xml.sh localhost:30000 \
+  &importpath;/more-linktag-values.xml true</userinput>
+</synopsis>
+
+When the import process is finished, Proximity reports on the number
+of database entities created 
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+
+<screen>INFO  app.ImportXMLApp: * importing database from
+   /proximity/doc/user/tutorial/examples/more-linktag-values.xml
+   NOT CHECKING FOR DUPLICATES 
+INFO  app.ImportXMLApp: * converting xml to bulk import text files;
+   dir: /tmp/prox-xml-import62294
+INFO  app.ImportXMLApp:   attributes
+INFO  app.ImportXMLApp:   attribute: link_tag, L, str
+INFO  app.ImportTextApp: * importing database from /tmp/prox-xml-import62294
+INFO  app.ImportTextApp:   Loading object table
+INFO  app.ImportTextApp:   Loading link table
+INFO  app.ImportTextApp:   Loading attributes
+INFO  app.ImportTextApp:   Loading attribute: av_0
+INFO  app.ImportTextApp:   Loading containers
+INFO  app.ImportTextApp: * done importing
+INFO  app.ImportXMLApp: * done importing; counts:
+   0 objects, 0 links, 1 attributes, 5 attribute values,
+   0 containers, 0 subgraph items
+</screen>
+
+Note that the start of the trace includes a warning that the import
+process is not checking for duplicates.</para>
+</step>
+
+<step>
+<para>If you want, examine link&nbsp;1 in the &proxui; to see its
+attribute values.  (A summary of steps for examining
+link&nbsp;1&rsquo;s attribute values is included, below. See
+<xref linkend="ch_browse"/> for complete information on using the
+&proxui;.)</para>
+<!-- 
+<substeps>
+  <step>
+  <para>From the &uiname; start page, click
+        <guibutton>Links</guibutton>.</para>
+  </step>
+  <step>
+  <para>Click <guibutton>1</guibutton>.</para>
+  </step>
+  <step>
+  <para>Click <guibutton>attrs</guibutton>.</para>
+  </step>
+</substeps>
+-->
+<orderedlist spacing="compact" numeration="loweralpha">
+<listitem>
+  <para>From the &uiname; start page, click
+        <guibutton>Links</guibutton>.</para>
+</listitem>
+<listitem>
+  <para>Click <guibutton>1</guibutton>.</para>
+</listitem>
+<listitem>
+  <para>Click <guibutton>attrs</guibutton>.</para>
+</listitem>
+</orderedlist>
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata align="center" valign="bottom"
+   fileref="&graphicspath;/GUI_NewLinktagValue.png" format="PNG"
+   width="5.75in"/>
+</imageobject>
+<imageobject role="html">
+   <imagedata align="center" valign="bottom"
+   fileref="&graphicspath;/GUI_NewLinktagValue.png" format="PNG"
+   contentwidth="7.0in"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+<para>Because link&nbsp;1 already had a value of
+&ldquo;<literal>OFFSITE</literal>&rdquo; for the 
+<token role="attr">link_tag</token> attribute, the new data is added
+as an additional value for this attribute.</para>
+</step>
+</procedure>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                 TRANSFORMING TABULAR DATA TO XML               -->
+<!-- ============================================================== -->
+
+<sect1 id="import_script">
+<title>Transforming Tabular Data to XML</title>
+<indexterm><primary>tabular data</primary></indexterm>
+<indexterm><primary>converting</primary>
+           <secondary>tabular data to XML</secondary></indexterm>
+<indexterm><primary>XML</primary>
+           <secondary>converting tabular data to</secondary></indexterm>
+
+<para>Proximity allows you to import data from other databases using a
+three-step process:
+<orderedlist spacing="compact">
+  <listitem>
+    <para>Export the data to the specified tabular format.</para>
+  </listitem>
+  <listitem>
+    <para>Convert the data to the Proximity XML import format.</para>
+  </listitem>
+  <listitem>
+    <para>Import the XML data into Proximity.</para>
+  </listitem>
+</orderedlist>
+See
+<filename>&proxpath;/doc/user/text2xml/text2xml.txt</filename> for a
+specification of the required file format and instructions for using
+the <command>text2xml.pl</command> 
+<indexterm><primary>text2xml.pl</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>text2xml.pl</secondary></indexterm>
+script to transform tabular data to
+the Proximity XML import format.</para>
+
+<para>To import XML data into Proximity, follow the procedure
+described in <xref linkend="ex_import_webkb"/> to create and
+initialize the &monet; database and import the data.</para>
+<indexterm startref="idx_import1" class="endofrange"/>
+<indexterm startref="idx_import2" class="endofrange"/>
+<indexterm startref="idx_import3" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       EXPORTING DATA TO XML                    -->
+<!-- ============================================================== -->
+
+<?pagebreak?>
+<sect1 id="export_xml">
+<title>Exporting Data to XML</title>
+<indexterm id="idx_export1" class="startofrange">
+           <primary>exporting data</primary>
+           <secondary sortas="XML">to XML</secondary></indexterm>
+<indexterm id="idx_export2" class="startofrange">
+           <primary>data</primary>
+           <secondary>exporting</secondary></indexterm>
+<indexterm id="idx_export3" class="startofrange">
+           <primary>XML data</primary>
+           <secondary>exporting</secondary></indexterm>
+
+<para>Proximity provides the <command>export-xml.sh</command> shell
+script (<command>export-xml.bat</command> for Windows) for exporting
+data in Proximity databases to an XML format. You can export complete
+databases as well as selected database elements 
+(<glossterm baseform="attribute">attributes</glossterm> and
+<glossterm baseform="container">containers</glossterm>).</para>
+
+<sidebar>
+<para>During export, Proximity converts the characters
+<literal>&lt;</literal>, <literal>&gt;</literal>, and
+<literal>&amp;</literal> to the corresponding entities:
+<literal>&amp;lt;</literal>, <literal>&amp;gt;</literal>, and
+<literal>&amp;amp;</literal>.
+Newline characters are converted to underscores.</para>
+</sidebar>
+
+<!-- force blank line between sidebars -->
+<para></para>
+
+<sidebar>
+<para>The general form of a call to the
+<command>export-xml.sh</command> script is
+<blockquote>
+<!--
+<para><code>export-xml.sh</code>&nbsp;&nbsp;<replaceable>host:port</replaceable>&nbsp;&nbsp;<replaceable>filename</replaceable>&nbsp;&nbsp;<replaceable>exportType</replaceable>&nbsp;&nbsp;<replaceable>exportSpec</replaceable>
+-->
+<para><code>export-xml.sh&nbsp;&nbsp;</code><replaceable>host:port&nbsp;&nbsp;filename&nbsp;&nbsp;exportType&nbsp;&nbsp;exportSpec</replaceable>
+</para>
+</blockquote>
+where
+<blockquote>
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para><replaceable>host:port</replaceable> is the &monet;
+      server&rsquo;s host and port</para>
+    </listitem>
+    <listitem>
+      <para><replaceable>filename</replaceable> is the name of the
+      file that will contain the XML output</para>
+    </listitem>
+    <listitem>
+      <para><replaceable>exportType</replaceable>
+      <indexterm><primary>exportType</primary></indexterm>
+      is an optional argument that indicates the type of data to be
+      exported</para>
+    </listitem>
+    <listitem>
+      <para><replaceable>exportSpec</replaceable>
+      <indexterm><primary>exportSpec</primary></indexterm>
+      is an optional argument that indicates the specific instance of
+      the data type specified by
+      <replaceable>exportType</replaceable></para>
+    </listitem>
+  </itemizedlist>
+</blockquote>
+The <replaceable>exportType</replaceable> and
+<replaceable>exportSpec</replaceable> arguments are omitted when
+exporting the complete database.</para>
+
+<para>
+Legal values for <replaceable>exportType</replaceable> are
+<blockquote>
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para><literal>object-attribute</literal></para>
+    </listitem>
+    <listitem>
+      <para><literal>link-attribute</literal></para>
+    </listitem>
+    <listitem>
+      <para><literal>container-attribute</literal></para>
+    </listitem>
+    <listitem>
+      <para><literal>container</literal></para>
+    </listitem>
+  </itemizedlist>
+</blockquote>
+Note that the values of <replaceable>exportType</replaceable> use hyphens
+as shown above only when used as arguments for the
+<command>export-xml.sh</command> shell script or
+<command>export-xml.bat</command> batch file.  Use uppercase text
+and substitute underscores instead of hyphens (e.g., 
+<literal>OBJECT_ATTRIBUTE</literal>) when using these keywords
+within a script or in Java code.</para>
+
+<para>When exporting an attribute, the value of
+<replaceable>exportSpec</replaceable> is the name of the attribute to
+be exported.</para>
+
+<para>When exporting a container, 
+<indexterm><primary>containers</primary>
+           <secondary>exporting</secondary></indexterm>
+the value of <replaceable>exportSpec</replaceable> is
+the container name and a UNIX-like path that indicates where the target
+container resides in the container hierarchy.
+The root container
+<indexterm><primary>root container</primary></indexterm>
+<indexterm><primary>containers</primary>
+           <secondary>root</secondary></indexterm>
+is specified by a single slash
+(<literal>/</literal>) with child containers appended to the path. For
+example, to export the samples container, which is a child of the
+1d-clusters container, use 
+<literal>/1d-clusters/samples</literal> as the value of
+<replaceable>exportSpec</replaceable>.  Do not include a trailing
+<literal>/</literal> in the path.  The root container is a virtual
+container provided as a convenience for accessing other
+containers&mdash;you cannot export the root container.
+</para>
+</sidebar>
+
+<!-- .............................................................. -->
+<!--                    Exporting databases to XML                  -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Exporting databases to XML</title>
+<indexterm><primary>databases</primary>
+           <secondary>exporting</secondary></indexterm>
+
+<para>
+<xref linkend="ex_export_db"/> walks through the process of
+exporting the complete &webkb; database.
+</para>
+
+<procedure id="ex_export_db">
+<title>Exporting a database to XML</title>
+
+<caution>
+<para>The export process overwrites any existing data in the output
+file without warning.  Make sure that output file is empty or can be
+safely overwritten.</para>
+</caution>
+
+<step>
+<para>Change to the <filename>&proxpath;</filename> directory.</para>
+</step>
+
+<step>
+<para>Export the database.  (Substitute the appropriate port number if
+you are using a different port.)</para>
+
+<para><synopsis>&prompt; <userinput>bin/export-xml.sh localhost:30000 \
+  &exportpath;/my_proxwebkb.xml</userinput>
+</synopsis>
+<indexterm><primary>export-xml.sh/export-xml.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>export-xml.sh</secondary></indexterm>
+Data files can only be exported to the same machine as that serving the
+database.</para>
+
+<para>Proximity outputs the following trace 
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+
+<screen>INFO  app.ExportXMLApp: * exporting database to:
+   /proximity/doc/user/tutorial/examples/my_proxwebkb.xml
+INFO  app.ExportXMLApp: * saving objects
+INFO  app.ExportXMLApp: * saving links
+INFO  app.ExportXMLApp: * saving O attributes
+INFO  app.ExportXMLApp: * saving attribute school
+INFO  app.ExportXMLApp: * saving attribute url_server_info
+INFO  app.ExportXMLApp: * saving attribute url_protocol
+INFO  app.ExportXMLApp: * saving attribute url_hierarchy1
+INFO  app.ExportXMLApp: * saving attribute url_hierarchy2
+INFO  app.ExportXMLApp: * saving attribute url
+INFO  app.ExportXMLApp: * saving attribute page_num_outlinks
+INFO  app.ExportXMLApp: * saving attribute page_num_inlinks
+INFO  app.ExportXMLApp: * saving attribute url_hierarchy1b
+INFO  app.ExportXMLApp: * saving attribute page_words_top100
+INFO  app.ExportXMLApp: * saving attribute pagetype
+INFO  app.ExportXMLApp: * saving attribute url_hierarchy3
+INFO  app.ExportXMLApp: * saving L attributes
+INFO  app.ExportXMLApp: * saving attribute link_id
+INFO  app.ExportXMLApp: * saving attribute link_tag
+INFO  app.ExportXMLApp: * saving C attributes
+INFO  app.ExportXMLApp: * done exporting
+</screen>
+</para>
+
+</step>
+</procedure>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                Exporting database elements to XML              -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Exporting database elements to XML</title>
+<indexterm><primary>attributes</primary>
+           <secondary>exporting to XML</secondary></indexterm>
+
+<para>Proximity lets you export individual 
+<glossterm baseform="attribute">attributes</glossterm> and 
+<glossterm baseform="container">containers</glossterm>
+for off-line storage or to share with other Proximity users.
+<!--
+Containers are exported to the Proximity XML data format described in
+<xref linkend="apx_xmlformat"/>.  Attribute values can be exported
+either to this XML format (described in the the exercise, below) or to
+a tab-delimited text file for import into other applications
+(described in <xref linkend="ex_exploringattrs"/>).
+-->
+Care must be taken when importing this data back into Proximity.
+You must ensure that all relevant 
+<glossterm baseform="object identifier">identifiers</glossterm> (for 
+<glossterm baseform="object">objects</glossterm>, 
+<glossterm baseform="link">links</glossterm>,
+containers, and <glossterm baseform="subgraph">subgraphs</glossterm>)
+in the data file correctly 
+match the corresponding identifiers in the existing database.  You
+cannot import attribute data if that attribute name is already used in
+the destination database.  Similarly, you cannot import a container if
+that container identifier is already used by the destination
+database.<footnote><para>These import restrictions can be overridden
+by using the <code>noChecks</code> option.  See
+<xref linkend="import_nocheck"/>for information on using this import 
+option.</para></footnote>
+Importing containers can be problematic if different sets of queries
+have been run on the source and destination databases.</para>
+
+<para>Exporting a container
+<indexterm><primary>containers</primary>
+           <secondary>exporting</secondary></indexterm>
+exports all the container&rsquo;s subgraphs, any
+attributes on those subgraphs, and any containers nested
+<indexterm><primary>nested containers</primary></indexterm>
+<indexterm><primary>containers</primary>
+           <secondary>nested</secondary></indexterm>
+within the specified container. Exporting a container does not export
+the container&rsquo;s attributes;
+<indexterm><primary>containers</primary>
+           <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="containers">of containers</secondary></indexterm>
+you must export any container attributes
+as a separate step using the <literal>container-attribute</literal>
+export type.</para>
+
+<para>
+<xref linkend="ex_export_attr"/> walks through the process of
+exporting the <token role="attr">url_server_info</token> object
+attribute from the &webkb; database.
+</para>
+
+<procedure id="ex_export_attr">
+<title>Exporting an attribute to XML</title>
+
+<para>This exercise walks through the process of exporting an
+attribute to the Proximity XML data format.
+<!-- Exporting attribute values to a tab-delimited text file is
+described in <xref linkend="ex_exploringattrs"/>.-->
+Before beginning, make sure that you are serving the &webkb;
+database using Mserver.  Data files can only be exported to the same
+machine as that serving the database.</para>
+
+<caution>
+<para>The export process overwrites any existing data in the output
+file without warning.  Make sure that output file is empty or can be
+safely overwritten.</para>
+</caution>
+
+<step>
+<para>Change to the <filename>&proxpath;</filename> directory.</para>
+</step>
+
+<step>
+<para>Export the <token role="attr">url_server_info</token> object
+attribute. (Substitute the appropriate port number if
+you are using a different port.)</para>
+
+<para><synopsis>&prompt; <userinput>bin/export-xml.sh localhost:30000 \
+  &exportpath;/url_server_info_attr.xml \
+  object-attribute url_server_info</userinput>
+</synopsis>
+<indexterm><primary>export-xml.sh/export-xml.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>export-xml.sh</secondary></indexterm>
+Data files can only be exported to the same machine as that serving the
+database.</para>
+
+<para>Proximity outputs the following trace
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+
+<screen>INFO  app.ExportXMLApp: * exporting database to:
+   /proximity/doc/user/tutorial/examples/url_server_info_attr.xml
+INFO  app.ExportXMLApp: * saving attribute url_server_info
+INFO  app.ExportXMLApp: * done exporting
+</screen>
+</para>
+</step>
+
+</procedure>
+<indexterm startref="idx_export1" class="endofrange"/>
+<indexterm startref="idx_export2" class="endofrange"/>
+<indexterm startref="idx_export3" class="endofrange"/>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                    IMPORTING PLAIN TEXT DATA                   -->
+<!-- ============================================================== -->
+
+<sect1 id="import_textdata">
+<title>Importing Plain Text Data</title>
+<indexterm id="idx_textimp01" class="startofrange">
+           <primary>text data</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm id="idx_textimp02" class="startofrange">
+           <primary>importing</primary>
+           <secondary>text data</secondary></indexterm>
+<indexterm id="idx_textimp03" class="startofrange">
+           <primary>data</primary>
+           <secondary>importing</secondary></indexterm>
+
+<para>This section describes how to import plain text data into
+Proximity.  Proximity lets you import a complete database, including
+any <glossterm baseform="subgraph">subgraphs</glossterm> and 
+<glossterm baseform="container">containers</glossterm>, or you can
+import individual <glossterm baseform="attribute">attributes</glossterm>
+or containers.</para>
+
+<para>
+<caution>
+<para>The utilities that use the Proximity plain text data format 
+perform no error checking.  Proximity makes no checks to ensure that
+attributes are assigned to items (objects, links, subgraphs, or
+containers) that are actually present in the database.  Assigning
+attribute values to non-existent items does not trigger an exception
+or warning.  No checks are made to ensure that existing data is not
+being incorrectly overwritten.  Although this format requires less disc
+space than the XML format and its use can improve import and export
+speed, you are solely responsible for maintaining data integrity and
+consistency when using this format.</para>
+</caution>
+</para>
+
+<para>Unlike when using the XML data format, Proximity does not
+prohibit adding additional elements to a database once those elements
+have been defined when importing data using the plain text data
+format.  Therefore, there is no need for a equivalent to the
+<code>noChecks</code> option available for importing XML data.  When
+using the plain text format, you must take care to ensure the
+integrity and consistency of your data; Proximity will not necessarily
+alert you to data errors when using this format.</para>
+
+<sidebar>
+<para>As with importing XML data, Proximity automatically converts all
+<indexterm><primary>MonetDB</primary>
+           <secondary>character conversion for</secondary></indexterm>
+<indexterm><primary>characters</primary>
+           <secondary>converting for MonetDB</secondary></indexterm>
+<indexterm><primary>converting</primary>
+           <secondary>characters for MonetDB</secondary></indexterm>
+attribute names to lower case
+<indexterm><primary>case of attribute names and values</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>case of names and values</secondary></indexterm>
+when importing plain text data; attribute values retain their original
+case.  (Proximity ignores case when matching attribute names but obeys
+case when matching attribute values.)</para>
+
+<para>For compatibility with &monet;, we recommend that all single
+<indexterm><primary>characters</primary>
+           <secondary>special</secondary>
+           <tertiary sortas="text">in text data representation</tertiary></indexterm>
+<indexterm><primary>special characters</primary>
+           <secondary sortas="text">in text data representation</secondary></indexterm>
+quotes, double quotes, and newline characters be converted to
+underscores. This substitution is performed automatically when
+importing XML data but must be performed as a pre-processing step when
+importing text data.  Note that values such as
+&ldquo;<literal>&amp;quot;</literal>&rdquo; are treated as strings and
+not XML entities.
+<!--  A string value of <literal>&amp;quot;</literal>
+will not be converted to a double quote. -->
+</para>
+</sidebar>
+
+<!-- .............................................................. -->
+<!--                Importing databases using plain text            -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Importing databases using plain text</title>
+<indexterm id="idx_textimp04" class="startofrange">
+           <primary>databases</primary>
+           <secondary>importing</secondary></indexterm>
+
+<para>The exercise below walks through the process of importing a
+sample database using the plain text data format.  This database
+stores selected data for a small set of movies, actors, and
+directors.  The set of files for this exercise illustrate how the
+plain text data format represents all types of Proximity database
+entities.</para>
+
+<!--
+   EXERCISE: Importing a database using plain text
+-->
+
+<procedure id="ex_import_textdb">
+<title>Importing a database using plain text data</title>
+
+<para>This exercise and exercise <xref linkend="ex_import_textattr" />
+use a different database than that used for most
+<citetitle>Tutorial</citetitle> exercises.  Before beginning these
+exercises, make sure that you are no longer serving the &webkb;
+database. Data files must be on the same machine as that serving the
+database.</para>
+
+<step>
+<para>Uncompress the plain text data files.</para>
+
+<para>
+<synopsis>&prompt; <userinput>cd &importpath;</userinput>
+&prompt; <userinput>gunzip movie_db.tar.gz</userinput>
+</synopsis>
+</para>
+<para>Uncompressing this tar file creates a
+<filename>MovieDB</filename> directory under the
+<filename>&proxpath;/doc/user/tutorial/examples</filename>
+directory. All plain text data files required for the current import
+operation must be located in the same directory.</para>
+</step>
+
+<step>
+<para>Start the &monet; server.  Data files must be on the same
+machine as that serving the database.</para>
+
+<para>
+<synopsis>&prompt; <userinput>Mserver --dbname &moviedb; &proxpath;/resources/init-mserver.mil</userinput>
+</synopsis>
+<indexterm><primary>Mserver command</primary></indexterm>
+The <filename>init-mserver.mil</filename> 
+<indexterm><primary><filename>init-mserver.mil</filename> script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>init-mserver.mil</secondary></indexterm>
+script sets the port 
+<indexterm><primary>port number</primary></indexterm>
+for the server to 30000.
+Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+MonetDB&nbsp;&monetoldversion;. See 
+<xref xrefstyle="pageref" linkend="ov_mserver"/> for more
+information.</para>
+
+<para>Because the database does not exist, 
+<indexterm><primary>databases</primary>
+           <secondary>new</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>MonetDB databases</secondary></indexterm>
+&monet; prints warning statements along with its usual startup message:
+
+<screen>!WARNING: GDKlockHome: created directory
+    /usr/local/Monet-mars/var/MonetDB/dbfarm/MovieDB/
+!WARNING: GDKlockHome: ignoring empty or invalid .gdk_lock.
+!WARNING: BBPdir: initializing BBP.
+# MonetDB Server v4.20.0
+# based on GDK   v1.20.0
+# Copyright (c) 1993-2007, CWI. All rights reserved.
+# Compiled for powerpc-apple-darwin8.10.0/32bit with 32bit OIDs; dynamically linked.
+# Visit http://monetdb.cwi.nl/ for further information.
+Listening on port 30000
+&monetprompt;
+</screen>
+
+The startup message may be slightly different depending on your
+operating system and the version of &monet; you are using.
+</para>
+<para>
+&monet; also creates a <filename>&moviedb;</filename> directory in its
+<filename>dbfarm</filename> 
+directory to hold the new database.</para>
+<para>Leave the &monet; server running for the remainder of the import
+process. You must be serving the database for any Proximity action
+that interacts with database data.</para>
+</step>
+
+<step>
+<para><glossterm baseform="initialization">Initialize</glossterm>
+<indexterm><primary>databases</primary>
+           <secondary>initializing</secondary></indexterm>
+<indexterm><primary>initializing databases</primary></indexterm>
+the new Proximity
+database. (Substitute the appropriate port number if
+you are using a different port.)</para>
+
+<para>
+<synopsis>&prompt; <userinput>cd &proxpath;</userinput>
+&prompt; <userinput>bin/db-util.sh localhost:30000 init-db</userinput>
+</synopsis>
+<indexterm><primary>db-util.sh/db-util.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>db-util.sh</secondary></indexterm>
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>db-util.bat</secondary></indexterm>
+<indexterm><primary>init-db (db-util option)</primary></indexterm>
+</para>
+
+<para>
+Proximity outputs the following trace
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+
+<screen>INFO  app.DBUtil: * connecting to db
+INFO  app.DBUtil: * database opened; initializing Prox tables
+INFO  db.DB: * initializing Proximity database
+INFO  app.DBUtil: * tables initialized
+INFO  app.DBUtil: * disconnecting from db
+INFO  app.DBUtil: * done
+</screen>
+</para>
+</step>
+
+<step>
+<para>Import the plain text data file into the new Proximity
+database. (Substitute the appropriate port number if
+you are using a different port.)</para>
+
+<para>
+<indexterm><primary>import-text.sh/import-text.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>import-text.sh</secondary></indexterm>
+<synopsis>&prompt; <userinput>bin/import-text.sh localhost:30000 \
+  &importpath;/MovieDB</userinput>
+</synopsis>
+</para>
+<para>The plain text data files must be on the same machine as that
+serving the (still empty) database.  You must provide an absolute path
+to the data files; relative paths cannot be used.</para>
+
+<para>During import, Proximity reports on the entities being defined
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+
+<screen>INFO  app.ImportTextApp: * importing database from 
+   /proximity/doc/user/tutorial/examples/MovieDB
+INFO  app.ImportTextApp:   Loading object table
+INFO  app.ImportTextApp:   Loading link table
+INFO  app.ImportTextApp:   Loading attributes
+INFO  app.ImportTextApp:   Loading attribute: O_attr_objtype.data
+INFO  app.ImportTextApp:   Loading attribute: O_attr_title.data
+INFO  app.ImportTextApp:   Loading attribute: O_attr_name.data
+INFO  app.ImportTextApp:   Loading attribute: L_attr_linktype.data
+INFO  app.ImportTextApp:   Loading attribute: C_attr_qgraph_query.data
+INFO  app.ImportTextApp:   Loading containers
+INFO  app.ImportTextApp:   Loading container: si_0
+INFO  app.ImportTextApp:   Loading container attribute: si_0_attr_samplenumber.data
+INFO  app.ImportTextApp:   Loading container: si_1
+INFO  app.ImportTextApp:   Loading container: si_2
+INFO  app.ImportTextApp:   Loading container: si_3
+INFO  app.ImportTextApp: * done importing
+</screen>
+</para>
+
+</step>
+</procedure>
+<indexterm startref="idx_textimp04" class="endofrange"/>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--            Importing database elements using plain text        -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Importing database elements using plain text</title>
+<indexterm><primary>attributes</primary>
+           <secondary>importing</secondary></indexterm>
+<indexterm><primary>containers</primary>
+           <secondary>importing</secondary></indexterm>
+
+<para>In addition to importing a complete database, Proximity lets you
+import individual <glossterm baseform="container">containers</glossterm>
+and <glossterm baseform="attribute">attributes</glossterm> using the
+plain text data format.  To
+import additional data into an existing database, use the
+<command>import-text.sh</command> (<command>import-text.bat</command>
+for Windows) script to import a plain text data file containing the
+new data.</para>
+
+<para>To import data into an existing database, all relevant files
+must be present in the same directory.  To ensure that no unwanted
+data is imported, we recommend using a different directory for storing
+the required files for each import operation.</para>
+
+<caution>
+<para>Recall that Proximity performs no error checking when importing
+plain text data.  You are entirely responsible for ensuring the
+consistency and integrity of data imported using this format.</para>
+</caution>
+
+<para>The following exercise walks through the process of importing a new
+attribute, <token role="attr">birthyear</token>, and its values
+into the existing &moviedb;
+database.</para>
+
+<!--
+   EXERCISE: Importing attribute values using plain text
+-->
+
+<procedure id="ex_import_textattr">
+<title>Importing an attribute using plain text data</title>
+
+<para>Before beginning, make sure that you are serving the &moviedb;
+database (created in <xref linkend="ex_import_textdb"/>) using
+Mserver.  You must have completed <xref linkend="ex_import_textdb"/>
+before running the current exercise.  Data files must be on the same
+machine as that serving the database.</para>
+
+<step>
+<para>Uncompress the plain text data files.</para>
+
+<para>
+<synopsis>&prompt; <userinput>cd &importpath;</userinput>
+&prompt; <userinput>gunzip movie_attr.tar.gz</userinput>
+</synopsis>
+</para>
+<para>Uncompressing this tar file creates a
+<filename>MovieAttr</filename> directory under the
+<filename>&proxpath;/doc/user/tutorial/examples</filename>
+directory. All plain text data files required for the current import
+operation must be located in the same directory.</para>
+</step>
+
+<step>
+<para>Examine the files in the <filename>&importpath;/MovieAttr</filename>
+directory.</para>
+<para>Note that this directory contains two files:
+<itemizedlist spacing="compact">
+<listitem>
+  <para><filename>attributes.data</filename></para>
+</listitem>
+<listitem>
+  <para><filename>O_attr_birthyear.data</filename></para>
+</listitem>
+</itemizedlist>
+The <filename>attributes.data</filename> file defines the 
+<token role="attr">birthyear</token>attribute that we want to
+import and the <filename>O_attr_birthyear.data</filename> file
+provides the values for this attribute.  When importing selected
+database elements, you do not need to provide files for other types of
+data such as objects or links.</para>
+</step>
+
+<step>
+<para>Import the <token role="attr">birthyear</token> attribute data.
+(Substitute the appropriate port number if
+you are using a different port.)
+<synopsis>&prompt; <userinput>bin/import-text.sh localhost:30000 &importpath;/MovieDB</userinput>
+</synopsis>
+Data files must be on the same machine as that serving the
+database.</para>
+
+<para>During import, Proximity reports on the entities being defined
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO kdl.prox.app.ImportTextApp - * importing database from
+   /proximity/doc/user/tutorial/examples/MovieAttr
+INFO kdl.prox.app.ImportTextApp -   Loading object table
+INFO kdl.prox.app.ImportTextApp -   Loading link table
+INFO kdl.prox.app.ImportTextApp -   Loading attributes
+INFO kdl.prox.app.ImportTextApp -   Loading attribute: O_attr_birthyear.data
+INFO kdl.prox.app.ImportTextApp -   Loading containers
+INFO kdl.prox.app.ImportTextApp - * done importing
+</screen>
+</para>
+</step>
+
+</procedure>
+<indexterm startref="idx_textimp01" class="endofrange"/>
+<indexterm startref="idx_textimp02" class="endofrange"/>
+<indexterm startref="idx_textimp03" class="endofrange"/>
+
+</sect2>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                    EXPORTING PLAIN TEXT DATA                   -->
+<!-- ============================================================== -->
+
+<sect1 id="export_textdata">
+<title>Exporting Plain Text Data</title>
+<indexterm id="idx_export5" class="startofrange">
+           <primary>data</primary>
+           <secondary>exporting</secondary></indexterm>
+<indexterm id="idx_export4" class="startofrange">
+           <primary>text data</primary>
+           <secondary>exporting</secondary></indexterm>
+<indexterm id="idx_textexp1" class="startofrange">
+           <primary>exporting data</primary>
+           <secondary sortas="text">to text</secondary></indexterm>
+
+<para>Proximity provides the <command>export-text.sh</command> shell
+script (<command>export-text.bat</command> for Windows) for exporting
+data in Proximity databases to an XML format. You can only export
+complete databases, but you can prune and edit the resulting files if you
+want to preserve only a portion of the exported data, such as the data
+for a single <glossterm>attribute</glossterm> or
+<glossterm>container</glossterm>.</para>
+
+<sidebar>
+<para>Unlike XML data import, Proximity performs no character
+<indexterm><primary>characters</primary>
+           <secondary>special</secondary>
+           <tertiary sortas="text">in text data representation</tertiary></indexterm>
+<indexterm><primary>special characters</primary>
+           <secondary sortas="text">in text data representation</secondary></indexterm>
+<indexterm><primary>converting</primary>
+           <secondary>characters during plain text export</secondary></indexterm>
+conversion during text data export.  If attribute values contain
+symbols such as &lt;, &gt;, or &amp;, they are exported as is to the
+resulting text files and are not converted to the corresponding XML
+entities.</para>
+</sidebar>
+
+<!-- force blank line between sidebars -->
+<para></para>
+
+<sidebar>
+<para>The general form of a call to the
+<command>export-text.sh</command> script is
+<blockquote>
+<para><code>export-text.sh&nbsp;&nbsp;</code><replaceable>host:port&nbsp;&nbsp;directory</replaceable></para>
+</blockquote>
+where
+<blockquote>
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><replaceable>host:port</replaceable> is the &monet;
+    server&rsquo;s host and port</para>
+  </listitem>
+  <listitem>
+    <para><replaceable>directory</replaceable> is the absolute path to
+    the directory that will contain the resulting data files; this
+    directory must be on the same machine as that serving the
+    database</para>
+  </listitem>
+</itemizedlist>
+</blockquote>
+</para>
+</sidebar>
+
+<!-- .............................................................. -->
+<!--                Exporting databases using plain text            -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Exporting databases using plain text</title>
+<indexterm><primary>databases</primary>
+           <secondary>exporting</secondary></indexterm>
+
+<para>
+<xref linkend="ex_export_textdb"/> walks through the process of
+exporting the complete database created in
+<xref linkend="ex_import_textdb"/>.</para>
+
+<procedure id="ex_export_textdb">
+<title>Exporting a database to plain text</title>
+
+<para>Before beginning, make sure that you are serving the &moviedb;
+database using Mserver.  Data files can only be exported to the same
+machine as that serving the database.</para>
+
+<caution>
+<para>The export process overwrites existing data files in the output
+directory without warning.  Make sure that output directory is empty
+or can be safely overwritten.</para>
+</caution>
+
+<step>
+<para>Create a <filename>&exportpath;/TextExport</filename> directory.</para>
+</step>
+
+<step>
+<para>Export the database.  (Substitute the appropriate port number if
+you are using a different port.)
+You can only export text to an existing directory on the machine serving the
+database.</para>
+<para>
+<indexterm><primary>export-text.sh/export-text.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>export-text.sh</secondary></indexterm>
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>export-text.bat</secondary></indexterm>
+<synopsis>&prompt; <userinput>bin/export-text.sh localhost:30000 \
+  &exportpath;/TextExport</userinput>
+</synopsis>
+
+Proximity outputs the following trace
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+
+<screen>INFO kdl.prox.app.ExportTextApp - * exporting database to
+  /proximity/doc/user/tutorial/examples/TextExport
+INFO kdl.prox.app.ExportTextApp -   Exporting object table
+INFO kdl.prox.app.ExportTextApp -   Exporting link table
+INFO kdl.prox.app.ExportTextApp -   Exporting attributes
+INFO kdl.prox.app.ExportTextApp - objtype
+INFO kdl.prox.app.ExportTextApp - title
+INFO kdl.prox.app.ExportTextApp - name
+INFO kdl.prox.app.ExportTextApp - birthyear
+INFO kdl.prox.app.ExportTextApp - linktype
+INFO kdl.prox.app.ExportTextApp - qgraph_query
+INFO kdl.prox.app.ExportTextApp -   Exporting containers
+INFO kdl.prox.app.ExportTextApp -      si_0
+INFO kdl.prox.app.ExportTextApp -      si_1
+INFO kdl.prox.app.ExportTextApp -      si_2
+INFO kdl.prox.app.ExportTextApp -      si_3
+INFO kdl.prox.app.ExportTextApp - * done exporting
+</screen>
+</para>
+</step>
+</procedure>
+<indexterm startref="idx_textexp1" class="endofrange"/>
+
+</sect2>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       SPECIALIZED DATA EXPORT                  -->
+<!-- ============================================================== -->
+
+<sect1 id="export_special">
+<title>Specialized Data Export</title>
+
+<para>Proximity can also export selected subsets of data
+using the &uiname;.  You can export the set of values for
+a given attribute, or the data in a selected nested synchronized table
+(NST) to tab-delimited text files.</para>
+
+<sect2>
+<title>Exporting attribute values</title>
+<indexterm><primary>attributes</primary>
+           <secondary>exporting</secondary></indexterm>
+<indexterm><primary>exporting data</primary>
+           <secondary sortas="CSV">to CSV files</secondary></indexterm>
+
+<para>It is occasionally useful to be able to use or analyze a set of
+attribute values in another application.  To facilitate this,
+Proximity lets you easily export the set of values for any attribute
+to a tab-delimited text file.</para>
+
+<example>
+<title>Exporting attribute values to tab-delimited text files</title>
+
+<para>The following steps require that you be serving a database using
+the &monet; server and running the &uiname;.  See
+<xref linkend="ex_exploring1"/> for information on
+starting and using the &uiname;.</para>
+<orderedlist spacing="compact">
+  <listitem>
+    <para>Display the histogram for the target attribute in the
+    &uiname;.  (See <xref xrefstyle="pageref" linkend="browse_attrs"/>
+    for information on
+    how to display the attribute&rsquo;s histogram.)</para>
+  </listitem>
+  <listitem>
+    <para>Click <guibutton>export</guibutton>.  Proximity displays the
+    <guilabel>Open</guilabel> dialog.</para>
+  </listitem>
+  <listitem>
+    <para>Navigate to the target output directory and enter a file
+    name for the exported data in the <guilabel>Save As</guilabel>
+    box. You can only export data to a file on the same machine as
+    that serving the database.</para>
+  </listitem>
+  <listitem>
+    <para>Click <guibutton>Save</guibutton>. Proximity saves the
+    exported data in the specified file.</para>
+  </listitem>
+</orderedlist>
+
+</example>
+
+</sect2>
+
+<sect2 id="export_nst">
+<title>Exporting NST data</title>
+
+<para><glossterm baseform="nested synchronized table">Nested synchronized tables</glossterm>
+(NSTs) are internal Proximity data
+structures that provide a more convenient and intuitive way to view
+the 
+<glossterm baseform="vertical database">vertically fragmented</glossterm>
+data required by &monet;&rsquo;s storage
+model.  You can export the data in any NST to a tab-delimited text
+file for use in other applications.  (See
+<xref xrefstyle="pageref" linkend="scripts_nst"/> for additional
+information about NSTs and their use in Proximity.)</para>
+
+<example>
+<title>Exporting NST data to tab-delimited text files</title>
+<indexterm><primary>NSTs</primary>
+           <secondary>exporting data from</secondary></indexterm>
+<indexterm><primary>exporting data</primary>
+           <secondary sortas="NSTs">from NSTs</secondary></indexterm>
+
+<para>The following steps require that you be serving a database using
+the &monet; server and running the &uiname;.  See
+<xref linkend="ex_exploring1"/> for information on starting and using 
+the &uiname;.</para>
+<orderedlist spacing="compact">
+  <listitem>
+    <para>From the &uiname; start page, click
+    <guibutton>browse tables</guibutton>.  Proximity opens the
+    &nstbrowser;.</para>
+  </listitem>
+  <listitem>
+    <para>Select and display the target NST, drilling down to the
+    appropriate data NST as needed.</para>
+  </listitem>
+  <listitem>
+    <para>From the <guimenu>File</guimenu> menu, choose
+    <guimenuitem>Export to File.</guimenuitem>  Proximity displays the
+    <guilabel>Open</guilabel> dialog.</para>
+  </listitem>
+  <listitem>
+    <para>Navigate to the target output directory and enter a file
+    name for the exported data in the <guilabel>Save As</guilabel>
+    box. You can only export data to a file on the same machine as
+    that serving the database.</para>
+  </listitem>
+  <listitem>
+    <para>Click <guibutton>Save</guibutton>. Proximity saves the
+    exported data in the specified file.</para>
+  </listitem>
+</orderedlist>
+
+</example>
+<indexterm startref="idx_export5" class="endofrange"/>
+<indexterm startref="idx_export4" class="endofrange"/>
+
+</sect2>
+
+</sect1>
+
+
+<!-- ============================================================== -->
+<!--                    DELETING PROXIMITY DATABASES                -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Deleting Proximity Databases</title>
+
+<para>
+Proximity uses a &monet; database to store its data.
+To delete 
+<indexterm><primary>databases</primary>
+           <secondary>deleting</secondary></indexterm>
+<indexterm><primary>deleting</primary>
+           <secondary>databases</secondary></indexterm>
+<indexterm><primary>removing</primary>
+           <see>deleting</see></indexterm>
+a &monet; database, make sure that you are not serving
+that database and delete the database files.  Database files are
+located in
+<indexterm><primary>databases</primary>
+           <secondary>file locations</secondary></indexterm>
+</para>
+
+<para>Linux/&macosx;:
+<blockquote>
+<para><filename>&monetdbpath;<replaceable>name</replaceable></filename></para>
+</blockquote>where <replaceable>name</replaceable> is the name of the
+database.</para>
+
+<para>Windows:
+<blockquote>
+<para><filename>&winmonetdbpath;</filename><replaceable>name</replaceable></para>
+</blockquote>where <replaceable>username</replaceable> is the login name for
+the current user and
+<replaceable>name</replaceable> is the name of the database.</para>
+
+<para>This permanently deletes the database.</para>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        TIPS AND REMINDERS                      -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Tips and Reminders</title>
+
+<itemizedlist spacing="compact">
+<title>General</title>
+  <listitem>
+    <para>All imported and exported data files must reside on the same
+    machine as that serving the database.</para>
+  </listitem>
+  <listitem>
+    <para>You must 
+    <glossterm baseform="initialization">initialize</glossterm> a
+    database using 
+    <command>db-util</command> before importing data.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity automatically converts all attribute names to
+    lower case when importing data; attribute values retain their
+    original case.</para>
+  </listitem>
+  <listitem>
+    <para>Use specialized export functionality available through the
+    &uiname; to export attribute or NST data to tab-delimited text
+    files.</para>
+  </listitem>
+  <listitem><para>Delete a database by deleting its files in the
+    <filename>dbfarm</filename> directory in your local &monet;
+    installation.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>XML import and export</title>
+  <listitem>
+    <para>The
+    <glossterm baseform="document type definition">DTD</glossterm>,
+    for the XML data format <filename>prox3db.dtd</filename>, must 
+    reside in the same directory as the import data file. 
+    Copy the DTD file from
+    <filename>&proxpath;/resources/</filename> to the directory
+    containing the data file before importing data.</para>
+  </listitem>
+  <listitem><para>For compatibility with &monet;, single quotes,
+    double quotes, and newline characters in the XML data are
+    automatically changed to underscores during import.</para>
+  </listitem>
+  <listitem>
+    <para>The XML data format and associated utilities provide limited
+    error checking against some data corruption problems by
+    restricting the types of data that can be imported into an exiting
+    database.</para>
+  </listitem>
+  <listitem>
+    <para>To override the default restrictions on importing XML data into
+    existing databases, set the import script <code>noChecks</code>
+    parameter to true.</para>
+  </listitem>
+<!--
+  <listitem>
+    <para>Although Proximity supports the use of 
+    <glossterm baseform="multi-dimensional attribute">multi-dimensional</glossterm> 
+    <glossterm baseform="attribute">attributes</glossterm>
+    for data representation, import, and display, it 
+    does not yet allow the use of multi-dimensional attributes
+    in queries. See <xref linkend="apx_xmlformat"/> for more
+    information on the Proximity XML data format.</para>
+  </listitem>
+-->
+  <listitem><para>Exporting a <glossterm>container</glossterm> to XML
+    exports all the container&rsquo;s 
+    <glossterm baseform="subgraph">subgraphs</glossterm>,
+    any attributes on those subgraphs, and any containers
+    nested within the specified container, but not the container&rsquo;s
+    attributes.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Plain text import and export</title>
+  <listitem>
+    <para>The plain text data format and associated utilities provide
+    no error checking; you are completely responsible for the
+    consistency and integrity of your imported data.</para>
+  </listitem>
+  <listitem>
+    <para>For compatibility with &monet;, convert single quotes,
+    double quotes, and newline characters to underscores in a
+    pre-processing step before importing data using the plain text
+    format.</para>
+  </listitem>
+</itemizedlist>
+
+<para>
+<itemizedlist spacing="compact">
+<title>Additional Information</title>
+  <listitem>
+    <para>See <xref xrefstyle="pageref" linkend="apx_xmlformat"/> for
+    a description of the XML data format.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref xrefstyle="pageref" linkend="apx_textformat"/> for
+    a description of the plain text data format.</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

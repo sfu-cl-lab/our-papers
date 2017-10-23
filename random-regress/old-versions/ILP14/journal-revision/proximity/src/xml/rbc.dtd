@@ -1,0 +1,41 @@
+<!--
+
+  Proximity Relational Bayesian Classifier (RBC) DTD
+  Version: 1.0
+
+  Part of the open-source Proximity system
+  (see LICENSE for copyright and license information).
+
+  -->
+
+<!-- rbc -->
+
+<!ELEMENT rbc (rbc-info, rbc-body)>
+<!ATTLIST rbc name CDATA #REQUIRED>
+
+
+<!-- rbc-info -->
+
+<!ELEMENT rbc-info (description, class-label, author-name, author-email)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT class-label (attr-desc, prob-dist) >
+<!ELEMENT author-name (#PCDATA)>
+<!ELEMENT author-email (#PCDATA)>
+<!ELEMENT attr-desc (item, attribute, is-object, is-continuous) >
+<!ELEMENT item (#PCDATA)>
+<!ELEMENT attribute (#PCDATA)>
+<!ELEMENT is-object (#PCDATA)>
+<!ELEMENT is-continuous (#PCDATA)>
+<!ENTITY % prob-dist-content "prob-dist-entry*">
+<!ELEMENT prob-dist-entry (value, count)>
+<!ELEMENT value (#PCDATA)>
+<!ELEMENT count (#PCDATA)>
+<!ELEMENT prob-dist (%prob-dist-content;) >
+
+<!-- rbc-body -->
+<!ENTITY % rbc-content "attr-estimator*">
+<!ELEMENT rbc-body (%rbc-content;)>
+<!ELEMENT attr-estimator (attr-desc, cond-prob-dist) >
+<!ENTITY % cond-prob-dist-content "cond-prob-dist-entry*">
+<!ELEMENT cond-prob-dist-entry (value, prob-dist)>
+<!ELEMENT cond-prob-dist (%cond-prob-dist-content;)>

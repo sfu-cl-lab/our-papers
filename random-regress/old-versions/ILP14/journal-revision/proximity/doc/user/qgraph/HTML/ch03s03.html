@@ -1,0 +1,392 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Evaluating Conditions</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Conditions">
+      <link rel="prev" href="ch03s02.html" title="Existence Conditions">
+      <link rel="next" href="ch03s03s02.html" title="Evaluating existence conditions">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;3.&nbsp;Conditions</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s03s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="qg_cond_eval"></a>Evaluating Conditions
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e1728"></a><a class="indexterm" name="d0e1733"></a><a class="indexterm" name="d0e1738"></a><p>QGraph is designed for use with databases that permit
+            set-valued attributes.
+            <a class="indexterm" name="d0e1745"></a>
+            Therefore if an attribute has more than
+            one value for an individual object or link, we must
+            consider all of its values when evaluating conditions.
+            And because the set of values may be empty,
+            <a class="indexterm" name="d0e1751"></a>
+            <a class="indexterm" name="d0e1757"></a>
+            we also need to
+            understand how QGraph evaluates 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e49"><span class="glossterm">attribute value conditions</span></a>
+            when the object or link has no values for the given attribute.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="qg_cond_eval_attr"></a>Evaluating attribute value conditions
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e1770"></a><a class="indexterm" name="d0e1775"></a><p>A condition is satisfied when the value of the corresponding
+               attribute satisfies the test established in the
+               condition.  When an object or link has more than one value for a particular
+               attribute, a condition on that entity is satisfied if <span class="emphasis"><em>any 
+                     member</em></span> of the set of attribute values for that entity
+               satisfies the condition.<sup>[<a name="d0e1785" href="#ftn.d0e1785">2</a>]</sup>
+               
+            </p>
+            <p>Consider a movie database that links actors to the
+               movies they appear in. Each of these links
+               includes a <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Role</span> attribute that lists the
+               characters the actor played 
+               in the movie. In <span class="emphasis"><em>Monty Python and the Holy Grail</em></span>, Graham
+               Chapman played several roles, so the edge connecting Graham
+               Chapman to <span class="emphasis"><em>Monty Python and the Holy Grail</em></span> has a
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Role</span> 
+               attribute with multiple values: <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">King Arthur</span>,
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Voice of God</span>, 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Middle Head</span> and 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Hiccuping Guard</span>.
+               A relevant fragment of such a database is shown
+               in <a href="ch03s03.html#fig_cond_db02" title="Figure&nbsp;3.8.&nbsp;Database with multiple attribute values [Cond_DB02.xml]">Figure&nbsp;3.8</a>.
+               
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db02"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB02.png" align="middle" width="567" alt="Database with multiple attribute values [Cond_DB02.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.8.&nbsp;Database with multiple attribute values [Cond_DB02.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+               To find actors and the movies in which they played King
+               Arthur we create a query that requires an edge condition
+               <code class="literal">Role = King Arthur</code>, as shown in 
+               <a href="ch03s03.html#cond_db02_q01" title="Figure&nbsp;3.9.&nbsp;Query [Cond_DB02_Q01.qg2.xml]">Figure&nbsp;3.9</a>.
+               
+               
+            </p>
+            <div class="figure"><a name="cond_db02_q01"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB02_Q01.png" align="middle" width="328.50000000000006" alt="Query [Cond_DB02_Q01.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.9.&nbsp;Query [Cond_DB02_Q01.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+               The pair of Peter Cook and <span class="emphasis"><em>Jake&#8217;s Journey</em></span> is
+               returned as a match because the link connecting them has a 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Role</span> attribute with a single value of 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">King Arthur</span>.  The link connecting
+               Graham Chapman to <span class="emphasis"><em>Monty Python and the Holy Grail</em></span>
+               has multiple values for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Role</span> attribute.
+               Because <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">King Arthur</span> is one of these values,
+               this link also matches the condition on the query edge. The results of
+               the query are shown in <a href="ch03s03.html#fig_cond_db02_q01_res" title="Figure&nbsp;3.10.&nbsp;Results">Figure&nbsp;3.10</a>.
+               
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db02_q01_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB02_Q01_res.png" align="middle" width="328.50000000000006" alt="Results"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.10.&nbsp;Results</b></p>
+            </div>
+            <p><br class="figure-break">
+               As we have seen before, even though the condition only requires
+               matching a single
+               attribute value, the matching subgraph includes all values for the
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Role</span> attribute.
+               
+            </p>
+            <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p>The rule for evaluating attribute value conditions
+                           can be more formally expressed as:
+                           
+                        </p>
+                        <div class="blockquote">
+                           <blockquote class="blockquote">
+                              <p>Given 
+                                 
+                              </p>
+                              <div class="itemizedlist">
+                                 <ul type="disc" compact>
+                                    <li>
+                                       <p>a database entity (object or link)
+                                              <em class="varname"><code>E</code></em></p>
+                                    </li>
+                                    <li>
+                                       <p>an attribute <em class="varname"><code>attribute</code></em></p>
+                                    </li>
+                                    <li>
+                                       <p>a set of values <em class="varname"><code>Values</code></em> for
+                                              <em class="varname"><code>attribute</code></em> on <em class="varname"><code>E</code></em></p>
+                                    </li>
+                                    <li>
+                                       <p>an attribute value condition
+                                              <em class="varname"><code>attribute</code></em>&nbsp;&nbsp;<em class="varname"><code>operator</code></em>&nbsp;&nbsp;<em class="varname"><code>value</code></em></p>
+                                    </li>
+                                 </ul>
+                              </div>
+                              <p>
+                                 The condition is satisfied if there exists a value <em class="varname"><code>v</code></em>
+                                 a member of <em class="varname"><code>Values</code></em>, such that 
+                                 <em class="varname"><code>v</code></em>&nbsp;<em class="varname"><code>operator</code></em>&nbsp;<em class="varname"><code>value</code></em>
+                                 is true.
+                              </p>
+                           </blockquote>
+                        </div>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <p>Because QGraph considers the condition to be satisfied if any
+               attribute value for the corresponding database entity satisfies the
+               condition, care must be taken in defining queries and interpreting
+               results when objects or links have multiple values for that
+               attribute.  For example, books are often released in
+               different formats over time: hard cover, trade paperback, mass market
+               paperback, etc. As a result, a single book can have multiple
+               publication dates, as shown in <a href="ch03s03.html#fig_cond_multpubdates" title="Figure&nbsp;3.11.&nbsp;Book with multiple publication dates">Figure&nbsp;3.11</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_cond_multpubdates"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_MultPubDates.png" align="middle" width="360" alt="Book with multiple publication dates"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.11.&nbsp;Book with multiple publication dates</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>Consider a condition that tests the publication date for a
+               book, e.g.,
+            </p>
+            <div class="blockquote">
+               <blockquote class="blockquote">
+                  <p><code class="literal">PubDate&nbsp;=&nbsp;1981</code></p>
+               </blockquote>
+            </div>
+            <p>
+               Because 1981 is a member of the set of values for
+               <span class="emphasis"><em>Carrie</em></span>&#8217;s <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate</span>
+               attribute, the condition is satisfied and <span class="emphasis"><em>Carrie</em></span>
+               matches a query vertex with this condition.
+            </p>
+            <p>But because <span class="emphasis"><em>Carrie</em></span>&#8217;s 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate</span> attribute contains other values,
+               the condition
+            </p>
+            <div class="blockquote">
+               <blockquote class="blockquote">
+                  <p><code class="literal">PubDate &lt;&gt;
+                        1981</code></p>
+               </blockquote>
+            </div>
+            <p> 
+               is also satisfied. The other values for this attribute 
+               (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1974</span>, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1993</span>, and
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">2003</span>) make the expression true.  Similarly, the
+               conditions
+            </p>
+            <div class="blockquote">
+               <blockquote class="blockquote">
+                  <p><code class="literal">PubDate&nbsp;&lt;&nbsp;1990, 
+                        PubDate&nbsp;&lt;=&nbsp;1990, PubDate&nbsp;&gt;&nbsp;1990,</code>
+                     and <code class="literal">PubDate&nbsp;&gt;=&nbsp;1990</code></p>
+               </blockquote>
+            </div>
+            <p>are 
+               also satisfied because at least one <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">PubDate</span>
+               value satisfies each of these tests.
+            </p>
+            <p>Because objects and links in a Proximity database can be
+               structurally heterogeneous, some entities may not have a value for the
+               attribute
+               <a class="indexterm" name="d0e2001"></a>
+               <a class="indexterm" name="d0e2007"></a>
+               listed in a condition.  In such cases, an attribute
+               condition&#8217;s test always fails because there are 
+               no values to compare against the condition&#8217;s requirements.
+               Consider the database fragment shown in
+               <a href="ch03s03.html#fig_cond_db03" title="Figure&nbsp;3.12.&nbsp;Books adapted to movies [Cond_DB03.xml]">Figure&nbsp;3.12</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db03"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB03.png" align="middle" width="549" alt="Books adapted to movies [Cond_DB03.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.12.&nbsp;Books adapted to movies [Cond_DB03.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>Two of the movies, <span class="emphasis"><em>Carrie</em></span> and
+               <span class="emphasis"><em>It</em></span>, have a <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ReleaseType</span>
+               attribute that indicates 
+               whether the movie was released in theaters or made for TV.  The third
+               movie, <span class="emphasis"><em>Pet Sematary</em></span>, does not have a value for
+               this attribute.  If we execute the query shown below
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db03_q01"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB03_Q01.png" align="middle" width="351.00000000000006" alt="Query for books made into theatrical movies [Cond_DB03_Q01.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.13.&nbsp;Query for books made into theatrical movies [Cond_DB03_Q01.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               we get the results shown in <a href="ch03s03.html#fig_cond_db03_q01_res" title="Figure&nbsp;3.14.&nbsp;Results for books made into theatrical movies">Figure&nbsp;3.14</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db03_q01_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB03_Q01_res.png" align="middle" width="328.50000000000006" alt="Results for books made into theatrical movies"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.14.&nbsp;Results for books made into theatrical movies</b></p>
+            </div>
+            <p><br class="figure-break">
+               The query finds only a single matching movie, <span class="emphasis"><em>Carrie</em></span>,
+               which was released theatrically.  Both
+               <span class="emphasis"><em>It</em></span>, which was made into a TV movie, and
+               <span class="emphasis"><em>Pet Sematary</em></span>, which does not include a release
+               type, do not match the query&#8217;s condition.
+               
+            </p>
+            <p>Objects and links that do not have the specified attribute
+               similarly fail to match inequality conditions.  The
+               query shown in <a href="ch03s03.html#fig_cond_db03_q02" title="Figure&nbsp;3.15.&nbsp;Alternate query for books made into theatrical movies&#xA;[Cond_DB03_Q02.qg2.xml]">Figure&nbsp;3.15</a>, below, also finds
+               books made into theatrical movies.
+               For the given database fragment, where the 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ReleaseType</span>
+               attribute can only take a single value drawn from the choices 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">theater</span> or
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">TV</span>, this query is equivalent to 
+               the query shown earlier in <a href="ch03s03.html#fig_cond_db03_q01" title="Figure&nbsp;3.13.&nbsp;Query for books made into theatrical movies [Cond_DB03_Q01.qg2.xml]">Figure&nbsp;3.13</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_cond_db03_q02"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Cond_DB03_Q02.png" align="middle" width="341.99999999999994" alt="Alternate query for books made into theatrical movies [Cond_DB03_Q02.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.15.&nbsp;Alternate query for books made into theatrical movies
+                     [Cond_DB03_Q02.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>This new query yields the same results as the original. In addition to
+               excluding the movie <span class="emphasis"><em>It</em></span> because its value for the
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ReleaseType</span> attribute is <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">TV</span>, it also
+               excludes the movie <span class="emphasis"><em>Pet Sematary</em></span> because this
+               object has no value for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ReleaseType</span> attribute.
+               It&#8217;s important to note that the equivalence of these two queries
+               depends on the database 
+               enforcing the restriction of legal values for the
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ReleaseType</span> attribute to those specified. 
+               If, for example, the database also lets 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ReleaseType</span> assume values of 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">video</span> and <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">DVD</span>,
+               this equivalence no longer holds.
+            </p>
+         </div>
+         <div class="footnotes"><br><hr width="100" align="left">
+            <div class="footnote">
+               <p><sup>[<a name="ftn.d0e1785" href="#d0e1785">2</a>] </sup>This reflects a change in the QGraph
+                  language since the publication of the technical report <em class="citetitle">A
+                     Visual Language for Querying and Updating Graphs</em>
+                  [<a href="bi01.html#blau02"><abbr class="abbrev">Blau, Immerman, and Jensen, 2002</abbr></a>].  The <em class="citetitle">QGraph Guide</em> provides
+                  the current and correct rules for how QGraph evaluates
+                  conditions on set-valued attributes.
+               </p>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s03s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Existence Conditions&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Evaluating existence conditions</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

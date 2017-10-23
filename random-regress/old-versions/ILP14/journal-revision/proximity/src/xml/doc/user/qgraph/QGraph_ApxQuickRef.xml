@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<appendix id="qg_apx_quickref">
+<title>Quick Reference</title>
+
+<!-- ~~~~~~~~~~~~~~~~ SIDEBAR: ANNOTATION FORM ~~~~~~~~~~~~~~~~~~~~ -->
+<sidebar>
+<para>
+The general form of an individual condition is
+<indexterm><primary>conditions</primary>
+           <secondary>general form</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>in conditions</secondary></indexterm>
+<blockquote>
+<para>
+<replaceable>attribute</replaceable>&nbsp;&nbsp;<replaceable>operator</replaceable>&nbsp;&nbsp;<replaceable>value</replaceable>
+</para>
+</blockquote>
+where
+<blockquote>
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para><replaceable>attribute</replaceable> is the name of an
+      attribute for this database entity (object or link)</para>
+    </listitem>
+    <listitem>
+      <para><replaceable>value</replaceable> is a legal value for
+      <replaceable>attribute</replaceable></para>
+    </listitem>
+    <listitem>
+      <para><replaceable>operator</replaceable> is one of
+      <literal>=</literal>, <literal>&gt;=</literal>,
+      <literal>&lt;=</literal>, and
+      <literal>&lt;&gt;</literal>.</para>
+    </listitem>
+  </itemizedlist>
+</blockquote>
+Attribute names and values containing spaces must be surrounded by single
+quotes.</para>
+<para>Proximity also supports conditions that require only that an
+<indexterm><primary>conditions</primary>
+           <secondary>"exists" test</secondary></indexterm>
+<indexterm><primary>exists test in conditions</primary></indexterm>
+attribute exists and has some value rather than specifying its
+value. The syntax for this type of condition is
+<blockquote>
+<para><literal>exists(</literal><replaceable>attribute</replaceable><literal>)</literal>
+</para></blockquote>
+To negate a condition, use the form
+<blockquote>
+<para><literal>NOT(<replaceable>condition</replaceable>)</literal>
+</para></blockquote>
+</para>
+<para>The rule for evaluating attribute conditions against set-valued
+attributes can be formally expressed as:
+<blockquote>
+<para>Given 
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>a database entity (object or link)
+    <varname>A</varname></para>
+  </listitem>
+  <listitem>
+    <para>an attribute <varname>attr</varname></para>
+  </listitem>
+  <listitem>
+    <para>a set of values <varname>V</varname> for <varname>attr</varname>
+    on <varname>A</varname></para>
+  </listitem>
+  <listitem>
+    <para>an attribute condition
+    <varname>attr</varname>&nbsp;&nbsp;<varname>op</varname>&nbsp;&nbsp;<varname>value</varname></para>
+  </listitem>
+</itemizedlist>
+The condition is true if there exists a value <varname>a</varname>
+a member of <varname>V</varname>, such that 
+<varname>a</varname>&nbsp;<varname>op</varname>&nbsp;<varname>value</varname>
+is true.
+</para>
+</blockquote>
+</para>
+</sidebar>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~ END SIDEBAR ~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+
+<!-- ~~~~~~~~~~~~~~~~ SIDEBAR: ANNOTATION FORM ~~~~~~~~~~~~~~~~~~~~ -->
+<sidebar>
+<para>Numeric annotations take the form
+<blockquote><para>
+<userinput>[<replaceable>min</replaceable>..<replaceable>max</replaceable>]
+</userinput>
+</para></blockquote>
+where
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>&min; specifies the minimum number of database elements
+    required to match the query</para>
+  </listitem>
+  <listitem>
+    <para>&max; specifies the maximum number of database elements that
+    can be present to match the query</para>
+  </listitem>
+</itemizedlist>
+That is, the database must contain at least &min; and at most &max; of
+the annotated entity to match the query.</para>
+
+<para>The value for &max; can be left unspecified, indicating that at
+least &min; number of elements must be present in the database to
+match the query.</para>
+</sidebar>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~ END SIDEBAR ~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+
+<itemizedlist spacing="compact">
+<title>Query format</title>
+  <listitem>
+    <para>Every query must have at least one vertex and every edge
+    must have vertices at both ends.</para>
+  </listitem>
+  <listitem>
+    <para>A &qgraph; query must be a connected graph.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; queries can be as simple as a single vertex.
+    </para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; supports both directed and undirected
+    edges. Proximity only supports binary links.</para>
+  </listitem>
+  <listitem>
+    <para>Each vertex and edge in a &qgraph; query has a unique label
+    used within the context of the query. These labels are used to
+    identify the elements in the resulting subgraphs but have no effect
+    on what the query matches.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Query results</title>
+  <listitem>
+    <para>Query results in the form of containers and subgraphs are
+    added as persistent items to the database.</para>
+  </listitem>
+  <listitem>
+    <para>Query results include all attributes for the objects and
+    links in the container&rsquo;s subgraphs, even if those attributes are
+    not explicitly included in the query.
+    </para>
+  </listitem>
+  <listitem>
+    <para>Subgraphs include the the actual database objects and links
+    that match the originating query, not copies of these objects.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; does not require that query elements match distinct
+    database entities, therefore database items may appear more 
+    than once in an individual subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; does not return links in the database that are not
+    specified in the query, even when both link ends are in the same
+    subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>Loops (links that point back to the originating object) in
+    the database are treated identically to other links.
+    </para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Conditions</title>
+  <listitem>
+    <para>Conditions serve to restrict the number of query matches by
+    placing requirements on the attributes of an object or link in the
+    database.</para>
+  </listitem>
+  <listitem>
+    <para>Conditions are commonly, but not exclusively, used to
+    enforce type restrictions in query matches.</para>
+  </listitem>
+  <listitem>
+    <para>Attribute conditions require that attribute values for
+    database entities match those specified in the query.</para>
+  </listitem>
+  <listitem>
+    <para>Existence conditions test only to see whether the
+    corresponding object or link has an instance of the specified
+    attribute, but does not require that the attribute have any
+    particular value.</para>
+  </listitem>
+  <listitem>
+    <para>Attribute value conditions can use the comparison operators
+    <literal>=</literal>, <literal>&lt;=</literal>,
+    <literal>&gt;=</literal>, and <literal>&lt;&gt;</literal> plus
+    <literal>NOT</literal>.  Use multiple conditions for strict
+    <literal>&lt;</literal> and <literal>&gt;</literal> comparisons.
+    </para>
+  </listitem>
+  <listitem>
+    <para>Multiple conditions for a single query vertex or edge can be
+    combined using disjunctive normal form.</para>
+  </listitem>
+  <listitem>
+    <para>A condition is true if any member of the set of attribute
+    values satisfies the condition.</para>
+  </listitem>
+  <listitem>
+    <para>The use of set-valued attributes means that different
+    attribute values for a single object or link may satisfy different
+    condition tests, yielding the result that
+    <literal><replaceable>attr</replaceable>&nbsp;=&nbsp;<replaceable>value</replaceable></literal>
+    is not necessarily equivalent to
+    <literal><replaceable>attr</replaceable>&nbsp;&lt;&gt;&nbsp;<replaceable>value</replaceable></literal>
+    </para>
+  </listitem>
+  <listitem>
+    <para>If an object or link does not have a value for the attribute
+    listed in a condition, the condition fails.
+    </para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Efficiency considerations</title>
+  <listitem>
+    <para>Efficiency considerations may improve processing speed for
+    extremely complex queries or queries run against an extremely
+    large database.</para>
+  </listitem>
+  <listitem>
+    <para>It is generally more efficient to include more rather than
+    fewer restrictions in the form of conditions.</para>
+  </listitem>
+  <listitem>
+    <para>Queries containing undirected links can be much more
+    computationally expensive than those that contain only directed
+    edges.</para>
+  </listitem>
+  <listitem>
+    <para>Use existence conditions instead of attribute conditions
+    when they match the same data.</para>
+  </listitem>
+  <listitem>
+    <para>Taking advantage of some of these efficiency improvements
+    may require perfect information about a database&rsquo;s schema. In
+    practice, we frequently do not have thorough enough 
+    information about a database to be able to use efficiency
+    improvements with confidence.
+    </para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Annotation uses</title>
+  <listitem>
+    <para>Numeric annotations serve to place limits on the number of
+    isomorphic structures that can occur in matching portions of the
+    database.</para> 
+  </listitem>
+  <listitem>
+    <para>Numeric annotations also serve to group isomorphic
+    structures in the query results into a single subgraph that would
+    otherwise produce multiple matches.</para>
+  </listitem>
+  <listitem>
+    <para>&qgraph; does not provide any mechanism for limiting the 
+    number of matching substructures without grouping the results.</para>
+  </listitem>
+  <listitem>
+    <para>A numeric annotation can be specified on a vertex or edge in
+    a &qgraph; query.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Annotation format</title>
+  <listitem>
+    <para>Numeric annotations can specify a range of values.</para>
+    <itemizedlist spacing="compact">
+      <listitem>
+        <para>An <emphasis>unbounded range</emphasis>
+        [<replaceable>i</replaceable>..] on a vertex or edge means that at
+        least <replaceable>i</replaceable> instances of the corresponding
+        database element must be present to match the query.  An unbounded
+        range will match any number greater than or equal to
+        <replaceable>i</replaceable> of database elements.</para>
+      </listitem>
+      <listitem>
+        <para>A <emphasis>bounded range</emphasis>
+        [<replaceable>i</replaceable>..<replaceable>j</replaceable>] means
+        that at least <replaceable>i</replaceable> and no more than
+        <replaceable>j</replaceable> instances are required for a
+        match. The query will not match database structures that have
+        fewer or more than the specified number of elements.</para>
+      </listitem>
+      <listitem>
+        <para>An <emphasis>exact annotation</emphasis> means that exactly
+        the specified number of database elements must be present to match
+        the query. For example, if you specify a vertex annotation of
+        <literal>[2]</literal>, the query will not match database
+        structures that have one, three, or more matching vertices.</para>
+      </listitem>
+    </itemizedlist>
+  </listitem>
+  <listitem>
+    <para>To group substructures without limit, we use the annotation
+    <literal>[1..]</literal>.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Adjacency requirements</title>
+  <listitem>
+    <para>Edges adjacent to annotated vertices must themselves be
+    annotated.</para>
+  </listitem>
+  <listitem>
+    <para>At most, only one of two adjacent vertices can be
+    annotated.</para>
+  </listitem>
+  <listitem>
+    <para>The <literal>[1..]</literal> annotation is often the
+    appropriate choice for annotating an edge adjacent to an annotated
+    vertex.</para>
+  </listitem>
+  <listitem>
+    <para>Annotated edges can stand alone; they do not require that
+    any adjacent vertices be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>The vertex annotation takes precedence over the edge
+    annotation.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Negated and optional elements</title>
+  <listitem>
+    <para>A negated element is indicated by an annotation of
+    <literal>[0]</literal>, indicating that the corresponding database
+    elements must not be present in the matching subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>An optional element is indicated by an annotation of
+    <literal>[0..]</literal> or
+    <literal>[0..<replaceable>j</replaceable>]</literal>, indicating
+    that the corresponding database element may be present but are not
+    required in the matching subgraph.</para>
+  </listitem>
+  <listitem>
+    <para>To be well formed, the query must remain a connected graph
+    after removing any negated or optional elements.</para>
+  </listitem>
+  <listitem>
+    <para>The annotation <literal>[1..]</literal> is usually
+    appropriate for annotating edges adjacent to a negated or optional
+    vertex.</para>
+  </listitem>
+  <listitem>
+    <para>Negated query elements do not appear in the query&rsquo;s
+    results.</para>
+  </listitem>
+  <listitem>
+    <para>Negated elements cannot substitute for conditions that
+    express inequalities.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Implementation restrictions</title>
+  <listitem>
+    <para>Proximity cannot process queries in which an annotated
+    vertex is connected to more than one unannotated vertex.</para>
+  </listitem>
+</itemizedlist>
+
+</appendix>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

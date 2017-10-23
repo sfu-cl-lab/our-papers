@@ -1,0 +1,243 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Adding a New Attribute</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">
+      <link rel="prev" href="ch06s05.html" title="Sampling the Database">
+      <link rel="next" href="ch06s07.html" title="Social Networking Algorithms">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Using Scripts</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s07.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="scripts_attrs"></a>Adding a New Attribute
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e11623"></a><a class="indexterm" name="d0e11628"></a><p>Sometimes a database doesn&#8217;t include the necessary representation
+            required for a specific task.  For example, one of the classification models
+            used in <a href="ch07.html" title="Chapter&nbsp;7.&nbsp;Learning Models">Chapter&nbsp;7, <i>Learning Models</i></a> uses a boolean attribute to
+            identify members of a class. The ProxWebKB database doesn&#8217;t include such
+            an attribute, so we must create one based on other existing attribute
+            values. 
+            Although you can create attributes directly in the Proximity Database Browser,
+            <a class="indexterm" name="d0e11637"></a>
+            it is sometimes more convenient to do so as part of a script.  This section
+            describes how to create a new attribute and use a function to assign
+            values to that new attribute in a script.  The syntax for the
+            assignment function is identical, regardless of whether the attribute
+            is created in a script or directly in the Proximity Database Browser.
+         </p>
+         <p>In this example, we create an attribute needed for later
+            <em class="citetitle">Tutorial</em> exercises: a binary 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span> object attribute
+            that indicates whether or not a web page belongs to a
+            student. We assign the value <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1</span> to the 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span>
+            attribute if the page&#8217;s <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span>
+            attribute is <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Student</span>, and 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">0</span> otherwise.
+         </p>
+         <p>Creating a useful attribute requires two steps: creating the
+            appropriate database tables and populating its values. 
+            The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html"><code class="classname">Proximity</code></a> class&#8217;s <code class="methodname">addAttribute()</code>
+            <a class="indexterm" name="d0e11676"></a>
+            <a class="indexterm" name="d0e11680"></a>
+            method lets you accomplish both of these steps in one 
+            method call and provides great flexibility in how you assign values to
+            the new attribute.
+         </p>
+         <p>To create and populate a new attribute, you specify a function
+            that describes how to assign values to the new attribute for each
+            entity. New attribute values can be constants or can be based on
+            existing attribute values. In this example, we use the value of the
+            existing <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute to determine the
+            value of the new <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span>
+            attribute. This function is specified as a string passed into the
+            <code class="methodname">addAttribute()</code> method.  You can create
+            attributes for any class of database entity&#8212;objects, links,
+            containers, or subgraphs.
+            See the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/AddAttribute.html"><code class="classname">AddAttribute</code></a> 
+            <a class="indexterm" name="d0e11700"></a>
+            <a class="indexterm" name="d0e11704"></a>
+            class for a full description of the syntax for
+            specifying the creation function.
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>You can also create a new attribute directly in the Proximity Database Browser.
+                        Both methods use the same syntax to define the function that assigns
+                        values to the new attribute.
+                        See <a href="ch04s04.html#ex_exploringattrs" title="Exercise&nbsp;4.2.&nbsp;Exploring attributes:">Exercise&nbsp;4.2</a> for
+                        information on creating attributes in the Proximity Database Browser.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e11719"></a>Code example: create-isStudent-attr.py
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e11722"></a><a class="indexterm" name="d0e11727"></a><p>This section describes the script found in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/create-isStudent-attr.py</code>.
+            </p>
+            <p>Get the current set of object attributes and define the new
+               attribute name. We use the set of current attributes to determine
+               whether the new attribute already exists in the database.
+               
+               
+            </p><pre class="programlisting">currentAttrs = prox.objectAttrs
+newAttrName = "isStudent"
+</pre><p>
+               
+               Define the function that determines the new attribute value.
+               This example uses a switch function. It sets the value of the new
+               attribute to <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1</span> if the object&#8217;s 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute is equal to
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Student</span>
+               and <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">0</span> otherwise.  See the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/AddAttribute.html"><code class="classname">AddAttribute</code></a>
+               class for details on
+               specifying function strings for defining new attributes.
+               
+               
+            </p><pre class="programlisting">newAttrFunction = "pagetype = \"Student\" ==&gt; 1, default ==&gt; 0"
+</pre><p>
+               
+               See if this object attribute already exists in the database.
+               <a class="indexterm" name="d0e11758"></a>
+               
+               If it does, ask the user if we should delete it so we can redefine
+               it.  Proximity provides two methods,
+               <code class="methodname">getYesNoFromUser()</code> 
+               <a class="indexterm" name="d0e11767"></a>
+               <a class="indexterm" name="d0e11773"></a>
+               and <code class="methodname">getStringFromUser()</code>,
+               <a class="indexterm" name="d0e11780"></a>
+               <a class="indexterm" name="d0e11786"></a>
+               both members of the
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html"><code class="classname">Proximity</code></a> class, that you can use to interact with your Python
+               programs. Both methods display a dialog with the specified prompt. The
+               <code class="methodname">getYesNoFromUser()</code> method returns
+               <code class="literal">true</code> if the user selects Yes and
+               <code class="literal">false</code> if the user selects No. The
+               <code class="methodname">getStringFromUser()</code> method returns the string
+               entered by the user.
+               
+               
+            </p><pre class="programlisting">prompt = "Attribute already exists. Delete and recreate?"
+
+if currentAttrs.isAttributeDefined(newAttrName):
+   deleteExisting = prox.getYesNoFromUser(prompt)
+</pre><p>
+               
+               If yes, delete the existing attribute and create it again.
+               
+               
+            </p><pre class="programlisting">   if deleteExisting:
+      currentAttrs.deleteAttribute(newAttrName)
+      print "Creating new ", newAttrName, " attribute"
+      prox.addAttribute(currentAttrs,newAttrName,newAttrFunction)
+</pre><p>
+               
+               If the attribute does not already exist, go ahead and create it.
+               
+               
+            </p><pre class="programlisting">else:
+   print "Creating new ", newAttrName, " attribute"
+   prox.addAttribute(currentAttrs,newAttrName,newAttrFunction)
+</pre><div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p>Running the <code class="filename">create-isStudent-attr.py</code> script
+                           creates an 
+                           attribute used by later tutorial exercises.  Make sure that you
+                           complete this exercise if you plan to complete the exercises in 
+                           <a href="ch07.html" title="Chapter&nbsp;7.&nbsp;Learning Models">Chapter&nbsp;7, <i>Learning Models</i></a>.
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <div class="procedure"><a name="ex_scripts_adding"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;6.5.&nbsp;Adding a new attribute:</b></p>
+               <p>Before beginning, make sure that you are serving the ProxWebKB
+                  database using Mserver. Start the Proximity Database Browser if it is not already
+                  running.
+               </p>
+               <ol type="1">
+                  <li>
+                     <p>From the <span><strong class="guimenu">Script</strong></span> menu, choose
+                        <span><strong class="guimenuitem">Run Script</strong></span>.
+                        Proximity displays the <span class="guilabel">Open</span> dialog.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory and
+                        choose <code class="filename">create-isStudent-attr.py</code>.
+                        Click <span><strong class="guibutton">Open</strong></span>.
+                     </p>
+                     <p>Proximity opens a window to show you any output from the script
+                        along with a trace of the script execution. 
+                        Proximity reports:
+                        
+                        
+                     </p><pre class="screen">Status: starting running script:
+   /proximity/doc/user/tutorial/examples/create-isStudent-attr.py
+Creating new  isStudent  attribute
+Status: finished running script
+</pre><p>
+                        
+                        You can close this window after the script finishes.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Click <span><strong class="guibutton">Object attributes</strong></span> to see the new
+                        isStudent attribute.
+                     </p>
+                  </li>
+               </ol>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s07.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Sampling the Database&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Social Networking Algorithms</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

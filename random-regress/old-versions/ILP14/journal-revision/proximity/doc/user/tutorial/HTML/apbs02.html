@@ -1,0 +1,222 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Installing MonetDB</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="apb.html" title="Appendix&nbsp;B.&nbsp;Installation">
+      <link rel="prev" href="apb.html" title="Appendix&nbsp;B.&nbsp;Installation">
+      <link rel="next" href="apbs03.html" title="Installing Proximity">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="apb.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Appendix&nbsp;B.&nbsp;Installation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="apbs03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="apx_install_monet"></a>Installing MonetDB
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_apx_geninstall"></a><a class="indexterm" name="idx_apx_mdb"></a><p>Users updating from Proximity&nbsp;4.0 or later versions may
+            choose to stay with their current MonetDB installation
+            (MonetDB&nbsp;4.6.2) or update to MonetDB Mars (4.20 for
+            Linux/Mac&nbsp;OS&nbsp;X, 4.18.2 for Windows).  The later MonetDB versions
+            provide some performance improvements, but as the underlying database
+            formats are not compatible, using these versions also requires converting
+            existing databases to the newer format.  See 
+            <a href="apbs04.html" title="Updating MonetDB Databases">&#8220;Updating MonetDB Databases&#8221;</a> later in this appendix for
+            instructions on converting MonetDB&nbsp;4.6.2 databases
+            for use with MonetDB Mars.
+         </p>
+         <p>See <a href="ch02s03.html#ov_mserver" title="Running the MonetDB database server">&#8220;Running the MonetDB database server&#8221;</a> in 
+            <a href="ch02.html" title="Chapter&nbsp;2.&nbsp;Getting Started with Proximity">Chapter&nbsp;2, <i>Getting Started with Proximity</i></a> for information on
+            using the MonetDB server with Proximity.
+            Full MonetDB documentation is available from
+            <a class="indexterm" name="d0e18136"></a>
+            <a class="indexterm" name="d0e18142"></a>
+            CWI&#8217;s website at <a href="http://monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html" target="_top">monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html</a>.
+            
+         </p>
+         <div class="example"><a name="d0e18151"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Installing MonetDB for Linux/Mac&nbsp;OS&nbsp;X platforms</b></p>
+            <div class="example-contents"><a class="indexterm" name="d0e18154"></a><a class="indexterm" name="d0e18159"></a><p>You must have administrator privileges (either by using
+                  <code class="code">sudo</code> or being logged in as &#8220;root&#8221;)
+                  to install MonetDB.
+               </p>
+               <div class="orderedlist">
+                  <ol type="1">
+                     <li>
+                        <p>Change directories to <code class="filename">/usr/local</code>.
+                           
+                        </p><pre class="synopsis">&gt; <span><strong class="command">cd /usr/local</strong></span>
+</pre><p>
+                           The Linux/Mac&nbsp;OS&nbsp;X binary distribution of MonetDB is not
+                           relocatable.
+                        </p>
+                     </li>
+                     <li>
+                        <p>Extract the distribution. You must have a version of tar (e.g.,
+                           GNU tar) that supports long file names.
+                           
+                        </p><pre class="synopsis">&gt; <strong class="userinput"><code>tar xvfz <em class="replaceable"><code>path-to-tarfile</code></em>/monet-mars-distr-<em class="replaceable"><code>platform</code></em>.tgz</code></strong>
+</pre><p>
+                           where <em class="replaceable"><code>platform</code></em> reflects your operating system.
+                           
+                        </p>
+                     </li>
+                     <li>
+                        <p>
+                           Change permissions for the <code class="filename">Monet-mars/var</code>
+                           directory to permit write access.
+                           
+                        </p><pre class="synopsis">&gt; <strong class="userinput"><code>cd /usr/local/Monet-mars</code></strong>
+&gt; <strong class="userinput"><code>chmod -R a+w var</code></strong>
+</pre><p>
+                           
+                        </p>
+                     </li>
+                     <li>
+                        <p>[Optional] Add <code class="filename">/usr/local/Monet-mars/bin</code> to
+                           <code class="envar">PATH</code>.
+                           <a class="indexterm" name="d0e18224"></a>
+                           <a class="indexterm" name="d0e18228"></a>
+                           
+                        </p>
+                     </li>
+                  </ol>
+               </div>
+            </div>
+         </div><br class="example-break"><div class="example"><a name="d0e18235"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Installing MonetDB for Windows platforms</b></p>
+            <div class="example-contents"><a class="indexterm" name="d0e18238"></a><p>The Windows version of the MonetDB sever requires
+                  Windows&nbsp;2000 Professional or later. You must be logged in as a
+                  user with administrator privileges to install MonetDB.
+               </p>
+               <div class="orderedlist">
+                  <ol type="1">
+                     <li>
+                        <p>If you have an older version of MonetDB already installed on your
+                           system, remove the following DLL  files from the
+                           <code class="filename">C:\WINDOWS\System32\</code> directory:
+                           
+                        </p>
+                        <div class="itemizedlist">
+                           <ul type="disc" compact>
+                              <li>
+                                 <p><code class="filename">libstream.dll</code></p>
+                              </li>
+                              <li>
+                                 <p><code class="filename">libmutils.dll</code></p>
+                              </li>
+                              <li>
+                                 <p><code class="filename">libMonetODBCs.dll</code></p>
+                              </li>
+                              <li>
+                                 <p><code class="filename">libMonetODBS.dll</code></p>
+                              </li>
+                              <li>
+                                 <p><code class="filename">libMapi.dll</code></p>
+                              </li>
+                           </ul>
+                        </div>
+                        <p>
+                           
+                        </p>
+                     </li>
+                     <li>
+                        <p>Extract the installation files using WinZip or an equivalent
+                           application.
+                        </p>
+                     </li>
+                     <li>
+                        <p>Run the Microsoft installer for MonetDB,
+                           <code class="filename">monet-mars-distr-win.msi</code>, by 
+                           double-clicking the file name
+                           to start the installation wizard. Follow the instructions to install
+                           the MonetDB server in the desired location.  The default installation
+                           directory is <code class="filename">C:\Program Files\CWI\MonetDB</code>.
+                        </p>
+                        <p>Proximity does not require the MonetDB ODBC driver. You can
+                           unselect this option on the third page of the installation wizard if
+                           you plan to only use MonetDB to serve Proximity databases.  You can
+                           ignore warnings that &#8220;installation will fail if this component is not
+                           installed&#8221; if you are not installing the MonetDB ODBC driver;
+                           this warning refers to installing the MonetDB ODBC driver without
+                           having other required software already installed.
+                           
+                        </p>
+                        <p>Your choice of installing MonetDB for &#8220;Just me&#8221;
+                           versus &#8220;All users&#8221; affects only whether MonetDB is added
+                           to the Start Menu for the current user or for all users.  In all cases
+                           MonetDB stores its databases in
+                           
+                        </p>
+                        <div class="blockquote">
+                           <blockquote class="blockquote">
+                              <p><code class="filename">C:\\Documents&nbsp;and&nbsp;Settings\<em class="replaceable"><code>username</code></em>\Application&nbsp;Data\MonetDB4\dbfarm\</code></p>
+                           </blockquote>
+                        </div>
+                        <p>
+                           where <em class="replaceable"><code>username</code></em> is the login name for the
+                           current user.
+                        </p>
+                     </li>
+                     <li>
+                        <p>Run <span><strong class="command">Mserver.bat</strong></span>
+                           (located in the installation directory).
+                           
+                        </p><pre class="synopsis">&gt; <strong class="userinput"><code>C:\\Documents&nbsp;and&nbsp;Settings\<em class="replaceable"><code>username</code></em>\Application&nbsp;Data\MonetDB4\dbfarm\Mserver.bat</code></strong>
+</pre><p>
+                           where <em class="replaceable"><code>username</code></em> is the login name of the
+                           current user.
+                           This creates the required directory hierarchy for MonetDB data files.
+                           Substitute the appropriate path if you installed the Monet
+                           server someplace other than the default location.
+                           
+                        </p>
+                     </li>
+                     <li>
+                        <p>Enter <strong class="userinput"><code>quit();</code></strong> at the Monet server prompt to
+                           quit the server (note the parentheses and semi-colon).
+                        </p>
+                     </li>
+                     <li>
+                        <p>[Optional] Add the MonetDB installation directory to
+                           <code class="envar">PATH</code>.
+                           
+                        </p>
+                     </li>
+                  </ol>
+               </div>
+            </div>
+         </div><br class="example-break"><a class="indexterm" name="d0e18331"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="apb.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="apb.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="apbs03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Appendix&nbsp;B.&nbsp;Installation&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Installing Proximity</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

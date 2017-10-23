@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="SubQ_DB02_Q02">
+  <description>Find student pages two links away from faculty page</description>
+  <query-body>
+    <vertex name="prof">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>PageType</attribute-name>
+          <value>Faculty</value>
+        </test>
+      </condition>
+    </vertex>
+    <edge name="link1">
+      <vertex1>prof</vertex1>
+      <vertex2>linked-page</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <subquery>
+      <vertex name="student">
+        <condition>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>PageType</attribute-name>
+            <value>Student</value>
+          </test>
+        </condition>
+        <numeric-annotation>
+          <min>1</min>
+        </numeric-annotation>
+      </vertex>
+      <vertex name="linked-page" />
+      <edge name="link2">
+        <vertex1>linked-page</vertex1>
+        <vertex2>student</vertex2>
+        <directed>true</directed>
+        <numeric-annotation>
+          <min>1</min>
+        </numeric-annotation>
+      </edge>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </subquery>
+    <constraint>
+      <and>
+        <test>
+          <operator>ne</operator>
+          <item>
+            <item-name>linked-page</item-name>
+            <id />
+          </item>
+          <item>
+            <item-name>student</item-name>
+            <id />
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="prof" x="20.0" y="52.0" />
+    <vertex-location name="student" x="424.0" y="147.0" />
+    <vertex-location name="linked-page" x="195.0" y="147.0" />
+  </editor-data>
+</graph-query>
+

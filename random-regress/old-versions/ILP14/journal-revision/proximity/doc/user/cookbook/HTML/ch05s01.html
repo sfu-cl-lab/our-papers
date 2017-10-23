@@ -1,0 +1,312 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>5.1.&nbsp;Configuring Log4j</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Cookbook">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Proximity Development">
+      <link rel="prev" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Proximity Development">
+      <link rel="next" href="ix01.html" title="Index">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Proximity Development</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ix01.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="section" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="cb_log4j"></a>5.1.&nbsp;Configuring Log4j
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e2875"></a><a class="indexterm" name="d0e2878"></a><a class="indexterm" name="d0e2881"></a><a class="indexterm" name="d0e2886"></a><a class="indexterm" name="d0e2891"></a><a class="indexterm" name="d0e2894"></a><a class="indexterm" name="d0e2899"></a><a class="indexterm" name="d0e2902"></a><a class="indexterm" name="d0e2907"></a><a class="indexterm" name="d0e2912"></a><a class="indexterm" name="d0e2917"></a><a class="indexterm" name="d0e2920"></a><a class="indexterm" name="d0e2923"></a><a class="indexterm" name="d0e2926"></a><a class="indexterm" name="d0e2931"></a><div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e2941"></a>Problem
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>You are testing code that you&#8217;ve written, and you want to
+               output detailed debugging information while the program runs. However,
+               turning debugging on shows you information about
+               <span class="emphasis"><em>all</em></span> packages, making it difficult to trace the
+               execution of your code.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e2952"></a>Solution
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Proximity uses 
+               <a href="http://logging.apache.org/log4j/" target="_top">log4j</a>, a
+               powerful tool that allows programmatic control of the debugging
+               information that your program displays. Using log4j, you can send your
+               output to different <span class="emphasis"><em>loggers</em></span> using different
+               <span class="emphasis"><em>levels</em></span> of verbosity, you can dynamically change
+               those levels, and you can associate different
+               <span class="emphasis"><em>appenders</em></span> to the loggers to send the
+               output to different destinations such as the console, a file, a TCP/IP
+               socket, or a database. Regretfully, log4j can also be hard to
+               configure. In this recipe, we explain how Proximity uses log4j and guide
+               you through the process of configuring log4j with some example
+               setups.
+            </p>
+            <p>Proximity currently uses three different loggers:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p><code class="code">rootLogger</code>, the main logger, which receives the
+                            messages from all the classes in the system
+                     </p>
+                  </li>
+                  <li>
+                     <p><code class="code">mil</code>, a logger for MIL
+                            statements
+                     </p>
+                  </li>
+                  <li>
+                     <p><code class="code">milMessages</code>, another logger for MIL
+                            statements
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               The two MIL loggers are used exclusively by the low-level database
+               classes.  By default, all messages from the main logger are routed to
+               the console at a low level of verbosity (<code class="code">INFO</code>).
+               However, if you want to see more or less debugging output,
+               you can change the verbosity level, or attach new appenders with a
+               different verbosity and send their output to a different location
+               (for example, a file where you save all the <code class="code">DEBUG</code>
+               statements).  Alternately, it is also possible to use different
+               appenders for individual packages or classes, thereby having a finer
+               control of the output.
+            </p>
+            <p>Changing verbosity levels, changing or adding output
+               destinations, and much more, is done through the
+               <code class="filename">prox.lcf</code> configuration file.  Proximity looks for
+               this file in the directory from where it&#8217;s launched, and uses it
+               to configure log4j before execution begins.  The Proximity
+               distribution includes examples of different configuration files under
+               the <code class="filename">example/config</code> directory.
+            </p>
+            <p>The most basic configuration file,
+               <code class="filename">info.lcf</code>, is equivalent to the default
+               setup:
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> log4j.rootLogger=INFO, A1
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+</code></strong></pre><p>
+               
+               The first line sets the verbosity level of the main logger
+               (<code class="code">rootLogger</code>) to <code class="code">INFO</code>, and attaches an
+               appender named <code class="code">A1</code> to it. The other lines define the
+               <code class="code">A1</code> appender, send its output to the console, and
+               specify a particular format for the messages.
+            </p>
+            <p>You can save a copy of all the logging output to a file, as
+               the configuration file <code class="filename">info-plus-file.lcf</code> shows:
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> log4j.rootLogger=INFO, A1, A2
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+ log4j.appender.A2=org.apache.log4j.FileAppender
+ log4j.appender.A2.File=prox.log
+ log4j.appender.A2.Append=false
+    log4j.appender.A2.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A2.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+</code></strong></pre><p>
+               
+               The first line attaches an additional appender (<code class="code">A2</code>) to
+               the main logger, which is configured to send the output to a file
+               named <code class="filename">prox.log</code>, using the same format as the
+               <code class="code">A1</code> appender.
+            </p>
+            <p>What if you want to get more detailed debugging information for
+               a particular package or individual file?  Simply
+               increase the verbosity level for that class, as is shown in the
+               <code class="filename">module-debug.lcf</code> configuration file:
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> log4j.rootLogger=INFO, A1
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+ log4j.logger.kdl.prox.dbmgr.NST=DEBUG
+ log4j.logger.kdl.prox.sample=DEBUG
+</code></strong></pre><p>
+               
+               In this particular case, the output will be the same as before except
+               for the <code class="code">NST</code> class and all the classes in the
+               <code class="code">sample</code> package, which will report their information at
+               the highest level of verbosity (<code class="code">DEBUG</code>). Notice that the
+               output won&#8217;t be sent to a 
+               <code class="filename">prox.log</code> file, as in the previous example. 
+               To do that, add a second appender and configure it as 
+               <code class="code">A2</code> in the configuration file above.
+            </p>
+            <p>If you want to get as much debugging information as possible
+               without getting distracted by the exhaustive logging of the
+               database layers, you can set the default level to 
+               <code class="code">DEBUG</code> and selectively decrease the level for the
+               database loggers, following the technique demonstrated above.  An
+               example of this configuration is shown in
+               <code class="filename">debug-except-db.lcf</code>:
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> log4j.rootLogger=DEBUG, A1
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+ # reduce monet-related debug output, and output from the DB classes
+ log4j.logger.mil=WARN
+ log4j.logger.milMessages=WARN
+ log4j.logger.kdl.prox.db=WARN
+ log4j.logger.kdl.prox.dbmgr=WARN
+ log4j.logger.kdl.prox.monet.Connection=WARN
+ log4j.logger.kdl.prox.util.MonetUtil=WARN
+</code></strong></pre><p>
+               
+               Note that the level for the root logger is set to <code class="code">DEBUG</code>,
+               the most verbose level, while all the database-related classes are set
+               to <code class="code">WARN</code>, the least verbose of all levels.
+            </p>
+            <p>As a final example, consider the extremely rare situation in which the
+               lower database layer is failing. In such a case, you want to use
+               the highest level of debugging possible and also save a log of the
+               Monet statements (MIL commands).  The file
+               <code class="filename">full-debug-plus-mil-file.lcf</code> illustrates the
+               corresponding configuration:
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> log4j.rootLogger=DEBUG, A1
+
+ log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=kdl.prox.util.TimeStampLayout
+    log4j.appender.A1.layout.ConversionPattern=%-9r %-5p %c{2}: %m%n
+
+ # Send MIL to the console
+ log4j.additivity.mil=true
+
+ # And to a file appender
+ log4j.logger.mil=DEBUG, A3
+ log4j.logger.milMessages=DEBUG, A3
+
+ # Create the prox.log.mil file with RAW instructions
+ log4j.appender.A3=org.apache.log4j.FileAppender
+ log4j.appender.A3.File=prox.log.mil
+ log4j.appender.A3.Append=false
+ log4j.appender.A3.layout=org.apache.log4j.PatternLayout
+ log4j.appender.A3.layout.ConversionPattern=%m%n
+</code></strong></pre><p>
+               
+               Note the use of the database-related loggers,
+               <code class="code">mil</code> and <code class="code">milMessages</code>. They are configured
+               such that their output is added to that of the main logger, and such
+               that the MIL commands get saved to a <code class="filename">prox.log.mil</code>
+               file in a raw format.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e3104"></a>Discussion
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>The examples above cover all the configuring options that we
+               have ever had to use while writing and debugging Proximity:  They use
+               different loggers, create one or more appenders, and change the level of
+               verbosity for individual classes and packages. You can combine these
+               options to suit your needs, including writing the output of
+               different packages to separate files, or setting different verbosity
+               levels for groups of classes in the same package.
+            </p>
+            <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p>Whatever your needs, remember that Proximity looks for
+                           configuration information in the file <code class="filename">prox.lcf</code>,
+                           which must be present in the directory from which Proximity is
+                           launched.
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e3118"></a>Supporting Files
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>All the examples above are included in the Proximity
+               distribution, under the <code class="filename">/example/config/</code>
+               directory.
+            </p>
+            <p>For more information and configuration options,
+               consult the 
+               <a href="http://logging.apache.org/log4j/" target="_top">log4j</a>
+               documentation.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ix01.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;5.&nbsp;Proximity Development&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Index</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

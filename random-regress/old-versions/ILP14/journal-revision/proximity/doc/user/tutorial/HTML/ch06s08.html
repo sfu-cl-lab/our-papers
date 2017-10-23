@@ -1,0 +1,813 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Working with Proximity Tables</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">
+      <link rel="prev" href="ch06s07.html" title="Social Networking Algorithms">
+      <link rel="next" href="ch06s09.html" title="Synthetic Data Generation">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s07.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Using Scripts</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s09.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="scripts_nst"></a>Working with Proximity Tables
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_dbtables1"></a><a class="indexterm" name="d0e12149"></a><a class="indexterm" name="idx_nsts1"></a><a class="indexterm" name="idx_nsts2"></a><a class="indexterm" name="idx_nstbrowser"></a><a class="indexterm" name="idx_nstbrowser2"></a><a class="indexterm" name="idx_exploringNSTs"></a><a class="indexterm" name="idx_exploringdata2"></a><p>The database engine underlying Proximity, MonetDB, uses a
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e842"><span class="glossterm"><span class="emphasis"><em>vertically fragmented</em></span></span></a>
+            design.  This design stores all data in two-column tables
+            <a class="indexterm" name="d0e12184"></a>
+            <a class="indexterm" name="d0e12190"></a>
+            called BATs
+            <a class="indexterm" name="d0e12196"></a>
+            <a class="indexterm" name="d0e12200"></a>
+            (binary association tables).  All BATs include a 
+            <span class="emphasis"><em>head</em></span> column that contains an identifier (OID)
+            <a class="indexterm" name="d0e12207"></a>
+            and a <span class="emphasis"><em>tail</em></span> column that contains data.  The
+            contents of the tail can also point to other tables.  Thus, rather than the
+            object-centric view provided by familiar relational databases where
+            an entity&#8217;s attributes are stored in the columns of a table,
+            Proximity uses separate tables for each attribute. Other tables store
+            the Proximity ID 
+            <a class="indexterm" name="d0e12214"></a>
+            <a class="indexterm" name="d0e12218"></a>
+            <a class="indexterm" name="d0e12224"></a>
+            for each object or link in the database. Each attribute value is
+            associated with the appropriate entity through the corresponding
+            ID.
+         </p>
+         <p>Proximity&#8217;s vertically fragmented design makes some
+            database operations more or less efficient than they would be in a
+            traditional relational database.  Operations required by common
+            knowledge discovery tasks, such as the joins required for finding
+            subgraphs matching a query, are significantly faster than they would
+            be in a common relational database.
+            Object- and link-centric operations, such as finding all the attribute
+            values for a specified object, are less efficient.
+         </p>
+         <p>To enable a more intuitive view of the data, Proximity provides
+            an intermediate representation called 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e549"><span class="glossterm"><span class="emphasis"><em>nested synchronized tables</em></span></span></a>
+            (NSTs) that combines the data from several related
+            BATs into a single, multi-column table.  Proximity includes an
+            NST browser for direct examination of these data structures.  For
+            many tasks, using NSTs provides the best mechanism for working with
+            data in Proximity databases.
+         </p>
+         <p>The exercise below illustrates how to use NSTs and 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e352"><span class="glossterm">filtering</span></a>
+            <a class="indexterm" name="idx_filteringNSTs1"></a>
+            <a class="indexterm" name="idx_filteringNSTs2"></a>
+            <a class="indexterm" name="idx_filteringNSTs3"></a>
+            to identify objects and links based on attribute values&#8212;in this
+            case, to find all links from Wisconsin staff web pages to Wisconsin
+            faculty pages.  More specifically, we first identify all the objects that
+            correspond to Wisconsin staff pages (all objects where the value of
+            the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute equals 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Wisconsin</span> and the value of the 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute equals 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Staff</span>).  We then similarly identify the
+            objects that correspond to Wisconsin faculty pages.  Finally, we find
+            all links that originate from an object in the first set and terminate
+            at an object in the second set.
+         </p>
+         <p>To better understand the NSTs used in this example, the
+            following exercise uses the Proximity interactive Python interpreter
+            <a class="indexterm" name="d0e12275"></a>
+            rather than a Python script, allowing you to pause to examine the
+            relevant NSTs as you proceed.  The exercise begins by exploring the
+            standard Proximity NSTs and illustrating how to use the NST browser
+            features.  This is followed by the steps needed to create the NSTs
+            that identify the restricted sets of objects and links listed
+            above.
+         </p>
+         <div class="procedure"><a name="scripts_nsts"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;6.7.&nbsp;Finding specific links:</b></p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>From the Proximity Database Browser start page, click 
+                     <span><strong class="guibutton">browse tables</strong></span> to browse the
+                     built-in Proximity NSTs.
+                     <a class="indexterm" name="d0e12293"></a>
+                     <a class="indexterm" name="d0e12299"></a>
+                     Proximity opens the NST browser.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_Home.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <p>The Proximity NST browser lets you directly examine Proximity
+                     data as represented by NSTs.  Every Proximity database uses several
+                     standard NSTs
+                     <a class="indexterm" name="d0e12313"></a>
+                     <a class="indexterm" name="d0e12319"></a>
+                     for storing objects, links, containers, and attributes
+                     for these entities.  A Proximity database can also have an arbitrary
+                     number of user-created NSTs that typically store subsets or joins of
+                     existing NSTs.  The Proximity NST browser includes a menu bar, top
+                     button bar for navigation, filter text box, bottom button bar for
+                     paging through long lists, and a large area used to display the data
+                     in the selected NST.
+                  </p>
+                  <p>The <span><strong class="guimenu">File</strong></span> menu&#8217;s single command,
+                     <span><strong class="guimenuitem">Export to File</strong></span>,
+                     <a class="indexterm" name="d0e12333"></a>
+                     <a class="indexterm" name="d0e12339"></a>
+                     <a class="indexterm" name="d0e12345"></a>
+                     writes the data for the
+                     current NST to a tab-delimited text file for use in other
+                     applications. Exported NST data does not include the head column
+                     (OIDs), and the trailing <code class="code">@0</code> is omitted from ID
+                     data.
+                  </p>
+                  <p>The initial NST browser display shows the standard
+                     NSTs included in all Proximity databases:
+                     
+                  </p>
+                  <div class="itemizedlist">
+                     <ul type="disc" compact>
+                        <li>
+                           <p>The <span class="token">prox_object</span> NST
+                              <a class="indexterm" name="d0e12363"></a>
+                                stores the IDs of objects in the database.
+                           </p>
+                        </li>
+                        <li>
+                           <p>The <span class="token">prox_obj_attr</span> NST
+                              <a class="indexterm" name="d0e12375"></a>
+                              <a class="indexterm" name="d0e12381"></a>
+                              <a class="indexterm" name="d0e12387"></a>
+                                stores the name, data type, and pointers to tables that contain the
+                                values for object attributes.
+                           </p>
+                        </li>
+                        <li>
+                           <p>The <span class="token">prox_link</span> NST
+                              <a class="indexterm" name="d0e12399"></a>
+                                stores the IDs of the links and the IDs of the objects they connect
+                                to and from (recall that all links in Proximity are directed).
+                           </p>
+                        </li>
+                        <li>
+                           <p>The <span class="token">prox_link_attr</span> NST
+                              <a class="indexterm" name="d0e12411"></a>
+                              <a class="indexterm" name="d0e12417"></a>
+                                stores the name, data type, and pointers to tables that contain the
+                                values for link attributes.
+                           </p>
+                        </li>
+                        <li>
+                           <p>The <span class="token">prox_container</span> NST
+                              <a class="indexterm" name="d0e12429"></a>
+                                stores the ID, name, and parent container for all the containers in
+                                the database, plus pointers to tables that contain the data (objects,
+                                links, and attributes) for those subgraphs.
+                           </p>
+                        </li>
+                        <li>
+                           <p>The <span class="token">prox_cont_attr</span> NST
+                              <a class="indexterm" name="d0e12441"></a>
+                              <a class="indexterm" name="d0e12447"></a>
+                                stores the name and data type for all the container attributes in
+                                the database, plus pointers to tables that contain the values for
+                                those attributes
+                           </p>
+                        </li>
+                     </ul>
+                  </div>
+                  <p>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Double-click <span><strong class="guibutton">prox_object</strong></span>. Proximity
+                     displays the NST that stores object IDs.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_Objects.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                     The <code class="token">prox_object</code> NST includes two
+                     columns: the head column (labeled &#8220;<code class="code">-</code>&#8221;), which
+                     stores the OIDs for each 
+                     object, and an <code class="token">id</code> column, which stores
+                     the object IDs for each object.
+                  </p>
+                  <p>The OID is an internal value used by Proximity; the ID is a
+                     visible value that you can use to refer to specific objects in the
+                     database.  Although they are identical in this case, the OID and ID
+                     values need not match.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">Go Back</strong></span> and then double-click
+                     <span><strong class="guibutton">prox_obj_attr</strong></span>.  Proximity displays the NST that
+                     stores object attribute data.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_ObjectAttrs.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                     The <span class="token">prox_obj_attr</span> NST includes four
+                     columns: the head column, plus columns storing the attribute name,
+                     data type, and a <code class="token">data</code> column that
+                     contains a pointer to the table containing the values for this
+                     attribute.  Each of these attribute value tables is another NST.
+                     To see the values for an attribute, double-click the name of the
+                     corresponding attribute value table.
+                  </p>
+               </li>
+               <li>
+                  <p>Double-click the name of the attribute value table for the
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page_num_inlinks</span> attribute
+                     (the name may vary but will start with <code class="literal">tmp</code>, e.g., 
+                     <span class="token">&lt;tmp-94&gt;</span>).  Proximity
+                     displays the table of values for the 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page_num_inlinks</span> attribute.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_InLinks.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                     Attribute value tables have three columns: the head column, an 
+                     <code class="token">id</code> column that stores the ID of a
+                     database entity (object, link, container, or subgraph) and a 
+                     <code class="token">value</code> column that stores the 
+                     value of the attribute for that entity.  Note that in this case the
+                     values in the <code class="token">id</code> column do 
+                     not match the OIDs in the head column.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">Go Back</strong></span> and then double-click 
+                     <span><strong class="guibutton">&lt;tmp-100&gt;</strong></span>.  Proximity displays the table
+                     of values for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page_words_top100</span> attribute.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_TopWords.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                     In contrast to the previous attribute NST, the table of values for
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page_words_top100</span> contains multiple rows
+                     with the same <code class="token">id</code> value.  This indicates
+                     that <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page_words_top100</span> is a set-valued
+                     attribute&#8212;objects in the database may have multiple values
+                     <a class="indexterm" name="d0e12557"></a>
+                     for this attribute.  And as we can see in the table shown above, this
+                     set can include the same value (e.g.,
+                     &#8220;<code class="code">science</code>&#8221;) more than once.  Proximity
+                     entities may have zero, one, or many values for a specified
+                     attribute.
+                  </p>
+               </li>
+               <li><a name="guifilter"></a><p>Click <span><strong class="guibutton">Go Back</strong></span> and then double-click
+                     <span><strong class="guibutton">&lt;tmp-70&gt;</strong></span>.  Proximity displays the table
+                     of values for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute.
+                  </p>
+                  <p>In the <span class="guilabel">Filter</span> box, enter
+                     <a class="indexterm" name="d0e12583"></a>
+                     <a class="indexterm" name="d0e12587"></a>
+                     <a class="indexterm" name="idx_filteringNSTs1b"></a>
+                     <a class="indexterm" name="idx_filteringNSTs2b"></a>
+                     <a class="indexterm" name="idx_filteringNSTs3b"></a>
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>value = "Wisconsin"</code></strong></pre><p>
+                     and press <span class="keycap">Return</span>.
+                  </p>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e352"><span class="glossterm">Filters</span></a> are a set of
+                     conditions that rows in the NST must 
+                     match.  For example, a common use for filters is identifying all
+                     objects having a specified attribute value.
+                     <a class="indexterm" name="d0e12622"></a>
+                     <a class="indexterm" name="d0e12628"></a>
+                     Filters can be used in Python
+                     scripts or entered directly in the NST browser&#8217;s 
+                     <span class="guilabel">Filter</span> text box.
+                  </p>
+                  <p>This filter limits the displayed
+                     rows to those that have <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Wisconsin</span> in
+                     the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">value</span> column.
+                     The NST browser now shows only the objects that have this attribute value.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_WiscPages.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                     Filters specify a set of conditions that rows in the NST must match.
+                     You can filter an NST based on values in any of the non-head columns
+                     in that NST.
+                     
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>The general form of a filter is
+                                 <a class="indexterm" name="d0e12655"></a>
+                                 
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p><code class="code"><em class="replaceable"><code>column-name</code></em> 
+                                          <em class="replaceable"><code>operator</code></em>
+                                          <em class="replaceable"><code>value</code></em></code>
+                                       
+                                    </p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                 where
+                                 
+                              </p>
+                              <div class="itemizedlist">
+                                 <ul type="disc" compact>
+                                    <li>
+                                       <p><em class="replaceable"><code>column-name</code></em> is the name of a column
+                                            in the NST.  Although we typically filter on attribute values, we
+                                            can create a filter on any non-head column in the NST.
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>operator</code></em> is one of the operators
+                                          <a class="indexterm" name="d0e12685"></a>
+                                          <a class="indexterm" name="d0e12691"></a>
+                                            listed in the <a href="../../../../javadoc/kdl/prox/dbmgr/FilterFactory.html"><code class="classname">FilterFactory</code></a> class.  In addition to the familiar
+                                            comparison operators (<code class="literal">=</code>, 
+                                            <code class="literal">!=</code>, <code class="literal">&lt;</code>,
+                                            <code class="literal">&lt;=</code>, <code class="literal">&gt;</code>, and
+                                            <code class="literal">&gt;=</code>), Proximity provides common database
+                                            filter operators such as <code class="code">DISTINCT ROWS</code> and 
+                                            <code class="code">LIKE</code>.  See the Javadoc for this class for a complete
+                                            list of available operators.
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>value</code></em> is a specific value for this
+                                            attribute.  Note that string values must be quoted.
+                                            Some operators, such as <code class="code">DISTINCT ROWS</code>, do not require a
+                                            <em class="replaceable"><code>value</code></em> parameter.
+                                       </p>
+                                    </li>
+                                 </ul>
+                              </div>
+                              <p>
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>If it is not already available, open the interactive Python
+                     interpreter by choosing <span><strong class="guimenuitem">Open Interpreter</strong></span>
+                     from the <span><strong class="guimenu">Script</strong></span> menu.
+                  </p>
+               </li>
+               <li>
+                  <p>In the interactive Python interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>wiscPages = DB.getObjects("school = 'Wisconsin'")</code></strong></pre><p>
+                     The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Container.html#getObjects(java.lang.String)"><code class="methodname">getObjects()</code></a> method
+                     <a class="indexterm" name="d0e12755"></a>
+                     <a class="indexterm" name="d0e12759"></a>
+                     requires a single string argument that specifies the desired filter.
+                     <a class="indexterm" name="d0e12765"></a>
+                     Note that because the filter requires a
+                     string <em class="replaceable"><code>value</code></em>, 
+                     <code class="code">'Wisconsin'</code>, it requires single quotes in addition to the
+                     double quotes surrounding the complete filter string.
+                  </p>
+                  <p>Proximity creates an NST named <code class="code">wiscPages</code> containing
+                     the same set of objects as those listed in the filtered 
+                     NST from <a href="ch06s08.html#guifilter">Step 6</a>.
+                     
+                  </p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>Although filters resemble conditions, they have
+                                 different semantics.  Conditions operate on objects or links whereas
+                                 filters operate on NST rows.  
+                                 
+                                 A database entity satisfies a condition only if it has a value for the 
+                                 relevant attribute that satisfies the condition; entities having
+                                 no value for the attribute cannot satisfy the condition.  Filters pass
+                                 all rows that satisfy the filter.
+                                 
+                                 
+                              </p>
+                              <p>For example, if some but
+                                 not all objects have a value for the 
+                                 <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute, only those objects having a
+                                 value can satisfy the inequality condition 
+                                 <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school&nbsp;&lt;&nbsp;&gt;&nbsp;UTexas</span>.
+                                 In contrast, a similar-looking filter,
+                                 <code class="code">school&nbsp;!=&nbsp;UTexas</code>, admits any NST row that does
+                                 not have <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">UTexas</span> as a value.  When applied
+                                 to the full objects NST, both objects having a different value for the
+                                 <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute as well as objects having
+                                 no value pass through the filter.
+                              </p>
+                              <p>Add
+                                 <code class="code"><em class="replaceable"><code>attribute</code></em>&nbsp;!=&nbsp;nil</code> to
+                                 a filter to omit entities having no value for the specified
+                                 attribute.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>In the interactive Python interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>prox.browse(wiscPages)</code></strong></pre><p>
+                     <a class="indexterm" name="d0e12822"></a>
+                     <a class="indexterm" name="d0e12826"></a>
+                     <a class="indexterm" name="d0e12832"></a>
+                     <a class="indexterm" name="d0e12838"></a>
+                     Proximity opens another NST browser window that shows you the
+                     contents of the <code class="code">wiscPages</code> NST you just created.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_WiscPagesAgain.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <p>Although the <code class="code">wiscPages</code> NST contains the same
+                     information as the filtered <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> NST,
+                     these NSTs are not identical.  Specifically, the values in the head
+                     column are different across the two NST browser windows.
+                     Remember to use the value in the <code class="token">id</code>
+                     column, not the OID in the head column, when you need the ID of a
+                     database entity.
+                  </p>
+                  <p>You can also use the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#browse(int)"><code class="methodname">browse()</code></a> method to examine the
+                     standard Proximity NSTs.  Use the 
+                     &#8220;shortcuts&#8221; to these tables described in 
+                     <a href="ch06s02s03.html" title="The prox object">&#8220;The <em class="varname"><code>prox</code></em> object&#8221;</a>
+                     <a class="indexterm" name="d0e12871"></a>
+                     <a class="indexterm" name="d0e12877"></a>
+                     <a class="indexterm" name="d0e12883"></a>
+                     as the argument to <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#browse(int)"><code class="methodname">browse()</code></a>.  For example, to display the
+                     objects NST in a new NST browser window, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>prox.browse(prox.objectNST)</code></strong></pre><p>
+                     Note that the
+                     shortcut <code class="code">prox.objectAttrs</code> returns an <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Attributes.html"><code class="classname">Attributes</code></a> object;
+                     therefore, to browse one of the standard attribute NSTs use the form
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>prox.browse(prox.objectAttrs.getAttrNST())</code></strong></pre><p>
+                     <a class="indexterm" name="d0e12906"></a>
+                     <a class="indexterm" name="d0e12910"></a>
+                     to get the NST for this data.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>In the interactive Python interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>wiscPages2 = DB.getObjects("school = 'Wisconsin'","pagetype, url")
+prox.browse(wiscPages2)</code></strong></pre><p>
+                     
+                  </p>
+                  <p>Proximity creates and displays an NST named 
+                     <span class="token">wiscPages2</span>
+                     containing columns for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> and
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url</span> attributes in addition to the head,
+                     <code class="token">id</code>, and <code class="token">value</code> columns we saw before.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_WiscPagesPlus.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <p>In both of the previous methods of filtering the 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute, the resulting NST
+                     included only the head, <code class="token">id</code>, and
+                     <code class="token">value</code> columns.  We can include additional
+                     data in the NST by using an overload of the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Container.html#getObjects(java.lang.String,%20java.lang.String)"><code class="methodname">getObjects()</code></a> method that
+                     lets us specify which additional columns to include in the resulting NST.
+                     This overload requires two string arguments: a filter, and a list of
+                     additional columns to be included in the resulting NST.  
+                     Proximity provides similar overloads for many methods that work with
+                     NSTs.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>In the interactive Python in interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>wiscPages.describe()</code></strong></pre><p>
+                     <a class="indexterm" name="d0e12967"></a>
+                     <a class="indexterm" name="d0e12971"></a>
+                     Proximity reports
+                     
+                  </p><pre class="screen">1,247 rows, 2 columns [id,school:oid,str] -- in memory</pre><p>
+                     
+                  </p>
+                  <p>The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#describe()"><code class="methodname">describe()</code></a> method provides summary information about
+                     an NST.  As was the case for the
+                     <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/script/Proximity.html#browse(int)"><code class="methodname">browse()</code></a> method, use the &#8220;shortcut&#8221; names to pass one
+                     of the standard tables
+                     <a class="indexterm" name="d0e12988"></a>
+                     <a class="indexterm" name="d0e12994"></a>
+                     <a class="indexterm" name="d0e13000"></a>
+                     <a class="indexterm" name="d0e13006"></a>
+                     <a class="indexterm" name="d0e13012"></a>
+                     as an argument to <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#describe()"><code class="methodname">describe()</code></a>. Remember that the attribute
+                     shortcuts return an <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Attributes.html"><code class="classname">Attributes</code></a> object, not an NST, so you must
+                     explicitly get the corresponding NST, for example,
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>prox.objectAttrs.getAttrNST().describe()</code></strong></pre><p>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>In the interactive interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>wiscStaff = DB.getObjects("school = 'Wisconsin' AND pagetype = 'Staff'")
+prox.browse(wiscStaff)</code></strong></pre><p>
+                     
+                  </p>
+                  <p>Proximity creates and displays an NST named
+                     <span class="token">wiscStaff</span>.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_WiscStaffPages.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                     To find the objects that correspond to Wisconsin staff web pages, we
+                     need to create a filter that requires matching
+                     <span class="emphasis"><em>two</em></span> conditions:
+                     <a class="indexterm" name="d0e13049"></a>
+                     <a class="indexterm" name="d0e13055"></a>
+                     the value of the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute must be
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Wisconsin</span> and the value of the
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span> attribute must be
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Staff</span>.  
+                     The filter combines these two conditions with the logical operator
+                     <a class="indexterm" name="d0e13073"></a>
+                     <a class="indexterm" name="d0e13077"></a>
+                     <code class="code">AND</code>.
+                  </p>
+                  <p>Filter conditions can be combined with
+                     <code class="code">AND</code> and <code class="code">OR</code>, using 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e399"><span class="glossterm">infix notation</span></a>.
+                     The filter is passed in as a single
+                     string parameter to the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Container.html#getObjects(java.lang.String)"><code class="methodname">getObjects()</code></a> method.  
+                     String values must be quoted; note the single quotes
+                     surrounding the required attribute values.
+                     For more information about
+                     using logical operators in filters, see the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/FilterFactory.html"><code class="classname">FilterFactory</code></a> class.
+                     <a class="indexterm" name="d0e13103"></a>
+                     <a class="indexterm" name="d0e13107"></a>
+                     
+                  </p>
+                  <p>Because the filter used values
+                     from both the <code class="token">school</code> and
+                     <code class="token">pagetype</code> columns, these columns are
+                     automatically included in the resulting NST.  You can use the overload
+                     of the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/Container.html#getObjects(java.lang.String,%20java.lang.String)"><code class="methodname">getObjects()</code></a> method, described above, to include data from
+                     additional columns in the resulting NST.
+                  </p>
+               </li>
+               <li>
+                  <p>In the interactive Python interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>wiscFaculty = DB.getObjects("school = 'Wisconsin' AND pagetype = 'Faculty'")</code></strong></pre><p>
+                     
+                     This filter combines two conditions to find all the Wisconsin faculty
+                     pages. The results are stored in a new NST named
+                     <span class="token">wiscFaculty</span>.
+                  </p>
+                  <p>Next, we need to find the links from objects in the set of
+                     Wisconsin staff pages (<span class="token">wiscStaff</span>) to
+                     objects in the set of Wisconsin Faculty pages
+                     (<span class="token">wiscFaulty</span>).  We begin by getting the
+                     standard Proximity links NST.
+                  </p>
+               </li>
+               <li>
+                  <p>In the interactive Python interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>linksNST = prox.linkNST</code></strong></pre><p>
+                     
+                     Examine this NST in the browser by either entering
+                     
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>prox.browse(linksNST)</code></strong></pre><p>
+                     
+                     in the interactive Python interpreter or by double-clicking 
+                     <span><strong class="guibutton">prox_link</strong></span> in the NST browser&#8217;s home page.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_Links.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                     The links NST has four columns: the head column, the ink IDs
+                     (<code class="token">link_id</code>), and the starting
+                     (<code class="token">o1_id</code>) and ending
+                     (<code class="token">o2_id</code>) objects for each link.
+                  </p>
+                  <p>Now we need to identify those links where the starting object is
+                     a Wisconsin staff page (the link&#8217;s 
+                     <code class="token">o1_id</code> value must be in the list of IDs
+                     from the <span class="token">wiscStaff</span> NST) and the ending
+                     object is a Wisconsin faculty page (the link&#8217;s 
+                     <code class="token">o2_id</code> value must be in the list of IDs
+                     from the <code class="token">wiscFaculty</code> NST.
+                  </p>
+               </li>
+               <li>
+                  <p>In the interactive Python interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>facOutLinks = linksNST.intersect(wiscStaff, "o1_id = id")</code></strong></pre><p>
+                     <a class="indexterm" name="d0e13192"></a>
+                     <a class="indexterm" name="d0e13196"></a>
+                     
+                     This identifies those links where the starting object 
+                     (<code class="token">o1_id</code>) is a 
+                     Wisconsin staff page.   That is, the link&#8217;s 
+                     <code class="token">o1_id</code> value must equal the value of 
+                     <code class="token">id</code> for an object in the 
+                     <span class="token">wiscStaff</span> NST.
+                  </p>
+                  <p>Once again, we use a filter to identify the relevant rows in
+                     these NSTs. But because we need to match values across two different
+                     NSTs, the filter is used as an argument to the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#intersect(kdl.prox.dbmgr.NST,%20java.lang.String)"><code class="methodname">intersect()</code></a> method.  The
+                     filter for this instance, <code class="code">o1_id = id</code>, compares the values
+                     in <span class="token">linksNST</span>&#8217;s 
+                     <code class="token">o1_id</code> column with the values in 
+                     <span class="token">wiscStaff</span>&#8217;s 
+                     <code class="token">id</code> column.
+                  </p>
+                  <p>Because these NSTs have unique column names, Proximity knows which
+                     NST each column comes from.  When both NSTs share a column name that you
+                     want to use in a filter, add a prefix
+                     indicating which NST it comes from.  For example, if both NSTs had
+                     an <code class="token">id</code> column, write
+                     <code class="code">A.id</code> to indicate that this refers to the
+                     <code class="token">id</code> column from
+                     NST that the method operates on
+                     (<span class="token">linksNST</span>)
+                     and <code class="code">B.id</code> to indicate that this refers to the
+                     <code class="token">id</code> column from the NST passed in as a
+                     parameter to the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#intersect(kdl.prox.dbmgr.NST,%20java.lang.String)"><code class="methodname">intersect()</code></a> method
+                     (<code class="token">wiscStaff</code>).
+                     
+                  </p><a class="indexterm" name="d0e13260"></a><a class="indexterm" name="d0e13261"></a><a class="indexterm" name="d0e13262"></a></li>
+               <li>
+                  <p>In the interactive Python interpreter, enter
+                     
+                  </p><pre class="synopsis"><strong class="userinput"><code>wiscStaffFacLinks = facOutLinks.intersect(wiscFaculty, "o2_id = id")</code></strong>
+<strong class="userinput"><code>prox.browse(wiscStaffFacLinks)</code></strong></pre><p>
+                     
+                  </p>
+                  <p>Proximity creates and displays an NST names
+                     <span class="token">wiscStaffFacLinks</span>.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/NST_WiscStaffFacLinks.png" align="middle" width="522"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <p>This identifies the links in <span class="token">facOutLinks</span>
+                     where the ending object is a Wisconsin faculty page.  That is, the
+                     link&#8217;s <code class="token">o2_id</code> value must equal 
+                     the value of <code class="token">id</code> for an object in the 
+                     <span class="token">wiscFaculty</span> NST.
+                     Because <span class="token">facOutLinks</span> includes only the links
+                     beginning at a Wisconsin staff page, the
+                     <span class="token">wiscStaffFacLinks</span> NST contains the links
+                     we want&#8212;links from Wisconsin staff pages to Wisconsin faculty
+                     pages.  Remember, the <code class="token">link_id</code> column, not
+                     the head column, lists the IDs for the final set of links.
+                  </p>
+               </li>
+            </ol>
+         </div><a class="indexterm" name="d0e13309"></a><a class="indexterm" name="d0e13310"></a><a class="indexterm" name="d0e13311"></a><a class="indexterm" name="d0e13312"></a><a class="indexterm" name="d0e13313"></a><a class="indexterm" name="d0e13314"></a><a class="indexterm" name="d0e13315"></a><a class="indexterm" name="d0e13316"></a><a class="indexterm" name="d0e13317"></a><a class="indexterm" name="d0e13318"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s07.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s09.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Social Networking Algorithms&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Synthetic Data Generation</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

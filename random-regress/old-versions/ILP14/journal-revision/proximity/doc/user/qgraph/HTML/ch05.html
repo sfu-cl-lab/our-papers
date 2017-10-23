@@ -1,0 +1,482 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Chapter&nbsp;5.&nbsp;Constraints</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="prev" href="ch04s07.html" title="Summary">
+      <link rel="next" href="ch05s02.html" title="Attribute Constraints">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s07.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">&nbsp;</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="chapter" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title"><a name="qg_ch_constraints"></a>Chapter&nbsp;5.&nbsp;Constraints
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <div class="toc">
+            <p><b>Table of Contents</b></p>
+            <dl>
+               <dt><span class="sect1"><a href="ch05.html#d0e4920">Identity Constraints</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s02.html">Attribute Constraints</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s03.html">Multiple Constraints</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s04.html">Evaluating Constraints</a></span></dt>
+               <dt><span class="sect1"><a href="ch05s05.html">Constraints and Annotations</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch05s05.html#d0e5805">Constraints on annotated elements</a></span></dt>
+                     <dt><span class="sect2"><a href="ch05s05s02.html">Constraints involving negated and optional elements</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch05s06.html">Implementation in Proximity</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch05s06.html#d0e6010">Constraint elements</a></span></dt>
+                     <dt><span class="sect2"><a href="ch05s06s02.html">Annotation restrictions</a></span></dt>
+                     <dt><span class="sect2"><a href="ch05s06s03.html">Multiple constraints</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch05s07.html">Summary</a></span></dt>
+            </dl>
+         </div>
+         <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e162"><span class="glossterm">Conditions</span></a> let you
+            specify restrictions on individual items in a 
+            query. To place restrictions across different items we use
+            <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">constraints</span></a></em></span>.
+            Constraints compare one <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e824"><span class="glossterm">vertex</span></a> or 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e310"><span class="glossterm">edge</span></a> in the query to another vertex or
+            edge.
+         </p>
+         <p>QGraph provides two types of constraints:
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p><span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e385"><span class="glossterm">Identity constraints</span></a></em></span>
+                         compare the identity of the corresponding 
+                         database objects, for example, making sure that the same object
+                         does not match multiple query elements.
+                  </p>
+               </li>
+               <li>
+                  <p><span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e41"><span class="glossterm">Attribute constraints</span></a></em></span>
+                         compare <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e35"><span class="glossterm">attribute</span></a> values for the 
+                         corresponding database objects, for example, requiring that
+                         objects have the same attribute value.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            Both types of constraints are described in more detail below.
+         </p>
+         <p>Because constraints involve more than one query
+            element, they apply to the query as a whole rather than to a specific
+            vertex or edge. We therefore draw constraints
+            <a class="indexterm" name="d0e4888"></a>
+            <a class="indexterm" name="d0e4894"></a>
+            separate from any query element.
+            <a href="ch05.html#fig_const_ex01" title="Figure&nbsp;5.1.&nbsp;Example query with an identity constraint">Figure&nbsp;5.1</a> shows an example query with an
+            identity constraint that requires that the object matching vertex
+            <em class="token">A</em> must be different from the object matching
+            vertex <em class="token">C</em>.
+            
+         </p>
+         <div class="figure"><a name="fig_const_ex01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Const_Ex01.png" align="middle" width="458.99999999999994" alt="Example query with an identity constraint"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.1.&nbsp;Example query with an identity constraint</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <div class="sect1" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h2 class="title" style="clear: both"><a name="d0e4920"></a>Identity Constraints
+                     </h2>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="idx_idconst0"></a><a class="indexterm" name="idx_idconst1"></a><p>Identity constraints are commonly used to ensure that the same
+               database element does not match two different query elements. Consider
+               the database fragment shown in <a href="ch05.html#fig_const_db01" title="Figure&nbsp;5.2.&nbsp;Database fragment [Const_DB01.xml]">Figure&nbsp;5.2</a>. This
+               database represents interconnected web pages.
+               
+            </p>
+            <div class="figure"><a name="fig_const_db01"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB01.png" align="middle" width="423" alt="Database fragment [Const_DB01.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.2.&nbsp;Database fragment [Const_DB01.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               Like many long web pages, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page3.html</span>
+               links to itself, creating a 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e721"><span class="glossterm">loop</span></a>.  Notice,
+               also, that this database does not have any link attributes.
+               <a class="indexterm" name="d0e4950"></a>
+               <a class="indexterm" name="d0e4958"></a>
+               <a class="indexterm" name="d0e4966"></a>
+               <a class="indexterm" name="d0e4974"></a>
+               <a class="indexterm" name="d0e4980"></a>
+               Neither QGraph nor Proximity requires the use of
+               attributes for either objects or links in a database.
+               
+            </p>
+            <p>
+               <a href="ch05.html#fig_id_no_constraint" title="Figure&nbsp;5.3.&nbsp;1-dimensional star query [Const_DB01_Q01.qg2.xml]">Figure&nbsp;5.3</a> shows a query designed to find
+               the cluster of pages (<a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e733"><span class="glossterm">star</span></a>)
+               linked from each
+               web page in the database. 
+               
+            </p>
+            <div class="figure"><a name="fig_id_no_constraint"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB01_Q01.png" align="middle" width="328.50000000000006" alt="1-dimensional star query [Const_DB01_Q01.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.3.&nbsp;1-dimensional star query [Const_DB01_Q01.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+               With no constraints, we get the following results when the query is run on the
+               database fragment shown in <a href="ch05.html#fig_const_db01" title="Figure&nbsp;5.2.&nbsp;Database fragment [Const_DB01.xml]">Figure&nbsp;5.2</a>.
+               
+               
+            </p>
+            <div class="figure"><a name="fig_const_db01_q01_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB01_Q01_res.png" align="middle" width="549" alt="Query results"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.4.&nbsp;Query results</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>The subgraph with <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page3.html</span> as the
+               <em class="token">core_page</em> shows how Proximity used the link from
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page3.html</span> to itself to match the
+               query.  As we saw in <a href="ch02.html" title="Chapter&nbsp;2.&nbsp;Query Basics">Chapter&nbsp;2, <i>Query Basics</i></a>,
+               QGraph does not require that distinct query elements be matched by
+               distinct database elements.  Because this object 
+               matches both the <em class="token">core_page</em> and the
+               <em class="token">linked_page</em> vertices in the query, it 
+               appears twice in the query results, once for each corresponding query
+               vertex.
+            </p>
+            <p>To eliminate such duplicated
+               <a class="indexterm" name="d0e5034"></a>
+               <a class="indexterm" name="d0e5038"></a>
+               elements, we use an identity
+               constraint that specifies that the object that matches the 
+               <em class="token">core_page</em> vertex must not be the same as
+               the object that matches the <em class="token">linked_page</em>
+               vertex.
+            </p>
+            <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p>The general form of an identity constraint is
+                           
+                        </p>
+                        <div class="blockquote">
+                           <blockquote class="blockquote">
+                              <p>
+                                 <em class="replaceable"><code>element1</code></em>
+                                 &nbsp;&nbsp;<em class="replaceable"><code>operator</code></em>&nbsp;&nbsp;
+                                 <em class="replaceable"><code>element2</code></em>
+                                 
+                              </p>
+                           </blockquote>
+                        </div>
+                        <p>
+                           where
+                           
+                        </p>
+                        <div class="itemizedlist">
+                           <ul type="disc" compact>
+                              <li>
+                                 <p><em class="replaceable"><code>element1</code></em> and
+                                    	<em class="replaceable"><code>element2</code></em> are the names of two
+                                    	vertices or two edges in the query
+                                 </p>
+                              </li>
+                              <li>
+                                 <p><em class="replaceable"><code>operator</code></em> is one of
+                                    <a class="indexterm" name="d0e5080"></a>
+                                    <a class="indexterm" name="d0e5086"></a>
+                                    	<code class="literal">=</code>, <code class="literal">&lt;&gt;</code>,
+                                            <code class="literal">&lt;</code>, <code class="literal">&lt;=</code>,
+                                    	<code class="literal">&gt;</code>, and <code class="literal">&gt;=</code></p>
+                              </li>
+                           </ul>
+                        </div>
+                        <p>
+                           
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <p>The revised query with the identity constraint is shown in
+               <a href="ch05.html#fig_const_db01_q02" title="Figure&nbsp;5.5.&nbsp;Query with identity constraint [Const_DB01_Q02.qg2.xml]">Figure&nbsp;5.5</a>. 
+               
+            </p>
+            <div class="figure"><a name="fig_const_db01_q02"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB01_Q02.png" align="middle" width="328.50000000000006" alt="Query with identity constraint [Const_DB01_Q02.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.5.&nbsp;Query with identity constraint [Const_DB01_Q02.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               The query&#8217;s constraint,
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">core_page&nbsp;&lt;&nbsp;&gt;&nbsp;linked_page</span>,
+               prohibits matching the same object to both the
+               <em class="token">core_page</em> and 
+               <em class="token">linked_page</em> vertices.
+               The results of executing this query on the database fragment shown
+               in <a href="ch05.html#fig_const_db01" title="Figure&nbsp;5.2.&nbsp;Database fragment [Const_DB01.xml]">Figure&nbsp;5.2</a> are shown below:
+               
+            </p>
+            <div class="figure"><a name="fig_const_db01_q02_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB01_Q02_res.png" align="middle" width="549" alt="Query results"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.6.&nbsp;Query results</b></p>
+            </div>
+            <p><br class="figure-break">
+               The subgraph with <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page3.html</span> as the
+               <em class="token">core_page</em> is no longer included in the
+               query results.  The
+               constraint ensures that the same object cannot match both of the
+               query&#8217;s vertices.
+               
+            </p>
+            <p>Another common use for constraints is to
+               remove equivalent subgraphs
+               <a class="indexterm" name="d0e5151"></a>
+               <a class="indexterm" name="d0e5157"></a>
+               from a query&#8217;s results.  Consider the
+               fragment of a genealogy database shown below:
+               
+            </p>
+            <div class="figure"><a name="fig_const_db02"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB02.png" align="middle" width="503.99999999999994" alt="Database fragment [Const_DB02.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.7.&nbsp;Database fragment [Const_DB02.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>A query (without constraints) that finds both parents of
+               an individual is shown in <a href="ch05.html#fig_const_db02_q01" title="Figure&nbsp;5.8.&nbsp;Query [Const_DB02_Q01.qg2.xml]">Figure&nbsp;5.8</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_const_db02_q01"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB02_Q01.png" align="middle" width="549" alt="Query [Const_DB02_Q01.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.8.&nbsp;Query [Const_DB02_Q01.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               As we saw before, a query without constraints can
+               return matches that include repeated elements as well as equivalent
+               subgraphs where the same objects match different vertices, but with
+               the order reversed.   We call such subgraphs
+               <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e506"><span class="glossterm">mirror matches</span></a></em></span>
+               <a class="indexterm" name="d0e5187"></a>
+               because one often looks like the
+               mirror image of the other when graphed.
+            </p>
+            <p>The results of executing this query on the database fragment 
+               in <a href="ch05.html#fig_const_db02" title="Figure&nbsp;5.7.&nbsp;Database fragment [Const_DB02.xml]">Figure&nbsp;5.7</a> are shown below:
+               
+            </p>
+            <div class="figure"><a name="fig_const_db02_q01_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB02_Q01_res.png" align="middle" width="531" alt="Query results"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.9.&nbsp;Query results</b></p>
+            </div>
+            <p><br class="figure-break">
+               The top two subgraphs are mirror matches; they 
+               differ only in how Tony Curtis and Janet Leigh correspond to
+               the <em class="token">parent1</em> and 
+               <em class="token">parent2</em> vertices.
+               The bottom two subgraphs contain repeated elements. In one 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Tony Curtis</span> matches both the 
+               <em class="token">parent1</em> and 
+               <em class="token">parent2</em> vertices; in the other,
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Janet Leigh</span> matches both vertices.
+               
+            </p>
+            <p>As described before, we can add an identity constraint 
+               to the query to remove the subgraphs containing duplicated elements:
+               
+            </p>
+            <div class="figure"><a name="fig_const_db02_q02"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB02_Q02.png" align="middle" width="549" alt="Query [Const_DB02_Q02.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.10.&nbsp;Query [Const_DB02_Q02.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               The constraint,
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">parent1&nbsp;&lt;&nbsp;&gt;&nbsp;parent2</span>,
+               ensures that the same object cannot match both vertices.  
+               
+            </p>
+            <div class="figure"><a name="fig_const_db02_q02_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB02_Q02_res.png" align="middle" width="531" alt="Query results"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.11.&nbsp;Query results</b></p>
+            </div>
+            <p><br class="figure-break">
+               The inequality constraint
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">parent1&nbsp;&lt;&nbsp;&gt;&nbsp;parent2</span>
+               eliminates the subgraphs where the same object matches both the
+               <em class="token">parent1</em> and <em class="token">parent2</em>
+               vertices, but the results still include a mirror match.  These two
+               subgraphs include the same database objects and links but matches them
+               to different query elements.
+               To remove the mirror match from the results, we modify the
+               constraint as shown below.
+               
+            </p>
+            <div class="figure"><a name="fig_const_db02_q03"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB02_Q03.png" align="middle" width="549" alt="Query [Const_DB02_Q03.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.12.&nbsp;Query [Const_DB02_Q03.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               The new constraint, 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">parent1&nbsp;&lt;&nbsp;parent2</span>, enforces an
+               ordering on the object IDs matching these vertices. Because each
+               object has a unique ID, this ensures that different subgraphs do not
+               contain the same objects in a different order. The results of
+               the modified query can be seen below:
+               
+            </p>
+            <div class="figure"><a name="fig_const_db02_q03_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Const_DB02_Q03_res.png" align="middle" width="531" alt="Query results"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.13.&nbsp;Query results</b></p>
+            </div>
+            <p><br class="figure-break">
+               As you can see, this <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e234"><span class="glossterm">container</span></a> includes just a
+               single subgraph. The revised constraint removed the mirror match.
+            </p>
+            <p>This constraint works because the underlying database provides
+               a unique ID for each object and link.  Proximity provides unique
+               IDs; therefore, Proximity queries can take advantage of such constraints
+               to eliminate mirror matches.
+            </p><a class="indexterm" name="d0e5281"></a><a class="indexterm" name="d0e5282"></a></div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s07.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center">&nbsp;</td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Summary&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Attribute Constraints</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,313 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Importing XML Data</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Importing and Exporting Proximity Data">
+      <link rel="prev" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Importing and Exporting Proximity Data">
+      <link rel="next" href="ch03s02s02.html" title="Importing database elements using XML">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;3.&nbsp;Importing and Exporting Proximity Data</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s02s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="import_webkb"></a>Importing XML Data
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_import1"></a><a class="indexterm" name="idx_import2"></a><a class="indexterm" name="idx_import3"></a><p>This section describes how to import XML data
+            into Proximity using the provided ProxWebKB
+            <a class="indexterm" name="d0e2062"></a>
+            <a class="indexterm" name="d0e2068"></a>
+            database as an example.
+            Proximity lets you import a complete database, including any
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraphs</span></a> and 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">containers</span></a>, or you can
+            import individual <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attributes</span></a>
+            or containers.
+         </p>
+         <p>By default, Proximity restricts the structure of the XML data
+            file to ensure that you cannot accidentally create identity
+            conflicts.  For example, Proximity prohibits adding additional objects
+            to a database once the initial set of objects has been defined;
+            therefore, the XML data file can contain only a single objects section
+            and you cannot add more objects with a subsequent import.  Similarly,
+            you cannot add new links or add more values to an attribute once you have
+            completed importing the initial set of links or attribute
+            values. You can override these restrictions by using the
+            <code class="code">noChecks</code> 
+            <a class="indexterm" name="d0e2086"></a>
+            option to the import script, described in 
+            <a href="ch03s02s03.html" title="Importing XML data using noChecks">&#8220;Importing XML data using <code class="code">noChecks</code>&#8221;</a>.
+         </p>
+         <p>
+            
+         </p>
+         <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+            <table border="0" summary="Caution">
+               <tr>
+                  <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                  <th align="left"></th>
+               </tr>
+               <tr>
+                  <td align="left" valign="top">
+                     <p>You are responsible for ensuring the integrity of the data in an
+                        XML file.  Proximity makes no checks to ensure that attributes are
+                        assigned to items (objects, links, subgraphs, or containers) that are
+                        actually present in the database.  Assigning attribute values to
+                        non-existent items does not trigger an exception or warning.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p> 
+            
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>Proximity automatically converts all attribute names to lower
+                        case
+                        <a class="indexterm" name="d0e2101"></a>
+                        <a class="indexterm" name="d0e2105"></a>
+                        when importing XML data; attribute values retain their original
+                        case.  (Proximity ignores case when matching attribute names but obeys
+                        case when matching attribute values.)
+                     </p>
+                     <p>The characters <code class="literal">&lt;</code>, <code class="literal">&gt;</code>,
+                        and <code class="literal">&amp;</code> must be represented by the corresponding
+                        XML entities, <code class="literal">&amp;lt;</code>,
+                        <code class="literal">&amp;gt;</code>, and <code class="literal">&amp;amp;</code>. 
+                        For compatibility with MonetDB, single quotes, double quotes, 
+                        <a class="indexterm" name="d0e2131"></a>
+                        <a class="indexterm" name="d0e2137"></a>
+                        <a class="indexterm" name="d0e2143"></a>
+                        <a class="indexterm" name="d0e2149"></a>
+                        <a class="indexterm" name="d0e2155"></a>
+                        the pipe symbol (<code class="literal">|</code>),
+                        and newline characters in the XML data are automatically
+                        changed to underscores during import.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>The sections below walk through the process of first
+            importing a database and then importing values for a new
+            attribute on the existing database objects.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e2171"></a>Importing databases using XML
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="idx_import5"></a><p>The exercise below walks through the process of importing the XML
+               version of the ProxWebKB database. ProxWebKB was developed from the WebKB
+               <a class="indexterm" name="d0e2181"></a>
+               <a class="indexterm" name="d0e2185"></a>
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e679"><span class="glossterm">relational data</span></a> set [<a href="bi01.html#craven99"><abbr class="abbrev">Craven et al., 1999</abbr></a>]
+               available from 
+               <a href="http://www-2.cs.cmu.edu/~WebKB/" target="_top">www-2.cs.cmu.edu/~WebKB/</a>.
+               The version used for the Proximity tutorial has been modified from the
+               public distribution to meet the needs of this tutorial. Modifications
+               include some data clean up and the the creation of additional object
+               attributes based on the data in the distributed version.
+            </p>
+            <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p>Most of the remaining tutorial exercises require that you use
+                           the ProxWebKB database. Make sure you complete <a href="ch03s02.html#ex_import_webkb" title="Exercise&nbsp;3.1.&nbsp;Importing the ProxWebKB data into Proximity:">Exercise&nbsp;3.1</a> to create the ProxWebKB
+                           database.
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <div class="procedure"><a name="ex_import_webkb"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;3.1.&nbsp;Importing the ProxWebKB data into Proximity:</b></p>
+               <ol type="1">
+                  <li>
+                     <p>Uncompress the compressed ProxWebKB XML data file.</p><pre class="synopsis">&gt; <strong class="userinput"><code>cd $PROX_HOME/doc/user/tutorial/examples</code></strong>
+&gt; <strong class="userinput"><code>gunzip proxwebkb.xml.gz</code></strong>
+</pre></li>
+                  <li>
+                     <p>Copy the file <code class="filename">prox3db.dtd</code> from
+                        <code class="filename">$PROX_HOME/resources</code> to the directory containing
+                        the XML data file, <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code>.
+                        
+                     </p>
+                     <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                        <table border="0" bgcolor="#CCCCFF">
+                           <tr>
+                              <td>
+                                 <p>Proximity requires that the 
+                                    <a href="go01.html#d18e304"><span class="glossterm">DTD</span></a> file, 
+                                    <a class="indexterm" name="d0e2238"></a>
+                                    <a class="indexterm" name="d0e2244"></a>
+                                    <code class="filename">prox3db.dtd</code>, be present in the directory
+                                    containing the XML data file. The DTD file is included in
+                                    <code class="filename">$PROX_HOME/resources</code>. Make sure you copy the DTD
+                                    to any other directories containing XML data files you want to import
+                                    into Proximity.
+                                 </p>
+                              </td>
+                           </tr>
+                        </table>
+                     </div><pre class="synopsis">&gt; <strong class="userinput"><code>cp $PROX_HOME/resources/prox3db.dtd $PROX_HOME/doc/user/tutorial/examples/</code></strong>
+</pre></li>
+                  <li>
+                     <p>Start the MonetDB server.  Data files must be on the same
+                        machine as that serving the database.
+                     </p><pre class="synopsis">&gt; <strong class="userinput"><code>Mserver --dbname ProxWebKB $PROX_HOME/resources/init-mserver.mil</code></strong>
+</pre><p>
+                        <a class="indexterm" name="d0e2270"></a>
+                        
+                        The <code class="filename">init-mserver.mil</code> 
+                        <a class="indexterm" name="d0e2277"></a>
+                        <a class="indexterm" name="d0e2283"></a>
+                        script sets the port 
+                        <a class="indexterm" name="d0e2289"></a>
+                        for the server to 30000.  To use a different port, add 
+                        <strong class="userinput"><code>--set port=<em class="replaceable"><code>nnnnn</code></em></code></strong>
+                        (where <em class="replaceable"><code>nnnnn</code></em> is the new port number) to
+                        the command line.  For example:
+                        
+                     </p><pre class="synopsis">&gt; <strong class="userinput"><code>Mserver --dbname ProxWebKB $PROX_HOME/resources/init-mserver.mil \
+  --set port=45678</code></strong>
+</pre><p>
+                        Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+                        MonetDB&nbsp;4.6.2.
+                        See <a href="ch02s03.html#ov_mserver" title="Running the MonetDB database server">&#8220;Running the MonetDB database server&#8221;</a> for more
+                        information on starting and using the MonetDB server.
+                     </p>
+                     <p>Because the database does not exist, 
+                        <a class="indexterm" name="d0e2311"></a>
+                        <a class="indexterm" name="d0e2317"></a>
+                        MonetDB prints warning statements along with its usual startup message:
+                        
+                        
+                     </p><pre class="screen">!WARNING: GDKlockHome: created directory
+    /usr/local/Monet-mars/var/MonetDB4/dbfarm/ProxWebKB/
+!WARNING: GDKlockHome: ignoring empty or invalid .gdk_lock.
+!WARNING: BBPdir: initializing BBP.
+# MonetDB Server v4.20.0
+# based on GDK   v1.20.0
+# Copyright (c) 1993-2007, CWI. All rights reserved.
+# Compiled for powerpc-apple-darwin8.10.0/32bit with 32bit OIDs; dynamically linked.
+# Visit http://monetdb.cwi.nl/ for further information.
+Listening on port 30000
+MonetDB&gt;
+</pre><p>
+                        
+                        The startup message may be slightly different depending on your
+                        operating system and the version of MonetDB you are using.
+                        
+                     </p>
+                     <p>
+                        MonetDB also creates a <code class="filename">ProxWebKB</code> directory in its
+                        <code class="filename">dbfarm</code> 
+                        directory to hold the new database.
+                     </p>
+                     <p>Leave the MonetDB server running for the remainder of the import
+                        process. You must be serving the database for any Proximity action
+                        that interacts with database data.
+                     </p>
+                  </li>
+                  <li>
+                     <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e411"><span class="glossterm">Initialize</span></a>
+                        <a class="indexterm" name="d0e2341"></a>
+                        <a class="indexterm" name="d0e2347"></a>
+                        the new Proximity
+                        database. (Substitute the appropriate port number if you are using a
+                        different port.)
+                     </p><pre class="synopsis">&gt; <strong class="userinput"><code>cd $PROX_HOME</code></strong>
+&gt; <strong class="userinput"><code>bin/db-util.sh localhost:30000 init-db</code></strong>
+</pre><p>
+                        <a class="indexterm" name="d0e2361"></a>
+                        <a class="indexterm" name="d0e2365"></a>
+                        <a class="indexterm" name="d0e2371"></a>
+                        <a class="indexterm" name="d0e2377"></a>
+                        
+                     </p>
+                     <p>
+                        Proximity outputs the following trace 
+                        (leading information showing elapsed time and execution thread 
+                        has been omitted from the trace for brevity):
+                        
+                        
+                     </p><pre class="screen">INFO  app.DBUtil: * connecting to db
+INFO  app.DBUtil: * database opened; initializing Prox tables
+INFO  db.DB: * initializing Proximity database
+INFO  app.DBUtil: * tables initialized
+INFO  app.DBUtil: * disconnecting from db
+INFO  app.DBUtil: * done
+</pre></li>
+                  <li>
+                     <p>Import the XML data file into the new Proximity
+                        database. (Substitute the appropriate port number if you are using a
+                        different port.)
+                     </p>
+                     <p>
+                        
+                     </p><pre class="synopsis">&gt; <strong class="userinput"><code>bin/import-xml.sh localhost:30000 \
+  $PROX_HOME/doc/user/tutorial/examples/proxwebkb.xml</code></strong>
+</pre><p>
+                        <a class="indexterm" name="d0e2396"></a>
+                        <a class="indexterm" name="d0e2400"></a>
+                        
+                        When the import process is finished, Proximity reports on the
+                        number of database entities created.
+                        
+                        
+                     </p><pre class="screen">INFO  app.ImportXMLApp: * done importing; counts:
+  4135 objects, 10934 links, 13 attributes, 222052 attribute values,
+  0 containers, 0 subgraph items
+</pre><p>
+                        <a class="indexterm" name="d0e2409"></a>
+                        
+                     </p>
+                  </li>
+               </ol>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s02s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;3.&nbsp;Importing and Exporting Proximity Data&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Importing database elements using XML</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="Annot_DB03_Q03">
+  <description>Actors playing two or more roles in two or more movies</description>
+  <query-body>
+    <vertex name="actor">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>person</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="movie">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>movie</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>2</min>
+      </numeric-annotation>
+    </vertex>
+    <edge name="role">
+      <vertex1>actor</vertex1>
+      <vertex2>movie</vertex2>
+      <directed>true</directed>
+      <condition>
+        <test>
+          <operator>exists</operator>
+          <attribute-name>Role</attribute-name>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>2</min>
+      </numeric-annotation>
+    </edge>
+  </query-body>
+  <editor-data>
+    <vertex-location name="actor" x="127.0" y="85.0" />
+    <vertex-location name="movie" x="399.0" y="131.0" />
+  </editor-data>
+</graph-query>
+

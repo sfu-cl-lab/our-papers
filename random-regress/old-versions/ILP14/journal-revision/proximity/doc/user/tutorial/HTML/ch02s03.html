@@ -1,0 +1,282 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Using Proximity</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Getting Started with Proximity">
+      <link rel="prev" href="ch02s02s02.html" title="Setting up your environment">
+      <link rel="next" href="ch02s03s02.html" title="Running Proximity applications">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02s02s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;2.&nbsp;Getting Started with Proximity</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch02s03s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="d0e421"></a>Using Proximity
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <p>Most Proximity applications can be run either through the
+            Proximity Database Browser or via shell 
+            scripts (Linux/Mac&nbsp;OS&nbsp;X) or batch files (Windows) 
+            that call the applications.
+         </p>
+         <p>Proximity applications are supported by a Java API.
+            <a class="indexterm" name="d0e428"></a>
+            <a class="indexterm" name="d0e432"></a>
+            You can use the API as you would any other Java API in your own Java
+            applications. Proximity also provides a scripting interface that lets
+            you access the full API functionality through Python
+            <a class="indexterm" name="d0e438"></a>
+            scripts. Proximity&#8217;s scripting interface is an important mechanism for
+            working in Proximity and is described in 
+            <a href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">Chapter&nbsp;6, <i>Using Scripts</i></a>.
+         </p>
+         <p>The following sections describe how to use the MonetDB server
+            and run Proximity applications.  See <a href="apa.html" title="Appendix&nbsp;A.&nbsp;Proximity Quick Reference">Appendix&nbsp;A, <i>Proximity Quick Reference</i></a>
+            for a convenient summary of this information.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="ov_mserver"></a>Running the MonetDB database server
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="idx_overview_server"></a><a class="indexterm" name="d0e461"></a><p>Proximity uses a MonetDB 
+               <a class="indexterm" name="d0e468"></a>
+               <a class="indexterm" name="d0e474"></a>
+               <a class="indexterm" name="d0e478"></a>
+               database to store its data. Unlike traditional
+               database systems that start the server
+               separately from connecting to a database, MonetDB attaches a server to a
+               database. To connect to multiple databases, you must start multiple
+               copies of the server.
+            </p>
+            <p>When you start the MonetDB server, you specify the database to
+               serve.  MonetDB stores database files in different locations,
+               depending on your platform:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p><b xmlns:exsl="http://exslt.org/common">Linux and Mac&nbsp;OS&nbsp;X:&nbsp;</b><code class="filename">/usr/local/Monet-mars/var/MonetDB4/dbfarm/</code></p>
+                  </li>
+                  <li>
+                     <p><b xmlns:exsl="http://exslt.org/common">Windows:&nbsp;</b><code class="filename">C:\\Documents&nbsp;and&nbsp;Settings\<em class="replaceable"><code>username</code></em>\Application&nbsp;Data\MonetDB4\dbfarm\</code> where
+                              <em class="replaceable"><code>username</code></em> is the login name for the user
+                              who installed MonetDB
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               Database names correspond to the directories immediately under
+               <code class="filename">dbfarm</code>.  When you create the ProxWebKB
+               database in <a href="ch03s02.html#ex_import_webkb" title="Exercise&nbsp;3.1.&nbsp;Importing the ProxWebKB data into Proximity:">Exercise&nbsp;3.1</a>,
+               MonetDB creates a&nbsp; <code class="filename">ProxWebKB</code> directory under
+               <code class="filename">dbfarm</code>.
+            </p>
+            <p>Proximity provides an MIL
+               <a class="indexterm" name="d0e522"></a>
+               <a class="indexterm" name="d0e526"></a>
+               (Monet Interpreter Language) script,
+               <a class="indexterm" name="d0e532"></a>
+               <a class="indexterm" name="d0e538"></a>
+               <code class="filename">init-mserver.mil</code>, that loads required modules and
+               makes the server start listening for connections on a given port
+               (30000 by default).
+            </p>
+            <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p>Proximity&nbsp;4.3 can be used with either the newer
+                           <a class="indexterm" name="d0e550"></a>
+                           MonetDB&nbsp;4.20 (Linux/Mac&nbsp;OS&nbsp;X) or
+                           MonetDB&nbsp;4.18.2 (Windows), collectively known as the
+                           &#8220;Mars&#8221; versions of MonetDB, or existing users can opt to
+                           continue using MonetDB&nbsp;4.6.2 with
+                           Proximity&nbsp;4.3.  Proximity uses the port number to select
+                           the appropriate protocol for the version of MonetDB being used.  You
+                           must use a port number&nbsp;
+                           <fo:inline xmlns:fo="http://www.w3.org/1999/XSL/Format" font-family="Symbol">&#8804;</fo:inline>&nbsp;40000
+                           for the Mars versions and a port number&nbsp;&gt;&nbsp;40000
+                           for MonetDB&nbsp;4.6.2.
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <p>Full MonetDB documentation is available from
+               <a class="indexterm" name="d0e561"></a>
+               <a class="indexterm" name="d0e567"></a>
+               CWI&#8217;s website at <a href="http://monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html" target="_top">monetdb.cwi.nl/projects/monetdb/MonetDB/Version4/Documentation/index.html</a>.
+               
+               
+            </p>
+            <div class="example"><a name="ex_mserver"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Starting the MonetDB server under Linux/Mac&nbsp;OS&nbsp;X</b></p>
+               <div class="example-contents"><a class="indexterm" name="d0e581"></a><p>Start the MonetDB server by executing the <span><strong class="command">Mserver</strong></span>
+                     command,
+                     <a class="indexterm" name="d0e591"></a>
+                     located in <code class="filename">/usr/local/Monet-mars/bin</code>.  You can add
+                     this directory to <code class="envar">PATH</code> 
+                     <a class="indexterm" name="d0e601"></a>
+                     <a class="indexterm" name="d0e605"></a>
+                     as the examples in the <em class="citetitle">Tutorial</em> assume, or
+                     specify the full path on the command line.
+                  </p>
+                  <p>The command line below starts the MonetDB server the default
+                     port (30000)
+                     for a specified database, using the Proximity initialization script.
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>Mserver --dbname <em class="replaceable"><code>name</code></em> $PROX_HOME/resources/init-mserver.mil</code></strong>
+</pre><p>
+                     where <em class="replaceable"><code>name</code></em> is the name of the database to
+                     be served.
+                  </p>
+                  <p>To use a different port, add the port information to the command
+                     line as shown below:
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>Mserver --dbname <em class="replaceable"><code>name</code></em> $PROX_HOME/resources/init-mserver.mil --set port=<em class="replaceable"><code>nnnnn</code></em></code></strong>
+</pre><p>
+                     where <em class="replaceable"><code>nnnnn</code></em> is the new port number.
+                     (Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+                     MonetDB&nbsp;4.6.2.)
+                  </p>
+                  <p>MonetDB responds with a startup message:
+                     
+                  </p><pre class="screen"># MonetDB Server v4.20.0
+# based on GDK   v1.20.0
+# Copyright (c) 1993-2007, CWI. All rights reserved.
+# Compiled for powerpc-apple-darwin8.10.0/32bit with 32bit OIDs; dynamically linked.
+# Visit http://monetdb.cwi.nl/ for further information.
+Listening on port 30000
+MonetDB&gt;
+</pre><p>
+                     The startup message may be slightly different depending on your
+                     operating system, the version of MonetDB you are using, and whether
+                     you elected to use the default port or specify a different port number
+                     on the command line.
+                  </p>
+                  <p>If the database does not 
+                     <a class="indexterm" name="d0e651"></a>
+                     <a class="indexterm" name="d0e657"></a>
+                     exist, the MonetDB server starts on the
+                     specified port to let you work interactively or to create new
+                     databases, but prints the following warning message:
+                     
+                  </p><pre class="screen">!WARNING: GDKlockHome: created directory
+    /usr/local/Monet-mars/var/MonetDB4/dbfarm/<em class="replaceable"><code>name</code></em>/
+!WARNING: GDKlockHome: ignoring empty or invalid .gdk_lock.
+!WARNING: BBPdir: initializing BBP.
+</pre><p>
+                     where <em class="replaceable"><code>name</code></em> is the name of the database.
+                  </p>
+               </div>
+            </div><br class="example-break"><div class="example"><a name="ex_mserver_windows"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Starting the MonetDB server under Windows</b></p>
+               <div class="example-contents">
+                  <p>The MonetDB server is run from a command (DOS) window.
+                     The <span><strong class="command">Mserver.bat</strong></span> batch file is
+                     located in your local MonetDB installation directory
+                     (<code class="filename">C:\Program Files\CWI\MonetDB4</code> if you installed 
+                     MonetDB in the default location).  You can add this directory to
+                     <code class="envar">PATH</code> as the examples in the
+                     <em class="citetitle">Tutorial</em> assume, or specify the full path on
+                     the command line.
+                  </p><a class="indexterm" name="d0e690"></a><p>The command line below starts the MonetDB server on the default
+                     port (30000) for a specified database, using the Proximity
+                     initialization script. 
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>Mserver.bat --dbname <em class="replaceable"><code>name</code></em> %PROX_HOME%\resources\init-mserver.mil</code></strong>
+</pre><p>
+                     where <em class="replaceable"><code>name</code></em> is the name of the database to
+                     be served.
+                  </p>
+                  <p>To use a different port, add the port information to the command
+                     line as shown below:
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>Mserver.bat --dbname <em class="replaceable"><code>name</code></em> %PROX_HOME%\resources\init-mserver.mil \
+  --set port=<em class="replaceable"><code>nnnnn</code></em></code></strong>
+</pre><p>
+                     where <em class="replaceable"><code>nnnnn</code></em> is the new port number.
+                     (Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+                     MonetDB&nbsp;4.6.2.)
+                  </p>
+                  <p>
+                     MonetDB responds with a startup message:
+                     
+                  </p><pre class="screen"># MonetDB Server v4.18.2
+# Copyright (c) 1993-2007, CWI. All rights reserved.
+# Compiled for i686-pc-win32/32bit; dynamically linked.
+# Visit http://monetdb.cwi.nl/ for further information.
+Listening on port 30000
+MonetDB&gt;
+</pre><p>
+                     The startup message may be slightly different depending on your
+                     operating system, the version of MonetDB you are using, and whether
+                     you elected to use the default port or specify a different port number
+                     on the command line.
+                  </p>
+                  <p>If the database does not exist, the MonetDB server starts on the
+                     specified port to let you work interactively or to create new
+                     databases, but prints the following warning message:
+                     
+                  </p><pre class="screen">!WARNING: GDKlockHome: created directory
+    C:\Documents and Settings\All Users\Application Data\MonetDB4\dbfarm\<em class="replaceable"><code>name</code></em>\
+!WARNING: GDKlockHome: ignoring empty or invalid .gdk_lock.
+!WARNING: BBPdir: initializing BBP.
+</pre><p>
+                     where <em class="replaceable"><code>name</code></em> is the name of the database.
+                  </p>
+               </div>
+            </div><br class="example-break"><div class="example"><a name="d0e742"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Stopping the MonetDB server</b></p>
+               <div class="example-contents">
+                  <p>To close the MonetDB server,
+                     <a class="indexterm" name="d0e747"></a>
+                     <a class="indexterm" name="d0e751"></a>
+                     <a class="indexterm" name="d0e755"></a>
+                     enter
+                     
+                  </p><pre class="synopsis">MonetDB&gt; <strong class="userinput"><code>quit();</code></strong></pre><p>
+                     where <code class="literal">MonetDB&gt;</code> is the MonetDB server prompt.
+                     The parentheses and semi-colon are required.
+                  </p><a class="indexterm" name="d0e767"></a></div>
+            </div><br class="example-break"></div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02s02s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch02s03s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Setting up your environment&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Running Proximity applications</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

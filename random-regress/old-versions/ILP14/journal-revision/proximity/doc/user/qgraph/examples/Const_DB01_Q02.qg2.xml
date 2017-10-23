@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="Const_DB01_Q02">
+  <description>1d star query with identity constraint</description>
+  <query-body>
+    <vertex name="core_page">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>web page</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="linked_page">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>web page</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </vertex>
+    <edge name="link">
+      <vertex1>core_page</vertex1>
+      <vertex2>linked_page</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <constraint>
+      <and>
+        <test>
+          <operator>ne</operator>
+          <item>
+            <item-name>core_page</item-name>
+            <id />
+          </item>
+          <item>
+            <item-name>linked_page</item-name>
+            <id />
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="core_page" x="69.0" y="118.0" />
+    <vertex-location name="linked_page" x="336.0" y="203.0" />
+  </editor-data>
+</graph-query>
+

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="Const_DB05_Q01">
+  <description>Home pages not linked to other pages on same site</description>
+  <query-body>
+    <vertex name="start-page">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>PageType</attribute-name>
+          <value>home</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="linked-page">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>PageType</attribute-name>
+          <value>other</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>0</min>
+        <max>0</max>
+      </numeric-annotation>
+    </vertex>
+    <edge name="linked-to">
+      <vertex1>start-page</vertex1>
+      <vertex2>linked-page</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <constraint>
+      <and>
+        <test>
+          <operator>eq</operator>
+          <item>
+            <item-name>start-page</item-name>
+            <attribute-name>Site</attribute-name>
+          </item>
+          <item>
+            <item-name>linked-page</item-name>
+            <attribute-name>Site</attribute-name>
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="start-page" x="97.0" y="52.0" />
+    <vertex-location name="linked-page" x="366.0" y="153.0" />
+  </editor-data>
+</graph-query>
+

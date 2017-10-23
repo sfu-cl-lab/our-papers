@@ -1,0 +1,1192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="qg_ch_subqueries">
+<title>Subqueries</title>
+
+<para>A <glossterm>subquery</glossterm> is a connected subgraph of
+<glossterm baseform="vertex">vertices</glossterm> and 
+<glossterm baseform="edge">edges</glossterm> that 
+can be treated as a logical unit.  Using subqueries expands the
+expressive power of &qgraph;, enabling you to identify more complex
+structures than could be found otherwise.</para>
+
+<para>The example with which we opened this
+<emphasis>Guide</emphasis>, repeated in <xref linkend="fig_subq_db01_q01"/>,
+shows a query that finds 
+<glossterm baseform="subgraph">subgraphs</glossterm> containing a
+director, all the 
+movies he or she has directed, and all the actors who have appeared in
+those movies.  This example contains a subquery, denoted
+<indexterm><primary>subqueries</primary>
+           <secondary>graphical representation</secondary></indexterm>
+<indexterm><primary>graphical representation</primary>
+           <secondary>subqueries</secondary></indexterm>
+by the box surrounding the <token role="vertex">movie</token> and
+<token role="vertex">actor</token> vertices and the
+<token role="edge">acted-in</token> edge.
+<figure id="fig_subq_db01_q01">
+<title>Example query with subquery [Intro_DB01_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q01.png"
+               width="4.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q01.png"
+               contentwidth="5.5in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The subquery in <xref linkend="fig_subq_db01_q01"/>
+is linked to its parent query by an edge connecting the
+<token role="vertex">movie</token> vertex to the 
+<token role="vertex">director</token> vertex.  We call this edge
+(the edge labeled <token role="edge">directed</token> in the above query)
+a <emphasis><glossterm>boundary edge</glossterm></emphasis>
+<indexterm><primary>boundary edges (of a subquery)</primary></indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>boundary edges</secondary></indexterm>
+of the subquery.
+All subqueries must be connected to one or more vertices in the
+main query.  (However, see <xref linkend="subq_prox_impl"/> later in
+this chapter for restrictions on how
+subqueries can be connected to the main query in Proximity.)</para>
+
+<para>Subqueries expand &qgraph;&rsquo;s expressive power by letting
+you attach a <glossterm>numeric annotation</glossterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="subqueries">on subqueries</secondary>
+</indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>numeric annotations on</secondary></indexterm>
+to a connected 
+set of vertices and edges instead of just a single vertex or edge.
+This effectively lets you treat a more complex structure as if it were
+a single vertex.  For example, if we replace the subquery in
+<xref linkend="fig_subq_db01_q01"/> with a single vertex, we
+see the familiar <glossterm>star query</glossterm> structure.
+<figure id="fig_subq_db01_mainstructure">
+<title>Conceptual structure of query in 
+       <xref linkend="fig_subq_db01_q01"/></title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_MainStructure.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_MainStructure.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This diagram shows the subquery as a single vertex.
+<indexterm><primary>subqueries</primary>
+           <secondary>visualizing</secondary></indexterm>
+The <token role="annot">[1..]</token> annotation on the subquery means
+that the complex structures matching the subquery are grouped
+<indexterm><primary>grouping in query results</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary></indexterm>
+<indexterm><primary>results of queries</primary></indexterm>
+in the same way that objects are grouped when matching an annotated vertex.
+Thus all the movies and their linked actors for a specific director
+will be included in a single subgraph. Executing this query on the
+sample database contained in 
+<filename>Intro_DB01.xml</filename> returns six subgraphs, one for
+each <token role="object">director</token> object in the database.
+The subgraph where the <token role="vertex">director</token> vertex
+matches Steven Spielberg is shown in
+<xref linkend="fig_subq_db01_q01_res"/> (Edge labels have been removed
+for space reasons.)
+<figure id="fig_subq_db01_q01_res">
+<title>Query results for director = Steven Spielberg
+       (edge labels omitted)</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q01_resB.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q01_resB.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+All the movies directed by Steven Spielberg, as well as all the
+actors linked to those movies, are included in this single subgraph.
+</para>
+
+<para>Compare the subgraph shown in 
+<xref linkend="fig_subq_db01_q01_res"/> to the results of a similar
+query that does not use subqueries.  
+<xref linkend="fig_subq_db01_q01_nosubq"/> shows the query from 
+<xref linkend="fig_subq_db01_q01"/>, but without the subquery box and
+subquery annotation.
+<figure id="fig_subq_db01_q01_nosubq">
+<title>Similar query without subquery [SubQ_DB01_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q01_NoSubQ.png"
+               width="4.25in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q01_NoSubQ.png"
+               contentwidth="5.2in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Executing this query on the same data returns 23 subgraphs, one for
+each movie in the database.  The subgraphs in which the
+<token role="vertex">director</token> vertex matches Steven Spielberg
+are shown in <xref linkend="fig_subq_db01_q02_res"/>.
+<figure id="fig_subq_db01_q02_res">
+<title>Query results for director = Steven Spielberg
+      (edge labels omitted)</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q02_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q02_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Because the <token role="vertex">movie</token> vertex is not
+annotated, the query cannot group all the movies for a single director
+and must return a separate subgraph for each director-movie pair in
+the data.</para>
+
+<para>The <emphasis><glossterm>inner structure</glossterm></emphasis>
+<indexterm><primary>inner structure of a subquery</primary></indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>inner structure of</secondary></indexterm>
+of a subquery must be a 
+<glossterm baseform="well formed">well-formed</glossterm>
+<indexterm><primary>queries</primary>
+           <secondary>well-formedness</secondary></indexterm>
+query in its own right. (The inner structure of a subquery is the
+part that remains after removing the boundary edges and the subquery
+box with its annotation.) For example, the inner structure of the
+subquery shown in <xref linkend="fig_subq_db01_q01"/>, shown below,
+forms a valid query in its own right.
+<figure id="fig_subq_db01_q01_subq">
+<title>Inner structure of subquery [SubQ_DB01_Q01_SubQ.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q01_SubQ.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB01_Q01_SubQ.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The inner structure of this subquery is the familiar star query
+<indexterm><primary>star queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>star</secondary></indexterm>
+that finds all actors linked to a single movie.  If we choose, we can
+create and execute a new query containing just this structure.
+</para>
+
+<para>In particular, because 
+<glossterm baseform="disconnected query">disconnected queries</glossterm>
+<indexterm><primary>queries</primary>
+           <secondary>disconnected</secondary></indexterm>
+<indexterm><primary>disconnected queries</primary></indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>disconnected</secondary></indexterm>
+<indexterm><primary>disconnected subqueries</primary></indexterm>
+are not well-formed,
+subqueries cannot be disconnected. That is, all the vertices and edges
+inside the subquery box must be connected in a single graph.
+For example, the query shown in
+<xref linkend="fig_subq_badsubq01"/> contains a disconnected
+subquery.
+<figure id="fig_subq_badsubq01">
+<title>Illegal query containing disconnected subquery</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ01.png"
+               width="4.25in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ01.png"
+               contentwidth="5.20in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+If we look only at the elements inside the subquery box, we see that
+the <token role="vertex">D</token> vertex is not connected to the
+other subquery components (the <token role="vertex">B</token> and
+<token role="object">C</token> vertices and the
+<token role="edge">Z</token> edge).  
+Although the the query as a whole is connected, because it
+contains a disconnected subquery, the query shown in
+<xref linkend="fig_subq_badsubq01"/> is illegal.
+</para>
+
+<!-- ============================================================== -->
+<!--                   SUBQUERIES AND ANNOTATIONS                   -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Subqueries and Annotations</title>
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="subqueries">on subqueries</secondary>
+</indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>numeric annotations on</secondary></indexterm>
+
+<para>&qgraph; requires that all subqueries must be 
+<glossterm baseform="numeric annotation">annotated</glossterm>.  An
+unannotated subquery is equivalent to the same query structure without
+the subquery box.  If we could remove the annotation from the subquery
+box and then run the query shown in 
+<xref linkend="fig_subq_db01_q01"/>, we would see the same results we
+saw in <xref linkend="fig_subq_db01_q02_res"/>. 
+Because an unannotated subquery duplicates capabilities available via
+other &qgraph; elements, unannotated subqueries add nothing to
+&qgraph;&rsquo;s expressive power and &qgraph; therefore requires that
+all subqueries must be annotated.</para>
+
+<para>Because subqueries are annotated, they
+must obey all the &qgraph; rules that apply to
+annotated query elements.  For example, &qgraph; requires that the
+edge adjacent to an annotated element must itself be annotated.
+Therefore the boundary edge(s)
+<indexterm><primary>boundary edges (of a subquery)</primary></indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>boundary edges</secondary></indexterm>
+of an annotated subquery must always be
+annotated.</para>
+
+<para>The query shown in <xref linkend="fig_subq_db01_q01"/>
+illustrates the proper annotation of a subquery&rsquo;s boundary
+edge.  As we saw earlier in 
+<xref xrefstyle="brief" linkend="qg_ch_annotations"/>,
+although other annotations are also legal, most queries will
+probably use the <token role="annot">[1..]</token> annotation on the
+boundary edge.</para>
+
+<para>Because &qgraph; prohibits edges connecting two annotated
+elements, no numeric annotation is allowed on a vertex
+adjacent to an annotated subquery.  For example, the query structure
+shown below is illegal:
+<figure id="fig_subq_badannot01">
+<title>Illegal annotation (vertex <token role="vertex">A</token>)</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadAnnot01.png"
+               width="4.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadAnnot01.png"
+               contentwidth="5.5in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>As we saw in the first part this chapter, we can mentally
+substitute a single vertex for a subquery to better understand the
+conceptual structure of a query.  This heuristic also works well for
+seeing potential annotation problems involving subqueries.  For
+example, we can visualize the query
+<indexterm><primary>subqueries</primary>
+           <secondary>visualizing</secondary></indexterm>
+shown in <xref linkend="fig_subq_badannot01"/>
+as the structure shown below:
+<figure id="fig_subq_badannot01B">
+<title>Conceptual structure of illegally annotated query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadAnnot01B.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadAnnot01B.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This conceptual view helps us see that the query includes an edge
+connecting two annotated elements, the subquery and the 
+<token role="vertex">A</token> vertex.  Because this conceptual
+structure includes an illegal annotation, we can more easily see that the
+corresponding query is also illegal.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                   SUBQUERIES AND CONSTRAINTS                   -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Subqueries and Constraints</title>
+<indexterm id="idx_sub_const1" class="startofrange">
+     <primary>constraints</primary>
+     <secondary>subqueries and</secondary></indexterm>
+<indexterm id="idx_sub_const2" class="startofrange">
+     <primary>subqueries</primary>
+     <secondary>constraints and</secondary></indexterm>
+
+<para>In this section we examine the ways in which subquery
+elements can be used in 
+<glossterm baseform="constraint">constraints</glossterm>.  A
+constraint may compare two 
+elements within the same subquery, or it may compare elements that span the
+subquery boundary. Constraints that involve elements inside a subquery 
+must obey the same rules that apply to any &qgraph; constraint.
+Proximity&rsquo;s current implementation of &qgraph; imposes
+additional restrictions for constraints that cross the subquery
+boundary. See <xref linkend="subq_prox_impl"/> later in
+this chapter for information on these restrictions.</para>
+
+<!-- .............................................................. -->
+<!--               Constraints within a subquery                    -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Constraints within a subquery</title>
+
+<para>Let&rsquo;s look first at a constraint that compares two items within
+the same subquery.  Our example uses a database containing information
+on student and faculty web pages and their
+interconnecting links.  A fragment of such a database is shown in
+<xref linkend="fig_subq_db02"/>.
+<figure id="fig_subq_db02">
+<title>Database fragment [SubQ_DB02.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02.png"
+               width="4.55in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02.png"
+               contentwidth="5.55in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+It&rsquo;s common for two web pages to link to each other and for
+pages to link to themselves.  We see this reflected in our database
+fragment where, for example, <token role="object">page01.html</token> and 
+<token role="object">page03.html</token> point to each other and where
+<token role="object">page06.html</token>
+links to itself.
+Our goal is to find all the student pages that we can reach by
+following exactly two links (hops) from a faculty page.  
+<xref linkend="fig_subq_db02_q01"/> shows a first pass at
+creating such a query.
+<figure id="fig_subq_db02_q01">
+<title>Query [SubQ_DB02_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02_Q01.png"
+               width="4.45in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02.png"
+               contentwidth="5.45in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+We want our results to include a single subgraph for each
+faculty member, so the query uses a subquery to group the cluster of
+pages linked from each <token role="vertex">linked-page</token>
+vertex.</para>
+
+<para>Because the database contains objects that link to themselves,
+this query will incorrectly identify some pages as being two hops away when the
+second hop follows this self link.  We see this in the
+results of executing the query on our database fragment:
+<figure id="fig_subq_db02_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02_Q01_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02_Q01_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Because <token role="object">page06.html</token> links to itself, the
+top subgraph shows <token role="object">page06.html</token> as 
+being both one and two hops away from
+<token role="object">page01.html</token>.  Similarly, because 
+<token role="object">page05.html</token> links to itself, the bottom
+subgraph shows that 
+<token role="object">page05.html</token> matches both the
+<token role="vertex">linked-page</token> and 
+<token role="vertex">student</token> vertices.
+To eliminate these matches, we add an 
+<glossterm>identity constraint</glossterm> that requires that
+the <token role="vertex">linked-page</token> and
+<token role="vertex">student</token> vertices not match the same
+object.
+<figure id="fig_subq_db02_q02">
+<title>Revised query with constraint [SubQ_DB02_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02_Q02.png"
+               width="4.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02_Q02.png"
+               contentwidth="5.5in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The results of executing this modified query on our database
+fragment are shown below:
+<figure id="fig_subq_db02_q02_res">
+<title>Revised query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02_Q02_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB02_Q02_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The two student pages, <token role="object">page05.html</token> and
+<token role="object">page06.html</token>, that were included as a result
+of the self links are no longer included in the query results.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--       Constraints crossing the subquery boundary               -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Constraints crossing the subquery boundary</title>
+
+<para><glossterm baseform="constraint">Constraints</glossterm> can
+also cross subquery boundaries. That is, 
+constraints can compare a query element inside a subquery with a query
+element outside the subquery, either in the main query or in a
+different subquery. 
+(Proximity currently places limitations on the the circumstances under
+which constraints can cross the subquery boundary.  See
+<xref linkend="subq_prox_impl"/> later in this chapter for details on
+these restrictions.)
+</para>
+
+<para>The &ldquo;Six Degrees&rdquo; game finds paths between pairs of
+actors based on the shared movies in which they and other actors have
+appeared.  The length of the shortest path between actors becomes the
+&ldquo;degree of separation&rdquo; between these two actors.
+The database fragment shown in <xref linkend="fig_subq_db03"/>
+contains information on actors and the other actors with whom they
+have co-starred. Links between actors indicate that those two actors
+appeared in the same movie. Proximity requires
+<indexterm><primary>Proximity</primary>
+           <secondary>databases</secondary>
+           <tertiary>link requirements</tertiary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>Proximity</secondary>
+           <tertiary>link requirements</tertiary></indexterm>
+that all links be directed, so the database
+includes two links, one in each direction, between each pair of
+connected actors.
+<figure id="fig_subq_db03">
+<title>Database fragment [SubQ_DB03.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03.png"
+               width="5.45in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03.png"
+               contentwidth="6.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+
+The query in <xref linkend="fig_subq_db03_q01"/> finds actors
+who are one or two degrees of separation from another actor in
+the database.
+
+<figure id="fig_subq_db03_q01">
+<title>Two degrees of separation query without constraint [SubQ_DB03_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03_Q01.png"
+               width="4.7in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03_Q01.png"
+               contentwidth="5.75in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+A query without constraints, like the one shown in 
+<xref linkend="fig_subq_db03_q01"/>, suffers from a problem similar
+to that which we encountered in our previous example. In this case,
+because the database 
+includes links in both directions, this query can match the same
+object to two different vertices.
+Specifically, the same database object can match both the
+<token role="vertex">start</token> and
+<token role="vertex">2degrees</token> vertices, as can be seen in the
+sample subgraph drawn from the query&rsquo;s results, shown below:
+<figure id="fig_subq_db03_q01_res">
+<title>Two degrees of separation results for Kevin Bacon (no
+       constraint)</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03_Q01_res.png"
+               width="5.45in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03_Q01_res.png"
+               contentwidth="6.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para><xref linkend="fig_subq_db03_q01_res"/> shows the subgraph in
+which the <token role="vertex">start</token> vertex matches the
+<token role="object">Kevin Bacon</token> object.  This
+subgraph includes three instances of 
+<token role="object">Kevin Bacon</token> also matching the
+<token role="vertex">2degrees</token> vertex.  In these instances, the
+query matched the <token role="edge">worked-with2</token> edge to the
+links pointing back towards the <token role="object">Kevin Bacon</token>
+object.</para>
+
+<para>To eliminate these unwanted matches, we add an 
+<glossterm>identity constraint</glossterm> to the query, as shown in 
+<xref linkend="fig_subq_db03_q02"/>.
+The constraint states that the same object
+may not match both the <token role="vertex">start</token> and
+<token role="vertex">2degrees</token> vertices.
+
+<figure id="fig_subq_db03_q02">
+<title>Two degrees of separation query with constraint [SubQ_DB03_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03_Q02.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03_Q02.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Again, we examine the subgraph
+in which the <token role="vertex">start</token> vertex matches the 
+<token role="object">Kevin Bacon</token> object to examine.
+<figure id="fig_subq_db03_q02_res">
+<title>Two degrees of separation results for Kevin Bacon</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03_Q02_res.png"
+               width="5.45in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_DB03_Q02_res.png"
+               contentwidth="6.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The constraint successfully eliminated the three instances of
+<token role="object">Kevin Bacon</token> matching the
+<token role="vertex">2degrees</token> vertex that we saw in 
+<xref linkend="fig_subq_db03_q01_res"/>.
+</para>
+<indexterm startref="idx_sub_const1" class="endofrange"/>
+<indexterm startref="idx_sub_const2" class="endofrange"/>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        MULTIPLE SUBQUERIES                     -->
+<!-- ============================================================== -->
+
+<sect1 id="subq_mult">
+<title>Multiple Subqueries</title>
+<indexterm><primary>subqueries</primary>
+           <secondary>multiple</secondary></indexterm>
+<indexterm><primary>multiple subqueries</primary></indexterm>
+
+<para>You can include more than one subquery in a &qgraph; query.
+Because subqueries are always annotated, you must ensure that queries
+containing subqueries obey &qgraph;&rsquo;s annotation rules.
+<indexterm><primary>subqueries</primary>
+           <secondary>annotation rules</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="subqueries">on subqueries</secondary></indexterm>
+For example, because &qgraph; prohibits edges connecting two annotated
+elements, you cannot connect two subqueries by a single edge.</para>
+
+<para>In the query shown in <xref linkend="fig_subq_badsubq02"/>,
+two subqueries are connected by the
+<token role="edge">Z</token> edge.  Because the 
+<token role="edge">Z</token> edge connects two annotated elements,
+this query is illegal.
+<figure id="fig_subq_badsubq02">
+<title>Illegal query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ02.png"
+               width="5.65in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ02.png"
+               contentwidth="6.9in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+<!--
+</para>
+
+<para>
+-->
+It may be easier to see whether your query obeys all annotation
+rules by visualizing any subqueries
+<indexterm><primary>subqueries</primary>
+           <secondary>visualizing</secondary></indexterm>
+as vertices. <xref linkend="fig_subq_badsubq02B"/> shows such a view
+of the above query:
+<figure id="fig_subq_badsubq02B">
+<title>Conceptual structure of illegal query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ02B.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ02B.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Visually collapsing the subqueries into single vertices helps to
+illustrate how the <token role="edge">Z</token> edge connects two
+annotated query elements.</para>
+
+<para>
+Compare the query in <xref linkend="fig_subq_badsubq02"/> to the one
+shown below.
+<figure id="fig_subq_badsubq02_modified">
+<title>Legal query</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ02_Modified.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ02_Modified.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This query adds another vertex (vertex <token role="vertex">E</token>)
+between the two subqueries.  Visualizing the subqueries as vertices
+yields the structure shown in 
+<xref linkend="fig_subq_badsubq02_modifiedb"/>.
+<figure id="fig_subq_badsubq02_modifiedb">
+<title>Conceptual structure of legal query with two subqueries</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ02_ModifiedB.png"
+               width="3.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadSubQ02_ModifiedB.png"
+               contentwidth="4.6in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This view helps us see that this structure obeys &qgraph;&rsquo;s
+requirements for annotations, and is thus a legal query.
+</para>
+
+<!-- .............................................................. -->
+<!--                      Nested subqueries                         -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Nested subqueries</title>
+<indexterm id="idx_sub_nest1" class="startofrange"><primary>subqueries</primary>
+           <secondary>nested</secondary></indexterm>
+<indexterm id="idx_sub_nest2" class="startofrange"><primary>nested subqueries</primary></indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>multiple</secondary></indexterm>
+
+<para>Although not yet supported by Proximity, &qgraph; also lets
+you nest subqueries inside other subqueries.  This further
+increases &qgraph;&rsquo;s expressive power and lets you match
+more complex structures than would be possible with a single level of
+subquery.  The query shown in <xref linkend="fig_subq_nested"/> shows
+a query that includes a nested subquery.
+<figure id="fig_subq_nested">
+<title>Nested subqueries</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_Nested.png"
+               width="5.2in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_Nested.png"
+               contentwidth="6.35in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Nested subqueries must obey the same annotation requirements
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="subqueries">on subqueries</secondary></indexterm>
+that apply to any query element.  In the above query, both the
+top-level subquery and nested subquery are annotated, as are the 
+<token role="edge">X</token> and <token role="edge">Y</token>
+incident
+<indexterm><primary>incident edges</primary>
+           <see>subqueries, boundary edges</see></indexterm>
+edges.</para>
+
+<para>This query extends the pattern we saw in the query shown in
+<xref linkend="fig_subq_db01_q01"/>, which returned 2d-star
+<indexterm><primary>queries</primary>
+           <secondary>star</secondary></indexterm>
+<indexterm><primary>star queries</primary></indexterm>
+subgraphs&mdash;clusters of linked objects two hops away from a
+central object. In this case, using nested 
+subqueries lets us find and return 3d-star subgraphs.  Deeper
+nesting offers the opportunity to match even more complex structures.
+</para>
+
+<para>We can continue our technique of visualizing subqueries
+<indexterm><primary>subqueries</primary>
+           <secondary>visualizing</secondary></indexterm>
+as vertices to help us understand more complex queries.  Visualizing
+the nested subquery in <xref linkend="fig_subq_nested"/> as a single
+vertex gives us the structure shown below.
+<figure id="fig_subq_nestedb">
+<title>Conceptual structure of nested subqueries</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_NestedB.png"
+               width="3.85in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_NestedB.png"
+               contentwidth="4.7in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>By treating a complex structure (the nested subquery) as a vertex
+inside the top-level subquery, we can more clearly see how the structure of
+this query resembles the 2d-star query we saw in 
+<xref linkend="fig_subq_db01_q01"/>.
+</para>
+<indexterm startref="idx_sub_nest1" class="endofrange"/>
+<indexterm startref="idx_sub_nest2" class="endofrange"/>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                   IMPLEMENTATION IN PROXIMITY                  -->
+<!-- ============================================================== -->
+
+<sect1 id="subq_prox_impl">
+<title>Implementation in Proximity</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>QGraph implementation</secondary>
+           <tertiary>subqueries</tertiary></indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>implementation restrictions</secondary></indexterm>
+
+<para>Proximity imposes some additional restrictions on how subqueries
+can be used in &qgraph; queries.  This section describes the current
+requirements for using subqueries in Proximity.</para>
+
+<!-- .............................................................. -->
+<!--                         Edge requirements                      -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Edge requirements</title>
+<indexterm><primary>subqueries</primary>
+           <secondary>boundary edges</secondary></indexterm>
+<indexterm><primary>boundary edges (of a subquery)</primary>
+           <secondary>multiple</secondary></indexterm>
+
+<para>Subqueries can potentially be connected to the main query via
+multiple edges in several ways. Proximity, however, requires that a
+subquery can only be connected to the main query via a single edge.  
+<xref linkend="fig_subq_badproxqueries"/> shows two queries
+that cannot currently be executed in Proximity.
+<figure id="fig_subq_badproxqueries">
+<title>Unimplemented Proximity queries</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadProxQueries.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/SubQ_BadProxQueries.png"
+               contentwidth="6.1in"
+               format="PNG"/>
+</imageobject>
+</mediaobject>
+</figure>
+Proximity cannot execute queries that have multiple 
+<glossterm baseform="boundary edge">boundary edges</glossterm>
+connecting the subquery to a single 
+<glossterm>boundary vertex</glossterm>, or that
+have multiple boundary edges connecting the subquery to more than one
+boundary vertex.  Queries can contain more than one subquery as long as
+each subquery has only a single boundary edge.
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                  Annotation requirements                       -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Annotation requirements</title>
+
+<para>Proximity requires that the <glossterm>boundary vertex</glossterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>boundary vertices</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary sortas="subqueries">on subqueries</secondary></indexterm>
+of a subquery not be 
+<glossterm baseform="numeric annotation">annotated</glossterm>.  The
+boundary vertex 
+<indexterm><primary>boundary vertices</primary></indexterm>
+of a subquery is that vertex
+which is connected to elements outside the subquery box by the
+<glossterm>boundary edge</glossterm>.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                        Nested subqueries                       -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Nested subqueries</title>
+<!--
+add back if page breaks change
+  <indexterm><primary>subqueries</primary>
+             <secondary>nested</secondary></indexterm>
+  <indexterm><primary>nested subqueries</primary></indexterm>
+-->
+
+<para>Proximity does not currently support executing queries
+containing nested subqueries.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                     Constraint restrictions                    -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Constraint restrictions</title>
+<indexterm><primary>constraints</primary>
+           <secondary>subqueries and</secondary></indexterm>
+<indexterm><primary>subqueries</primary>
+           <secondary>constraints and</secondary></indexterm>
+
+<para>Proximity requires that 
+<glossterm baseform="constraint">constraints</glossterm> that cross subquery
+boundaries must obey specific 
+<glossterm baseform="numeric annotation">annotation</glossterm>
+requirements.  When a 
+constraint compares items that do not fall in the same subquery, one
+of the elements being compared in the constraint must be 
+<glossterm baseform="optional element">optional</glossterm>,
+<indexterm><primary>optional</primary>
+           <secondary>query elements</secondary>
+           <tertiary sortas="constraints">in constraints</tertiary></indexterm>
+<indexterm><primary>constraints</primary>
+           <secondary sortas="negated">on negated/optional elements</secondary></indexterm>
+that is, it must be annotated with either
+<token role="annot">[0..]</token> or
+<token role="annot">[0..<replaceable>j</replaceable>]</token>.
+This annotation restriction is illustrated in the example query in
+<xref linkend="fig_subq_db03_q02"/>.  This query compares an
+element in the subquery (the <token role="vertex">2degrees</token>
+vertex) with an element in the main query (the
+<token role="vertex">start</token> vertex).  The
+<token role="vertex">2degrees</token> vertex is annotated with
+<token role="annot">[0..]</token>, making the match to this vertex
+optional and thus making this a valid Proximity query.</para>
+
+<para>The restriction that one of the constrained elements be optional
+applies whether one of the elements is in a subquery and
+the other is in the main query, or both elements are in two distinct
+subqueries.  Constraints that compare elements within the same
+subquery are not subject to such annotation requirements.
+</para>
+
+<para>Another Proximity implementation restriction addresses
+constraints when one of the constrained items is outside the subquery
+boundary while the other item is inside the subquery box.  In this
+case, the item outside the subquery boundary cannot be annotated.
+Proximity prohibits constraints between an annotated item and an item
+within an annotated subquery.</para>
+
+</sect2>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                              SUMMARY                           -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_subq_summary">
+<title>Summary</title>
+<indexterm><primary>queries</primary>
+           <secondary>rule summaries</secondary></indexterm>
+
+<itemizedlist spacing="compact">
+<title>Subquery structure</title>
+  <listitem>
+    <para>Subqueries let you attach a 
+    <glossterm>numeric annotation</glossterm> to a
+    connected set of vertices and edges instead of just a single
+    vertex or edge.</para>
+  </listitem>
+  <listitem>
+    <para>A subquery must be connected to one or more vertices in the
+    main query.</para>
+  </listitem>
+  <listitem>
+    <para>A subquery&rsquo;s
+    <emphasis><glossterm>boundary edge</glossterm></emphasis>
+    <indexterm><primary>boundary edges (of a subquery)</primary></indexterm>
+    <indexterm><primary>subqueries</primary>
+               <secondary>boundary edges</secondary></indexterm>
+    connects a vertex inside the subquery (the boundary
+    vertex) to a vertex outside of the subquery.</para>
+  </listitem>
+  <listitem>
+    <para>A subquery&rsquo;s
+    <emphasis><glossterm>boundary vertex</glossterm></emphasis>
+    <indexterm><primary>boundary vertices</primary></indexterm>
+    <indexterm><primary>subqueries</primary>
+               <secondary>boundary vertices</secondary></indexterm>
+    is a vertex inside the subquery box that is connected to the main
+    query by a boundary edge.</para>
+  </listitem>
+  <listitem>
+    <para>The 
+    <emphasis><glossterm>inner structure</glossterm></emphasis> of a
+    subquery is 
+    the set of objects and links inside the subquery box. A boundary
+    edge is not part of a subquery&rsquo;s inner structure; a boundary
+    vertex is included in the inner structure.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Subquery requirements</title>
+  <listitem>
+    <para>The inner structure of a subquery must be a
+    <glossterm baseform="well formed">well-formed</glossterm>
+    query in its own right.</para>
+  </listitem>
+  <listitem>
+    <para>A subquery&rsquo;s inner structure may not be 
+    <glossterm baseform="disconnected query">disconnected</glossterm>.</para>
+  </listitem>
+  <listitem>
+    <para>All subqueries must be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>The boundary edge of a subquery must be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>The vertex outside the subquery connected to the boundary
+    edge may not be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>Draw subqueries as single vertices to better understand
+    query structure and annotation requirements.</para>
+  </listitem>
+  <listitem>
+    <para><glossterm baseform="constraint">Constraints</glossterm> on
+    elements within a subquery must obey the same 
+    rules that apply to any &qgraph; constraint.</para>
+  </listitem>
+  <listitem>
+    <para>Two subqueries may not be connected by a single edge.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Implementation restrictions</title>
+  <listitem>
+    <para>A subquery must be connected to the main query by a single
+    edge; multiple boundary edges are not permitted.</para>
+  </listitem>
+  <listitem>
+    <para>The boundary vertex of a subquery may not be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>Constraints that cross subquery boundaries require that one
+    of the items being compared be
+    <glossterm baseform="optional element">optional</glossterm> (have
+    an annotation of <token role="annot">[0..]</token> or
+    <token role="annot">[0..<replaceable>j</replaceable>]</token>).</para>
+  </listitem>
+  <listitem>
+    <para>Proximity prohibits constraints between an annotated item
+    and an item within an annotated subquery.</para>
+  </listitem>
+  <listitem>
+    <para>Nested subqueries are not permitted.</para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

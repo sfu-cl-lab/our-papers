@@ -1,0 +1,3456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="ch_queries">
+<title>Querying the Database</title>
+
+<!-- ============================================================== -->
+<!--                            OVERVIEW                            -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Overview</title>
+
+<para>
+<indexterm><primary>QGraph</primary></indexterm>
+Proximity uses <glossterm>QGraph</glossterm> <xref linkend="blau02"/>,
+a visual query language, for defining queries.  This chapter provides
+information on &qgraph;&rsquo;s features and walks through the process
+of creating several example queries.  See the <citetitle>&qguide;</citetitle>
+for a full description of the &qgraph; language as implemented in
+Proximity.</para>
+
+<para>A &qgraph; query is a labeled
+graph of 
+<glossterm baseform="vertex">vertices</glossterm> and 
+<glossterm baseform="edge">edges</glossterm>. The query vertices
+<indexterm><primary>vertices</primary>
+           <secondary sortas="objects">and objects</secondary></indexterm>
+<indexterm><primary>objects</primary>
+           <secondary sortas="vertices">and vertices</secondary></indexterm>
+correspond to 
+<glossterm baseform="object">objects</glossterm> in the database and
+the query edges
+<indexterm><primary>edges</primary>
+           <secondary sortas="links">and links</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary sortas="edges">and edges</secondary></indexterm>
+correspond to <glossterm baseform="link">links</glossterm> in the
+database.  QGraph lets you easily describe a specific configuration of
+objects and links, 
+<glossterm baseform="condition">conditions</glossterm> (required
+<glossterm>attribute</glossterm> values), and global 
+<glossterm baseform="constraint">constraints</glossterm> (restrictions
+across objects or links). To match  
+<indexterm><primary>queries</primary>
+           <secondary>matching</secondary></indexterm>
+<indexterm><primary>matching queries</primary></indexterm>
+a query, a database 
+subgraph must have the correct structure and satisfy all the
+conditions and constraints.</para>
+
+<para>The result of executing a QGraph query is a collection of
+matching <glossterm baseform="subgraph">subgraphs</glossterm> called a
+<emphasis><glossterm>container</glossterm></emphasis>. 
+<indexterm><primary>subgraphs</primary>
+           <secondary>as query results</secondary></indexterm>
+<indexterm><primary>containers</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary>
+           <seealso>subgraphs</seealso></indexterm>
+<indexterm><primary>results of queries</primary>
+           <seealso>subgraphs</seealso></indexterm>
+When you execute a query, the container holding the matching subgraphs
+is added as a persistent 
+<indexterm><primary>persistence</primary></indexterm>
+item in the Proximity database.
+Proximity creates an empty container when the query returns no
+matching subgraphs.</para>
+
+<para>&qgraph; also provides extensive data update 
+<indexterm><primary>queries</primary>
+           <secondary>update functionality</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>updating via queries</secondary></indexterm>
+<indexterm><primary>updating</primary>
+           <secondary>databases via queries</secondary></indexterm>
+functionality; however, only a portion of this functionality has been
+implemented in Proximity to date.  Proximity implements the ability to
+add links to 
+the database through the use of &qgraph; queries.</para>
+
+<para>Proximity represents queries in an XML 
+<indexterm><primary>XML</primary>
+           <secondary>query representation</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>XML representation</secondary></indexterm>
+format. Although you can
+create queries by writing this XML representation in a text editor,
+Proximity provides a Query Editor that lets you create queries
+interactively using a natural graphical representation.  The exercises
+in this chapter use the Query Editor to create queries of increasing
+complexity, illustrating the range of &qgraph;&rsquo;s functionality
+as implemented in Proximity.  Details on the query XML file format are
+included in the <citetitle>&qguide;</citetitle>. 
+</para>
+
+<para>
+Proximity provides many ways to execute queries. This tutorial
+describes how to execute queries
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>from the Query Editor</para>
+  </listitem>
+  <listitem>
+    <para>from the &uiname;</para>
+  </listitem>
+  <listitem>
+    <para>from the command line using Proximity shell scripts</para>
+  </listitem>
+</itemizedlist>
+You can also call methods that execute 
+<indexterm><primary>queries</primary>
+           <secondary>executing</secondary></indexterm>
+<indexterm><primary>executing</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>running</primary>
+           <secondary>queries</secondary></indexterm>
+queries from within Proximity Python scripts or Java programs.
+</para>
+
+<para>All of the queries used in this chapter are available in
+<filename>&querypath;</filename>. You can follow the exercises in this
+chapter to create the queries interactively or execute the example
+queries provided with the Proximity distribution.
+</para>
+
+<sidebar><para><xref linkend="ex_queries_1dclusters"/> creates a
+container used by exercises in later chapters. Make sure that you
+complete <xref linkend="ex_queries_1dclusters"/> if you plan to
+complete the exercises in the following chapters.
+</para>
+</sidebar>
+
+<para>
+<itemizedlist spacing="compact">
+<title>Objectives</title>
+<para>The exercises in this chapter demonstrate how to</para>
+      <listitem>
+	<para>create queries using the Query Editor</para>
+      </listitem>
+     <listitem>
+	<para>add links to the data by executing queries</para>
+      </listitem>
+     <listitem>
+	<para>execute queries from the Query Editor, &uiname;, and
+	command line</para>
+      </listitem>
+<!--
+      <listitem>
+	<para>execute queries from the &uiname;</para>
+      </listitem>
+      <listitem>
+	<para>execute queries from the command line</para>
+      </listitem>
+-->
+      <listitem>
+        <para>execute a query against the contents of a
+        container</para>
+      </listitem>
+      <listitem>
+	<para>examine query results (containers and subgraphs)</para>
+      </listitem>
+      <listitem>
+        <para>create the database entities used in later
+        tutorial exercises</para>
+      </listitem>
+</itemizedlist>
+</para>
+
+<para>Each exercise in this chapter introduces new &qgraph;
+features. A complete explanation of the &qgraph; query language
+is available in the <citetitle>&qguide;</citetitle>.  
+The <xref linkend="query_tips"/> 
+section at the end of this chapter provides a 
+summary of rules for 
+<glossterm baseform="well formed">well-formed</glossterm>
+&qgraph; queries.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                   A FIRST PROXIMITY QUERY                      -->
+<!-- ============================================================== -->
+
+<sect1 id="query_simple">
+<title>A First Proximity Query</title>
+
+<para>The &webkb; database contains 
+<glossterm baseform="object">objects</glossterm> and 
+<glossterm baseform="link">links</glossterm> corresponding to
+web pages and the links between them. Each object has a 
+<token role="attr">pagetype</token>
+attribute that identifies whether the page belongs to or describes a
+student, faculty member, staff member, research project, course, or
+something else (other).</para>
+
+<para>The following exercise steps through the process of creating
+<indexterm id="idx_queries_new1" class="startofrange">
+           <primary>queries</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm id="idx_queries_new2" class="startofrange">
+           <primary>creating</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>adding</primary>
+           <see>creating</see></indexterm>
+a simple query using the Query Editor. The query finds all the research
+project pages in the database along with the pages directly linked to
+that research project page.
+Each successful match of the query identifies a portion of the
+database that matches this structure. Because a Proximity database can
+be represented as a large graph, a match is represented as a 
+<glossterm>subgraph</glossterm>.
+</para>
+
+<!-- 
+   EXERCISE: Creating a first Proximity query
+-->
+
+<procedure id="ex_queries_rc1">
+<title>Creating a first Proximity query</title>
+
+<para>The query created in this exercise is also available in the
+&proxcurrent; distribution in 
+<filename>&scriptpath;/research-clusters1.qg2.xml</filename>.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>If you plan to execute any of the saved queries in
+<filename>&querypath;</filename>, 
+copy <filename>graph-query.dtd</filename>
+<indexterm><primary>graph-query.dtd</primary></indexterm>
+<indexterm><primary>DTDs</primary>
+           <secondary>graph-query.dtd</secondary></indexterm>
+from <filename>&proxpath;/resources</filename> to the directory
+containing the example queries.
+
+<synopsis>&prompt; <userinput>cp &proxpath;/resources/graph-query.dtd &querypath;/</userinput>
+</synopsis>
+</para>
+
+<sidebar>
+<para>Proximity queries are represented using an XML format. The 
+<glossterm baseform="document type definition">DTD</glossterm>
+that describes this format must be in the directory containing the
+query file to execute the query.</para>
+</sidebar>
+</step>
+
+<step>
+<para>From the <guimenu>Query</guimenu> menu, choose
+<guimenuitem>New Query</guimenuitem>.
+<indexterm><primary>Query Editor</primary>
+           <secondary>starting</secondary></indexterm>
+<indexterm><primary>starting</primary>
+           <secondary>Query Editor</secondary></indexterm>
+Proximity starts the Query Editor.
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/QE_Interface.png"
+    width="5.75in" format="PNG" />
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/QE_Interface.png" 
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+The Query Editor includes two properties panes at the bottom of the
+window.  The query properties pane displays properties of the
+query as a whole. The element properties pane displays the
+properties of the selected query element.  The element properties pane
+is blank when no query element is selected.
+</para>
+
+</step>
+
+<step>
+<para>Click &vertextool; or press <keycap>Ctrl-2</keycap>
+to choose the vertex tool.
+<indexterm><primary>vertex tool</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>vertex tool</secondary></indexterm>
+<indexterm id="idx_vertices" class="startofrange">
+           <primary>vertices</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm id="idx_vertices2" class="startofrange">
+           <primary>creating</primary>
+           <secondary>vertices</secondary></indexterm>
+Tool selection is persistent; the vertex tool remains selected until
+you choose another tool.</para>
+
+<tip>
+<para>Use keyboard shortcuts
+<indexterm><primary>keyboard shortcuts</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>keyboard shortcuts</secondary></indexterm>
+<indexterm><primary>shortcuts</primary>
+           <secondary>for Query Editor</secondary></indexterm>
+to change the Query Editor selection mode.
+You can open, close, save, and run queries, select
+tools, and select query elements using keyboard shortcuts.  
+Keyboard shortcuts are shown next to the corresponding command in the
+Query Editor&rsquo;s menus; a summary of the tool selection shortcuts
+is shown below:
+<informaltable frame="none" rowsep="0" colsep="0">
+<tgroup cols="4">
+<?dbfo table-width="4.0in"?>
+<colspec colnum="1" colname="col1" colwidth="2*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="4*"/>
+<colspec colnum="4" colname="col4" colwidth="2*"/>
+<tbody valign="top">
+  <row>
+    <entry> </entry>
+    <entry><keycap>Ctrl-1</keycap></entry>
+    <entry>Choose the selection tool</entry>
+    <entry> </entry>
+  </row>
+  <row>
+    <entry> </entry>
+    <entry><keycap>Ctrl-2</keycap></entry>
+    <entry>Choose the vertex tool</entry>
+    <entry> </entry>
+  </row>
+  <row>
+    <entry> </entry>
+    <entry><keycap>Ctrl-3</keycap></entry>
+    <entry>Choose the edge tool</entry>
+    <entry> </entry>
+  </row>
+  <row>
+    <entry> </entry>
+    <entry><keycap>Ctrl-4</keycap></entry>
+    <entry>Choose the subquery tool</entry>
+    <entry> </entry>
+  </row>
+</tbody></tgroup>
+</informaltable>
+A complete list of keyboard shortcuts for the Query Editor is included
+in <xref linkend="apx_quickref"/>.
+</para>
+</tip>
+
+<para>Click in the Query Editor display area. The Query Editor creates
+a new <glossterm>vertex</glossterm>.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_NewVertex.png"
+    width="4.7in" format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/QE_NewVertex.png" 
+    contentwidth="5.75in" format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+
+<tip>
+<para>To delete an element from a query in the Query Editor, 
+<indexterm><primary>deleting</primary>
+           <secondary>Query Editor elements</secondary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>deleting query elements</secondary></indexterm>
+click &selecttool; to choose the selection tool, select the
+element, then press <keycap>Delete</keycap>.
+</para>
+</tip>
+</step>
+
+<step>
+<para>Click &selecttool; or press <keycap>Ctrl-1</keycap>
+to choose the selection tool. 
+<indexterm><primary>selection tool</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>selection tool</secondary></indexterm>
+Click the vertex you just created to select it. 
+<indexterm><primary>editing</primary>
+           <secondary>vertices</secondary></indexterm>
+<indexterm><primary>changing</primary>
+           <secondary>queries</secondary>
+           <see>editing</see></indexterm>
+<indexterm><primary>changing</primary>
+           <secondary>data</secondary>
+           <see>updating</see></indexterm>
+<indexterm><primary>modifying</primary>
+           <secondary>queries</secondary>
+           <see>editing</see></indexterm>
+<indexterm><primary>modifying</primary>
+           <secondary>data</secondary>
+           <see>updating</see></indexterm>
+The Query Editor selects the vertex and displays the vertex&rsquo;s
+properties in the element properties pane.
+
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_EditVertex.png"
+    width="5.75in" format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_EditVertex.png" format="PNG"
+    contentwidth="7.0in" />
+</imageobject>
+</mediaobject>
+</para>
+<tip>
+<para>To rearrange a query&rsquo;s layout, use the selection tool to
+drag vertices inside the display area.</para>
+</tip>
+</step>
+
+<step>
+<para>In the element properties pane, double-click the vertex 
+<glossterm>name</glossterm>
+<indexterm><primary>names</primary>
+           <secondary sortas="vertices">of vertices</secondary></indexterm>
+<indexterm><primary>vertices</primary>
+           <secondary>names of</secondary></indexterm>
+<indexterm><primary>labels</primary>
+           <see>names</see></indexterm>
+(currently &ldquo;Vertex1&rdquo;) to edit its value.  Enter
+<userinput>start_page</userinput> and press <keycap>Tab</keycap>.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_EditVertexLabel.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_EditVertexLabel.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+Vertex and edge names
+<indexterm><primary>names</primary>
+           <secondary sortas="edges">of edges</secondary></indexterm>
+<indexterm><primary>edges</primary>
+           <secondary>names of</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>matching</secondary></indexterm>
+<indexterm><primary>matching queries</primary></indexterm>
+are used for your convenience in creating
+the query, in understanding and using query results, and for
+identifying subgraph elements in learning and applying models.
+<!--
+<xref xrefstyle="pageref" linkend="models_intro"/> describes how to label
+query elements so that they can be appropriately used by Proximity&rsquo;s
+models.
+-->
+Although
+we may label query elements with names that remind us of specific attribute
+values, these names have no effect on how query elements match
+different database elements.
+</para>
+
+<tip>
+<para>Double-click a vertex or edge in the Query Editor
+display area to edit the corresponding label.
+</para>
+</tip>
+
+<para>Other vertex 
+properties&mdash;<glossterm baseform="numeric annotation">annotations</glossterm>
+and <glossterm baseform="condition">conditions</glossterm>&mdash;are
+<indexterm><primary>annotations</primary>
+           <see>numeric annotations</see></indexterm>
+optional mechanisms for restricting matches in the database.
+Conditions restrict matches to those entities (objects or links) that 
+match specified <glossterm>attribute</glossterm>
+values. In this exercise, you specify a
+condition for one of the vertices. Numeric annotations are covered in
+the next example.</para>
+</step>
+
+<step>
+<para>Double-click in the (currently blank) value column of the
+<guilabel>Condition</guilabel> property to edit
+<indexterm><primary>editing</primary>
+           <secondary>conditions</secondary></indexterm>
+<indexterm><primary>conditions</primary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>conditions</secondary></indexterm>
+its value.  Enter 
+<blockquote><para><userinput>pagetype&nbsp;=&nbsp;ResearchProject</userinput></para></blockquote>
+and press <keycap>Tab</keycap>.
+Attribute names and values containing spaces must be surrounded by
+single quotes.  Spaces surrounding the &ldquo;=&rdquo; sign are
+not significant.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_EditVertexCond.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_EditVertexCond.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+<indexterm startref="idx_vertices" class="endofrange"/>
+<indexterm startref="idx_vertices2" class="endofrange"/>
+
+<sidebar>
+<para>
+Proximity ignores case when matching attribute <emphasis>names</emphasis>
+<indexterm><primary>names</primary>
+          <secondary>matching case in Proximity</secondary></indexterm>
+<indexterm><primary>case matching in Proximity</primary></indexterm>
+in a query&rsquo;s condition or <glossterm>constraint</glossterm>
+to those in the database. (All attribute names in
+the database are automatically converted to lower case during import.)
+Proximity obeys case, however, when matching attribute
+<emphasis>values</emphasis> specified in a query with those in the
+database.
+</para>
+</sidebar>
+
+<para>Proximity supports two types of conditions:
+<itemizedlist spacing="compact">
+<listitem>
+<para>Attribute value conditions compare the value of an object&rsquo;s
+or link&rsquo;s attribute with a specified value.</para>
+</listitem>
+<listitem>
+<para>Existence conditions merely check to see whether an object or
+link has <emphasis>any</emphasis> value for the specified
+attribute.</para>
+</listitem>
+</itemizedlist>
+Both of these types of conditions are described more formally, below.
+</para>
+
+<sidebar>
+<para>
+The general form of an <glossterm>attribute value condition</glossterm> is
+<indexterm><primary>attributes</primary>
+           <secondary sortas="conditions">in conditions</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>attribute value</secondary></indexterm>
+<indexterm><primary>attribute value conditions</primary></indexterm>
+<blockquote>
+<para>
+<replaceable>attribute</replaceable>&nbsp;&nbsp;<replaceable>operator</replaceable>&nbsp;&nbsp;<replaceable>value</replaceable>
+</para>
+</blockquote>
+where
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><replaceable>attribute</replaceable> is the name of an
+    attribute</para>
+  </listitem>
+  <listitem>
+    <para><replaceable>value</replaceable> is a legal value for
+    <replaceable>attribute</replaceable></para>
+  </listitem>
+  <listitem>
+    <para><replaceable>operator</replaceable> is one of
+    <literal>=</literal>, <literal>&lt;</literal>,
+    <literal>&lt;=</literal>, <literal>&gt;</literal>,
+    <literal>&gt;=</literal>, and
+    <literal>&lt;&gt;</literal>.
+<indexterm><primary>comparison operators</primary></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>comparison</secondary></indexterm>
+</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>A vertex or edge may have at most one
+condition statement; however, that condition may be 
+<indexterm><primary>complex conditions</primary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>complex</secondary></indexterm>
+<glossterm baseform="complex condition">complex</glossterm>, that is,
+it may include boolean combinations of simple 
+conditions. Proximity requires the use of 
+<glossterm>disjunctive normal form</glossterm>
+<indexterm><primary>disjunctive normal form</primary></indexterm>
+<indexterm><primary>logical operators</primary></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>logical</secondary></indexterm>
+<indexterm><primary>multiple conditions</primary></indexterm>
+in <glossterm>prefix notation</glossterm>
+for combining simple conditions. For example, to match all
+research project pages at either Cornell or Wisconsin, enter
+<blockquote>
+<para>
+<literal>AND(pagetype=ResearchProject, OR(school=Cornell, school=Wisconsin))</literal>.
+</para>
+</blockquote>
+Proximity also supports 
+<emphasis><glossterm baseform="existence condition">existence conditions</glossterm></emphasis>
+that require only that an 
+<indexterm><primary sortas="exists">existence conditions</primary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>existence</secondary></indexterm>
+an attribute value be defined for the target object or edge, rather than
+requiring a specific value or value range. The syntax for an existence
+condition is
+<blockquote>
+<para><literal>exists(</literal><replaceable>attribute</replaceable><literal>)</literal>
+</para></blockquote>
+See the <citetitle>&qguide;</citetitle> for more information on and
+examples of attribute and existence conditions.
+</para>
+</sidebar>
+</step>
+
+<step>
+<para>Create a second vertex labeled
+<userinput>linked_page</userinput>.  Because we don&rsquo;t 
+want to restrict the kinds of pages linked to research project pages,
+do not enter a condition for this vertex.</para>
+</step>
+
+<step>
+<para>Click &edgetool; or press <keycap>Ctrl-3</keycap>
+to choose the edge tool. 
+<indexterm><primary>edge tool</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>edge tool</secondary></indexterm>
+<indexterm><primary>edges</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>edges</secondary></indexterm>
+Drag the mouse from <token role="vertex">start_page</token> to 
+<token role="vertex">linked_page</token>.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_AddEdge.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_AddEdge.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+The Query Editor creates a new, directed edge connecting the first
+vertex to the second vertex.
+</para>
+
+<tip>
+<para>To create a &ldquo;loop&rdquo; edge (an edge connecting a vertex
+back to itself), choose the edge tool and click the target vertex
+without dragging.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_LoopEdge.png"
+    format="PNG"
+    width="3.5in" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_LoopEdge.png"
+    contentwidth="4.25in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+</tip>
+</step>
+
+<step>
+<para>Choose the selection tool and click the new edge to edit its
+properties.  The Query Editor selects the edge and displays the
+edge&rsquo;s properties in the element properties pane. 
+<indexterm><primary>editing</primary>
+           <secondary>edges</secondary></indexterm>
+Enter <userinput>linked_to</userinput> for the edge&rsquo;s label.
+
+</para>
+</step>
+
+<step>
+<para>Double-click in the value column of the edge&rsquo;s 
+<guilabel>Is Directed</guilabel> property to change this value.  Enter
+<userinput>false</userinput> and press <keycap>Tab</keycap>.
+For this example, we don&rsquo;t care about the direction of matching
+links.
+</para>
+
+<sidebar>
+<para>
+Proximity queries can use either 
+<glossterm baseform="directed edge">directed</glossterm> or 
+<glossterm baseform="undirected edge">undirected edges</glossterm>.
+<indexterm><primary>edges</primary>
+           <secondary>directed vs. undirected</secondary></indexterm>
+<indexterm><primary>directed edges</primary></indexterm>
+<indexterm><primary>undirected edges</primary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>directedness</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>data model</secondary></indexterm>
+Although Proximity&rsquo;s data model uses only directed links,
+&qgraph; lets you use undirected edges in a query when you do not know
+or do not care about the directionality of a link.</para>
+</sidebar>
+</step>
+
+<step>
+<para>In the query properties pane, double-click in the value column
+of the query&rsquo;s <guilabel>Name</guilabel> property
+<indexterm><primary>editing</primary>
+           <secondary>query names and descriptions</secondary></indexterm>
+to edit its value (currently &ldquo;new query&rdquo;). Enter
+<userinput>research-clusters1</userinput> and
+press <keycap>Tab</keycap>.</para>
+</step>
+
+<step>
+<para>Enter a description for the query and press <keycap>Tab</keycap>.
+This query finds pages connected to research project pages.
+</para>
+<?pagebreak?>
+</step>
+
+<step>
+<para>Check the status list at the bottom of the Query Editor window
+to make sure your completed query is 
+<glossterm baseform="validation">valid</glossterm>.
+<indexterm><primary>validating queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>validating</secondary></indexterm>
+</para>
+
+<para>Proximity checks to make sure that the query obeys the
+syntactic requirements of the DTD. 
+<indexterm><primary>DTDs</primary>
+           <secondary sortas="query">and query validation</secondary></indexterm>
+No semantic checking is
+performed. Specifically, validation does not check whether
+attribute names correspond to actual database entities.
+If a query is invalid, the status list shows the number of
+errors and provides a list of the errors in the query.</para>
+</step>
+
+<step>
+<para>From the <guimenu>File</guimenu> menu, choose <guimenuitem>Save
+As</guimenuitem> to save your query.
+<indexterm><primary>saving</primary>
+           <secondary>queries</secondary></indexterm>
+Save the query as <filename>rc1.qg2.xml</filename> in the
+<filename>&querypath;</filename> directory.</para>
+
+<caution>
+<para>The Proximity distribution includes this query in the file
+<filename>&querypath;/research-clusters1.qg2.xml</filename>.
+<indexterm><primary>research-clusters1 query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>research-clusters1</tertiary></indexterm>
+Be careful not to overwrite this file.</para>
+</caution>
+
+<para>The Query Editor also saves basic layout
+<indexterm><primary>layout</primary>
+           <secondary sortas="queries">of queries</secondary></indexterm>
+<indexterm><primary>arranging</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>layout in Query Editor</secondary></indexterm>
+information for the
+query so that it will be displayed as shown when you next open the
+query in the Query Editor.  If you prefer a different arrangement, you
+can rearrange the query by dragging vertices and saving the query again.
+If the query was invalid when saved, the Query Editor attempts to read
+and display the query; however, some errors may
+result in the query being partially or incorrectly displayed.
+<indexterm startref="idx_queries_new1" class="endofrange"/>
+<indexterm startref="idx_queries_new2" class="endofrange"/>
+</para>
+</step>
+
+<step>
+<para>From the <guimenu>File</guimenu> menu, choose
+<guimenuitem>Run</guimenuitem> or press <keycap>Ctrl-R</keycap>
+<indexterm><primary>queries</primary>
+           <secondary>executing</secondary></indexterm>
+<indexterm><primary>executing</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>running</primary>
+           <secondary>queries</secondary></indexterm>
+to execute your query.
+</para>
+
+<para>Proximity prompts you for a name for the results
+<glossterm>container</glossterm>. Enter
+<userinput>research-clusters1</userinput> and click 
+<guibutton>OK</guibutton>.</para>
+
+<sidebar>
+<para>
+<indexterm><primary>containers</primary>
+           <secondary>names of</secondary></indexterm>
+<indexterm><primary>names</primary>
+           <secondary sortas="containers">of containers</secondary></indexterm>
+<indexterm><primary>characters</primary>
+           <secondary>special</secondary>
+           <tertiary sortas="container">in container names</tertiary></indexterm>
+<indexterm><primary>special characters</primary>
+           <secondary sortas="container">in container names</secondary></indexterm>
+Container names may not include <literal>/</literal>,
+<literal>?</literal>, <literal>!</literal>, 
+<literal>&lt;</literal>, <literal>&gt;</literal>, or <literal>#</literal>.
+</para>
+</sidebar>
+
+<para>
+<caution>
+<para>If the database already includes a container with this name,
+Proximity asks whether you want to delete the existing container.
+Answering yes lets Proximity overwrite the contents of this
+container. This also deletes any containers inside the existing
+container.</para>
+</caution>
+</para>
+
+<para>Proximity opens a window to show you a trace of the
+query execution.  The last lines should be
+similar to the following excerpt 
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> found 1294 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> query results saved in
+   container: research-clusters1
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</screen>
+
+Close the trace window after the query finishes.</para>
+</step>
+
+</procedure>
+
+<para>The next section describes how to view the results of your
+query.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--               EXPLORING CONTAINERS AND SUBGRAPHS               -->
+<!-- ============================================================== -->
+
+<sect1 id="query_browsing">
+<title>Exploring Containers and Subgraphs</title>
+<indexterm id="idx_queries_subg1" class="startofrange">
+           <primary>containers</primary>
+           <secondary>exploring</secondary></indexterm>
+<indexterm id="idx_queries_subg2" class="startofrange">
+           <primary>subgraphs</primary>
+           <secondary>exploring</secondary></indexterm>
+<indexterm id="idx_queries_subg3" class="startofrange">
+           <primary>exploring</primary>
+           <secondary>containers</secondary></indexterm>
+<indexterm id="idx_queries_subg4" class="startofrange">
+           <primary>exploring</primary>
+           <secondary>subgraphs</secondary></indexterm>
+
+<para>You can use the &proxui; to examine the results of the queries
+you execute.  The &proxui; supports examining the 
+<glossterm baseform="subgraph">subgraphs</glossterm> and 
+<glossterm baseform="container">containers</glossterm> created as a
+result of executing queries via both browser-style access
+(clicking identifiers to see that item&rsquo;s details) and direct
+access via the location bar.
+<indexterm><primary>location bar</primary>
+           <secondary sortas="Proximity">in &uiname;</secondary></indexterm>
+<indexterm><primary>Proximity Database Browser</primary>
+           <secondary>location bar</secondary></indexterm>
+<indexterm><primary>path in location bar</primary></indexterm>
+The following exercise illustrates how to use both
+of these methods to examine the contents of the container created in
+the previous exercise. See <xref linkend="apx_quickref"/> for a
+summary of how to access Proximity database elements using the location
+bar.</para>
+
+<?pagebreak?>
+<!--
+   EXERCISE: Exploring containers and subgraphs
+-->
+
+<procedure>
+<title>Exploring containers and subgraphs</title>
+
+<para>This exercise requires the container created in 
+<xref linkend="ex_queries_rc1"/>. You must have completed 
+<xref linkend="ex_queries_rc1"/> before beginning the current
+exercise.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>Click &home; to go to the &uiname; start page.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Containers</guibutton> or enter
+<userinput>cont:/containers</userinput> in the location bar.  Use the
+<code>cont:</code> protocol to access containers using the location
+bar.
+Proximity displays the list of top-level containers in the &webkb;
+database.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_ContainerList.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_ContainerList.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+The initial container page shows that you are exploring the 
+contents of the <glossterm>root container</glossterm>.
+<indexterm><primary>root container</primary></indexterm>
+<indexterm><primary>containers</primary>
+           <secondary>root</secondary></indexterm>
+The root container is provided as a convenience
+for accessing a database&rsquo;s other containers; it does not
+explicitly exist in the database.  The location bar path
+<code>cont:/containers</code> corresponds to the root container.
+</para>
+</step>
+
+<step>
+<para>Click <guibutton>&simpleclusters;</guibutton> or enter
+<userinput>cont:/containers/&simpleclusters;</userinput> in the
+location bar.
+Proximity displays a list of subgraphs in the 
+<token role="container">&simpleclusters;</token> container.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_Subgraphs.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_Subgraphs.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+
+<para>The <token role="container">&simpleclusters;</token>
+page lists the ID numbers of the first 200 subgraphs in the 
+container.  Click a page number at the bottom of the page or add the
+page number modifier to the end of the location bar path (e.g., 
+<code>cont:/containers/&simpleclusters;#2</code>) to 
+display more subgraph IDs.  Depending on the query,
+subgraph identifiers may or may not correspond to object 
+<glossterm baseform="object identifier">identifiers</glossterm> in the
+database. In general, you should not assume that the subgraph labels
+correspond to other database entities.</para>
+
+<para>To access any container using the location bar, use the
+<code>cont:</code> protocol and a UNIX-like path to the target
+container.  In this example, the 
+<token role="container">&simpleclusters;</token> container is a child
+of the root container, so the full path to this container is
+<code>cont:/containers/&simpleclusters;</code>.</para>
+
+<para>Each container page includes a list of container actions at the
+top of the page:
+<itemizedlist spacing="compact">
+<listitem>
+  <para>The <guibutton>view query</guibutton> action displays the query
+  used to create this container.  Proximity displays the query in the
+  Query Editor.  You must have a copy of
+  <filename>graph-query.dtd</filename>
+  <indexterm><primary>graph-query.dtd</primary></indexterm>
+  <indexterm><primary>DTDs</primary>
+             <secondary>graph-query.dtd</secondary></indexterm>
+  in the directory from which you
+  launched the &uiname; (i.e., <filename>&proxpath;</filename>) to
+  view the query.
+  Note that containers created by means other than querying (e.g., via
+  scripts) and containers created in Proximity&nbsp;4.2 or earlier
+  versions do not store the originating query with the resulting
+  container.
+  The <guibutton>view query</guibutton> option is disabled for these
+  containers.</para>
+</listitem>
+<listitem>
+  <para>The <guibutton>delete</guibutton> action deletes the
+  current container. You cannot delete the root container.</para>
+  <indexterm><primary>Proximity Database Browser</primary>
+             <secondary>updating data</secondary>
+             <tertiary>deleting containers</tertiary></indexterm>
+  <indexterm><primary>containers</primary>
+             <secondary>deleting</secondary></indexterm>
+  <indexterm><primary>deleting</primary>
+             <secondary>containers</secondary></indexterm>
+</listitem>
+<listitem>
+  <para>The <guibutton>attrs</guibutton> action displays any attributes
+  <indexterm><primary>containers</primary>
+             <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="containers">of containers</secondary></indexterm>
+  for the current container. Although you can create container
+  attributes for your own purposes, Proximity does not currently use
+  container attributes other than to store the XML version of the
+  query used to create the container.  (The &uiname; may not display
+  the value of the <token role="attr">qgraph_query</token> attribute
+  correctly; use the <guibutton>view query</guibutton> action to
+  display the query in the Query Editor instead.)</para>
+</listitem>
+<listitem>
+  <para>The <guibutton>query</guibutton> action executes a
+  query
+  <indexterm><primary>containers</primary>
+             <secondary>querying</secondary></indexterm>
+  <indexterm><primary>queries</primary>
+             <secondary>against containers</secondary></indexterm>
+  against the contents of the current container.  See
+  <xref xrefstyle="pageref" linkend="query_queryingcontainers"/> for
+  additional information on querying containers.</para>
+</listitem>
+<listitem>
+  <para>The <guibutton>thumbs</guibutton> action displays thumbnail images 
+  <indexterm><primary>visualizing</primary>
+             <secondary>subgraphs</secondary></indexterm>
+  <indexterm><primary>subgraphs</primary>
+             <secondary>visualizing</secondary></indexterm>
+  <indexterm><primary>thumbnails of subgraphs</primary></indexterm>
+  of a random selection of up to nine subgraphs from this collection.</para>
+</listitem>
+</itemizedlist>
+These actions are disabled for the root container.
+</para>
+</step>
+
+<step>
+<para>Click <guibutton>thumbs</guibutton>.  Proximity displays a set of
+thumbnail images of up to nine randomly selected subgraphs from this
+container.
+Because the thumbnails are selected at random, you may see a different
+set of subgraphs than those shown below.
+<mediaobject>
+<imageobject role="fo">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_Thumbs.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_Thumbs.png"
+    contentwidth="5.75in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+The thumbnails show that each subgraph in the 
+<token role="container">&simpleclusters;</token> container has the
+same structure: two objects connected by a single link.</para>
+</step>
+
+<step>
+<para>From the thumbnail window <guimenu>File</guimenu> menu, choose
+<guimenuitem>Show Color Legend</guimenuitem>. Proximity displays a key
+that shows how vertex colors in the thumbnails map to vertex labels
+from the query.
+<mediaobject>
+<imageobject role="fo">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_ThumbsLegend.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_ThumbsLegend.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+</step>
+
+<step>
+<para>Click to select a thumbnail.  From the thumbnail
+window <guimenu>File</guimenu> menu, choose 
+<guimenuitem>Open Selected Subgraph</guimenuitem>. Proximity displays
+a full-size graph of the selected subgraph.
+<tip>
+<para>You can also display a full-size graph of a subgraph in the
+thumbnail window by double-clicking the corresponding thumbnail
+image.</para>
+</tip>
+More information on using the full-size subgraph display is included
+later in this exercise.
+</para>
+</step>
+
+<step>
+<para>From the &uiname;, click <guibutton>&simplesubgraph1;</guibutton> or enter
+<userinput>subg:/containers/&simpleclusters;/&simplesubgraph1;</userinput>
+in the location bar to see the contents of 
+subgraph&nbsp;<token role="subgraph">&simplesubgraph1;</token>.
+Proximity displays information about this subgraph. 
+<mediaobject>
+<imageobject role="fo">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_0.png"
+    width="5.75in" format="PNG" />
+</imageobject>
+<imageobject role="html">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_0.png"
+    contentwidth="7.0in" format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+
+<para>The subgraph page includes a list of subgraph actions at the top
+of the page. These actions provide additional information about the
+subgraph and enable navigation within the container.
+<itemizedlist spacing="compact">
+<listitem>
+   <para>The <guibutton>attrs</guibutton> action displays any attributes for
+   the current subgraph.</para>
+</listitem>
+<listitem>
+   <para>The <guibutton>graph</guibutton> action displays a graph of the
+   subgraph.</para>
+</listitem>
+<listitem>
+  <para>The <guibutton>prev</guibutton> action displays the previous
+  subgraph in the container.  This link is disabled if you are viewing
+  the first subgraph in the container.</para>
+</listitem>
+<listitem>
+  <para>The <guibutton>next</guibutton> action displays the next
+  subgraph in the container.  This link is disabled if you are viewing
+  the last subgraph in the container.</para>
+</listitem>
+<listitem>
+   <para>The <guibutton>up</guibutton> action returns to the parent
+   container page.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>Subgraph information includes a list of the subgraph&rsquo;s
+member <glossterm baseform="object">objects</glossterm> and 
+<glossterm baseform="link">links</glossterm>, identified by
+&ldquo;(O)&rdquo; or &ldquo;(L)&rdquo; respectively. 
+The names of the objects and links in a subgraph correspond to the
+vertex and edge <glossterm baseform="name">labels</glossterm> from the
+query that produced this subgraph.  The listed objects and links point
+to the actual database entities, not copies.
+</para>
+
+<para>As we saw in <xref xrefstyle="pageref" linkend="browse_locbar"/>,
+the location bar protocol changes when you access individual entities
+instead of lists of entities.  In this case, to access an individual
+subgraph, we use the <code>subg:</code> protocol.  The container path
+remains the same, but we add the target subgraph ID to the end of the
+path.</para>
+
+<tip>
+<para>If your database includes an <glossterm>attribute</glossterm>
+whose values provide 
+semantically meaningful labels for objects, such as a 
+<token role="attr">title</token> attribute for movies, you can
+set the &uiname; preferences to display this attribute value instead
+of object IDs.  See <xref xrefstyle="pageref" linkend="browse_prefs"/>
+for information on using this feature.  (The &webkb; database does not
+provide a suitable attribute for this purpose, therefore we continue
+to display object IDs in the &uiname; for the remaining
+exercises.)</para>
+</tip></step>
+
+<step>
+<para>Click <guibutton>graph</guibutton> to display a graph
+<indexterm><primary>graphing</primary>
+           <secondary>subgraphs</secondary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>visualizing</secondary></indexterm>
+<indexterm><primary>visualizing</primary>
+           <secondary>subgraphs</secondary></indexterm>
+of this subgraph. Proximity opens a new window displaying a
+graph of the objects and links in the subgraph.
+Hover the mouse over an object or link to see its OID.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_0_graph.png"
+    width="5.75in" format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_0_graph.png"
+    contentwidth="7.0in" format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+
+<!--
+<para>Initial graph display uses the counts for each object label
+(from the query) to attempt to identify the &ldquo;core&rdquo; object
+in the subgraph, placing that object at the center of the
+display.
+</para>
+-->
+
+<itemizedlist>
+<listitem>
+<para><guibutton>Prev</guibutton> and <guibutton>Next</guibutton>
+buttons in the graph window change the display to show the previous or
+next subgraph, respectively, in the container.  You can also use the
+<guimenuitem>Next</guimenuitem> and <guimenuitem>Prev</guimenuitem>
+commands from the <guimenu>Graph</guimenu> menu to change to another
+subgraph.</para>
+</listitem>
+<listitem>
+<para>To display a key that shows how vertex colors in the graph map
+to vertex labels from the query, choose <guimenuitem>Show Color
+Legend</guimenuitem> from the <guimenu>Graph</guimenu> menu.</para>
+</listitem>
+<listitem>
+<para>To change how items in the subgraph are labeled, choose either
+<guimenuitem>Set Object Labels</guimenuitem> or 
+<guimenuitem>Set Link Labels</guimenuitem> from the subgraph
+<guimenu>Graph</guimenu> menu.  You can label items with their OID,
+their names from the query, or the value of a selected
+attribute.</para>
+</listitem>
+<listitem>
+<para>To display the details for this subgraph in a new &uiname;
+window, choose <guimenuitem>Browse Subgraph</guimenuitem> from the
+subgraph window <guimenu>Graph</guimenu> menu.</para>
+</listitem>
+</itemizedlist>
+</step>
+
+<step>
+<para>Right-click (<keycap>Ctrl-click</keycap> for &macosx;) any object
+in the graph to display a context menu for that object. The context menu
+lists actions applicable to the selected object:
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+              format="PNG"
+              width="5.75in"
+              fileref="&graphicspath;/GUI_Subgraph_ContextMenu.png"/>
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+              format="PNG"
+              contentwidth="7.0in"
+              fileref="&graphicspath;/GUI_Subgraph_ContextMenu.png"/>
+</imageobject>
+</mediaobject>
+<itemizedlist>
+<listitem>
+  <para>Choose <guimenuitem>Move to center</guimenuitem> to make the
+  selected object the new center
+  <indexterm><primary>arranging</primary>
+             <secondary>subgraph display</secondary></indexterm>
+  <indexterm><primary>layout</primary>
+             <secondary sortas="subgraphs">of subgraphs</secondary></indexterm>
+  of the display.</para>
+</listitem>
+<listitem>
+  <para>Choose <guimenuitem>Browse object</guimenuitem> to display
+  basic information about the selected object in a new &uiname;
+  window.</para>
+</listitem>
+<listitem>
+  <para>Choose <guimenuitem>Browse object attributes</guimenuitem> to
+  display attribute details for the selected object in a new &uiname;
+  window.</para>
+</listitem>
+<listitem>
+  <para>Choose <guimenuitem>Browse database from object</guimenuitem> to
+  graph the selected object and its immediate neighbors in the
+  &dbviztool;.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>Close the legend and graph windows when you are through
+examining the graph.</para>
+</step>
+
+<step>
+<para>Click the object and link IDs in the <guilabel>Items</guilabel>
+list to explore the individual items in this subgraph. For example,
+click <guibutton>start_page (O): 398</guibutton> or enter
+<userinput>item:/objects/398</userinput> in the location bar to see
+the details of the object in this subgraph that matched the 
+<token role="vertex">start_page</token> vertex from the
+&qgraph; query.
+Proximity displays the information for object&nbsp;398.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_0_details.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC1_0_details.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+</step>
+
+<step>
+<para>
+Click <guibutton>attrs</guibutton> or enter
+<userinput>item:/objects/398!ATTRVALS</userinput> to display the
+attributes and values for object 398.  Because object-based attribute
+lookup is computationally expensive in MonetDB, the main object page
+does not show the object&rsquo;s attribute values.
+If necessary, scroll down to see the value of
+the <token role="attr">pagetype</token> attribute to confirm that this
+is a research project page.
+</para>
+</step>
+
+<step>
+<para>Return to the 
+<token role="container">&simpleclusters;</token> container page.
+From the <guimenu>File</guimenu> menu, choose 
+<guimenuitem>New Window</guimenuitem> to open a new
+&proxui; window.
+<indexterm><primary>&proxui;</primary>
+           <secondary>new window</secondary></indexterm>
+Arrange the windows so you can see the contents of both windows.
+</para>
+</step>
+
+<step>
+<para>Display the contents of 
+subgraph&nbsp;<token role="subgraph">&simplesubgraph1;</token> in one
+of the windows.
+Display the contents of 
+subgraph&nbsp;<token role="subgraph">&simplesubgraph2;</token> in the
+other window.  Notice that 
+subgraphs&nbsp;<token role="subgraph">&simplesubgraph1;</token> 
+and&nbsp;<token role="subgraph">&simplesubgraph2;</token> have the same 
+<token role="vertex">start_page</token> object.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/GUI_RC1_0and2.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/GUI_RC1_0and2.png"
+    format="PNG"
+    contentwidth="7.0in" />
+</imageobject>
+</mediaobject>
+</para>
+<?pagebreak?>
+</step>
+
+<step>
+<para>Close the window for 
+subgraph&nbsp;<token role="subgraph">&simplesubgraph2;</token>. In the
+other window, click &back; to return to the page for
+subgraph&nbsp;<token role="subgraph">&simpleclusters;</token>.</para>
+</step>
+
+<step>
+<para>Continue to explore the results of your query. When you are
+finished, continue to the next section.</para>
+</step>
+
+</procedure>
+<indexterm startref="idx_queries_subg1" class="endofrange"/>
+<indexterm startref="idx_queries_subg2" class="endofrange"/>
+<indexterm startref="idx_queries_subg3" class="endofrange"/>
+<indexterm startref="idx_queries_subg4" class="endofrange"/>
+
+<para>
+The query created above matches
+individual objects and links in the database instead of groups of 
+objects and links.  To obtain results that
+group all the linked pages together for each research project page, we
+need to add 
+<glossterm baseform="numeric annotation">numeric annotations</glossterm>
+to the query.  The next section describes how to use numeric
+annotations in a Proximity query.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                 GROUPING ELEMENTS IN A QUERY                   -->
+<!-- ============================================================== -->
+
+<sect1 id="query_annotate">
+<title>Grouping Elements in a Query</title>
+<indexterm id="idx_queries_annot" class="startofrange">
+           <primary>numeric annotations</primary></indexterm>
+
+<para>The previous query matched individual elements in the
+database. To match groups of elements we use 
+<emphasis><glossterm baseform="numeric annotation">numeric annotations</glossterm></emphasis>.
+A numeric annotation groups together repeated 
+<glossterm>isomorphic</glossterm> substructures
+that would otherwise create multiple matches for the query.
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary></indexterm>
+<indexterm><primary>results of queries</primary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>as query results</secondary></indexterm>
+<indexterm><primary>matching queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>matching</secondary></indexterm>
+<indexterm><primary>grouping query results</primary></indexterm>
+<indexterm><primary>limiting query matches</primary></indexterm>
+Annotations can also be used to place limits on the number of
+substructures that can occur in matching portions of the
+database.</para>
+
+<sidebar>
+<para>Numeric annotations take one of three forms:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>An <emphasis><glossterm>unbounded range</glossterm></emphasis>
+    <indexterm><primary>unbounded ranges for numeric annotations</primary></indexterm>
+    <indexterm><primary>ranges in numeric annotations</primary></indexterm>
+    [<replaceable>i</replaceable>..] on a vertex or edge means that at
+    least <replaceable>i</replaceable> instances of the corresponding
+    database element must be present in the database to match the
+    query.</para>
+  </listitem>
+  <listitem>
+    <para>A <emphasis><glossterm>bounded range</glossterm></emphasis>
+    <indexterm><primary>bounded ranges for numeric annotations</primary></indexterm>
+    [<replaceable>i</replaceable>..<replaceable>j</replaceable>] means
+    that at least <replaceable>i</replaceable> and no more than
+    <replaceable>j</replaceable> instances are required for a
+    match.</para>
+  </listitem>
+  <listitem>
+    <para>An <glossterm baseform="exact annotation"><emphasis>exact</emphasis> annotation</glossterm>
+    <indexterm><primary>exact annotation</primary></indexterm>
+    [<replaceable>i</replaceable>] means that exactly
+    <replaceable>i</replaceable> instances are required for a
+    match.</para>
+  </listitem>
+</itemizedlist>
+The lower bound, <replaceable>i</replaceable>, can be any integer
+greater than or equal to zero. The upper bound,
+<replaceable>j</replaceable>, must be an integer greater than
+<replaceable>i</replaceable>.</para>
+
+<para>
+You can specify that the annotated substructure is optional for the
+match by 
+<indexterm><primary>optional query elements</primary></indexterm>
+using a lower bound of zero (e.g., <token role="annot">[0..]</token>).
+An exact annotation of <token role="annot">[0]</token> means that the
+<indexterm><primary>negated query elements</primary></indexterm>
+substructure must <emphasis>not</emphasis> be present to match the
+query.  Proximity currently permits the use of 
+<glossterm baseform="optional element">optional</glossterm> and 
+<glossterm baseform="negated element">negated</glossterm>
+vertices but prohibits the use of optional or negated edges.
+</para>
+</sidebar>
+
+<!--
+   EXERCISE: Creating a query with numeric annotations
+-->
+
+<para>The following exercise finds, for each research project object
+(web page) in the 
+database, all objects directly linked to that page.  It uses a numeric
+annotation to <emphasis>group</emphasis> matching database entities
+into a single matching subgraph.</para>
+
+<para>This query illustrates one of the most common query forms, the
+one-dimensional star or
+<emphasis><glossterm baseform="star query">1d-star</glossterm></emphasis>
+query.
+<indexterm><primary>1d-star query structure</primary></indexterm>
+<indexterm><primary>one-dimensional star query structure</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>1d-star structure</secondary></indexterm>
+A 1d-star is the cluster
+of objects directly linked to a central, core object.
+Star queries can use &qgraph; features such as 
+<glossterm baseform="condition">conditions</glossterm> and
+<glossterm baseform="constraint">constraints</glossterm> to restrict
+matches to objects with specific attribute values.</para>
+
+<sidebar>
+<para>Executing the research-clusters2 query creates a 
+<glossterm>container</glossterm> used by
+<xref linkend="ex_queries_containers"/>.
+Make sure that you complete this exercise before beginning
+<xref linkend="ex_queries_containers"/>.
+</para>
+</sidebar>
+
+<procedure id="ex_queries_annotations">
+<title>Creating a query with numeric annotations</title>
+
+<para>The query created in this exercise is also available in the
+&proxcurrent; distribution in 
+<filename>&scriptpath;/research-clusters2.qg2.xml</filename>.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>Open the research-clusters1 query that you created in 
+<xref linkend="ex_queries_rc1"/>:</para>
+<substeps>
+  <step>
+  <para>From the <guimenu>Query</guimenu> menu, choose
+    <guimenuitem>Edit Query</guimenuitem>.</para>
+  </step>
+  <step>
+  <para>Navigate to the location where you saved the query created in
+    <xref linkend="ex_queries_rc1"/>.  (If you saved the query using
+    the suggested directory and file name, this is
+    <filename>&querypath;/rc1.qg2.xml</filename>.)</para>
+  </step>
+  <step>
+  <para>Click <guibutton>OK</guibutton>.</para>
+  </step>
+</substeps>
+
+<para>
+So that you do not overwrite the existing query,
+save this new query as
+<filename>rc2.qg2.xml</filename>.
+</para>
+<caution>
+<para>The Proximity distribution includes the new query in the file
+<filename>&querypath;/research-clusters2.qg2.xml</filename>.
+<indexterm><primary>research-clusters2 query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>research-clusters2</tertiary></indexterm>
+Be careful not to overwrite this file.</para>
+</caution>
+</step>
+
+<step>
+<para>Select the <token role="vertex">linked_page</token> vertex.
+Double-click in the <guilabel>Value</guilabel> column of the
+<guilabel>Annotation</guilabel> property.
+<indexterm><primary>creating</primary>
+           <secondary>numeric annotations</secondary></indexterm>
+<indexterm><primary>editing</primary>
+           <secondary>numeric annotations</secondary></indexterm>
+Enter <userinput>[1..]</userinput> and press <keycap>Tab</keycap>.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata align="center" valign="bottom"
+   fileref="&graphicspath;/QE_RC2_EditAnnot.png"
+   width="5.75in"
+   format="PNG"/>
+</imageobject>
+<imageobject role="html">
+   <imagedata align="center" valign="bottom"
+   fileref="&graphicspath;/QE_RC2_EditAnnot.png"
+   contentwidth="7.0in"
+   format="PNG"/>
+</imageobject>
+</mediaobject>
+</para>
+
+<sidebar>
+<para>Only one of any two 
+<glossterm baseform="adjacency">adjacent</glossterm> 
+vertices may be
+annotated. Annotating adjacent vertices is prohibited as the resulting
+query is <glossterm>ambiguous</glossterm>.  See the
+<citetitle>&qguide;</citetitle> for additional information on and
+reasons for &qgraph; annotation rules..</para>
+</sidebar>
+</step>
+
+<step>
+<para>Check the status list at the bottom of the Query Editor.
+Notice that the query is now invalid.  Click the arrows at the
+right edge of the status list to see the specific errors.</para>
+
+<para>An edge next to an annotated vertex must itself be annotated.
+To fix the error, select the <token role="edge">linked_to</token>
+edge, enter <userinput>[1..]</userinput> for the
+edge&rsquo;s annotation, and press <keycap>Tab</keycap>.</para>
+
+<sidebar>
+<para>An edge next to an annotated vertex must also be annotated. The
+vertex annotation takes <glossterm>precedence</glossterm> over the
+edge annotation.  
+<indexterm><primary>precedence of vertex and edge annotations</primary></indexterm>
+</para>
+</sidebar>
+
+<para>You can optionally set the Query Editor to automatically
+<indexterm><primary>edges</primary>
+           <secondary>automatically annotating</secondary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>automatic edge annotation</secondary></indexterm>
+add a <token role="annot">[1..]</token> annotation to every new edge.
+The <token role="annot">[1..]</token> edge annotation groups multiple
+links connecting the same two objects, which is
+typically the intended behavior for most Proximity queries. To
+automatically add a <token role="annot">[1..]</token> annotation to
+new edges, choose <guimenuitem>Add [1..] To New
+Edges</guimenuitem> from the Query Editor&rsquo;s
+<guimenu>Edit</guimenu> menu.  You can edit an individual edge annotation
+later if you determine that a different annotation is more appropriate.
+</para>
+</step>
+
+<step>
+<para>Update the name and description of the query. Instead of finding
+individual linked pages, the new query finds clusters of pages
+connected to research project pages.</para>
+</step>
+
+<step>
+<para>Make sure the query is 
+<glossterm baseform="validation">valid</glossterm> by checking
+the status list at 
+the bottom of the Query Editor window.  If the query is not valid,
+examine the errors in the list and fix any problems before
+saving.</para>
+</step>
+
+<step>
+<para>[Optional] Update the name and description for the query.</para>
+</step>
+
+<step>
+<para>From the <guimenu>File</guimenu> menu, choose 
+<guimenuitem>Save</guimenuitem> or press <keycap>Ctrl-S</keycap>
+to save the changes to your query.</para> 
+</step>
+
+<step>
+<para>From the <guimenu>File</guimenu> menu, choose 
+<guimenuitem>Run</guimenuitem> or press <keycap>Ctrl-R</keycap>
+to execute your query.
+Proximity prompts you for a name for the results container. Enter
+<userinput>research-clusters2</userinput> and click
+<guibutton>OK</guibutton>.</para>
+<para>Proximity opens a window to show you a trace of the
+query execution.  The last lines should be
+similar to the following excerpt 
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> found 83 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> query results saved in
+   container: research-clusters2
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</screen>
+Close this window after the query finishes.</para>
+</step>
+
+<step>
+<para>If needed, move or close the Query Editor window so that you can
+see the &proxui;.
+In the &proxui; start page, click <guibutton>Containers</guibutton> to
+display the list of containers in the database.</para>
+</step>
+
+<step>
+<para>Click <guibutton>&annotatedclusters;</guibutton> to display the
+list of <glossterm baseform="subgraph">subgraphs</glossterm> in this container.
+You can see that there are far fewer subgraphs in this container
+than there were in the 
+<token role="container">&simpleclusters;</token> container.</para>
+</step>
+
+<step>
+<para>Click <guibutton>thumbs</guibutton> to display thumbnail images
+for a set of randomly selected subgraphs.
+Because the thumbnails are selected at random, you may see a different
+set of subgraphs than those shown below.
+<mediaobject>
+<imageobject role="fo">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC2_Thumbs.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC2_Thumbs.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+Unlike the subgraphs in the &simpleclusters; container, these
+subgraphs vary in the number of 
+<token role="vertex">linked_page</token> objects linked to each
+<token role="vertex">start_page</token> objects.  And in some of the
+subgraphs, some of the <token role="vertex">linked_page</token>
+objects are connected to the <token role="vertex">start_page</token>
+object by two or more links.
+The <token role="annot">[1..]</token> annotation on the 
+<token role="vertex">linked_page</token> vertex groups the matching
+objects and the <token role="annot">[1..]</token> annotation on the
+<token role="edge">linked_to</token> edge groups the corresponding 
+links.</para>
+</step>
+
+<step>
+<para>Click <guibutton>&annotatedsubgraph1;</guibutton> to see the
+contents of 
+subgraph&nbsp;<token role="subgraph">&annotatedsubgraph1;</token>.
+Notice that we still have a single start page, 
+object&nbsp;<token role="object">398</token> (you may need to scroll
+down to see the <token role="vertex">start_page</token> object), but
+the subgraph now includes many linked pages. 
+Click <guibutton>graph</guibutton> to display the graph of this
+subgraph.</para>
+<para>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC2_398.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_RC2_398.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+</step>
+
+</procedure>
+
+<para>Using numeric annotations
+successfully collapses the multiple subgraphs for each research page
+into a single subgraph that includes all the linked pages.</para>
+<indexterm startref="idx_queries_annot" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                 COMPARING ITEMS IN A QUERY                     -->
+<!-- ============================================================== -->
+
+<sect1 id="query_constraint">
+<title>Comparing Items in a Query</title>
+<indexterm id="idx_queries_const" class="startofrange">
+           <primary>constraints</primary></indexterm>
+
+<para><glossterm baseform="condition">Conditions</glossterm> let you
+specify restrictions on individual items in a 
+query. To place restrictions across different items we use 
+<emphasis><glossterm baseform="constraint">constraints</glossterm></emphasis>.
+Constraints compare one vertex or edge in the query to another
+vertex or edge.</para>
+
+<para>&qgraph; permits two types of constraints:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><emphasis><glossterm baseform="identity constraint">Identity constraints</glossterm></emphasis>
+    <indexterm><primary>identity constraints</primary></indexterm>
+    compare the <glossterm baseform="object identifier">identities</glossterm>
+    of two database objects or links.
+    </para>
+  </listitem>
+  <listitem>
+    <para><emphasis><glossterm baseform="attribute constraint">Attribute constraints</glossterm></emphasis>
+    <indexterm><primary>attribute value constraints</primary></indexterm>
+    compare the attribute values of two database objects or links.
+    <indexterm><primary>attributes</primary>
+               <secondary sortas="constraints">in constraints</secondary>
+    </indexterm>
+    </para>
+  </listitem>
+</itemizedlist>
+Identity constraints are typically used to ensure that the same
+database entity does not match two different query elements.
+<xref linkend="ex_subquery"/> illustrates a typical use of an identity
+constraint.</para>
+
+<para>Attribute constraints
+allow you to compare different 
+<glossterm baseform="attribute">attributes</glossterm> as long as
+their data types 
+<indexterm><primary>comparable data types</primary></indexterm>
+<indexterm><primary>data type</primary></indexterm>
+are <glossterm baseform="comparable types">comparable</glossterm>.
+In addition to comparing attribute values with the
+same data type, Proximity also lets you to compare
+<code>DBL</code> with <code>FLT</code> and
+<code>INT</code>, and <code>FLT</code> with <code>INT</code>.
+This exercise uses an attribute constraint to compare values for the
+<token role="attr">school</token> attribute across objects. 
+</para>
+
+<sidebar>
+<para>You cannot mix vertices and edges within a constraint.
+<indexterm><primary>edges</primary>
+           <secondary sortas="constraints">in constraints</secondary></indexterm>
+<indexterm><primary>vertices</primary>
+           <secondary sortas="constraints">in constraints</secondary></indexterm>
+Vertices can only be compared to other vertices and edges can only be
+compared to other edges.</para>
+<para>&qgraph; only lets one of the two constrained items be
+<glossterm baseform="numeric annotation">annotated</glossterm>;
+constraints between two annotated items are not allowed.
+With one exception, Proximity also prohibits constraints between
+two edges when one of them is annotated. 
+Proximity allows such constraints only when the vertex adjacent to the
+annotated edge is<glossterm baseform="optional element">optional</glossterm>
+(annotated with <token role="annot">[0..]</token> or 
+<token role="annot">[0..<replaceable>j</replaceable>]</token>).</para>
+</sidebar>
+
+<para>The following exercise creates a query that finds linked web pages
+from different schools.  The example query uses an attribute constraint to
+compare the value of the <token role="attr">school</token> attribute
+for the two web page objects.</para>
+
+<!--
+   EXERCISE: Adding constraints to a query
+-->
+
+<procedure>
+<title>Adding constraints to a query</title>
+<indexterm><primary>different-schools query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>different-schools</tertiary></indexterm>
+
+<para>
+The query created in this exercise is also available in the
+&proxcurrent; distribution in 
+<filename>&scriptpath;/different-schools.qg2.xml</filename>.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.
+</para>
+
+<step>
+<para>From the <guimenu>Query</guimenu> menu, choose
+<guimenuitem>New Query</guimenuitem>.
+Proximity starts the Query Editor.</para>
+</step>
+
+<step>
+<para>Create a vertex labeled <userinput>start_page</userinput>.</para>
+</step>
+
+<step>
+<para>Create a second vertex labeled <userinput>linked_page</userinput>.</para>
+</step>
+
+<step>
+<para>Add the numeric annotation <userinput>[1..]</userinput> to the
+<token role="vertex">linked_page</token> vertex.</para>
+</step>
+
+<step>
+<para>Create a <glossterm>directed edge</glossterm> from
+<token role="vertex">start_page</token> to
+<token role="vertex">linked_page</token>. Label the edge
+<userinput>linked_to</userinput>.</para>
+</step>
+
+<step>
+<para>If you do not have automatic edge annotation enabled, add the
+numeric annotation <userinput>[1..]</userinput> to the 
+<token role="edge">linked_to</token> edge.</para>
+</step>
+
+<step>
+<para>In the <guilabel>Constraints</guilabel> area at the bottom of
+the query properties pane, click <guibutton>&addconstraint;</guibutton> 
+<indexterm><primary>constraint tool</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>constraint tool</secondary></indexterm>
+to add a new constraint 
+<indexterm id="idx_const_creating" class="startofrange">
+           <primary>creating</primary>
+           <secondary>constraints</secondary></indexterm>
+to the query.</para>
+
+<para>The Query Editor adds a temporary constraint, 
+<token role="constraint">item1&nbsp;&gt;&nbsp;item2</token>, as an
+example to be edited with the correct values.  (Because this temporary
+constraint uses vertex labels not present in the query, the status
+list shows that the query is invalid.)
+</para>
+</step>
+
+<step>
+<para>Replace the example constraint with
+<blockquote>
+<para><userinput>start_page.school&nbsp;&lt;&gt;&nbsp;linked_page.school</userinput></para>
+</blockquote>
+and press <keycap>Tab</keycap>.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_NewConstraint.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/QE_NewConstraint.png"
+    contentwidth="7.0in" format="PNG" />
+</imageobject>
+</mediaobject>
+The query should now be <glossterm baseform="validation">valid</glossterm>.
+</para>
+
+<!--
+<para>The constrained elements must be two vertices or two edges
+defined elsewhere in the query.</para>
+-->
+
+<sidebar>
+<para>The general form of an attribute <glossterm>constraint</glossterm> is
+<blockquote>
+<para>
+<replaceable>element1</replaceable>.<replaceable>attribute1</replaceable>
+&nbsp;&nbsp;<replaceable>operator</replaceable>&nbsp;&nbsp;
+<replaceable>element2</replaceable>.<replaceable>attribute2</replaceable>
+</para>
+</blockquote>
+where
+<itemizedlist spacing="compact">
+   <listitem>
+	<para><replaceable>element1</replaceable> and
+	<replaceable>element2</replaceable> are the names of two
+	vertices or two edges in the query</para>
+  </listitem>
+  <listitem>
+	<para><replaceable>attribute1</replaceable> is the
+	name of an attribute for <replaceable>element1</replaceable>
+        </para>
+  </listitem>
+  <listitem>
+	<para><replaceable>attribute2</replaceable> is the
+	name of an attribute for <replaceable>element2</replaceable>
+        </para>
+ </listitem>
+  <listitem>
+        <para><replaceable>attribute1</replaceable> and 
+        <replaceable>attribute2</replaceable> are of comparable types
+        </para>
+  </listitem>
+  <listitem>
+	<para><replaceable>operator</replaceable> is one of
+	<literal>=</literal>, <literal>&lt;&gt;</literal>,
+        <literal>&lt;</literal>, <literal>&lt;=</literal>,
+	<literal>&gt;</literal>, and <literal>&gt;=</literal>.
+<indexterm><primary>comparison operators</primary></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>comparison</secondary></indexterm>
+</para>
+  </listitem>
+</itemizedlist>
+
+<?pagebreak?>
+The general form of an identity constraint is
+<blockquote>
+<para>
+<replaceable>element1</replaceable>
+&nbsp;&nbsp;<replaceable>operator</replaceable>&nbsp;&nbsp;
+<replaceable>element2</replaceable>
+</para>
+</blockquote>
+
+Surround vertex, edge, and attribute names and values
+containing spaces with single quotes.</para>
+
+<!--
+<para><replaceable>Attribute1</replaceable> and
+<replaceable>attribute2</replaceable> must be 
+<glossterm>comparable types</glossterm>, but
+need not be the same attribute name.</para>
+-->
+
+<para>
+You can compare attribute values for two vertices or two
+edges, but you cannot mix vertex and edge attributes in the same
+constraint.  Proximity does not permit constraints between two
+annotated elements.
+</para>
+</sidebar>
+<indexterm startref="idx_const_creating" class="endofrange"/>
+</step>
+
+<step>
+<para>Make sure the query is valid by checking the status list at
+the bottom of the Query Editor window.  If the query is not valid,
+examine the errors in the drop-down list and fix any problems before
+continuing.</para>
+</step>
+
+<step>
+<para>[Optional] Add a name and description and save the
+query.</para>
+<caution>
+<para>The Proximity distribution includes the new query in the file
+<filename>&querypath;/different-schools.qg2.xml</filename>.
+<indexterm><primary>different-schools query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>different-schools</tertiary></indexterm>
+Be careful not to overwrite this file.</para>
+</caution>
+</step>
+
+<step>
+<para>From the <guimenu>File</guimenu> menu, choose 
+<guimenuitem>Run</guimenuitem> or press the <keycap>Ctrl-R</keycap> to
+execute your query.
+Proximity prompts you for a name for the results container. Enter
+<userinput>different-schools</userinput> and click
+<guibutton>OK</guibutton>.</para>
+
+<para>Proximity opens a window to show you a trace of the
+query execution. The last lines should be
+similar to the following excerpt
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> found 0 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> query results saved in
+   container: different-schools
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</screen>
+Close this window after the query finishes.</para>
+
+<para>The resulting container has no subgraphs&mdash;there are no
+web pages in this database that link to a page at another school.
+Proximity creates a container even when there are no matches
+to the query.</para>
+</step>
+
+</procedure>
+<indexterm startref="idx_queries_const" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--           MATCHING COMPLEX SUBGRAPHS WITH SUBQUERIES           -->
+<!-- ============================================================== -->
+
+<sect1 id="query_subquery">
+<title>Matching Complex Subgraphs with Subqueries</title>
+<indexterm id="idx_subqueries1" class="startofrange">
+           <primary>subqueries</primary></indexterm>
+<indexterm id="idx_subqueries2" class="startofrange">
+           <primary>creating</primary>
+           <secondary>subqueries</secondary></indexterm>
+
+<para><glossterm baseform="subquery">Subqueries</glossterm> allow you
+to group complex substructures with 
+<glossterm baseform="numeric annotation">numeric
+annotations</glossterm> just as you grouped individual query elements
+in <xref linkend="ex_queries_annotations"/>.</para>
+
+<para>In this example we want to find, for every faculty member, all
+their research projects and all the individuals associated with each
+of those research projects.  We interpret links from
+<token role="object">faculty</token> pages to 
+<token role="object">research project</token> pages to mean that this
+faculty member supervises the associated project. We similarly
+interpret links connecting 
+<token role="object">research project</token> pages to other 
+individuals&rsquo; web pages as indicating involvement in or interest
+in that project, regardless of the direction of the link.  Taken
+together, all these links
+identify individuals associated with a particular
+project.  The <glossterm baseform="subgraph">subgraphs</glossterm>
+that match the query created in this exercise each identify a single 
+<token role="object">faculty</token> web page, all the 
+<token role="object">research project</token> pages it links to, and all
+the other <token role="object">faculty</token>, 
+<token role="object">student</token>, and <token role="object">staff</token>
+pages linked to or from those <token role="object">research project</token>
+pages.</para>
+
+<para>The structure of this query is a <emphasis>2d-star</emphasis>.
+<indexterm><primary>2d-star query structure</primary></indexterm>
+<indexterm><primary>two-dimensional star query structure</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>2d-star structure</secondary></indexterm>
+Similar to the <glossterm baseform="star query">1d-star query</glossterm>
+shown in 
+<xref linkend="ex_queries_annotations"/>, a 2d-star is
+the cluster of 1d-stars directly linked to a 
+<glossterm baseform="core vertex">core object</glossterm>. We use a
+subquery to specify the 1d-star substructure within a 2d-star
+query.</para>
+
+<para>In describing this query we made several assumptions about how
+objects and links in the database correspond to entities and
+relationships in the world.  Although these assumptions may seem
+reasonable, it&rsquo;s important to remember that we might be
+wrong in some or all of these assumptions. If we go on to use the
+results of this query in a model, appropriate care must be taken in
+applying the models&rsquo;s predictions to real world
+situations.</para>
+
+<procedure id="ex_subquery">
+<title>Using subqueries in a query</title>
+<indexterm><primary>project-people query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>project-people</tertiary></indexterm>
+
+<para>The query created in this exercise is also available in the
+&proxcurrent; distribution in 
+<filename>&scriptpath;/project-people.qg2.xml</filename>.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.
+</para>
+
+<step>
+<para>From the <guimenu>Query</guimenu> menu, choose
+<guimenuitem>New Query</guimenuitem>.
+Proximity starts the Query Editor.</para>
+</step>
+
+<step>
+<para>Create an unannotated <glossterm>vertex</glossterm> labeled
+<userinput>project</userinput>.  Add the <glossterm>condition</glossterm>
+<blockquote><para><userinput>pagetype&nbsp;=&nbsp;ResearchProject</userinput></para></blockquote>
+to this vertex.
+</para>
+</step>
+
+<step>
+<para>Create another vertex labeled <userinput>person</userinput>.
+Add the condition
+<blockquote>
+  <para>
+  <userinput>OR(pagetype&nbsp;=&nbsp;Faculty, 
+                pagetype&nbsp;=&nbsp;Student,
+                pagetype&nbsp;=&nbsp;Staff) </userinput>
+  </para>
+</blockquote>
+to this vertex. Proximity requires the use of 
+<glossterm>prefix notation</glossterm> and 
+<glossterm>disjunctive normal form</glossterm> to express
+<glossterm baseform="complex condition">complex conditions</glossterm>.
+<indexterm><primary>complex conditions</primary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>complex</secondary></indexterm>
+<indexterm><primary>disjunctive normal form</primary></indexterm>
+</para>
+</step>
+
+<step>
+<para>Add the <glossterm baseform="numeric annotation">annotation</glossterm>
+<userinput>[0..]</userinput> to the 
+<token role="vertex">person</token> vertex.  This annotation makes
+matching the <token role="vertex">person</token> vertex
+optional. Any pages matching the <token role="vertex">person</token>
+vertex will be included in the query results, but the query will match
+appropriate <token role="object">research project</token> web pages
+regardless of whether they link to another faculty, student, or staff
+page.</para>
+</step>
+
+<step>
+<para>Create an <glossterm>undirected edge</glossterm> labeled
+<userinput>associated-with</userinput> 
+linking the <token role="vertex">project</token> vertex to the 
+<token role="vertex">person</token> vertex.  If you do not have
+automatic edge annotation enabled, add the numeric
+annotation <userinput>[1..]</userinput> to this edge.</para>
+
+<para>The correct annotation for an edge adjacent to an 
+<glossterm baseform="optional element">optional</glossterm>
+vertex is almost always <userinput>[1..]</userinput>.  See the
+<citetitle>&qguide;</citetitle> for an explanation of
+why this is the appropriate annotation.</para>
+</step>
+
+<step>
+<para>Click &subquerytool; or press <keycap>Ctrl-4</keycap>
+to choose the subquery tool.
+<indexterm><primary>subquery tool</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>subquery tool</secondary></indexterm>
+Drag the mouse to create a rectangle that contains both vertices and
+the connecting edge.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/QE_Subquery.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/QE_Subquery.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+Release the mouse button.
+The Query Editor changes the color of the vertices inside the
+rectangle to red to indicate that they are part of a subquery.
+</para>
+
+<para>All subqueries must be annotated.  The Query Editor
+automatically adds a <token role="annot">[1..]</token> annotation to
+new subqueries.  To change this annotation, click inside the subquery
+box and edit the subquery&rsquo;s properties in the element properties
+pane.</para>
+</step>
+
+<step>
+<para>Create a vertex named <userinput>prof</userinput> outside the
+subquery area. Add the condition
+<blockquote><para><userinput>pagetype&nbsp;=&nbsp;Faculty</userinput></para></blockquote>
+to this vertex.</para>
+</step>
+
+<step>
+<para>Create a directed edge named <userinput>supervises</userinput>
+from the <token role="vertex">prof</token> vertex 
+to the <token role="vertex">project</token> vertex.
+</para>
+</step>
+
+<step>
+<para>Add the numeric annotation <userinput>[1..]</userinput> to the
+<token role="edge">supervises</token> edge. The 
+<glossterm>boundary edge</glossterm> of a
+subquery must be annotated.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/QE_Subquery_2.png"
+   width="4.95in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/QE_Subquery_2.png" format="PNG"
+   contentwidth="6.0in" />
+</imageobject>
+</mediaobject>
+</para>
+</step>
+
+<step>
+<para>Add the <glossterm>identity constraint</glossterm>
+<blockquote><para><userinput>prof&nbsp;&lt;&gt;&nbsp;person</userinput></para></blockquote>
+to the query.  This <glossterm>constraint</glossterm>
+<indexterm><primary>constraints</primary></indexterm>
+<indexterm><primary>identity constraints</primary></indexterm>
+ensures that the same object does not
+match both the <token role="vertex">prof</token> and 
+<token role="vertex">person</token> vertices in the same subgraph.
+</para>
+</step>
+
+<step>
+<para>Check the status list at the bottom of the Query Editor window
+to make sure the query is 
+<glossterm baseform="validation">valid</glossterm>.  If the query is
+not valid, examine the errors and fix any problems before
+continuing.</para>
+</step>
+
+<step>
+<para>[Optional] Add a name and description and save the query.</para>
+<caution>
+<para>The Proximity distribution includes the new query in the file
+<filename>&querypath;/project-people.qg2.xml</filename>.
+<indexterm><primary>project-people query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>project-people</tertiary></indexterm>
+Be careful not to overwrite this file.</para>
+</caution>
+</step>
+
+<step>
+<para>From the <guimenu>File</guimenu> menu, choose 
+<guimenuitem>Run</guimenuitem> or press <keycap>Ctrl-R</keycap>
+to execute your query.
+Proximity prompts you for a name for the results
+<glossterm>container</glossterm>. Enter 
+<userinput>proj-associated-people</userinput> and click
+<guibutton>OK</guibutton>.</para>
+
+<para>Proximity opens a window to show you a trace of the
+query execution. The last lines should be
+similar to the following excerpt
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> found 42 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> query results saved in
+   container: proj-associated-people
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</screen>
+Close this window after the query finishes.</para>
+</step>
+
+<step>
+<para>Examine the query results in the
+<token role="container">proj-associated-people</token> container.
+Click &home; to go to the &proxui; start page. Click
+<guibutton>Containers</guibutton>, 
+then click <guibutton>proj-associated-people</guibutton>.  Proximity
+displays the list of 
+<glossterm baseform="subgraph">subgraphs</glossterm> for this
+container.</para>
+</step>
+
+<step>
+<para>Click <guibutton>12</guibutton> to see the details of this
+subgraph. This subgraph includes two research project objects.</para>
+</step>
+
+<step>
+<para>Click <guibutton>graph</guibutton> to display the subgraph&rsquo;s
+graph structure. Because graph layout is non-deterministic, your graph
+may look somewhat different than that shown below.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_ProjPeople_graph.png"
+    width="5.75in"
+    format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_ProjPeople_graph.png"
+    contentwidth="7.0in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+</step>
+
+<step>
+<para>Continue to explore the results of your query. When you are
+finished, continue to the next section.</para>
+</step>
+
+</procedure>
+<indexterm startref="idx_subqueries1" class="endofrange"/>
+<indexterm startref="idx_subqueries2" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                ADDING LINKS TO DATA WITH QUERIES               -->
+<!-- ============================================================== -->
+
+<sect1 id="query_addlinks">
+<title>Adding Links to Data with Queries</title>
+<indexterm id="idx_updatedb1" class="startofrange">
+           <primary>databases</primary>
+           <secondary>updating via queries</secondary></indexterm>
+<indexterm id="idx_updatedb2" class="startofrange">
+           <primary>updating</primary>
+           <secondary>databases via queries</secondary></indexterm>
+<indexterm id="idx_updatedb3" class="startofrange">
+           <primary>queries</primary>
+           <secondary>update functionality</secondary></indexterm>
+<indexterm id="idx_addlinks1" class="startofrange">
+           <primary>databases</primary>
+           <secondary>creating links</secondary></indexterm>
+<indexterm id="idx_addlinks2" class="startofrange">
+           <primary>links</primary>
+           <secondary>creating with queries</secondary></indexterm>
+<indexterm id="idx_addlinks3" class="startofrange">
+           <primary>creating</primary>
+           <secondary>links</secondary></indexterm>
+
+<para>In addition to being able to extract data in the form of
+subgraphs, the &qgraph; language provides the ability to 
+<glossterm baseform="update query">update</glossterm>
+data&mdash;add or delete objects, links, or attributes&mdash;by
+executing queries. Although much of this functionality remains to be
+implemented in Proximity, you can currently use &qgraph; queries
+to add new links to the data.</para>
+
+<para>&qgraph; query processing separates the match phase
+<indexterm><primary>queries</primary>
+           <secondary>processing phases</secondary></indexterm>
+<indexterm><primary>match phase in query processing</primary></indexterm>
+from the update phase,
+<indexterm><primary>update phase in query processing</primary></indexterm>
+thus any new links added to the database are
+<emphasis>not</emphasis> included in the query&rsquo;s results.
+Importantly, the match phase applies to the data as it exists at the
+start of query execution.  Applying an update cannot add new matches
+to the current query&rsquo;s results.</para>
+
+<para>The query created in the following exercise continues some
+of the assumptions we made in <xref linkend="ex_subquery"/>
+about how the data in the &webkb; database correspond to
+entities and relationships in the world.  Specifically, we interpret
+links from <token role="attr">Faculty</token> pages to 
+<token role="attr">ResearchProject</token> pages to mean that this
+faculty member directs the project.  Similarly, we interpret links
+from <token role="attr">ResearchProject</token> pages to 
+<token role="attr">Student</token> pages to mean that that those
+students work on the project.  Therefore, we infer that the
+faculty member supervises these students, allowing us to add links
+that make this relationship explicit.
+Although these assumptions may seem
+reasonable, it&rsquo;s important to remember that we might be
+wrong in some or all of these assumptions. If we go on to use the
+results of this query in a model, appropriate care must be taken in
+applying the models&rsquo;s predictions to real world
+situations.</para>
+
+<procedure id="ex_addlinks">
+<title>Adding links with a query</title>
+<indexterm><primary>add-supervises-links query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>add-supervises-links</tertiary></indexterm>
+
+<para>The query created in this exercise is also available in the
+&proxcurrent; distribution in 
+<filename>&scriptpath;/add-supervises-links.qg2.xml</filename>.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.
+</para>
+
+<step>
+<para>From the <guimenu>Query</guimenu> menu, choose
+<guimenuitem>New Query</guimenuitem>.
+Proximity starts the Query Editor.</para>
+<?pagebreak?>
+</step>
+
+<step>
+<para>Create an unannotated <glossterm>vertex</glossterm> labeled
+<userinput>project</userinput>. Add the <glossterm>condition</glossterm>
+<blockquote><para><userinput>pagetype&nbsp;=&nbsp;ResearchProject</userinput></para></blockquote>
+to this vertex.</para>
+</step>
+
+<step>
+<para>Create another vertex labeled
+<userinput>professor</userinput>. Add the condition
+<blockquote><para><userinput>pagetype&nbsp;=&nbsp;Faculty</userinput></para></blockquote>
+to this vertex.  Add the 
+<glossterm baseform="numeric annotation">annotation</glossterm>
+<userinput>[1..]</userinput> to this vertex.</para>
+</step>
+
+<step>
+<para>Create a <glossterm>directed edge</glossterm>
+labeled <userinput>directs</userinput>
+from the <token role="vertex">professor</token> vertex to the
+<token role="vertex">project</token> vertex.  If you do not have
+automatic edge annotation enabled, add the annotation
+<userinput>[1..]</userinput> to this edge.</para>
+</step>
+
+<step>
+<para>Create a vertex labeled <userinput>student</userinput>.  Add the
+condition
+<blockquote><para><userinput>pagetype&nbsp;=&nbsp;Student</userinput></para></blockquote>
+to this vertex.  Add the annotation <userinput>[1..]</userinput> to
+this vertex.</para>
+</step>
+
+<step>
+<para>Create a directed edge labeled <userinput>has-member</userinput>
+from the <token role="vertex">project</token> vertex to the
+<token role="vertex">student</token> vertex.  If you do not have
+automatic edge annotation enabled, add the annotation
+<userinput>[1..]</userinput> to this edge.</para>
+<para>The query should look similar to that shown below:
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/QE_AddLink_1.png" 
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/QE_AddLink_1.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+</step>
+
+<step>
+<para>In the <guilabel>Add-links</guilabel> area
+<indexterm><primary>Query Editor</primary>
+           <secondary>add link tool</secondary></indexterm>
+<indexterm><primary>add link tool</primary></indexterm>
+at the bottom of
+the query properties pane, click <guibutton>Add</guibutton> to specify
+the new links to be added.</para>
+<para>The Query Editor creates a temporary link specification,
+<token role="constraint">vertex1,&nbsp;vertex2,&nbsp;attrname,&nbsp;"attrval"</token>,
+as an example to be edited with the correct values.  (Because this
+temporary link specification uses vertex labels not present in the
+query, the status indicator now shows that the query is
+invalid.)</para>
+
+<sidebar>
+<para>The general form of a new 
+<glossterm>link specification</glossterm> is
+<indexterm><primary>links</primary>
+           <secondary>specifications for new</secondary></indexterm>
+<blockquote>
+<para>
+<replaceable>starting-vertex</replaceable><literal>,</literal>
+<replaceable>ending-vertex</replaceable><literal>,</literal>
+<replaceable>attribute-name</replaceable><literal>,</literal>
+<replaceable>attribute-value</replaceable>
+</para>
+</blockquote>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>starting-vertex</replaceable> is the name of the
+  query vertex that corresponds to the link&rsquo;s starting object</para>
+</listitem>
+<listitem>
+  <para><replaceable>ending-vertex</replaceable> is the name of the
+  query vertex that corresponds to the link&rsquo;s ending object</para>
+</listitem>
+<listitem>
+  <para><replaceable>attribute-name</replaceable> is the name of an
+  <glossterm>attribute</glossterm> that will be placed on each new
+  link.  The specified attribute can be a new attribute or it
+  can already exist as a link attribute in the database.</para>
+</listitem>
+<listitem>
+  <para><replaceable>attribute-value</replaceable> is the value of
+  <replaceable>attribute-name</replaceable> to be assigned to each new
+  link. The new attribute value must be the
+  same for all links created by this specification.</para>
+</listitem>
+</itemizedlist>
+The attribute name and value are required&mdash;all new links must be
+assigned a value for a new or existing link attribute.
+</para>
+</sidebar>
+<?pagebreak?>
+</step>
+
+<step>
+<para>Replace the example link specification with
+<blockquote><para>
+<userinput>professor,&nbsp;student,&nbsp;link_type,&nbsp;"supervises"</userinput>
+</para></blockquote>
+and press <keycap>Tab</keycap>.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/QE_AddLink_LinkSpec.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/QE_AddLink_LinkSpec.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+<para>The link specification states that we want to add links from
+objects matching the <token role="vertex">professor</token> vertex to
+objects matching the <token role="vertex">student</token> vertex,
+assigning the value <token role="attr">supervises</token> to a new
+<token role="attr">link_type</token> attribute for that 
+link.</para>
+
+<para>If the resulting container includes more than one subgraph that
+would create the same new link, only one instance of the new link is
+created. However, re-running the query creates a new container and
+thus a new set of identical links.</para>
+</step>
+
+<step>
+<para>Make sure the query is <glossterm baseform="validation">valid</glossterm>
+by checking the status list at
+the bottom of the Query Editor window.  If the query is not valid,
+examine the errors in the drop-down list and fix any problems before
+continuing.</para>
+</step>
+
+<step>
+<para>[Optional] Add a name and description and save the query.</para>
+<caution>
+<para>The Proximity distribution includes the new query in the file
+<filename>&querypath;/add-supervises-links.qg2.xml</filename>.
+Be careful not to overwrite this file.</para>
+</caution>
+</step>
+
+<step>
+<para>From the <guimenu>File</guimenu> menu, choose 
+<guimenuitem>Run</guimenuitem> or press <keycap>Ctrl-R</keycap>
+to execute your query.
+Proximity prompts you for a name for the results
+<glossterm>container</glossterm>. Enter 
+<userinput>project-teams</userinput> and click
+<guibutton>OK</guibutton>.</para>
+
+<para>Proximity opens a window to show you the a trace of the
+query execution. The last lines should be
+similar to the following excerpt
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> found 20 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> query results saved in
+   container: project-teams
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - Adding links to database
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> Adding add-link
+   professor, student, link_type, "supervises":49 links created
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</screen>
+The trace includes a count of the number of links created.  In this
+example, we added 49 new links to the database.</para>
+<para>Close this window after the query finishes.</para>
+</step>
+
+<step>
+<para>To explore the newly added links, browse the links having a
+value of <token role="attr">supervises</token> for the new
+<token role="attr">link_type</token> attribute by drilling down through
+the <guilabel>Link Attributes</guilabel> area in the &uiname;
+or typing
+<blockquote>
+<para>
+<userinput>filter:/links/link_type/value/'supervises'</userinput>
+</para>
+</blockquote>
+in the &uiname; location bar and pressing <keycap>Return</keycap>.
+Proximity displays a list of the new links.
+</para>
+</step>
+
+</procedure>
+<indexterm startref="idx_updatedb1" class="endofrange"/>
+<indexterm startref="idx_updatedb2" class="endofrange"/>
+<indexterm startref="idx_updatedb3" class="endofrange"/>
+<indexterm startref="idx_addlinks1" class="endofrange"/>
+<indexterm startref="idx_addlinks2" class="endofrange"/>
+<indexterm startref="idx_addlinks3" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--     EXECUTING A QUERY FROM THE PROXIMITY DATABASE BROWSER      -->
+<!-- ============================================================== -->
+
+<sect1 id="query_running_gui">
+<title>Executing a Query from the &uiname;</title>
+
+<para>In addition to executing queries from the Query Editor, you can
+execute previously saved queries directly from the &uiname;. 
+<indexterm><primary>executing</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>executing</secondary></indexterm>
+<indexterm><primary>running</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>&uiname;</primary>
+           <secondary>executing queries</secondary></indexterm>
+The following exercise executes the query shown below to find, for every
+object (web page) in the database, the 1d-cluster of objects directly
+connected to that core object.  
+<mediaobject>
+<imageobject role="fo">
+   <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/QE_1dclusters.png"
+    width="3.5in" format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/QE_1dclusters.png"
+    contentwidth="4.25in" format="PNG" />
+</imageobject>
+</mediaobject>
+
+This is another example of the common 
+<glossterm baseform="star query">1d-star query</glossterm>.
+The query places no restrictions on the 
+<glossterm baseform="core vertex">core object</glossterm>
+or on any related objects&mdash;that is, there are no
+<glossterm baseform="condition">conditions</glossterm> or 
+<glossterm baseform="constraint">constraints</glossterm>.
+Additionally, the use of the <token role="annot">[0..]</token>
+annotation on the
+<token role="vertex">linked_from_page</token> and
+<token role="vertex">linked_to_page</token> vertices makes these
+matches <glossterm baseform="optional element">optional</glossterm>.
+By having no conditions or constraints and making 
+the linked objects optional, we ensure that the query will return a
+subgraph for every object in the database.</para>
+
+<para>Note that this query distinguishes links pointing to the 
+core object from links leaving the core object,
+and thus defines two types 
+of related objects: <token role="vertex">linked_from_page</token>,
+those objects that link to the core object, and 
+<token role="vertex">linked_to_page</token>, those objects that
+are linked to by the core object.  The matching subgraphs retain
+these vertex labels, allowing you to identify and use each type of
+linked object independently when learning and applying models.  If
+this distinction were not important, we could have instead used a
+simpler query of two vertices connected by an undirected edge.</para>
+
+<sidebar>
+<para>Executing the 1d-clusters query creates a 
+<glossterm>container</glossterm> used by
+later tutorial exercises.  Make sure that you complete this exercise
+if you plan to complete the exercises in the following
+chapters.</para>
+</sidebar>
+
+<!--
+   EXERCISE: Execute a saved query from the Proximity Database Browser 
+-->
+
+<procedure id="ex_queries_1dclusters">
+<title>Executing a saved query from the &uiname;</title>
+<indexterm><primary>1d-clusters query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>1d-clusters</tertiary></indexterm>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>If you have not already done so, copy
+<filename>graph-query.dtd</filename>
+<indexterm><primary>graph-query.dtd</primary></indexterm>
+<indexterm><primary>DTDs</primary>
+           <secondary>graph-query.dtd</secondary></indexterm>
+from <filename>&proxpath;/resources</filename> to the directory
+containing the example queries.
+
+<synopsis>&prompt; <userinput>cp &proxpath;/resources/graph-query.dtd &querypath;/</userinput>
+</synopsis>
+</para>
+
+<sidebar>
+<para>Proximity queries are represented using an XML format. The 
+<glossterm baseform="document type definition">DTD</glossterm>
+that describes this format must be in the directory containing the
+query file in order to execute the query.</para>
+</sidebar>
+</step>
+
+<step>
+<para>From the <guimenu>Query</guimenu> menu, choose
+<guimenuitem>Run Query</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&querypath;</filename>
+directory and choose the query <filename>1d-clusters.qg2.xml</filename>.
+</para>
+<para>You can create shortcuts to commonly used directories for easier
+access to query files. Shortcuts appear in the 
+<guilabel>Shortcuts</guilabel> pane of the <guilabel>Open</guilabel>
+dialog. See <xref xrefstyle="pageref" linkend="ex_shortcuts"/> for
+information on creating shortcuts.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Open</guibutton>. Proximity prompts you for a
+name for the results container.  Enter
+<userinput>1d-clusters</userinput> and click
+<guibutton>OK</guibutton>.</para>
+
+<para>
+<caution>
+<para>If the database already includes a container with this name,
+Proximity asks whether you want to delete the existing container.
+Answering yes lets Proximity overwrite the contents of this
+container. This also deletes any containers inside the existing
+container.</para>
+</caution>
+</para>
+
+<para>Proximity opens a window to show you a trace of the
+query execution. The last lines should be
+similar to the following excerpt
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> found 4135 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> query results saved in
+   container: 1d-clusters
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</screen>
+Close this window after the query finishes.</para>
+</step>
+
+<step>
+<para>Explore the <token role="container">1d-clusters</token>
+container. Note that because we used the 
+<token role="annot">[0..]</token> annotation on the linked objects
+making them optional for the match, some subgraphs contain only a
+single object.</para>
+</step>
+</procedure>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--           EXECUTING A QUERY FROM THE COMMAND LINE              -->
+<!-- ============================================================== -->
+
+<sect1 id="query_running_cli">
+<title>Executing a Query from the Command Line</title>
+<indexterm><primary>queries</primary>
+           <secondary>executing</secondary></indexterm>
+<indexterm><primary>executing</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>running</primary>
+           <secondary>queries</secondary></indexterm>
+
+<para>In addition to executing queries from the &uiname; and Query
+Editor, you can execute saved queries from the command line using the
+<command>query.sh</command> shell script (Linux/&macosx;) or
+<command>query.bat</command> (Windows) batch file.
+<indexterm><primary>query.sh/query.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>query.sh</secondary></indexterm>
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>query.bat</secondary></indexterm>
+</para>
+
+<!--
+   EXERCISE: Executing a saved query from the command line
+-->
+
+<procedure id="ex_queries_1dc">
+<title>Executing a query from the command line</title>
+
+<para>This exercise re-runs the research-clusters2 query.
+<indexterm><primary>research-clusters2 query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>research-clusters2</tertiary></indexterm>
+You can use either the <filename>rc2.qg2.xml</filename> query you
+created in <xref linkend="ex_queries_annotations"/> or the
+<filename>research-clusters2.qg2.xml</filename> query included with
+the distribution in <filename>&querypath;</filename>.
+The query results will overwrite the existing &annotatedclusters;
+<glossterm>container</glossterm>. Specify a different container name
+if you want to keep your original 
+<token role="container">&annotatedclusters;</token> container.</para>
+
+<para>
+<caution>
+<para>When executing queries from the &uiname; or Query Editor,
+Proximity prompts you to confirm overwriting an existing container.
+Proximity does not provide a similar prompt when executing queries
+from the command line and instead silently overwrites the existing
+container.</para>
+</caution>
+</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver.</para>
+
+<step>
+<para>Execute the <command>query.sh</command> shell script or
+<command>query.bat</command> batch file, specifying
+<variablelist>
+ <varlistentry>
+   <term><replaceable>host:port</replaceable></term>
+   <listitem>
+      <para>the Monet server&rsquo;s
+      host and port (<literal>localhost:30000</literal> if you are
+      running the Monet server on your local machine and did not
+      explicitly set the port to a different value on the command line)
+      </para>
+      <indexterm><primary>host:port specification</primary></indexterm>
+   </listitem>
+ </varlistentry>
+ <varlistentry>
+   <term><replaceable>queryXMLFile</replaceable></term>
+   <listitem>
+      <para>the file containing the saved query; use either your
+      <filename>rc2.gq2.xml</filename> query or the query listed
+      below</para>
+   </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term><replaceable>collectionName</replaceable></term>
+  <listitem>
+      <para>the name of the results container</para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term><replaceable>inputContainer</replaceable></term>
+  <listitem>
+      <para>[optional] the name of the input container&mdash; the
+      container to search when finding matches for the query</para>
+  </listitem>
+ </varlistentry>
+</variablelist>
+
+The optional <replaceable>inputContainer</replaceable> defaults to the
+<glossterm>root container</glossterm> (the entire database) if it is
+omitted.  To explicitly 
+specify the input container, Proximity uses a path-like syntax that
+reflects the container hierarchy for the specified
+container. Container names are separated by forward slashes with the
+initial <literal>/</literal> representing the root container.  For
+example, <literal>/c1/c2</literal> signifies container
+&ldquo;<token role="container">c2</token>&rdquo;, which is under
+container &ldquo;<token role="container">c1</token>&rdquo;, which in 
+turn is under the root container. All 
+container paths are absolute in this sense&mdash;they all must include
+an initial slash indicating the root container. Do not include a
+trailing &ldquo;<literal>/</literal>&rdquo;.
+See the <xref linkend="query_queryingcontainers"/> section, below, for
+more information on querying containers.</para>
+
+<para>In the command lines below, substitute the appropriate host and
+port information if you are running the Monet server on a different
+machine or are using a different port.</para>
+
+<para><synopsis>&prompt; <userinput>cd &proxpath;</userinput>
+&prompt; <userinput>bin/query.sh localhost:30000 \
+  &querypath;/research-clusters2.qg2.xml \
+  &annotatedclusters;</userinput>
+</synopsis>
+
+<!--
+Windows:
+<synopsis>&winprompt; <userinput>cd &winproxpath;</userinput>
+&prompt; <userinput>bin\query.bat localhost:30000 \
+  &winquerypath;\research-clusters2.qg2.xml \
+  &annotatedclusters;</userinput>
+</synopsis>
+-->
+
+Proximity writes the execution trace to the window in which you executed
+the above command. The last lines should be
+similar to the following excerpt (leading information showing elapsed
+time has been omitted from the trace for brevity):
+<screen>INFO  qgraph2.QueryGraph2CompOp: -> found 83 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> query results saved in
+   container: research-clusters2
+INFO  qgraph2.QueryGraph2CompOp: * query: done
+INFO  app.Query: * done executing query
+</screen>
+</para>
+
+</step>
+
+</procedure>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       QUERYING CONTAINERS                      -->
+<!-- ============================================================== -->
+
+<sect1 id="query_queryingcontainers">
+<title>Querying Containers</title>
+<indexterm><primary>containers</primary>
+           <secondary>querying</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>against containers</secondary></indexterm>
+
+<para>In addition to executing queries against the entire database,
+Proximity lets you execute queries against existing
+<glossterm baseform="container">containers</glossterm>.  In such
+cases, Proximity ignores the container <glossterm>subgraph</glossterm>
+information and merely limits query matches to the 
+<glossterm baseform="object">objects</glossterm> and 
+<glossterm baseform="link">links</glossterm>
+in the container.  Executing a query against a container creates a new
+container of matching subgraphs at the top level, i.e.,
+directly under the <glossterm>root container</glossterm>.
+This functionality is available through both the &uiname;
+and the command line query interface.  You cannot execute a query
+against a container from the Query Editor. 
+</para>
+
+<para>The following exercise executes a query against the 
+<token role="container">research-clusters2</token>
+container created in <xref linkend="ex_queries_annotations"/>. The
+<token role="container">research-clusters2</token> container holds the 
+<glossterm baseform="star query">1d-star</glossterm> clusters of
+objects linked to 
+<token role="object">research project</token> pages.  The new query
+searches this data to find pages from Cornell and those pages
+connected to the Cornell page by &ldquo;out&rdquo; links (links
+pointing from the core page to the linked page).</para>
+
+<para>To execute a query against a container instead of against the
+full database, you can either navigate to the input
+container and call the query from the &uiname; as shown in
+<xref linkend="ex_queries_containers"/>, below,
+or specify the input container name as an optional argument to
+the query shell script, as shown above in 
+<xref linkend="ex_queries_1dc"/>.
+All queries run from the Query Editor are executed against the
+complete database.
+</para>
+
+<!--
+   EXERCISE: Querying a container from the Proximity Database Browser 
+-->
+
+<procedure id="ex_queries_containers">
+<title>Querying a container from the &uiname;</title>
+
+<para>This exercise requires the container created in 
+<xref linkend="ex_queries_annotations"/>. You must have completed
+<xref linkend="ex_queries_annotations"/> before running the current
+exercise.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>Click &home; to go to the &uiname; start page.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Containers</guibutton>. Proximity displays the
+current list of containers in the database.</para>
+</step>
+
+<step>
+<para>Click <guibutton>research-clusters2</guibutton>. Proximity
+displays the <token role="container">research-clusters2</token>
+container page.</para>
+</step>
+
+<step>
+<para>Click <guibutton>query</guibutton>. Proximity displays the
+<guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&querypath;</filename> directory and
+choose the query
+<filename>cornell-out-clusters.qg2.xml</filename>.
+<indexterm><primary>cornell-out-clusters query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>examples</secondary>
+           <tertiary>cornell-out-clusters</tertiary></indexterm>
+</para>
+</step>
+
+<step>
+<para>Click <guibutton>Open</guibutton>. Proximity prompts you for a
+name for the results container.  Enter
+<userinput>cornell-out-clusters</userinput> and click
+<guibutton>OK</guibutton>.</para>
+
+<para>
+<caution>
+<para>If the database already includes a container with this name,
+Proximity asks whether you want to delete the existing container.
+Answering yes lets Proximity overwrite the contents of this
+container. This also deletes any containers inside the existing
+container.</para>
+</caution>
+</para>
+
+<para>Proximity opens a window to show you a trace of the
+query execution. The last lines should be
+similar to the following excerpt
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> found 99 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -> query results saved in
+   container: cornell-out-clusters
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</screen>
+Close this window after the query finishes.</para>
+</step>
+
+<step>
+<para>Explore the results of the 
+<token role="container">cornell-out-clusters</token>
+container.</para>
+</step>
+</procedure>
+
+<para>Executing the query creates a new, top-level container of 99
+subgraphs using data in the original container of 83
+subgraphs. Remember that Proximity uses the input container simply to
+limit the database items considered in executing the query; it does
+not use the existing subgraph information as part of this process.
+Therefore, the subgraphs identified as a result of executing this
+query are not related to those found by the query that initially
+created the input container.  The new query does not require that its
+<token role="object">core_page</token> object be a 
+<token role="object">research project</token> page, only
+that the <token role="attr">school</token> attribute have
+<token role="attr">Cornell</token> as a 
+value.  Thus the resulting subgraphs may have little
+resemblance to those in the input container.
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        TIPS AND REMINDERS                      -->
+<!-- ============================================================== -->
+
+<sect1 id="query_tips">
+<title>Tips and Reminders</title>
+
+<itemizedlist spacing="compact">
+<title>General query requirements</title>
+
+  <listitem>
+    <para>See the <citetitle>&qguide;</citetitle> for
+    a complete description of the &qgraph; language as implemented in
+    Proximity.</para>
+  </listitem>
+  <listitem>
+    <para>Queries run from the Query Editor are always executed
+    against the entire database.</para>
+  </listitem>
+  <listitem>
+    <para>Queries run from the &uiname; or from the command line can
+    be optionally executed against the contents of a 
+    <glossterm>container</glossterm>.</para>
+  </listitem>
+  <listitem>
+    <para>The QGraph 
+    <glossterm baseform="document type definition">DTD</glossterm>, 
+    <filename>graph-query.dtd</filename>,
+    <indexterm><primary>graph-query.dtd</primary></indexterm>
+    <indexterm><primary>DTDs</primary>
+               <secondary>graph-query.dtd</secondary></indexterm>
+    must reside in the same directory as the query file. 
+    Make sure that you copy the DTD file from
+    <filename>&proxpath;/resources</filename> to the directory
+    containing the query file before executing the query.</para>
+  </listitem>
+  <listitem>
+    <para>Every query must have at least one
+    <glossterm>vertex</glossterm>.</para>
+  </listitem>
+  <listitem>
+    <para>Every query <glossterm>edge</glossterm> must have vertices
+    at both ends.</para>
+  </listitem>
+  <listitem>
+    <para>Queries must be connected.</para>
+  </listitem>
+  <listitem>
+    <para>Queries must remain connected after
+    any <glossterm baseform="optional element">optional</glossterm> or 
+    <glossterm baseform="negated element">negated elements</glossterm>
+    are removed.</para>
+  </listitem>
+  <listitem>
+    <para>Each vertex and edge in a query must have a unique label
+    (<glossterm>name</glossterm>).</para>
+  </listitem>
+  <listitem>
+    <para>Proximity ignores case when matching attribute names
+    to those in the database.  Proximity obeys case when matching
+    attribute values with those in the database.</para>
+</listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Condition requirements</title>
+  <listitem>
+    <para><glossterm baseform="attribute value condition">Attribute value conditions</glossterm>
+    restrict query matches to objects or links that match the specified
+    attribute value.</para>
+  </listitem>
+  <listitem>
+    <para><glossterm baseform="existence condition">Existence conditions</glossterm>
+    restrict query matches to objects or links that have any value for
+    the specified attribute.</para>
+  </listitem>
+  <listitem>
+    <para>Use <glossterm>disjunctive normal form</glossterm> in 
+    <glossterm>prefix notation</glossterm> to create
+    <glossterm baseform="complex condition">complex
+    conditions</glossterm> from simple conditions.</para>
+  </listitem>
+  <listitem>
+    <para>Surround values (i.e., vertex and edge labels or
+    <glossterm>attribute</glossterm> names and 
+    values) containing spaces with single quotes.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Annotation requirements</title>
+<indexterm><primary>numeric annotations</primary></indexterm>
+  <listitem>
+    <para>An edge incident to an 
+    <glossterm baseform="numeric annotation">annotated</glossterm>
+    vertex must be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>The <glossterm>boundary edge</glossterm> of an annotated
+    subquery must be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>At most, only one of two adjacent elements can be
+    annotated; no edges are allowed between two annotated
+    elements.</para>
+  </listitem>
+  <listitem>
+    <para><glossterm baseform="optional element">Optional</glossterm>
+    and <glossterm baseform="negated element">negated</glossterm>
+    edges are not permitted.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Constraint requirements</title>
+<indexterm><primary>constraints</primary></indexterm>
+  <listitem>
+    <para><glossterm baseform="identity constraint">Identity constraints</glossterm>
+    compare <glossterm baseform="object identifier">IDs</glossterm> 
+    with each other.</para>
+  </listitem>
+  <listitem>
+    <para><glossterm baseform="attribute constraint">Attribute constraints</glossterm>
+    compare attribute values with each other.</para>
+  </listitem>
+  <listitem>
+    <para>Mixing IDs and attribute values in a constraint is not
+    permitted. (You may, however, 
+    compare values for different attributes as long as they are of
+    <glossterm>comparable types</glossterm>.)</para>
+  </listitem>
+  <listitem>
+    <para>Constraints are only allowed between two vertices or two 
+    edges; mixing vertices and edges is not permitted.</para>
+  </listitem>
+  <listitem>
+    <para>No constraints are allowed between two annotated
+    elements.</para>
+  </listitem>
+  <listitem>
+     <para>If one of two items in a constraint is annotated, the other
+     cannot be part of an annotated subquery.</para>
+  </listitem>
+  <listitem>
+     <para>With one exception, Proximity prohibits constraints between
+     two edges when one of them is annotated. Proximity allows such
+     constraints when the vertex adjacent to the annotated edge is itself
+     annotated with <token role="annot">[0..]</token> or
+     <token role="annot">[0..<replaceable>j</replaceable>]</token>.</para>
+  </listitem>
+  <listitem>
+    <para>Constraints can only be combined with AND;
+<indexterm><primary>multiple constraints</primary></indexterm>
+<indexterm><primary>logical operators</primary></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>logical</secondary></indexterm>
+     OR and NOT are not allowed.</para>
+  </listitem>
+  <listitem>
+    <para>Constraints that cross subquery boundaries require that one
+    of the items being compared be optional (have an annotation of 
+    <token role="annot">[0..]</token> or
+    <token role="annot">[0..<replaceable>j</replaceable>]</token>).</para>
+  </listitem>
+  <listitem>
+    <para>Surround values (i.e., vertex and edge labels or attribute
+    names and values) containing spaces with single quotes.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Subquery requirements</title>
+  <listitem>
+    <para>A <glossterm>subquery</glossterm> must be a 
+    <glossterm baseform="well formed">well-formed</glossterm> query by
+    itself.</para>
+  </listitem>
+  <listitem>
+    <para>All subqueries must be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>The <glossterm>boundary edge</glossterm> of a subquery must be
+    annotated.
+    <indexterm><primary>edges</primary>
+               <secondary sortas="subquery">on subquery boundaries</secondary></indexterm>
+    <indexterm><primary>vertices</primary>
+               <secondary>on subquery boundaries</secondary></indexterm>
+</para>
+  </listitem>
+  <listitem>
+    <para>The <glossterm>boundary vertex</glossterm> of a subquery
+    cannot be annotated.</para>
+  </listitem>
+  <listitem>
+    <para>The vertex outside the subquery connected to the boundary
+    edge cannot be annotated.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Update requirements</title>
+<indexterm><primary>queries</primary>
+           <secondary>update functionality</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>updating via queries</secondary></indexterm>
+<indexterm><primary>updating</primary>
+           <secondary>databases via queries</secondary></indexterm>
+  <listitem>
+    <para>The &qgraph; language provides full update functionality;
+    however, Proximity currently implements only the ability to add
+    links using queries.</para>
+</listitem>
+<listitem>
+    <para>A query&rsquo;s match phase is distinct from its update
+    phase; new database elements added by a query do not change a
+    query&rsquo;s matches.</para>
+</listitem>
+<listitem>
+    <para>New database elements added by a query are not included in the
+    query&rsquo;s results (subgraphs).</para>
+</listitem>
+<listitem>
+    <para>You must specify an attribute value for all new links. The
+    attribute value must be constant&mdash;the same for all new links
+    added by the query.</para>
+</listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Additional Information</title>
+  <listitem>
+    <para>See the <citetitle>&qguide;</citetitle> for additional
+    details on the QGraph 
+    language and it&rsquo;s implementation in Proximity.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref linkend="ch_models"/> for more information on how
+    query elements and labels are used by Proximity&rsquo;s
+    models.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref linkend="apx_quickref"/> for a summary of how to
+    use the location bar to directly access Proximity database
+    elements including containers and subgraphs.</para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

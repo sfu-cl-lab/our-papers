@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/local/sgml/docbook-xml-4.5/docbookx.dtd" [
+<!ENTITY % entities SYSTEM "../../ProxCommonEntities.ent">
+<!ENTITY % recipeentities SYSTEM "ProxCookbookEntities.ent">
+%entities;
+%recipeentities;
+]>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+
+<!-- ============================================================== -->
+<!--                            RECIPE:                             -->
+<!--              IMPORTING DATA WITH MISMATCHED IDS                -->
+<!-- ============================================================== -->
+
+<section id="recipe_mismatched_ids">
+<title>Importing Data with Mismatched IDs</title>
+
+<indexterm><primary>data</primary>
+           <secondary>importing</secondary>
+           <tertiary>from text files</tertiary></indexterm>
+<indexterm><primary>SQL databases</primary>
+           <secondary>saving as text</secondary></indexterm>
+<indexterm><primary>MySQL</primary>
+           <see>SQL</see></indexterm>
+<indexterm><primary>saving</primary>
+           <secondary>tables from MySQL</secondary></indexterm>
+<indexterm><primary>OIDs</primary>
+           <secondary>mismatched with imported data</secondary></indexterm>
+<indexterm><primary>IDs</primary>
+           <secondary>of imported data</secondary></indexterm>
+<indexterm><primary>IDs</primary>
+           <seealso>OIDs</seealso></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>attributes</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>reading</secondary>
+           <see>importing</see></indexterm>
+<indexterm><primary>reading</primary>
+           <secondary>data</secondary>
+           <see>importing</see></indexterm>
+<indexterm><primary>importing data</primary>
+           <secondary>from text files</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary sortas="attribute values">for attribute values</secondary>
+           </indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>NSTs for</secondary></indexterm>
+<indexterm><primary>joining tables</primary>
+           <secondary>filters for</secondary></indexterm>
+<indexterm><primary>joining tables</primary>
+           <secondary>keeping columns</secondary></indexterm>
+<indexterm><primary>tables</primary>
+           <secondary>joining</secondary></indexterm>
+<indexterm><primary>columns in NSTs</primary>
+           <secondary>prefix identifiers</secondary></indexterm>
+<indexterm><primary>tables</primary>
+           <secondary>column identifiers</secondary></indexterm>
+<indexterm><primary>filters</primary>
+           <secondary>keeping columns</secondary></indexterm>
+
+<!-- classes used in the recipe -->
+<indexterm><primary>NST class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>NST</secondary></indexterm>
+
+<!-- methods used in this recipe -->
+<indexterm><primary>defineAttributeWithData()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>defineAttributeWithData</secondary></indexterm>
+<indexterm><primary>fromfile()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>fromfile</secondary></indexterm>
+<indexterm><primary>getAttrDataNST()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getAttrDataNST</secondary></indexterm>
+<indexterm><primary>getObjectAttrs()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getObjectAttrs</secondary></indexterm>
+<indexterm><primary>join()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>join</secondary></indexterm>
+
+
+<!-- ============================================================== -->
+<!-- PROBLEM                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Problem</title>
+
+<para>You have a table in a MySQL database that you would like to
+import as a Proximity attribute. However, you realize that the IDs
+from that table no longer correspond to the object IDs in Proximity:
+The original IDs were replaced by new Proximity OIDs during the
+import.  But, luckily, you saved the old ones in an
+attribute.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SOLUTION                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Solution</title>
+
+<para>Suppose you have an attribute in a MySQL database called <token
+role="attr">class_label</token> that you want to import, with the
+following contents:
+<informaltable align="center">
+<?dbfo table-width="2in"?>
+<?dbhtml table-width="33%"?>
+<tgroup cols="2">
+<colspec colname="c1" colwidth="1*" />
+<colspec colname="c2" colwidth="1*" />
+<thead>
+<row>
+  <entry>member_id</entry>
+  <entry>class_label</entry>
+</row>
+</thead>
+<tbody>
+<row>
+  <entry>15</entry>
+  <entry>+</entry>
+</row>
+<row>
+  <entry>25</entry>
+  <entry>+</entry>
+</row>
+<row>
+  <entry>35</entry>
+  <entry>-</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+<para>The <token role="column">member_id</token> column is, in fact, a
+foreign key that references the <token role="column">id</token> of
+another table&mdash;let&rsquo;s call it the 
+<token role="table">persons</token> table. Let&rsquo;s 
+assume that when you originally imported the data, the rows from the
+<token role="table">persons</token> table were assigned object IDs
+starting from 200. Let&rsquo;s also assume that you saved the original 
+<token role="column">persons.id</token> column as an attribute in
+Proximity called <token role="attr">persons_id</token>. The contents
+of that attribute might look like 
+this:<footnote><para>You can use the
+&ldquo;shortcut&rdquo; <code>prox.objectAttrs</code>
+in place of <code>DB.getObjectAttrs()</code> in
+Proximity scripts and in the interactive Proximity Python
+interpreter.</para></footnote>
+<programlisting> <userinput>printNST(DB.getObjectAttrs().getAttrDataNST("persons_id"))</userinput>
+</programlisting>
+<screen>[SHOWING head,id,value WHERE * LIMIT *]
+[ 1@0,   200@0,   15    ]
+[ 2@0,   201@0,   16    ]
+[ 3@0,   202@0,   25    ]
+[ 4@0,   205@0,   35    ]
+</screen></para>
+
+<para>Your task is to combine the <token role="column">id</token> from
+the <token role="attr">persons_id</token> attribute with the 
+<token role="attr">class_label</token> from the new, imported data
+to create a new attribute with the rows shown below:
+
+<informaltable align="center">
+<?dbfo table-width="2in"?>
+<?dbhtml table-width="33%"?>
+<tgroup cols="2">
+<colspec colname="c1" colwidth="1*" />
+<colspec colname="c2" colwidth="1*" />
+<thead>
+<row>
+  <entry>id</entry>
+  <entry>value</entry>
+</row>
+</thead>
+<tbody>
+<row>
+  <entry>200</entry>
+  <entry>+</entry>
+</row>
+<row>
+  <entry>202</entry>
+  <entry>+</entry>
+</row>
+<row>
+  <entry>205</entry>
+  <entry>-</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+<para>Start by saving the MySQL table into a text file that Proximity
+can read. There are many ways to do this, for example:</para>
+
+<synopsis>&dollarprompt; <userinput>echo 'select * from class_label;' | mysql -u <varname>usrname</varname> -p <varname>dbname</varname> &gt; class_label.txt</userinput></synopsis>
+
+<para>Now you can go to Proximity and read that file directly into a new
+NST.
+<programlisting> <userinput>importedNST = NST("old_member_id, value", "int, str").fromfile("<varname>datafile</varname>")</userinput>
+</programlisting>
+where <varname>datafile</varname> includes the full path to the
+file. See the <xref linkend="mismatched_ids_files" /> section, below,
+for an example data file you can use to test this recipe.</para>
+
+<para>The resulting NST is shown below.
+<programlisting> <userinput>printNST(importedNST)</userinput>
+</programlisting>
+
+<screen>[SHOWING head,old_member_id,value WHERE * LIMIT *]
+[ 1@0,   15,   "+"    ]
+[ 2@0,   25,   "+"    ]
+[ 3@0,   35,   "-"    ]</screen></para>
+
+<para>If you were to save this NST as an attribute, the 
+<token role="column">id</token> column
+would be referencing object IDs that don&rsquo;t exist. You must first
+join it with the <token role="attr">persons_id</token> attribute, to
+get the correct Proximity IDs. Recall that the 
+<token role="attr">persons_id</token> attribute has the following values:
+<programlisting> <userinput>printNST(DB.getObjectAttrs().getAttrDataNST("persons_id"))</userinput>
+</programlisting>
+<screen>[SHOWING head,id,value WHERE * LIMIT *]
+[ 1@0,   200@0,   15    ]
+[ 2@0,   201@0,   16    ]
+[ 3@0,   202@0,   25    ]
+[ 4@0,   205@0,   35    ]</screen></para>
+
+<para>You can do a simple join between the two tables, keeping the
+<token role="column">id</token> of the 
+<token role="attr">persons_id</token> attribute and the 
+<token role="column">value</token> column from the 
+<token role="table">importedNST</token> table.
+Because both tables have a <token role="column">value</token> column,
+you must write <code>B.value</code> to indicate that you want to keep
+the one from the second (<token role="table">personIDs</token>) table.
+Only the first (<token role="table">importedNST</token>) table
+contains an <token role="column">id</token> column, so no prefix is used.
+<programlisting> <userinput>personIDs = DB.getObjectAttrs().getAttrDataNST("persons_id")</userinput>
+ <userinput>classNST = importedNST.join(personIDs, "A.old_member_id = B.value", "id, A.value")</userinput>
+ <userinput>printNST(classNST)</userinput>
+</programlisting>
+<screen>[SHOWING head,id,A.value WHERE * LIMIT *]
+[ 0@0,   200@0,   "+"    ]
+[ 1@0,   202@0,   "+"    ]
+[ 2@0,   205@0,   "-"    ]</screen></para>
+
+<para>This is exactly what you wanted. At this point, you can save the
+new NST as an attribute, using the techniques described in the 
+recipe <xref linkend="recipe_attrsfromdata" />.
+<programlisting> <userinput>DB.getObjectAttrs().defineAttributeWithData("class_label", "str", classNST)</userinput>
+</programlisting>
+</para>
+</section>
+
+<!-- ============================================================== -->
+<!-- DISCUSSION                                                     -->
+<!-- ============================================================== -->
+
+<section>
+<title>Discussion</title>
+
+<para>This is a very simple recipe, but quite powerful. The key concept
+is that you can do incremental imports from an SQL
+database as long as you keep around Proximity attributes like
+<token role="attr">persons_id</token>, which map MySQL IDs to
+Proximity IDs. With those attributes in place, you can read in new
+table dumps and always be able to convert from old to new IDs.</para>
+
+<para>This technique is not restricted to new attributes. For
+example, you can use the same technique to import new links.
+<orderedlist spacing="compact">
+  <listitem>
+    <para>Read in the dump for the new links.</para>
+  </listitem>
+  <listitem>
+    <para>Join the <token role="column">o1_id</token> and 
+    <token role="column">o2_id</token> endpoints with the attributes
+    that allow you to convert from MySQL to Proximity OIDs.</para>
+  </listitem>
+  <listitem>
+    <para>Insert the new table into the Proximity
+    <token role="table">links</token> NST.</para>
+  </listitem>
+</orderedlist>
+</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SUPPORTING FILES                                                -->
+<!-- ============================================================== -->
+
+<section id="mismatched_ids_files">
+<title>Supporting Files</title>
+
+<para>Download the following XML database file and new data file
+to create the database and attribute used above to demonstrate this
+recipe:
+<itemizedlist spacing="compact">
+  <listitem>
+  <para>Database:
+     <filename><ulink url="&examplespath;Import_MismatchedIDs_DB.xml">Import_MismatchedIDs_DB.xml</ulink></filename>
+  </para></listitem>
+  <listitem>
+  <para>New data file:
+     <filename><ulink url="&examplespath;Import_MismatchedIDs_NewData.txt">Import_MismatchedIDs_NewData.txt</ulink></filename>
+  </para></listitem>
+</itemizedlist>
+You may also want to examine the unit test file for this recipe at
+<filename>&testpath;/cookbook/ImportAttributeTest.java</filename>.
+</para>
+
+</section>
+
+<!-- === End of recipe ============================================ -->
+</section>
+
+<!--
+</chapter>
+-->
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("ProxCookbook.xml" "chapter" "section")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

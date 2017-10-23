@@ -1,0 +1,199 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Querying Containers</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="prev" href="ch05s09.html" title="Executing a Query from the Command Line">
+      <link rel="next" href="ch05s11.html" title="Tips and Reminders">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s09.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Querying the Database</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s11.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_queryingcontainers"></a>Querying Containers
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e9722"></a><a class="indexterm" name="d0e9727"></a><p>In addition to executing queries against the entire database,
+            Proximity lets you execute queries against existing
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">containers</span></a>.  In such
+            cases, Proximity ignores the container <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraph</span></a>
+            information and merely limits query matches to the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_object"><span class="glossterm">objects</span></a> and 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_link"><span class="glossterm">links</span></a>
+            in the container.  Executing a query against a container creates a new
+            container of matching subgraphs at the top level, i.e.,
+            directly under the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e697"><span class="glossterm">root container</span></a>.
+            This functionality is available through both the Proximity Database Browser
+            and the command line query interface.  You cannot execute a query
+            against a container from the Query Editor. 
+            
+         </p>
+         <p>The following exercise executes a query against the 
+            <span class="token">research-clusters2</span>
+            container created in <a href="ch05s04.html#ex_queries_annotations" title="Exercise&nbsp;5.3.&nbsp;Creating a query with numeric annotations:">Exercise&nbsp;5.3</a>. The
+            <span class="token">research-clusters2</span> container holds the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e733"><span class="glossterm">1d-star</span></a> clusters of
+            objects linked to 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">research project</span> pages.  The new query
+            searches this data to find pages from Cornell and those pages
+            connected to the Cornell page by &#8220;out&#8221; links (links
+            pointing from the core page to the linked page).
+         </p>
+         <p>To execute a query against a container instead of against the
+            full database, you can either navigate to the input
+            container and call the query from the Proximity Database Browser as shown in
+            <a href="ch05s10.html#ex_queries_containers" title="Exercise&nbsp;5.9.&nbsp;Querying a container from the Proximity Database Browser:">Exercise&nbsp;5.9</a>, below,
+            or specify the input container name as an optional argument to
+            the query shell script, as shown above in 
+            <a href="ch05s09.html#ex_queries_1dc" title="Exercise&nbsp;5.8.&nbsp;Executing a query from the command line:">Exercise&nbsp;5.8</a>.
+            All queries run from the Query Editor are executed against the
+            complete database.
+            
+         </p>
+         <div class="procedure"><a name="ex_queries_containers"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;5.9.&nbsp;Querying a container from the Proximity Database Browser:</b></p>
+            <p>This exercise requires the container created in 
+               <a href="ch05s04.html#ex_queries_annotations" title="Exercise&nbsp;5.3.&nbsp;Creating a query with numeric annotations:">Exercise&nbsp;5.3</a>. You must have completed
+               <a href="ch05s04.html#ex_queries_annotations" title="Exercise&nbsp;5.3.&nbsp;Creating a query with numeric annotations:">Exercise&nbsp;5.3</a> before running the current
+               exercise.
+            </p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>Click <span><strong class="guibutton">Home</strong></span> to go to the Proximity Database Browser start page.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">Containers</strong></span>. Proximity displays the
+                     current list of containers in the database.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">research-clusters2</strong></span>. Proximity
+                     displays the <span class="token">research-clusters2</span>
+                     container page.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">query</strong></span>. Proximity displays the
+                     <span class="guilabel">Open</span> dialog.
+                  </p>
+               </li>
+               <li>
+                  <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory and
+                     choose the query
+                     <code class="filename">cornell-out-clusters.qg2.xml</code>.
+                     <a class="indexterm" name="d0e9822"></a>
+                     <a class="indexterm" name="d0e9826"></a>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">Open</strong></span>. Proximity prompts you for a
+                     name for the results container.  Enter
+                     <strong class="userinput"><code>cornell-out-clusters</code></strong> and click
+                     <span><strong class="guibutton">OK</strong></span>.
+                  </p>
+                  <p>
+                     
+                  </p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>If the database already includes a container with this name,
+                                 Proximity asks whether you want to delete the existing container.
+                                 Answering yes lets Proximity overwrite the contents of this
+                                 container. This also deletes any containers inside the existing
+                                 container.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <p>Proximity opens a window to show you a trace of the
+                     query execution. The last lines should be
+                     similar to the following excerpt
+                     
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                  </p><pre class="screen">INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; found 99 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; query results saved in
+   container: cornell-out-clusters
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</pre><p>
+                     Close this window after the query finishes.
+                  </p>
+               </li>
+               <li>
+                  <p>Explore the results of the 
+                     <span class="token">cornell-out-clusters</span>
+                     container.
+                  </p>
+               </li>
+            </ol>
+         </div>
+         <p>Executing the query creates a new, top-level container of 99
+            subgraphs using data in the original container of 83
+            subgraphs. Remember that Proximity uses the input container simply to
+            limit the database items considered in executing the query; it does
+            not use the existing subgraph information as part of this process.
+            Therefore, the subgraphs identified as a result of executing this
+            query are not related to those found by the query that initially
+            created the input container.  The new query does not require that its
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">core_page</span> object be a 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">research project</span> page, only
+            that the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">school</span> attribute have
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Cornell</span> as a 
+            value.  Thus the resulting subgraphs may have little
+            resemblance to those in the input container.
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s09.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s11.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Executing a Query from the Command Line&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Tips and Reminders</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

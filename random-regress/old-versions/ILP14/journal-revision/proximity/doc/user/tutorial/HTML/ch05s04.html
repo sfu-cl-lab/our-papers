@@ -1,0 +1,423 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Grouping Elements in a Query</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="prev" href="ch05s03.html" title="Exploring Containers and Subgraphs">
+      <link rel="next" href="ch05s05.html" title="Comparing Items in a Query">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Querying the Database</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s05.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_annotate"></a>Grouping Elements in a Query
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_queries_annot"></a><p>The previous query matched individual elements in the
+            database. To match groups of elements we use 
+            <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e555"><span class="glossterm">numeric annotations</span></a></em></span>.
+            A numeric annotation groups together repeated 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e435"><span class="glossterm">isomorphic</span></a> substructures
+            that would otherwise create multiple matches for the query.
+            <a class="indexterm" name="d0e7662"></a>
+            <a class="indexterm" name="d0e7668"></a>
+            <a class="indexterm" name="d0e7672"></a>
+            <a class="indexterm" name="d0e7678"></a>
+            <a class="indexterm" name="d0e7682"></a>
+            <a class="indexterm" name="d0e7688"></a>
+            <a class="indexterm" name="d0e7692"></a>
+            Annotations can also be used to place limits on the number of
+            substructures that can occur in matching portions of the
+            database.
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>Numeric annotations take one of three forms:
+                        
+                     </p>
+                     <div class="itemizedlist">
+                        <ul type="disc" compact>
+                           <li>
+                              <p>An <span class="emphasis"><em><a href="go01.html#d18e791"><span class="glossterm">unbounded range</span></a></em></span>
+                                     <a class="indexterm" name="d0e7707"></a>
+                                     <a class="indexterm" name="d0e7711"></a>
+                                     [<em class="replaceable"><code>i</code></em>..] on a vertex or edge means that at
+                                     least <em class="replaceable"><code>i</code></em> instances of the corresponding
+                                     database element must be present in the database to match the
+                                     query.
+                              </p>
+                           </li>
+                           <li>
+                              <p>A <span class="emphasis"><em><a href="go01.html#d18e87"><span class="glossterm">bounded range</span></a></em></span>
+                                     <a class="indexterm" name="d0e7728"></a>
+                                     [<em class="replaceable"><code>i</code></em>..<em class="replaceable"><code>j</code></em>] means
+                                     that at least <em class="replaceable"><code>i</code></em> and no more than
+                                     <em class="replaceable"><code>j</code></em> instances are required for a
+                                     match.
+                              </p>
+                           </li>
+                           <li>
+                              <p>An <a href="go01.html#d18e334"><span class="glossterm"><span class="emphasis"><em>exact</em></span> annotation</span></a>
+                                     <a class="indexterm" name="d0e7752"></a>
+                                     [<em class="replaceable"><code>i</code></em>] means that exactly
+                                     <em class="replaceable"><code>i</code></em> instances are required for a
+                                     match.
+                              </p>
+                           </li>
+                        </ul>
+                     </div>
+                     <p>
+                        The lower bound, <em class="replaceable"><code>i</code></em>, can be any integer
+                        greater than or equal to zero. The upper bound,
+                        <em class="replaceable"><code>j</code></em>, must be an integer greater than
+                        <em class="replaceable"><code>i</code></em>.
+                     </p>
+                     <p>
+                        You can specify that the annotated substructure is optional for the
+                        match by 
+                        <a class="indexterm" name="d0e7774"></a>
+                        using a lower bound of zero (e.g., <code class="token">[0..]</code>).
+                        An exact annotation of <code class="token">[0]</code> means that the
+                        <a class="indexterm" name="d0e7784"></a>
+                        substructure must <span class="emphasis"><em>not</em></span> be present to match the
+                        query.  Proximity currently permits the use of 
+                        <a href="go01.html#d18e573"><span class="glossterm">optional</span></a> and 
+                        <a href="go01.html#d18e534"><span class="glossterm">negated</span></a>
+                        vertices but prohibits the use of optional or negated edges.
+                        
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>The following exercise finds, for each research project object
+            (web page) in the 
+            database, all objects directly linked to that page.  It uses a numeric
+            annotation to <span class="emphasis"><em>group</em></span> matching database entities
+            into a single matching subgraph.
+         </p>
+         <p>This query illustrates one of the most common query forms, the
+            one-dimensional star or
+            <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e733"><span class="glossterm">1d-star</span></a></em></span>
+            query.
+            <a class="indexterm" name="d0e7809"></a>
+            <a class="indexterm" name="d0e7813"></a>
+            <a class="indexterm" name="d0e7817"></a>
+            A 1d-star is the cluster
+            of objects directly linked to a central, core object.
+            Star queries can use QGraph features such as 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e162"><span class="glossterm">conditions</span></a> and
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e228"><span class="glossterm">constraints</span></a> to restrict
+            matches to objects with specific attribute values.
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>Executing the research-clusters2 query creates a 
+                        <a href="go01.html#d18e234"><span class="glossterm">container</span></a> used by
+                        <a href="ch05s10.html#ex_queries_containers" title="Exercise&nbsp;5.9.&nbsp;Querying a container from the Proximity Database Browser:">Exercise&nbsp;5.9</a>.
+                        Make sure that you complete this exercise before beginning
+                        <a href="ch05s10.html#ex_queries_containers" title="Exercise&nbsp;5.9.&nbsp;Querying a container from the Proximity Database Browser:">Exercise&nbsp;5.9</a>.
+                        
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div class="procedure"><a name="ex_queries_annotations"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;5.3.&nbsp;Creating a query with numeric annotations:</b></p>
+            <p>The query created in this exercise is also available in the
+               Proximity&nbsp;4.3 distribution in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/research-clusters2.qg2.xml</code>.
+            </p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>Open the research-clusters1 query that you created in 
+                     <a href="ch05s02.html#ex_queries_rc1" title="Exercise&nbsp;5.1.&nbsp;Creating a first Proximity query:">Exercise&nbsp;5.1</a>:
+                  </p>
+                  <ol type="a">
+                     <li>
+                        <p>From the <span><strong class="guimenu">Query</strong></span> menu, choose
+                               <span><strong class="guimenuitem">Edit Query</strong></span>.
+                        </p>
+                     </li>
+                     <li>
+                        <p>Navigate to the location where you saved the query created in
+                               <a href="ch05s02.html#ex_queries_rc1" title="Exercise&nbsp;5.1.&nbsp;Creating a first Proximity query:">Exercise&nbsp;5.1</a>.  (If you saved the query using
+                               the suggested directory and file name, this is
+                               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/rc1.qg2.xml</code>.)
+                        </p>
+                     </li>
+                     <li>
+                        <p>Click <span><strong class="guibutton">OK</strong></span>.
+                        </p>
+                     </li>
+                  </ol>
+                  <p>
+                     So that you do not overwrite the existing query,
+                     save this new query as
+                     <code class="filename">rc2.qg2.xml</code>.
+                     
+                  </p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>The Proximity distribution includes the new query in the file
+                                 <code class="filename">$PROX_HOME/doc/user/tutorial/examples/research-clusters2.qg2.xml</code>.
+                                 <a class="indexterm" name="d0e7889"></a>
+                                 <a class="indexterm" name="d0e7893"></a>
+                                 Be careful not to overwrite this file.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>Select the <em class="token">linked_page</em> vertex.
+                     Double-click in the <span class="guilabel">Value</span> column of the
+                     <span class="guilabel">Annotation</span> property.
+                     <a class="indexterm" name="d0e7913"></a>
+                     <a class="indexterm" name="d0e7919"></a>
+                     Enter <strong class="userinput"><code>[1..]</code></strong> and press <span class="keycap">Tab</span>.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_RC2_EditAnnot.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>Only one of any two 
+                                 <a href="go01.html#d18e9"><span class="glossterm">adjacent</span></a> 
+                                 vertices may be
+                                 annotated. Annotating adjacent vertices is prohibited as the resulting
+                                 query is <a href="go01.html#d18e21"><span class="glossterm">ambiguous</span></a>.  See the
+                                 <em class="citetitle"><span class="phrase"><a href="../../qgraph/HTML/index.html" target="_top">Proximity QGraph Guide</a></span>
+                                       
+                                       
+                                       </em> for additional information on and
+                                 reasons for QGraph annotation rules..
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>Check the status list at the bottom of the Query Editor.
+                     Notice that the query is now invalid.  Click the arrows at the
+                     right edge of the status list to see the specific errors.
+                  </p>
+                  <p>An edge next to an annotated vertex must itself be annotated.
+                     To fix the error, select the <em class="token">linked_to</em>
+                     edge, enter <strong class="userinput"><code>[1..]</code></strong> for the
+                     edge&#8217;s annotation, and press <span class="keycap">Tab</span>.
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>An edge next to an annotated vertex must also be annotated. The
+                                 vertex annotation takes <a href="go01.html#d18e595"><span class="glossterm">precedence</span></a> over the
+                                 edge annotation.  
+                                 <a class="indexterm" name="d0e7972"></a>
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>You can optionally set the Query Editor to automatically
+                     <a class="indexterm" name="d0e7978"></a>
+                     <a class="indexterm" name="d0e7984"></a>
+                     add a <code class="token">[1..]</code> annotation to every new edge.
+                     The <code class="token">[1..]</code> edge annotation groups multiple
+                     links connecting the same two objects, which is
+                     typically the intended behavior for most Proximity queries. To
+                     automatically add a <code class="token">[1..]</code> annotation to
+                     new edges, choose <span><strong class="guimenuitem">Add [1..] To New
+                           Edges</strong></span> from the Query Editor&#8217;s
+                     <span><strong class="guimenu">Edit</strong></span> menu.  You can edit an individual edge annotation
+                     later if you determine that a different annotation is more appropriate.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Update the name and description of the query. Instead of finding
+                     individual linked pages, the new query finds clusters of pages
+                     connected to research project pages.
+                  </p>
+               </li>
+               <li>
+                  <p>Make sure the query is 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e815"><span class="glossterm">valid</span></a> by checking
+                     the status list at 
+                     the bottom of the Query Editor window.  If the query is not valid,
+                     examine the errors in the list and fix any problems before
+                     saving.
+                  </p>
+               </li>
+               <li>
+                  <p>[Optional] Update the name and description for the query.</p>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">File</strong></span> menu, choose 
+                     <span><strong class="guimenuitem">Save</strong></span> or press <span class="keycap">Ctrl-S</span>
+                     to save the changes to your query.
+                  </p>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">File</strong></span> menu, choose 
+                     <span><strong class="guimenuitem">Run</strong></span> or press <span class="keycap">Ctrl-R</span>
+                     to execute your query.
+                     Proximity prompts you for a name for the results container. Enter
+                     <strong class="userinput"><code>research-clusters2</code></strong> and click
+                     <span><strong class="guibutton">OK</strong></span>.
+                  </p>
+                  <p>Proximity opens a window to show you a trace of the
+                     query execution.  The last lines should be
+                     similar to the following excerpt 
+                     
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                  </p><pre class="screen">INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; found 83 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; query results saved in
+   container: research-clusters2
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</pre><p>
+                     Close this window after the query finishes.
+                  </p>
+               </li>
+               <li>
+                  <p>If needed, move or close the Query Editor window so that you can
+                     see the Proximity Database Browser.
+                     In the Proximity Database Browser start page, click <span><strong class="guibutton">Containers</strong></span> to
+                     display the list of containers in the database.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">research-clusters2</strong></span> to display the
+                     list of <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraphs</span></a> in this container.
+                     You can see that there are far fewer subgraphs in this container
+                     than there were in the 
+                     <span class="token">research-clusters1</span> container.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">thumbs</strong></span> to display thumbnail images
+                     for a set of randomly selected subgraphs.
+                     Because the thumbnails are selected at random, you may see a different
+                     set of subgraphs than those shown below.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/GUI_RC2_Thumbs.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     Unlike the subgraphs in the research-clusters1 container, these
+                     subgraphs vary in the number of 
+                     <em class="token">linked_page</em> objects linked to each
+                     <em class="token">start_page</em> objects.  And in some of the
+                     subgraphs, some of the <em class="token">linked_page</em>
+                     objects are connected to the <em class="token">start_page</em>
+                     object by two or more links.
+                     The <code class="token">[1..]</code> annotation on the 
+                     <em class="token">linked_page</em> vertex groups the matching
+                     objects and the <code class="token">[1..]</code> annotation on the
+                     <em class="token">linked_to</em> edge groups the corresponding 
+                     links.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">0</strong></span> to see the
+                     contents of 
+                     subgraph&nbsp;<span class="token">0</span>.
+                     Notice that we still have a single start page, 
+                     object&nbsp;<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">398</span> (you may need to scroll
+                     down to see the <em class="token">start_page</em> object), but
+                     the subgraph now includes many linked pages. 
+                     Click <span><strong class="guibutton">graph</strong></span> to display the graph of this
+                     subgraph.
+                  </p>
+                  <p>
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/GUI_RC2_398.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+               </li>
+            </ol>
+         </div>
+         <p>Using numeric annotations
+            successfully collapses the multiple subgraphs for each research page
+            into a single subgraph that includes all the linked pages.
+         </p><a class="indexterm" name="d0e8136"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s05.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Exploring Containers and Subgraphs&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Comparing Items in a Query</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

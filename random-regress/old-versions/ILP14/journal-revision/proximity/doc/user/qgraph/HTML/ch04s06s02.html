@@ -1,0 +1,108 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Efficiency considerations</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch04s06.html" title="Implementation in Proximity">
+      <link rel="prev" href="ch04s06.html" title="Implementation in Proximity">
+      <link rel="next" href="ch04s07.html" title="Summary">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s06.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Implementation in Proximity</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04s07.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e4640"></a>Efficiency considerations
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e4643"></a><a class="indexterm" name="d0e4648"></a><p>For some database 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e709"><span class="glossterm">schemas</span></a>,
+            annotations may duplicate other query
+            requirements.  For example, consider a database containing
+            information about movies and their DVD releases.  If we want to find
+            movie-DVD subgraphs we might normally create a query like that shown
+            in <a href="ch04s06s02.html#fig_annot_withannot" title="Figure&nbsp;4.46.&nbsp;Annotated query">Figure&nbsp;4.46</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_withannot"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_WithAnnot.png" align="middle" width="328.50000000000006" alt="Annotated query"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.46.&nbsp;Annotated query</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+            If the target database always contains exactly one link from a movie
+            object to its corresponding DVD object, then annotating the
+            <em class="token">DVD</em> vertex and adjacent link will have no effect
+            on the query&#8217;s matches.  The annotation will, however, require
+            additional computation and is therefore less efficient than the
+            equivalent unannotated query, shown below.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_withoutannot"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_WithoutAnnot.png" align="middle" width="328.50000000000006" alt="Potentially equivalent unannotated query"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.47.&nbsp;Potentially equivalent unannotated query</b></p>
+         </div>
+         <p><br class="figure-break">
+            Importantly, the second query is only equivalent if the database
+            enforces the link restrictions described above.  If we later add
+            additional objects or links for subsequent DVD releases, the annotated
+            and unannotated queries will no longer match the same set of subgraphs.
+            
+         </p>
+         <p>In most cases, the difference in processing speed will not be of
+            concern, but such efficiency modifications may be worthwhile for
+            complex queries or queries run on extremely large databases.  Taking
+            advantage of such efficiency improvements can require perfect
+            knowledge of the corresponding database schema and data, however, and
+            thus may not be practical in many situations.
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s06.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch04s06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04s07.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Implementation in Proximity&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Summary</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

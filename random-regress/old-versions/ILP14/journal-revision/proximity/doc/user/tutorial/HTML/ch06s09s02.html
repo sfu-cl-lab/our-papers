@@ -1,0 +1,416 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Code example: generate-iid-data.py</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch06s09.html" title="Synthetic Data Generation">
+      <link rel="prev" href="ch06s09.html" title="Synthetic Data Generation">
+      <link rel="next" href="ch06s10.html" title="Tips and Reminders">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s09.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Synthetic Data Generation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s10.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="ex_gen_iid"></a>Code example: generate-iid-data.py
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e13506"></a><a class="indexterm" name="d0e13513"></a><p>This section describes the script found in
+            <code class="filename">$PROX_HOME/doc/user/tutorial/examples/generate-iid-data.py</code>.
+         </p>
+         <p>Import needed classes.
+            
+            
+         </p><pre class="programlisting">from kdl.prox.datagen2.structure import SyntheticGraphIID
+from kdl.prox.datagen2.attributes import AttributeGenerator
+from kdl.prox.model2.rpt import RPT
+from kdl.prox.util.stat import NormalDistribution
+from java.io import File
+</pre><p>
+            
+            Define a helper function that loads an RPT from a file.
+            
+            
+         </p><pre class="programlisting">def loadRPT(modelFile):
+    return RPT().load(modelFile)
+def loadFile(fileName):
+    return File(fileName)
+</pre><p>
+            <a class="indexterm" name="d0e13529"></a>
+            <a class="indexterm" name="d0e13535"></a>
+            
+            Data generation requires an empty database. Check to see if the
+            database already contains data so we can warn users accordingly.
+            The method <code class="methodname">isProxTablesEmpty()</code>
+            returns true if the top-level tables are defined and empty.
+            <a class="indexterm" name="d0e13542"></a>
+            <a class="indexterm" name="d0e13548"></a>
+            
+            
+         </p><pre class="programlisting">isEmpty = DB.isProxTablesEmpty()
+</pre><p>
+            
+            If the database is not empty, ask the user whether to overwrite the
+            existing data.
+            
+            
+         </p><pre class="programlisting">genData = 1
+if (not isEmpty):
+   prompt = "Database is not empty. Overwrite existing data?"
+   genData = prox.getYesNoFromUser(prompt)
+</pre><p>
+            <a class="indexterm" name="d0e13558"></a>
+            <a class="indexterm" name="d0e13564"></a>
+            
+            Do nothing if the database is not empty and the user says not to
+            overwrite the existing data.
+            
+            
+         </p><pre class="programlisting">if (not genData):
+   print 'No data generated'
+</pre><p>
+            
+            Continue with data generation if the database is empty or if the user
+            says to overwrite existing data.
+         </p>
+         <p>Clear and initialize the database.
+            
+            
+         </p><pre class="programlisting">else:
+   print 'Clearing database'
+   DB.clearDB()
+   print 'Initializing database'
+   DB.initEmptyDB()
+</pre><p>To define the i.i.d structure, we specify a probability
+            distribution over degree distributions for
+            the <em class="token">S</em> objects.
+            This script creates connected components with two different degree
+            distributions for the <em class="token">S</em> objects.  One half
+            of the <em class="token">S</em> objects have normally 
+            distributed degrees with a mean of 2 and standard deviation
+            approaching zero. The second half have normally distributed
+            degrees with a mean of 5 and standard deviation of 1.  The exact
+            number of components having each of the specified degree distributions
+            is determined probabilistically so you may not end up with exactly two
+            <em class="token">S</em> objects for each degree distribution.
+            
+            
+            
+         </p><pre class="programlisting">   degreeDistribs = [[0.5, NormalDistribution(2.0, 0.0000001)],
+                     [0.5, NormalDistribution(5.0, 1.0)]]
+</pre><p>
+            <a class="indexterm" name="d0e13594"></a>
+            <a class="indexterm" name="d0e13600"></a>
+            
+         </p>
+         <p>Generate the i.i.d. graph structure by calling a constructor for
+            the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/datagen2/structure/SyntheticGraphIID.html"><code class="classname">SyntheticGraphIID</code></a> class.
+            The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/datagen2/structure/SyntheticGraphIID.html"><code class="classname">SyntheticGraphIID</code></a> generator creates objects and gives them
+            a type (saved in an <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">objecttype</span> attribute):
+            <em class="token">S</em> for the core objects and 
+            <em class="token">T</em> for the peripheral objects (the objects
+            linked to the core <em class="token">S</em> objects).  Generating
+            i.i.d. data is unique in this regard&#8212;other
+            structure generators do not attach any attributes to the objects or
+            links that they create.  The generated data will
+            include four <em class="token">S</em> objects.
+            
+            
+         </p><pre class="programlisting">   print 'creating graph structure'
+   SyntheticGraphIID(4, degreeDistribs)
+</pre><p>
+            <a class="indexterm" name="d0e13630"></a>
+            <a class="indexterm" name="d0e13636"></a>
+            
+         </p>
+         <p>After creating the structure, we generate the attribute
+            values.  Note that the attribute generator can only generate
+            attributes on objects and that all attributes are string
+            valued.
+         </p>
+         <p>We use a
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e685"><span class="glossterm">relational dependency network</span></a>
+            <a class="indexterm" name="d0e13647"></a>
+            <a class="indexterm" name="d0e13653"></a>
+            (RDN) to generate the
+            values for the attributes.  The attribute names and their
+            distributions are specified by the constituent models of this RDN in
+            the form of 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e691"><span class="glossterm">relational probability trees</span></a>
+            <a class="indexterm" name="d0e13662"></a>
+            <a class="indexterm" name="d0e13668"></a>(RPTs).
+            The data generator requires one RPT
+            <a class="indexterm" name="d0e13674"></a>
+            and one query
+            <a class="indexterm" name="d0e13680"></a>
+            for each attribute
+            in the generated data.  In this example, we provide an RPT for the 
+            <em class="token">S</em> class labels and one each 
+            for the other attributes on <em class="token">S</em> and 
+            <em class="token">T</em> objects.
+            For each each attribute in the generated data, the attribute
+            generator executes a query that produces subgraphs having the
+            structure required by the corresponding RPT, saving the results in
+            a temporary container.  For example, the
+            <code class="filename">iid-coreS-query</code> query creates the 1d-star
+            subgraphs required by the RPT for the
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">s_attr0_label</span> attribute
+            (<code class="filename">s-attr-rpt.xml</code>).
+         </p>
+         <p>The data generation process iterates the
+            specified number of times, applying the RPTs one by one to the
+            subgraphs in the corresponding container, in a random order.
+            Applying the RPT predicts values for the associated attribute,
+            <a class="indexterm" name="d0e13706"></a>
+            <a class="indexterm" name="d0e13712"></a>
+            which are recorded in the database.  The values predicted by one application
+            of the RPT are used as input to succeeding applications.  In this way,
+            the attribute values change over time (are
+            <span class="emphasis"><em>conditioned</em></span>)
+            <a class="indexterm" name="d0e13719"></a>
+            <a class="indexterm" name="d0e13723"></a>
+            from their
+            initial random values to values consistent with the provided model.
+            See <a href="ch07.html" title="Chapter&nbsp;7.&nbsp;Learning Models">Chapter&nbsp;7, <i>Learning Models</i></a> for more information on RPTs and
+            RDNs.
+         </p>
+         <p>The attribute generator
+            appends the string &#8220;<code class="literal">_label</code>&#8221; and
+            prepends &#8220;<code class="literal">s_</code>&#8221; or
+            &#8220;<code class="literal">t_</code>&#8221; as appropriate to the attribute
+            names specified in the RPTs.  For example, if you specify an attribute
+            named &#8220;<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">class</span>&#8221; in
+            <code class="filename">s-class-rpt.xml</code>, the <em class="token">S</em> objects will be given an attribute named 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">s_class_label</span>.  Similarly, specifying an
+            attribute named &#8220;<code class="literal">attr1</code>&#8221; in
+            <code class="filename">t-attr-rpt.xml</code> results in an attribute named
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">t_attr1_label</span> in the generated
+            data.  Although Proximity modifies the final attribute names as outlined
+            above, all attribute names must be unique within the RPT files.
+            
+         </p>
+         <p>Proximity requires that the RPT and query files be in the
+            current working directory (<code class="filename">$PROX_HOME</code> if you are
+            following the tutorial).
+            
+            
+         </p><pre class="programlisting">   print 'generating i.i.d. attributes'
+
+   sClassQuery = loadFile("iid-class-query.xml")
+   sClassRPT   = loadRPT("s-class-rpt.xml")
+
+   sAttrQuery  = loadFile("iid-coreS-query.xml")
+   sAttrRPT    = loadRPT("s-attr-rpt.xml")
+
+   tAttrQuery  = loadFile("iid-coreT-query.xml")
+   tAttrRPT    = loadRPT("t-attr-rpt.xml")
+</pre><p>
+            
+            The first two queries get the 1d-stars for each 
+            <em class="token">S</em> object&#8212;all the 
+            <em class="token">T</em> objects connected to their core 
+            <em class="token">S</em> objects.
+            The last query, <code class="filename">iid-coreT-query</code>,
+            gets the 2d-stars for each <em class="token">T</em>
+            object&#8212;for each <em class="token">T</em> object it finds
+            any connected <em class="token">S</em> objects and any 
+            <em class="token">T</em> objects connected to those 
+            <em class="token">S</em> objects.
+            
+            
+         </p>
+         <div class="mediaobject" align="center">
+            <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+               <tr>
+                  <td align="center" valign="bottom"><img src="images/Datagen_Queries.png" align="middle" width="630"></td>
+               </tr>
+            </table>
+         </div>
+         <p>
+            The <em class="token">S</em> class RPT
+            (<code class="filename">s-class-rpt.xml</code>) infers the value of 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">s_class_label</span> based on the degree of the
+            <em class="token">S</em> objects.  The other two RPTs infer
+            the value of their respective attributes based on the value of 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">s_class_label</span> for the current object (for
+            <code class="filename">s-attr-rpt</code>) or linked <em class="token">S</em>
+            objects (for <code class="filename">t-attr-rpt</code>).
+            
+         </p>
+         <div class="mediaobject" align="center">
+            <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+               <tr>
+                  <td align="center" valign="bottom"><img src="images/Datagen_RPTs.png" align="middle" width="630"></td>
+               </tr>
+            </table>
+         </div>
+         <p>
+            
+         </p>
+         <p>Store the queries and RPTs in a Python dictionary that pairs
+            queries with the RPTs that specify the corresponding attributes.
+            
+         </p><pre class="programlisting">   queriesAndModels = {sClassQuery: sClassRPT, \
+       sAttrQuery: sAttrRPT, tAttrQuery: tAttrRPT}
+</pre><p>
+            
+            Specify the number of <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e372"><span class="glossterm">Gibbs sampling</span></a>
+            <a class="indexterm" name="d0e13844"></a>
+            iterations to use in conditioning the data.
+            
+            
+         </p><pre class="programlisting">   iters = 3
+</pre><p>
+            
+            To generate the attribute values, we call a constructor for the
+            <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/datagen2/attributes/AttributeGenerator.html"><code class="classname">AttributeGenerator</code></a> class.
+            <a class="indexterm" name="d0e13854"></a>
+            <a class="indexterm" name="d0e13860"></a>
+            
+         </p><pre class="programlisting">   AttributeGenerator(queriesAndModels, iters)
+</pre><p>
+            
+         </p>
+         <div class="procedure"><a name="ex_scripts_sdg-iid"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;6.8.&nbsp;Generating synthetic i.i.d. data:</b></p>
+            <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+               <table border="0" summary="Caution">
+                  <tr>
+                     <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                     <th align="left"></th>
+                  </tr>
+                  <tr>
+                     <td align="left" valign="top">
+                        <p>The i.i.d. data generation script clears and overwrites the
+                           current database. Make sure that you are serving an empty or test
+                           database.
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <ol type="1">
+               <li>
+                  <p>All <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e691"><span class="glossterm">RPT</span></a>
+                     files required for this exercise must be
+                     available in the current working directory
+                     (<code class="filename">$PROX_HOME</code> if you are 
+                     following the tutorial).  Copy the required files to the correct
+                     directory.
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cd $PROX_HOME</code></strong>
+&gt; <strong class="userinput"><code>cp $PROX_HOME/doc/user/tutorial/examples/s-class-rpt.xml .</code></strong>
+&gt; <strong class="userinput"><code>cp $PROX_HOME/doc/user/tutorial/examples/s-attr-rpt.xml .</code></strong>
+&gt; <strong class="userinput"><code>cp $PROX_HOME/doc/user/tutorial/examples/t-attr-rpt.xml .</code></strong>
+&gt; <strong class="userinput"><code>cp $PROX_HOME/doc/user/tutorial/examples/iid-class-query.xml .</code></strong>
+&gt; <strong class="userinput"><code>cp $PROX_HOME/doc/user/tutorial/examples/iid-coreS-query.xml .</code></strong>
+&gt; <strong class="userinput"><code>cp $PROX_HOME/doc/user/tutorial/examples/iid-coreT-query.xml .</code></strong>
+</pre><p>
+                     The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e304"><span class="glossterm">DTD</span></a> 
+                     describing the RPT format must be present in the same
+                     directory as the RPT files.  If you have not already done so, copy
+                     this file to the current working directory.
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cp $PROX_HOME/resources/rpt2.dtd .</code></strong>
+</pre></li>
+               <li>
+                  <p>Serve a new (empty) database.
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>Mserver --dbname DataGen_IID $PROX_HOME/resources/init-mserver.mil</code></strong>
+</pre><p>
+                     Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+                     MonetDB&nbsp;4.6.2.
+                  </p>
+               </li>
+               <li>
+                  <p>Initialize the new Proximity
+                     database. Substitute the appropriate host and port information if you are
+                     running the MonetDB server on a different machine or are using a
+                     different port.
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cd $PROX_HOME</code></strong>
+&gt; <strong class="userinput"><code>bin/db-util.sh localhost:30000 init-db</code></strong>
+</pre><a class="indexterm" name="d0e13935"></a><a class="indexterm" name="d0e13938"></a><a class="indexterm" name="d0e13943"></a><a class="indexterm" name="d0e13948"></a></li>
+               <li>
+                  <p>Start the Proximity Database Browser.</p>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">Script</strong></span> menu, choose
+                     <span><strong class="guimenuitem">Run Script</strong></span>.
+                     Proximity displays the <span class="guilabel">Open</span> dialog.
+                  </p>
+               </li>
+               <li>
+                  <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory and
+                     choose <code class="filename">generate-iid-data.py</code>.
+                     Click <span><strong class="guibutton">Open</strong></span>.
+                  </p>
+                  <p>Proximity opens a window to show you any output from the script
+                     along with a trace of the script execution.  The final lines
+                     of your output should look similar to the following
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                     
+                  </p><pre class="screen">INFO kdl.prox.qgraph2.QueryGraph2CompOp  - * done executing query
+INFO kdl.prox.model2.rdn.RDN  - RDN Iteration: 0
+Status: finished running script</pre><p>
+                     
+                     You can close this window after the script finishes.
+                  </p>
+                  <p>Examine the generated objects and attributes in the
+                     Proximity Database Browser. You may want to execute a 1d-star query that
+                     finds all <em class="token">T</em> objects directly connected to
+                     each <em class="token">S</em> object (for example,
+                     <code class="filename">iid-coreS-query.xml</code>).  The subgraphs created by
+                     such a query are shown below.  The results of each data
+                     generation run will be different and your results will not necessarily
+                     look exactly like that shown here.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Datagen_Thumbs.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+               </li>
+            </ol>
+         </div><a class="indexterm" name="d0e14003"></a><a class="indexterm" name="d0e14004"></a><a class="indexterm" name="d0e14005"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s09.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06s09.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s10.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Synthetic Data Generation&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Tips and Reminders</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

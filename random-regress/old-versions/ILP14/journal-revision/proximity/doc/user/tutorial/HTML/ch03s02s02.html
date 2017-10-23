@@ -1,0 +1,188 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Importing database elements using XML</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch03s02.html" title="Importing XML Data">
+      <link rel="prev" href="ch03s02.html" title="Importing XML Data">
+      <link rel="next" href="ch03s02s03.html" title="Importing XML data using noChecks">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Importing XML Data</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s02s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e2414"></a>Importing database elements using XML
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e2417"></a><a class="indexterm" name="d0e2422"></a><p>In addition to importing a complete database, Proximity lets you
+            import individual <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">containers</span></a>
+            and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attributes</span></a>.  This
+            feature lets 
+            Proximity users share data and results and store data off line.  To
+            import additional data 
+            into an existing database, use the <span><strong class="command">import-xml.sh</strong></span>
+            script (<span><strong class="command">import-xml.bat</strong></span> for Windows) to import a
+            Proximity XML data file containing the new data.
+         </p>
+         <p>By default, you cannot import 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_object"><span class="glossterm">objects</span></a> or 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_link"><span class="glossterm">links</span></a>
+            <a class="indexterm" name="d0e2449"></a>
+            <a class="indexterm" name="d0e2455"></a>
+            into an existing database if
+            it already contains any items of that type.  That is, you cannot
+            import any additional objects if you have previously created at least one
+            object in the database and you cannot import any additional links if
+            you have previously created at least one link in the database.
+            Similarly, you can only import new attributes.  Once an attribute has
+            been defined for a database, you cannot add additional values for
+            that attribute.  This behavior can be overridden through use of the
+            <code class="code">noChecks</code> flag, described in
+            <a href="ch03s02s03.html" title="Importing XML data using noChecks">&#8220;Importing XML data using <code class="code">noChecks</code>&#8221;</a>.
+            
+         </p>
+         <p>Imported containers are always created at the top level
+            (directly under the root container), regardless of where the container
+            lived in the source database.  Any nested containers within the
+            imported container retain their relative nesting, however.  For 
+            example, if you exported the <code class="literal">/1d-clusters/samples</code>
+            container, which includes nested containers
+            <code class="literal">/1d-clusters/samples/0</code> and
+            <code class="literal">/1d-clusters/samples/1</code>, and later imported that container
+            into another database, the destination database ends up with the
+            containers <code class="literal">/samples/0</code> and
+            <code class="literal">/samples/1</code> without the parent
+            1d-clusters container, regardless of whether the
+            destination database already includes a 1d-clusters container.
+            (The container hierarchy notation used in this paragraph is explained
+            in <a href="ch03s04.html" title="Exporting Data to XML">&#8220;Exporting Data to XML&#8221;</a>.)
+            
+         </p>
+         <p>
+            
+         </p>
+         <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+            <table border="0" summary="Caution">
+               <tr>
+                  <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                  <th align="left"></th>
+               </tr>
+               <tr>
+                  <td align="left" valign="top">
+                     <p>When importing attributes and containers, you are responsible
+                        for ensuring that object, link, subgraph, and container 
+                        <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e567"><span class="glossterm">identifiers</span></a>
+                        match those in the existing database.  Proximity makes no checks to
+                        ensure that attributes are assigned to items that are actually present
+                        in the database.  Errors in identifiers may result in inaccurate data
+                        being stored in the database.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>
+            
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>All containers must have a unique identifier. You cannot import
+                        a container if its identifier matches an existing container identifier
+                        in the database.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>The following exercise walks through the process of importing a new
+            attribute, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_hierarchy3</span>, and its values
+            into the existing ProxWebKB 
+            database. This attribute stores the third directory in the path after the
+            domain name, extracted from the object&#8217;s URL.
+            We can import this attribute into an existing database because the
+            ProxWebKB database created in <a href="ch03s02.html#ex_import_webkb" title="Exercise&nbsp;3.1.&nbsp;Importing the ProxWebKB data into Proximity:">Exercise&nbsp;3.1</a> does not
+            include any values for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_hierarchy3</span>
+            attribute.
+         </p>
+         <div class="procedure"><a name="ex_import_attr"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;3.2.&nbsp;Importing attribute values using XML:</b></p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database (created in <a href="ch03s02.html#ex_import_webkb" title="Exercise&nbsp;3.1.&nbsp;Importing the ProxWebKB data into Proximity:">Exercise&nbsp;3.1</a>) using
+               Mserver.  You must have completed <a href="ch03s02.html#ex_import_webkb" title="Exercise&nbsp;3.1.&nbsp;Importing the ProxWebKB data into Proximity:">Exercise&nbsp;3.1</a>
+               before running the current exercise.  Data files must be on the same
+               machine as that serving the database.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>Uncompress the file containing the 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_hierarchy3</span>
+                     attribute values.
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cd $PROX_HOME/doc/user/tutorial/examples</code></strong>
+&gt; <strong class="userinput"><code>gunzip url_hierarchy3_attr.xml.gz</code></strong>
+</pre></li>
+               <li>
+                  <p>Change to the <code class="filename">$PROX_HOME</code> directory.
+                  </p>
+               </li>
+               <li>
+                  <p>Import the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_hierarchy3</span> attribute
+                     data.  (Substitute the appropriate port number if you are using a
+                     different port.)
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>bin/import-xml.sh localhost:30000 \
+  $PROX_HOME/doc/user/tutorial/examples/url_hierarchy3_attr.xml</code></strong>
+</pre><p>
+                     
+                     When the import process is finished, Proximity reports on the number
+                     of database entities created.
+                     
+                     
+                  </p><pre class="screen">INFO  app.ImportXMLApp: * done importing; counts:
+   0 objects, 0 links, 1 attributes, 868 attribute values,
+   0 containers, 0 subgraph items
+</pre><p>
+                     
+                     Because many URLs do not include three levels of directories after
+                     the domain name, only 868 out of 4135 objects have a value for this
+                     attribute.
+                     
+                  </p>
+               </li>
+            </ol>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03s02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s02s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Importing XML Data&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Importing XML data using <code class="code">noChecks</code></td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<graph-query name="New Query">
+    <description>New Editor Query</description>
+    <query-body>
+        <vertex name="CoreFile">
+            <condition>
+                <and>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>objecttype</attribute-name>
+                        <value>File</value>
+                    </test>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>hot100</attribute-name>
+                        <value>1</value>
+                    </test>
+                </and>
+            </condition>
+        </vertex>
+        <edge name="afterQuery">
+            <vertex1>Query</vertex1>
+            <vertex2>CoreFile</vertex2>
+            <directed>false</directed>
+            <condition>
+                <test>
+                    <operator>eq</operator>
+                    <attribute-name>linktype</attribute-name>
+                    <value>file_query</value>
+                </test>
+            </condition>
+            <numeric-annotation>
+                <min>1</min>
+            </numeric-annotation>
+        </edge>
+        <edge name="ownsFile">
+            <vertex1>Owner</vertex1>
+            <vertex2>CoreFile</vertex2>
+            <directed>true</directed>
+            <condition>
+                <test>
+                    <operator>eq</operator>
+                    <attribute-name>linktype</attribute-name>
+                    <value>owns</value>
+                </test>
+            </condition>
+            <numeric-annotation>
+                <min>1</min>
+            </numeric-annotation>
+        </edge>
+        <subquery>
+            <vertex name="Co-ownedFile">
+                <condition>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>objecttype</attribute-name>
+                        <value>File</value>
+                    </test>
+                </condition>
+                <numeric-annotation>
+                    <min>0</min>
+                </numeric-annotation>
+            </vertex>
+            <vertex name="Owner">
+                <condition>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>objecttype</attribute-name>
+                        <value>User</value>
+                    </test>
+                </condition>
+            </vertex>
+            <edge name="co-ownsFile">
+                <vertex1>Owner</vertex1>
+                <vertex2>Co-ownedFile</vertex2>
+                <directed>true</directed>
+                <condition>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>linktype</attribute-name>
+                        <value>owns</value>
+                    </test>
+                </condition>
+                <numeric-annotation>
+                    <min>1</min>
+                </numeric-annotation>
+            </edge>
+            <numeric-annotation>
+                <min>0</min>
+            </numeric-annotation>
+        </subquery>
+        <subquery>
+            <vertex name="Co-queriedUser">
+                <condition>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>objecttype</attribute-name>
+                        <value>User</value>
+                    </test>
+                </condition>
+                <numeric-annotation>
+                    <min>0</min>
+                </numeric-annotation>
+            </vertex>
+            <vertex name="Co-queriedFile">
+                <condition>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>objecttype</attribute-name>
+                        <value>File</value>
+                    </test>
+                </condition>
+                <numeric-annotation>
+                    <min>0</min>
+                </numeric-annotation>
+            </vertex>
+            <vertex name="Query">
+                <condition>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>objecttype</attribute-name>
+                        <value>Query</value>
+                    </test>
+                </condition>
+            </vertex>
+            <edge name="co-queryFile">
+                <vertex1>Query</vertex1>
+                <vertex2>Co-queriedFile</vertex2>
+                <directed>true</directed>
+                <condition>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>linktype</attribute-name>
+                        <value>file_query</value>
+                    </test>
+                </condition>
+                <numeric-annotation>
+                    <min>0</min>
+                </numeric-annotation>
+            </edge>
+            <edge name="co-queryUsers">
+                <vertex1>Co-queriedUser</vertex1>
+                <vertex2>Query</vertex2>
+                <directed>true</directed>
+                <condition>
+                    <test>
+                        <operator>eq</operator>
+                        <attribute-name>linktype</attribute-name>
+                        <value>makes_query</value>
+                    </test>
+                </condition>
+                <numeric-annotation>
+                    <min>1</min>
+                </numeric-annotation>
+            </edge>
+            <numeric-annotation>
+                <min>0</min>
+            </numeric-annotation>
+        </subquery>
+        <constraint>
+            <and>
+                <test>
+                    <operator>ne</operator>
+                    <item>
+                        <item-name>CoreFile</item-name>
+                        <id/>
+                    </item>
+                    <item>
+                        <item-name>Co-ownedFile</item-name>
+                        <id/>
+                    </item>
+                </test>
+                <test>
+                    <operator>ne</operator>
+                    <item>
+                        <item-name>CoreFile</item-name>
+                        <id/>
+                    </item>
+                    <item>
+                        <item-name>Co-queriedFile</item-name>
+                        <id/>
+                    </item>
+                </test>
+            </and>
+        </constraint>
+
+        <add-link attrname="link_type" attrval="connected">
+            <vertex1>CoreFile</vertex1>
+            <vertex2>Co-queriedFile</vertex2>
+        </add-link>
+
+        <add-link attrname="link_type" attrval="connected again">
+            <vertex1>CoreFile</vertex1>
+            <vertex2>Co-queriedFile</vertex2>
+        </add-link>
+
+    </query-body>
+</graph-query>
+

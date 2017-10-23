@@ -1,0 +1,139 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>containers.data</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="apds02.html" title="File Formats">
+      <link rel="prev" href="apds02s04.html" title="Attribute data files">
+      <link rel="next" href="apds02s06.html" title="Subgraph data files">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="apds02s04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">File Formats</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="apds02s06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e20777"></a>containers.data
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e20780"></a><p>The <code class="filename">containers.data</code> file defines the
+            containers in the database. The file specifies the container ID,
+            name, and location in the container hierarchy and includes pointers to
+            the files storing subgraph data for these containers.
+         </p>
+         <h5><a name="d0e20790"></a>Format
+         </h5>
+         <p>
+            
+         </p><pre class="screen"><em class="replaceable"><code>id    cont-name    parent-id    subg-attrs-file    subg-data-file</code></em></pre><p>
+            where
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p><em class="replaceable"><code>id</code></em> is an integer-valued container
+                       ID
+                  </p>
+               </li>
+               <li>
+                  <p><em class="replaceable"><code>cont-name</code></em> is the name of the
+                       container
+                  </p>
+               </li>
+               <li>
+                  <p><em class="replaceable"><code>parent-id</code></em> is the ID of the parent
+                       container for the current container; a value of
+                       <code class="literal">-1</code> means that the current container is under the
+                       root container (has no parent container)
+                  </p>
+               </li>
+               <li>
+                  <p><em class="replaceable"><code>subg-attrs-file</code></em> is the base
+                       name (filename without extension) of the data file that defines
+                       attributes on subgraphs in this container; filenames must follow the
+                       naming conventions described in 
+                       <a href="apds02s07.html" title="Subgraph attribute specification files">&#8220;Subgraph attribute specification files&#8221;</a>.  This file is required
+                       but may be empty if the container has no subgraph attributes.
+                  </p>
+               </li>
+               <li>
+                  <p><em class="replaceable"><code>subg-data-file</code></em> is the base name
+                       (filename without extensions) of the data files containing the object
+                       and link data for the subgraphs in the current container; filenames
+                       must follow the naming conventions described in 
+                       <a href="apds02s06.html" title="Subgraph data files">&#8220;Subgraph data files&#8221;</a>.
+                     
+                     
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            
+         </p>
+         <h5><a name="d0e20834"></a>Example
+         </h5>
+         <p>
+            The following example describes two containers:
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p>A top-level container named 
+                       <span class="token">c1</span></p>
+               </li>
+               <li>
+                  <p>A container under <span class="token">c1</span>
+                       named <span class="token">samples</span></p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            The first line defines container <span class="token">c1</span>
+            and specifies that subgraph attributes used in this
+            container are defined in <code class="filename">si_0_attrs.data</code>, and the
+            objects and links for these subgraphs are specified in
+            <code class="filename">si_0.objects.data</code> and
+            <code class="filename">si_0.links.data</code>, respectively.
+            
+         </p><pre class="programlisting">0       c1          -1       si_0_attrs       si_0
+1       samples     0        si_1_attrs       si_1
+</pre><p>
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="apds02s04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="apds02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="apds02s06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Attribute data files&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Subgraph data files</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

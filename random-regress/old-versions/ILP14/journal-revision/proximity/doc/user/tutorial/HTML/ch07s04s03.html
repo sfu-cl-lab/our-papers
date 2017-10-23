@@ -1,0 +1,218 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Using temporal attributes in a relational probability tree</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch07s04.html" title="Relational Probability Trees">
+      <link rel="prev" href="ch07s04s02.html" title="Understanding and viewing relational probability trees">
+      <link rel="next" href="ch07s05.html" title="Relational Dependency Networks">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch07s04s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Relational Probability Trees</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch07s05.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e15725"></a>Using temporal attributes in a relational probability
+                     tree
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_trpt01"></a><a class="indexterm" name="idx_trpt02"></a><p>In some datasets, objects or links may have an attribute
+            that specifies a timestamp associated with that object.  For
+            example, a <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">movie</span> object might have a
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">date</span> attribute whose value is the
+            movie&#8217;s opening date.  Proximity allows you to use such
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e761"><span class="glossterm">temporal attributes</span></a>
+            to restrict the set of related items considered by an RPT.
+            (More specifically, it uses the temporal attribute to restrict which
+            values for another attribute can be aggregated by the RPT.)
+            To use temporal attributes, we provide a <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/TemporalAttributeSource.html"><code class="classname">TemporalAttributeSource</code></a> 
+            instead of an <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/AttributeSource.html"><code class="classname">AttributeSource</code></a> to specify the related items and
+            attributes that the RPT is to consider.
+         </p>
+         <p>To illustrate how to use temporal attributes in an RPT, consider
+            a database of actors linked by co-starring relationships (an actor is
+            linked to another actor if both appeared in the same movie).  The task
+            for our RPT is to estimate the likelihood that an actor has won an
+            award.  Each actor has attributes for the actor&#8217;s birth
+            year and for any awards won (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth_year</span> and
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">num_awards_won</span>, respectively).
+         </p>
+         <p>As input to the RPT, we construct 1-dimensional
+            &#8220;stars&#8221; around each actor.  That is, each subgraph contains
+            a <em class="token">core-actor</em> object and zero to many
+            linked <em class="token">co-starring-actor</em> objects.
+            We consider the number of awards won by an actor&#8217;s
+            costars in estimating whether the core actor has won any awards, but
+            we only want to consider awards won by an actor&#8217;s
+            peers in terms of age.  In this example, we consider awards won by costars
+            born within ten years (five years before to five years after) of
+            the core actor, but not those won by actors born earlier or later.
+            That is, we use the temporal attribute <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth_year</span>
+            to restrict which <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">num_awards_won</span>
+            values are aggregated.  Only those values for actors born within the
+            specified range are aggregated; the rest are ignored.
+         </p>
+         <p>The following text describes how
+            to set up an RPT to use the temporal
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth_year</span> attribute in this manner.
+         </p>
+         <p>Before setting up the input source, we must import the
+            necessary class definitions:
+            
+         </p><pre class="programlisting">from kdl.prox.model2.common.sources import AttributeSource
+from kdl.prox.model2.common.sources import TemporalAttributeSource
+</pre><p>
+            <a class="indexterm" name="d0e15785"></a>
+            <a class="indexterm" name="d0e15789"></a>
+            <a class="indexterm" name="d0e15795"></a>
+            <a class="indexterm" name="d0e15799"></a>
+            
+            To specify the temporal range relative for the 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth_year</span> attribute, we first create an
+            <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/AttributeSource.html"><code class="classname">AttributeSource</code></a> that indicates which attribute on the 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e240"><span class="glossterm">core item</span></a> the range is
+            relative to.
+            
+         </p><pre class="programlisting">coreTemporalAttr = AttributeSource('core-actor', 'birth_year')
+</pre><p>
+            Here <code class="code">core-actor</code> is the name of the core item, and
+            <code class="code">birth_year</code> is the name of the attribute on the core item
+            that the related item&#8217;s attribute will be relative to.
+            
+         </p>
+         <p>We also must create an <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/AttributeSource.html"><code class="classname">AttributeSource</code></a> that
+            specifies the related item and the temporal attribute on that item that is
+            considered relative to the core item&#8217;s attribute.
+            
+         </p><pre class="programlisting">relatedTemporalAttr = AttributeSource('co-starring-actor', 'birth_year')
+</pre><p>
+            In this case, values of the attribute on the related item are
+            considered relative to the value of the same attribute 
+            (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth_year</span>) on the
+            core item, but this need not always be the case.  We might consider
+            actors with birth years less than 30 years before a movie&#8217;s
+            opening date, for example.  The only requirement is that both
+            attributes must be of <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e129"><span class="glossterm">comparable types</span></a>.
+            <a class="indexterm" name="d0e15837"></a>
+            <a class="indexterm" name="d0e15841"></a>
+            
+         </p>
+         <p>The following code specifies the range around the core
+            item&#8217;s value for <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth_year</span> that we
+            allow for the related item&#8217;s 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth_year</span> values. 
+            In this case, we consider related actors born within ten years (five
+            years before to five years after) of the core actor.
+            
+         </p><pre class="programlisting">interval = "-5.0:5.0"
+</pre><p>
+            
+            We then create an <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/AttributeSource.html"><code class="classname">AttributeSource</code></a> that specifies 
+            the item whose values are to be aggregated
+            (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">co-starring-actor</span>) and the attribute
+            whose values we want to aggregate
+            (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">num_awards_won</span>).
+            
+         </p><pre class="programlisting">attrOfInterest = AttributeSource('co-starring-actor','num_awards_won')
+</pre><p>
+            
+            The above sources are used to specify the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/TemporalAttributeSource.html"><code class="classname">TemporalAttributeSource</code></a>
+            for this model.  As we did for the non-temporal RPT example, above, the
+            <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/TemporalAttributeSource.html"><code class="classname">TemporalAttributeSource</code></a> is placed in a list of sources.
+            
+         </p><pre class="programlisting">inputSources = [ \
+   TemporalAttributeSource(attrOfInterest, coreTemporalAttr, \
+      relatedTemporalAttr, interval) \
+   ]
+</pre><p>
+            As we saw in the previous RPT example, the list of input sources can
+            specify multiple sources, including additional temporal or
+            non-temporal sources.
+         </p>
+         <p>You can also use a temporal attribute to determine how
+            structural features are aggregated.  For example, you could use the
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth_year</span> of 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">co-starring-actor</span> objects to determine
+            which objects are counted when determining the degree of the core
+            item.  In such cases, use a <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/TemporalItemSource.html"><code class="classname">TemporalItemSource</code></a>
+            <a class="indexterm" name="d0e15888"></a>
+            <a class="indexterm" name="d0e15892"></a>
+            (the temporal
+            equivalent of an <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/ItemSource.html"><code class="classname">ItemSource</code></a>) to define the input source.
+         </p>
+         <p>You can specify multiple temporal attributes and mix temporal
+            attributes and non-temporal attributes in the list of
+            <code class="code">inputSources</code>.  You can also specify multiple ranges for
+            a given temporal attribute.  You must provide a separate
+            <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/TemporalAttributeSource.html"><code class="classname">TemporalAttributeSource</code></a> or <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/TemporalItemSource.html"><code class="classname">TemporalItemSource</code></a> for each range.
+            
+         </p>
+         <p>Proximity imposes two important restrictions on the use of
+            temporal attributes in RPTs:
+            
+         </p>
+         <div class="orderedlist">
+            <ol type="1" compact>
+               <li>
+                  <p>Temporal attributes must be single valued.  Multiple values
+                         and ranges are not permitted.
+                  </p>
+               </li>
+               <li>
+                  <p>The related temporal attribute must be on the same item as the
+                         attribute to be aggregated.  In our example, the 
+                         <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birth-year</span> attribute is on the same
+                         object as the aggregated <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">num_awards_won</span>
+                         attribute.
+                  </p>
+               </li>
+            </ol>
+         </div>
+         <p>
+            
+         </p>
+         <p>The attribute used for the
+            <code class="code">coreTemporalAttr</code> need not necessarily be located on the
+            core object of the subgraph.  The only requirement is that the
+            subgraph contain only a single instance of the &#8220;core&#8221;
+            temporal attribute.  (Other items in the subgraph can also have this
+            attribute, but there must be only one object or link that matches the
+            definition of <code class="code">coreTemporalAttr</code>.)  Because
+            subgraphs can only contain a single core object, we
+            typically use an attribute on the core object for the
+            <code class="code">coreTemporalAttr</code>.
+         </p><a class="indexterm" name="d0e15939"></a><a class="indexterm" name="d0e15940"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch07s04s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch07s04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch07s05.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Understanding and viewing relational probability trees&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Relational Dependency Networks</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="different-schools">
+  <description>Finds web pages at one school that link to a page at a different school</description>
+  <query-body>
+    <vertex name="linked_page">
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </vertex>
+    <vertex name="start_page" />
+    <edge name="linked_to">
+      <vertex1>start_page</vertex1>
+      <vertex2>linked_page</vertex2>
+      <directed>false</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <constraint>
+      <and>
+        <test>
+          <operator>ne</operator>
+          <item>
+            <item-name>start_page</item-name>
+            <attribute-name>school</attribute-name>
+          </item>
+          <item>
+            <item-name>linked_page</item-name>
+            <attribute-name>school</attribute-name>
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="linked_page" x="293.0" y="165.0" />
+    <vertex-location name="start_page" x="70.0" y="46.0" />
+  </editor-data>
+</graph-query>
+

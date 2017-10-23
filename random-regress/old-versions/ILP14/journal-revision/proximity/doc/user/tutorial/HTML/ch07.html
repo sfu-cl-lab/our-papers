@@ -1,0 +1,170 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Chapter&nbsp;7.&nbsp;Learning Models</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="prev" href="ch06s10.html" title="Tips and Reminders">
+      <link rel="next" href="ch07s02.html" title="The Modeling Process in Proximity">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s10.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">&nbsp;</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch07s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="chapter" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title"><a name="ch_models"></a>Chapter&nbsp;7.&nbsp;Learning Models
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <div class="toc">
+            <p><b>Table of Contents</b></p>
+            <dl>
+               <dt><span class="sect1"><a href="ch07.html#models_intro">Overview</a></span></dt>
+               <dt><span class="sect1"><a href="ch07s02.html">The Modeling Process in Proximity</a></span></dt>
+               <dt><span class="sect1"><a href="ch07s03.html">Relational Bayesian Classifier</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch07s03.html#model_rbc_code">Code example: run-1d-clusters-rbc.py</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch07s04.html">Relational Probability Trees</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch07s04.html#model_rpt_code">Code example: run-1d-clusters-rpt.py</a></span></dt>
+                     <dt><span class="sect2"><a href="ch07s04s02.html">Understanding and viewing relational probability trees</a></span></dt>
+                     <dt><span class="sect2"><a href="ch07s04s03.html">Using temporal attributes in a relational probability
+                              tree</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch07s05.html">Relational Dependency Networks</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch07s05.html#d0e16025">Code example: run-1d-clusters-rdn.py</a></span></dt>
+                     <dt><span class="sect2"><a href="ch07s05s02.html">Viewing relational dependency networks</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch07s06.html">Tips and Reminders</a></span></dt>
+            </dl>
+         </div>
+         <div class="sect1" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h2 class="title" style="clear: both"><a name="models_intro"></a>Overview
+                     </h2>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e14085"></a><a class="indexterm" name="d0e14088"></a><a class="indexterm" name="d0e14091"></a><p>The exercises in this chapter walk through the process of
+               training, testing, and evaluating several 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e625"><span class="glossterm">probabilistic models</span></a>
+               designed for relational
+               knowledge discovery. For each exercise in this chapter, we first walk
+               through the source code and identify how Proximity classes and methods
+               are used to accomplish the desired task. This is followed by
+               instructions for executing the script in Proximity.
+            </p>
+            <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+               <table border="0" bgcolor="#CCCCFF">
+                  <tr>
+                     <td>
+                        <p>Probabilistic relational models can consider huge amounts of data
+                           and take a corresponding amount of time to learn and apply.
+                           The exercises in this chapter were designed to run in a reasonable
+                           amount of time, and they therefore limit the number of input attributes to
+                           be considered.  These examples may therefore not necessarily represent
+                           realistic or rigorous experimental design.
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <p>The examples in this chapter are written in Jython, a Java
+               <a class="indexterm" name="d0e14106"></a>
+               <a class="indexterm" name="d0e14110"></a>
+               implementation of Python that lets you interact with Java code. The
+               classes and methods used in these examples are, of course, also
+               available for use in Java code. Source code files for all the scripts
+               discussed in this chapter are available in
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code>.
+            </p>
+            <p>
+               
+            </p>
+            <div class="itemizedlist">
+               <p xmlns:exsl="http://exslt.org/common" class="title"><b>Objectives</b></p>
+               <p>The exercises in this chapter demonstrate how to</p>
+               <ul type="disc" compact>
+                  <li>
+                     <p>learn, apply, and evaluate the 
+                            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e673"><span class="glossterm">relational Bayesian classifier</span></a>
+                            model
+                     </p>
+                  </li>
+                  <li>
+                     <p>learn, apply, and evaluate the 
+                            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e691"><span class="glossterm">relational probability tree</span></a>
+                            model
+                     </p>
+                  </li>
+                  <li>
+                     <p>learn, apply, and evaluate the
+                            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e685"><span class="glossterm">relational dependency network</span></a>
+                            model
+                     </p>
+                  </li>
+                  <li>
+                     <p>use temporal attributes to restrict the set of applicable
+                            attribute values in a relational probability tree
+                     </p>
+                  </li>
+                  <li>
+                     <p>display and interpret graphical representations of
+                            relational probability trees
+                     </p>
+                  </li>
+                  <li>
+                     <p>display and interpret graphical representations of
+                            relational dependency networks
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s10.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center">&nbsp;</td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch07s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Tips and Reminders&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;The Modeling Process in Proximity</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

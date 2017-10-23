@@ -1,0 +1,588 @@
+# $Id: init-mserver.mil 3636 2007-10-02 16:18:26Z schapira $
+
+# call with something like:
+#   Mserver --dbname testdb proximity3/resources/init-mserver.mil
+
+module(mapi);
+module(monettime);
+module(ascii_io);
+module(unix);
+module(aggr);
+module(aggrX3);
+module(xtables);
+module(radix);
+module(mkey);
+module(str);
+module(mmath);
+
+PROC start_mapi(int mport) : void {
+    if (int(find(monet_environment, "gdk_version").split(".").fetch(1)) > 6 ) {
+        fork(listen(mport, true));
+        mil_start();
+    } else {
+        fork(listen(mport));
+    }
+    printf("Listening on port %d\n", mport);
+}
+
+# Start Monet on port specified by variable prox_port.
+# If no port is specified, use 30000 by default
+var port:=30000;
+if (monet_environment.reverse().select("port").count() > 0) {
+   port := int(find(monet_environment, "port"));
+}
+start_mapi(int(port)) ;
+
+
+#
+# Define Proximity helpers
+#
+
+# like_select(), a little proc to make up for the lack
+# of likeselect in Monet 4.6
+PROC like_select (BAT[any::1,str] b, str val) : BAT[any::1, oid] {
+    if (int(find(monet_environment, "gdk_version").split(".").fetch(1)) < 6 ) {
+        return likeselect(b,val);
+    } else {
+        return like_uselect(b, val, str(chr(27)) + str(chr(27)));
+    }
+};
+
+# prox_group(), a little wrapper that hides the differences in CTGroup
+# from 4.6.2 to 4.10.2
+PROC prox_group (BAT[oid,any] a) : BAT[oid,oid] {
+    var r:=CTgroup(a);
+    if (int(find(monet_environment, "gdk_version").split(".").fetch(1)) < 10 ) {
+        return r;
+    } else {
+        return CTmap(r);
+    }
+};
+
+
+# delete_nst() does a  delete of all BATs contained by an NST.
+VAR strType := monet_atomtbl.find("str");
+
+PROC delete_nst(bat root) : void {
+  var rootName:=str(root);
+  VAR these_children:=bat(oid,str).insert(oid(nil), rootName);
+  if (root.htype() = strType) {
+    VAR bat_names := [oid](root.reverse()).reverse();
+    these_children.insert(bat_names);
+  }
+  these_children@batloop() {
+        persists(bat($t), false);
+        unload($t);
+  }
+};
+
+
+# Remove Identical Head-Tail: Returns a BAT that is a copy of inputBAT, but only
+# those rows whose head != tail.
+PROC prox_removeIdenticalHeadTail(BAT [any, any] input) : BAT [any,any] {
+    VAR a := input.mark(0@0).reverse();
+    VAR b := input.reverse().mark(0@0).reverse();
+    VAR x := [=](a, b).select(false);
+    return a.semijoin(x).reverse().join(b);
+};
+
+###
+# A faster procedure to insert rows into an NST from another NST
+# Renumbers heads of the second BAT if necessary
+###
+PROC addend(BAT[oid, any::1] i, BAT [oid, any::1] u) : BAT {
+    if (u.count() = 0) {
+       return i;
+    }
+    if (i.count() = 0) {
+        return i.insert(u);
+    }
+    var nextId  := int(i.reverse().max()) + 1;
+    var startId := int(u.reverse().min());
+    var ins := [oid]([+]([int](u.reverse()), int(nextId - startId))).reverse();
+    return i.insert(ins);
+}
+
+
+
+
+
+
+# A routine for the MODE feature (see ModeFeature.java)
+# It has to check whether itemValueBatName is empty; if it is the max of the
+# histogram will throw an error so we return an empty bat instead
+PROC mode_proc (BAT itemValueBATName, BAT selectItemValueBATName, BAT uniqueSubgIDBATName) : BAT {
+    if (itemValueBATName.count() > 0) {
+        var cnt:={count}(selectItemValueBATName, uniqueSubgIDBATName);
+        var mx:=[max]({histogram}(itemValueBATName));
+        return [>=](cnt,mx).select(true);
+    } else {
+        return bat(oid,int);
+    }
+}
+
+# A similar routing for computing a mode aggregator (ie, the equivalent of {mode}(a)
+# Mode doesn't allow a baseNST
+# NO LONGER USED --see mode_row
+PROC mode_aggr (BAT subgValueBAT) : BAT {
+    # Used to be this:
+    #    var x:={histogram}(subgValueBAT);
+    #    return [fetch]([sort_rev]([reverse](x)), 0);
+    # However, for str columns, the expansion into separate BATs forced
+    # the allocation of way too much memory for every string, and the operation failed
+    # So we do it one at a time: get each unique head value, compute the histogram, find the best, and repeat
+
+    var ret:=bat(subgValueBAT.htype(), subgValueBAT.ttype());
+    subgValueBAT.kunique()@batloop() {
+        var h:=$h;
+        var t:=subgValueBAT.reverse().select(h).reverse().histogram().reverse().sort_rev().fetch(0);
+        ret.insert(h,t);
+    }
+    return ret;
+}
+
+# Another aggregator
+# Concatenates all rows of a str tail into a single comma-separated string
+# Can be used as an aggregator too, with {}
+PROC batstrconcat(BAT[any::1, any::2] b) : str {
+    var x:="";
+    b@batloop() {
+       x:= x + ", " + str($t);
+    }
+    return string(x,2);
+}
+
+
+#  ReferenceVector routines..
+# L1 dist:  <a>,<b> = |(a1-b1)|+|(a2-b2)|+...+|(aN-bN)|
+PROC compute_l1_dist (bat[any,any] cv, bat[any,any] rv) : dbl {
+   # First get in the cv all the rows from the rv
+   var m1:=[dbl]({sum}(cv,rv.project(nil)));
+
+   # Now compute the distances
+   var m2:=[abs]([-](m1,rv));
+
+   # Return the sum of distances
+   return m2.sum();
+};
+
+# L2 dist:  <a>,<b> = sqrt [ (a1-b1)^2 + (a2-b2)^2 + ... + (aN-bN)^2 ]
+PROC compute_l2_dist (bat[any,any] cv, bat[any,any] rv) : dbl {
+   # First get in the cv all the rows from the rv
+   var m1:=[dbl]({sum}(cv,rv.project(nil)));
+
+   # Now compute the distances
+   var m2:=[-](m1,rv);
+   var m3:=[*](m2,m2);
+
+   # Return the the sum - square roots should not matter
+   return m3.sum();
+};
+
+# cosine dist: <a>,<b> = (a1*b1 + a2*b2 + ... + aN*bN)/(|a|*|b|)
+PROC compute_cosine_dist (bat[any,any] cv, bat[any,any] rv) : dbl {
+   # First get in the cv all the rows from the rv
+   var m1:=[dbl]({sum}(cv,rv.project(nil)));
+
+   # Avoid division by zero
+   if ((rv.sum() = dbl(0)) or (m1.sum() = dbl(0))) {
+     return dbl(0);
+   }
+
+   # Now compute the distances
+   var m2:=[*](cv,rv);
+
+   var m2sum := dbl(0);
+   if (m2.count() > 0) {
+      m2sum:=m2.sum();
+   }
+
+   # Return the sum of distances
+   return m2sum / (m1.sum() * rv.sum());
+};
+
+
+###
+# Methods for random numbers
+###
+# generates a random float in [0,1].
+proc rnd(any a) : flt {
+  return (rand() / flt(getRAND_MAX()));
+}
+
+# uni() generates a random integer in [0,a]].
+# It adds 0.5 because int() rounds down.
+proc uni(int a) : int := {
+  return int((rand() / flt(getRAND_MAX())) * (a+0.5));
+}
+
+# rand_row() selects a random value from a BAT
+proc rand_row(BAT[any::1, any::2] a) : any::2 {
+   var row:=int((rand() / flt(getRAND_MAX())) * (a.count()));
+   return a.fetch(row);
+}
+
+# mode_row() selects the most common row from a BAT
+proc mode_row(BAT[any::1, any::2] a) : any::2 {
+   return a.histogram().reverse().sort_rev().fetch(0);
+}
+
+###
+# Methods for save division and logs
+###
+PROC safeDiv(int a, int b) : dbl {
+    return safeDiv(dbl(a), dbl(b));
+}
+
+PROC safeDiv(int a, dbl b) : dbl {
+    return safeDiv(dbl(a), dbl(b));
+}
+
+PROC safeDiv(dbl a, int b) : dbl {
+    return safeDiv(dbl(a), dbl(b));
+}
+
+PROC safeDiv(dbl a, dbl b) : dbl {
+    if (b = dbl(0)) {
+       return dbl(0);
+    }
+
+    return a/b;
+}
+
+PROC safeLog(dbl a) : dbl {
+    if (a <= dbl(0)) {
+       return 0;
+    }
+
+    return log(a);
+}
+
+
+
+
+###
+# Methods for computing statistics
+###
+
+PROC gStatAndDF(BAT label, BAT weight, BAT match) : str {
+    var d := label.reverse().kunique().project(dbl(0));
+
+    var tw:=label.semijoin(match.select(TRUE)).reverse().join(weight);  # ==> label/weight
+    var fw:=label.semijoin(match.select(FALSE)).reverse().join(weight); # ==> label/weight
+    var t:={sum}(tw).kunion(d).sort();                                  # ==> label/summary
+    var f:={sum}(fw).kunion(d).sort();                                  # ==> label/summary
+
+    var tSum  := t.sum();
+    var fSum  := f.sum();
+    var rSums := [+](t,f);
+    var total := tSum + fSum;
+
+    var g:=0.0;
+
+    # Do true and false together
+    var i := -1;
+    while((i := i + 1) < t.count()) {
+        var rowTotal := rSums.fetch(i);
+
+        var value := t.fetch(i);
+        var tmp1 := safeDiv(tSum * rowTotal , total);
+        var tmp2 := safeDiv(value, tmp1);
+        g := g + (value * safeLog(dbl(tmp2)));
+
+        var value := f.fetch(i);
+        var tmp1 := safeDiv(fSum * rowTotal, total);
+        var tmp2 := safeDiv(value, tmp1);
+        g := g + (value * safeLog(dbl(tmp2)));
+    }
+
+    return str(2 * g) + "," + str(t.count() - 1) ;
+}
+
+
+# this procedure computes the Quinlan Information measure
+# ASSUMPTION: The contingency table is 2xC
+PROC quinlanInfo(BAT label, BAT weight, BAT match) : str {
+    var d := label.reverse().kunique().project(dbl(0));
+
+    var tw:=label.semijoin(match.select(TRUE)).reverse().join(weight);  # ==> label/weight
+    var fw:=label.semijoin(match.select(FALSE)).reverse().join(weight); # ==> label/weight
+    var t:={sum}(tw).kunion(d).sort();                                  # ==> label/summary
+    var f:={sum}(fw).kunion(d).sort();                                  # ==> label/summary
+
+    var tsum  := t.sum();
+    var fsum  := f.sum();
+    var n := tsum + fsum;
+
+    var num_classes := t.count();
+    var i := -1;
+    var M_c := 0.0;
+    var M_a_true := 0.0;
+    var M_a_false := 0.0;
+
+    # formulas derived from J. Minger An Empirical Comparison of Selection Measures for Decision-Tree Induction
+    # M(C) = -(x.1)/N*log((x.1)/n) - ((x.2)/N*log((x.2)/n) - ...   where x.y is the yth column margin
+    # M(A1) = -(x11)/(x1.)*log((x11)/(x1.)) - ...
+    # B(C|A) = (x1.)/N*(M(A1) + ....
+    # IM = M(C) - B(C|A)
+
+    while((i := i + 1) < num_classes) {
+        var cur_class := t.fetch(i) + f.fetch(i);
+        #print(cur_class);
+
+        M_c := dbl(M_c - (dbl(safeDiv(cur_class, dbl(n))) * safeLog(dbl(safeDiv(cur_class, dbl(n))))));
+        #print(M_c);
+
+        M_a_true := dbl(M_a_true - dbl(safeDiv(t.fetch(i), dbl(tsum)) * safeLog(safeDiv(t.fetch(i), dbl(tsum)))));
+        M_a_false := dbl(M_a_false - dbl(safeDiv(f.fetch(i), dbl(fsum)) * safeLog(safeDiv(f.fetch(i), dbl(fsum)))));
+    }
+
+    #print(M_c);
+    #print(M_a_true);
+    #print(M_a_false);
+    var b_c_a := dbl(dbl(safeDiv(tsum, n) * M_a_true) + dbl(safeDiv(fsum, n) * M_a_false));
+
+    #print(b_c_a);
+
+    return str(dbl(M_c - b_c_a));
+
+}
+
+# this procedure computes the GINI index of diversity
+# ASSUMPTION: The contingency table is 2xC
+PROC gini(BAT label, BAT weight, BAT match) : str {
+    var d := label.reverse().kunique().project(dbl(0));
+
+    var tw:=label.semijoin(match.select(TRUE)).reverse().join(weight);  # ==> label/weight
+    var fw:=label.semijoin(match.select(FALSE)).reverse().join(weight); # ==> label/weight
+    var t:={sum}(tw).kunion(d).sort();                                         # ==> label/summary
+    var f:={sum}(fw).kunion(d).sort();                                         # ==> label/summary
+
+    var tsum  := t.sum();
+    var fsum  := f.sum();
+    var n := tsum + fsum;
+
+    var num_classes := t.count();
+    var j := -1;
+
+    # formulas derived from J. Minger An Empirical Comparison of Selection Measures for Decision-Tree Induction
+    # i(t) = 1 - ((x.1)/N)^2  - ((x.2)/N)^2 ....
+    # i(A1) = 1 - (x11/x1.)^2 - (x12/x1.)^2 ...
+    # i = i(t) - (x1./N)i(A1) - (x2./N)i(A2) ...
+
+    var i_t := 1.0;
+    var i_a_true := 1.0;
+    var i_a_false := 1.0;
+
+    while((j := j + 1) < num_classes) {
+        var cur_class := t.fetch(j) + f.fetch(j);
+        #print(cur_class);
+
+        i_t := dbl(i_t - dbl(safeDiv(cur_class,n)*safeDiv(cur_class,n)));
+        i_a_true := dbl(i_a_true - dbl(safeDiv(t.fetch(j),tsum)*safeDiv(t.fetch(j),tsum)));
+        i_a_false := dbl(i_a_false - dbl(safeDiv(f.fetch(j),fsum)*safeDiv(f.fetch(j),fsum)));
+
+    }
+
+    # re-adjust i_a_true and i_a_false
+    i_a_true := dbl(safeDiv(tsum,n)*i_a_true);
+    i_a_false := dbl(safeDiv(fsum,n)*i_a_false);
+
+    return str(dbl(dbl(i_t - i_a_true) - i_a_false));
+
+}
+
+# Compute a weighted RMSE
+# For each true/false group,
+#   get their weighted average,
+#   compute the weighted square deviation,
+#   average them
+# return the rmse splitting, and not splitting
+# Also returns d and dhat to use in Kolmogorov-Smirnoff significance test
+# (see Sachs's Applied Statistics, pp 291)
+PROC rmse(BAT label, BAT weight, BAT match) : str {
+
+    var t:=match.select(TRUE);
+    var f:=match.select(FALSE);
+    var tl:=label.semijoin(t);
+    var tw:=weight.semijoin(t);
+    var fl:=label.semijoin(f);
+    var fw:=weight.semijoin(f);
+
+    # Compute the weighted averages for true, false, and all
+    var tavg:=safeDiv([*](tl,tw).sum(), tw.sum());
+    var favg:=safeDiv([*](fl,fw).sum(), fw.sum());
+    var bavg:=safeDiv([*](label,weight).sum(), weight.sum());
+
+    # Compute the square deviations and weight them
+    var tss:=[*]([pow]([-](tl, tavg), dbl(2.0)), tw);
+    var fss:=[*]([pow]([-](fl, favg), dbl(2.0)), fw);
+    var bss:=[*]([pow]([-](label, bavg), dbl(2.0)), weight);
+
+    # compute the rmse of the true/false
+    var rmseNoSplit:=sqrt(safeDiv(bss.sum(), weight.sum()));
+    var rmse       :=sqrt(safeDiv((tss.sum()+fss.sum()), weight.sum()));
+
+    # And now compute the d and dhat for Kolmogorov-Smirnoff
+    # bin both original and (true/false) weighted square errors, and compute their distances
+
+    # get the max deviation among parent and children to compute bins
+    var range:=max(max(tss.max(), fss.max()), bss.max());
+
+    # get the bins for the parent
+    var bnewbin:=bss.getcumulativefreq(10, range);
+
+    # combine the children
+    tss.access(BAT_WRITE).insert(fss);
+
+    # get the bins for the children
+    var splitbin:=tss.getcumulativefreq(10, range);
+
+    # compute Ks distance
+    var d:=[abs]([-](bnewbin, splitbin)).max();
+
+    # compute part of the normalized by-size in the Ks equation
+    var dhat:= sqrt(safeDiv((weight.sum() + weight.sum()), (weight.sum()*weight.sum())));
+    return str(rmseNoSplit) + "," + str(rmse) + "," + str(d) + "," + str(dhat);
+}
+
+
+
+
+# Computes chi-square value for arbitrary contingency table
+#must pass in a bat of bats of cell counts
+PROC chiSq(BAT b) : dbl {
+
+    var m:=b.count();
+
+    var total := 0.0;
+    var colTotal := 0.0;
+    var rowTotal := 0.0;
+    var chisqTot := 0.0;
+
+    var i := -1;
+    var j := -1;
+
+    # initialize rowTotals
+    var rowTotals := BAT(b.fetch(0));
+
+    while((i := i + 1) < b.count()) {
+
+        if(i > 0) {
+            rowTotals := [+](rowTotals, BAT(b.fetch(i)));
+        }
+        total := total + BAT(b.fetch(i)).sum();
+
+    }
+
+    i := -1;
+
+    #loop through row and columns, for each cell
+    #update chi-square score
+    while((i := i + 1) < rowTotals.count()) {
+        rowTotal := rowTotals.fetch(i);
+        j := -1;
+
+        while((j := j + 1) < b.count()) {
+            var temp := BAT(b.fetch(j));
+            colTotal := dbl(temp.sum());
+
+            var observed := dbl(temp.fetch(i));
+            var expected := safeDiv(dbl(dbl(rowTotal) * dbl(colTotal)), dbl(total));
+
+            chisqTot := chisqTot + safeDiv(dbl((dbl(observed) - dbl(expected)) * (dbl(observed) - dbl(expected))), dbl(expected));
+        }
+    }
+    return chisqTot;
+}
+
+# Computes gstatistic value for arbitrary contingency table
+#must pass in a bat of bats of cell counts
+# this code mimics StatUtil.gStatistic(double[][] table)
+PROC gStat(BAT b) : dbl {
+
+    var total := 0.0;
+    var colTotal := 0.0;
+    var rowTotal := 0.0;
+    var gStatTot := 0.0;
+
+    var i := -1;
+    var j := -1;
+
+    # initialize rowTotals
+    var rowTotals := BAT(b.fetch(0));
+
+    while((i := i + 1) < b.count()) {
+
+        if(i > 0) {
+            rowTotals := [+](rowTotals, BAT(b.fetch(i)));
+        }
+        total := total + BAT(b.fetch(i)).sum();
+
+    }
+
+    i := -1;
+
+    #loop through row and columns, for each cell
+    #update gStat score
+    while((i := i + 1) < rowTotals.count()) {
+        rowTotal := rowTotals.fetch(i);
+        j := -1;
+
+        while((j := j + 1) < b.count()) {
+            var temp := BAT(b.fetch(j));
+            colTotal := temp.sum();
+
+            var observed := temp.fetch(i);
+            var tmp1 := safeDiv(dbl(rowTotal * colTotal), dbl(total));
+            var tmp2 := safeDiv(dbl(observed), tmp1);
+            gStatTot := gStatTot + dbl(observed) * safeLog(dbl(tmp2));
+        }
+    }
+    return dbl(2*gStatTot);
+}
+
+
+###
+# Method for binning tables
+###
+PROC getcumulativefreq(BAT b, int numBins, dbl range) : BAT [oid,dbl] {
+
+    var cumfreq:=bat(oid, dbl);
+    var i:=0;
+
+    # iterate over each bin
+    while((i := i + 1) <= numBins) {
+    
+        # grab the current cumulative frequency
+        var temp:=b.select(dbl(nil), dbl(i)*( range/dbl(numBins) )).count();
+        cumfreq.insert(oid(i), safeDiv(dbl(temp), dbl(b.count())));
+
+    }
+
+    return cumfreq;
+}
+
+PROC bin(BAT b, int numBins) : BAT {
+    var values:=bat(b.ttype(), b.ttype());
+    var binSize := dbl(b.count() / (1.0 * numBins));
+    var currNum := dbl(0);
+    var hist := b.histogram().sort();
+    if (hist.count() <= numBins) {
+        return hist.mirror();
+    }
+    hist@batloop() {
+        var currValue := $h;
+        var currCount := $t;
+        if ( (currNum + currCount) >= binSize) {
+            values.insert($h, $h);
+            currNum := currNum - binSize;
+        }
+        currNum := currNum + currCount;
+    }
+    return values;
+}
+
+
+
+

@@ -1,0 +1,164 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Importing database elements using plain text</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch03s05.html" title="Importing Plain Text Data">
+      <link rel="prev" href="ch03s05.html" title="Importing Plain Text Data">
+      <link rel="next" href="ch03s06.html" title="Exporting Plain Text Data">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Importing Plain Text Data</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e3411"></a>Importing database elements using plain text
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e3414"></a><a class="indexterm" name="d0e3419"></a><p>In addition to importing a complete database, Proximity lets you
+            import individual <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">containers</span></a>
+            and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attributes</span></a> using the
+            plain text data format.  To
+            import additional data into an existing database, use the
+            <span><strong class="command">import-text.sh</strong></span> (<span><strong class="command">import-text.bat</strong></span>
+            for Windows) script to import a plain text data file containing the
+            new data.
+         </p>
+         <p>To import data into an existing database, all relevant files
+            must be present in the same directory.  To ensure that no unwanted
+            data is imported, we recommend using a different directory for storing
+            the required files for each import operation.
+         </p>
+         <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+            <table border="0" summary="Caution">
+               <tr>
+                  <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                  <th align="left"></th>
+               </tr>
+               <tr>
+                  <td align="left" valign="top">
+                     <p>Recall that Proximity performs no error checking when importing
+                        plain text data.  You are entirely responsible for ensuring the
+                        consistency and integrity of data imported using this format.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>The following exercise walks through the process of importing a new
+            attribute, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birthyear</span>, and its values
+            into the existing MovieDB
+            database.
+         </p>
+         <div class="procedure"><a name="ex_import_textattr"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;3.7.&nbsp;Importing an attribute using plain text data:</b></p>
+            <p>Before beginning, make sure that you are serving the MovieDB
+               database (created in <a href="ch03s05.html#ex_import_textdb" title="Exercise&nbsp;3.6.&nbsp;Importing a database using plain text data:">Exercise&nbsp;3.6</a>) using
+               Mserver.  You must have completed <a href="ch03s05.html#ex_import_textdb" title="Exercise&nbsp;3.6.&nbsp;Importing a database using plain text data:">Exercise&nbsp;3.6</a>
+               before running the current exercise.  Data files must be on the same
+               machine as that serving the database.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>Uncompress the plain text data files.</p>
+                  <p>
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cd $PROX_HOME/doc/user/tutorial/examples</code></strong>
+&gt; <strong class="userinput"><code>gunzip movie_attr.tar.gz</code></strong>
+</pre><p>
+                     
+                  </p>
+                  <p>Uncompressing this tar file creates a
+                     <code class="filename">MovieAttr</code> directory under the
+                     <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code>
+                     directory. All plain text data files required for the current import
+                     operation must be located in the same directory.
+                  </p>
+               </li>
+               <li>
+                  <p>Examine the files in the <code class="filename">$PROX_HOME/doc/user/tutorial/examples/MovieAttr</code>
+                     directory.
+                  </p>
+                  <p>Note that this directory contains two files:
+                     
+                  </p>
+                  <div class="itemizedlist">
+                     <ul type="disc" compact>
+                        <li>
+                           <p><code class="filename">attributes.data</code></p>
+                        </li>
+                        <li>
+                           <p><code class="filename">O_attr_birthyear.data</code></p>
+                        </li>
+                     </ul>
+                  </div>
+                  <p>
+                     The <code class="filename">attributes.data</code> file defines the 
+                     <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birthyear</span>attribute that we want to
+                     import and the <code class="filename">O_attr_birthyear.data</code> file
+                     provides the values for this attribute.  When importing selected
+                     database elements, you do not need to provide files for other types of
+                     data such as objects or links.
+                  </p>
+               </li>
+               <li>
+                  <p>Import the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">birthyear</span> attribute data.
+                     (Substitute the appropriate port number if
+                     you are using a different port.)
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>bin/import-text.sh localhost:30000 $PROX_HOME/doc/user/tutorial/examples/MovieDB</code></strong>
+</pre><p>
+                     Data files must be on the same machine as that serving the
+                     database.
+                  </p>
+                  <p>During import, Proximity reports on the entities being defined
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                  </p><pre class="screen">INFO kdl.prox.app.ImportTextApp - * importing database from
+   /proximity/doc/user/tutorial/examples/MovieAttr
+INFO kdl.prox.app.ImportTextApp -   Loading object table
+INFO kdl.prox.app.ImportTextApp -   Loading link table
+INFO kdl.prox.app.ImportTextApp -   Loading attributes
+INFO kdl.prox.app.ImportTextApp -   Loading attribute: O_attr_birthyear.data
+INFO kdl.prox.app.ImportTextApp -   Loading containers
+INFO kdl.prox.app.ImportTextApp - * done importing
+</pre><p>
+                     
+                  </p>
+               </li>
+            </ol>
+         </div><a class="indexterm" name="d0e3524"></a><a class="indexterm" name="d0e3525"></a><a class="indexterm" name="d0e3526"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03s05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Importing Plain Text Data&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Exporting Plain Text Data</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,1237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<appendix id="ch_queryeditor">
+<title>Using the Proximity Query Editor</title>
+<indexterm id="idx_qg_queryeditor" class="startofrange">
+           <primary>Query Editor</primary></indexterm>
+<indexterm id="idx_qg_proxqe" class="startofrange">
+           <primary>Proximity</primary>
+           <secondary>Query Editor</secondary></indexterm>
+<indexterm id="idx_qg_creatingqueries" class="startofrange">
+           <primary>creating queries</primary></indexterm>
+
+<!-- ============================================================== -->
+<!--                          INTRODUCTION                          -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Introduction</title>
+
+<para>&qgraph; is implemented in Proximity, an open source system for
+relational <glossterm>knowledge discovery</glossterm>.  Proximity
+represents queries in an 
+XML<indexterm><primary>XML representation of queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>XML representation</secondary></indexterm>
+format described in <xref linkend="qg_ch_xml"/>.  Although you can create
+queries by editing the XML file, Proximity provides a Query
+Editor that lets you work with queries using a more intuitive graphical
+representation similar to that used in this guide.  You can also edit,
+save, validate, and execute queries directly from the Proximity Query
+Editor.  This chapter provides a brief overview of how to use the
+Proximity Query Editor.  See the &tutorialhome; for more information
+on using the Query Editor and on creating and executing queries in
+Proximity.</para>
+
+<para>The Proximity Query Editor is available from the &proxui;,
+<indexterm><primary>Proximity</primary>
+           <secondary>Database Browser</secondary></indexterm>
+a browser-based interface to Proximity&rsquo;s functionality.  To access
+the Query Editor, select <guimenuitem>New Query</guimenuitem> from the
+<guimenu>Query</guimenu> menu of the &proxui;, shown below.
+</para>
+
+<para>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata align="center" valign="bottom"
+              fileref="&graphicspath;/GUIHome.png"
+              width="5.0in" format="PNG" />
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/GUIHome.png" 
+               contentwidth="5.75in"
+               format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+
+<para>Other options in the <guimenu>Query</guimenu> menu
+apply to existing query files:
+<itemizedlist spacing="compact">
+<listitem><para>Select <guimenuitem>Edit Query</guimenuitem>
+<indexterm><primary>Query Editor</primary>
+           <secondary>editing queries</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>editing in Query Editor</secondary></indexterm>
+<indexterm><primary>editing</primary>
+           <secondary>queries</secondary></indexterm>
+  to display a
+  previously saved query in the Query Editor for editing.</para></listitem>
+<listitem><para>Select <guimenuitem>Run Query</guimenuitem>
+<indexterm><primary>Query Editor</primary>
+           <secondary>executing queries</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>executing</secondary></indexterm>
+<indexterm><primary>executing queries</primary></indexterm>
+  to execute a saved query.</para></listitem>
+</itemizedlist>
+This chapter describes how to use the Query Editor to create, edit,
+save, and execute QGraph queries. See the &tutorialhome; for
+information on other methods of executing queries in Proximity.</para>
+
+<para>Creating a query
+<indexterm><primary>queries</primary>
+           <secondary>creating in Query Editor</secondary></indexterm>
+consists of
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>defining one or more
+    <glossterm baseform="vertex">vertices</glossterm></para>
+  </listitem>
+  <listitem>
+    <para>defining <glossterm baseform="edge">edges</glossterm>
+    linking those vertices</para> 
+  </listitem>
+  <listitem>
+    <para>adding any
+    <glossterm baseform="condition">conditions</glossterm> and 
+    <glossterm baseform="numeric annotation">annotations</glossterm>
+    to the vertices and edges</para>
+  </listitem>
+  <listitem>
+    <para>defining any
+    <glossterm baseform="subquery">subqueries</glossterm></para>
+  </listitem>
+  <listitem>
+    <para>adding any
+    <glossterm baseform="constraint">constraints</glossterm> between
+    separate query elements</para>
+  </listitem>
+  <listitem>
+    <para>adding any database update (new link) specifications</para>
+  </listitem>
+  <listitem>
+    <para>providing a name and description for the query</para>
+  </listitem>
+  <listitem>
+    <para>making sure the query is 
+    <glossterm baseform="validation">valid</glossterm></para>
+  </listitem>
+</itemizedlist>
+A query can be as simple as a single vertex.  Therefore, with the
+exception of defining at least one vertex and validating the query,
+all of these steps are optional.  Invalid queries will not execute and
+may not be correctly saved&mdash;we recommend that you check the
+status list for errors before executing or saving a query.  The Query
+Editor imposes no ordering on these steps.
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                 WORKING WITH THE QUERY EDITOR                  -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Working with the Query Editor</title>
+
+<para>The figure below shows the Proximity Query Editor interface. 
+<mediaobject>
+<imageobject role="fo">
+    <imagedata valign="bottom"
+    fileref="&graphicspath;/QE_Interface.png" format="PNG" />
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+    fileref="&graphicspath;/QE_Interface.png" 
+    contentwidth="5.75in"
+    format="PNG" />
+</imageobject>
+</mediaobject>
+The Query Editor provides a large display area where you graphically
+create the query structure of vertices, edges, and subqueries.
+The Query Editor includes two properties panes at the bottom of the
+window for displaying and editing query properties such as
+conditions, annotations, and constraints.  The query properties pane
+<indexterm><primary>Query Editor</primary>
+           <secondary>query properties pane</secondary></indexterm>
+<indexterm><primary>query properties pane</primary></indexterm>
+<indexterm><primary>properties panes</primary></indexterm>
+displays properties of the query as a whole. The element properties
+pane
+<indexterm><primary>Query Editor</primary>
+           <secondary>element properties pane</secondary></indexterm>
+<indexterm><primary>element properties pane</primary></indexterm>
+displays the properties of the selected query element.  The
+element properties pane is blank when no query element is selected.
+The status list
+<indexterm><primary>Query Editor</primary>
+           <secondary>status list</secondary></indexterm>
+<indexterm><primary>status list</primary></indexterm>
+at the bottom of the window indicates whether the
+query is valid,
+<indexterm><primary>validity of a query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>validity of</secondary></indexterm>
+and if invalid, provides a drop-down list of errors.
+<indexterm><primary>errors in queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>errors in</secondary></indexterm>
+</para>
+
+<para>The Query Editor is mode based.
+<indexterm><primary>Query Editor</primary>
+           <secondary>modes</secondary></indexterm>
+<indexterm><primary>modes in Query Editor</primary></indexterm>
+Each toolbar button selects a
+tool, which in turn determines the current mode for the Query Editor.
+For example, clicking the vertex tool places
+the Query Editor in vertex mode.  All subsequent clicks
+in the Query Editor display area place a new vertex at the indicated
+location.  Selecting a new tool by clicking the corresponding toolbar
+button changes the mode and changes how clicks in the display area are
+interpreted.
+
+<informaltable frame="none">
+<tgroup cols="2" align="left" rowsep="0" colsep="0">
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="8*"/>
+<tbody valign="middle">
+<row>
+<entry>&selecttool;</entry>
+<entry valign="middle">Selection mode&mdash;clicking 
+<indexterm><primary>selection mode</primary></indexterm>
+selects existing query elements for editing or deletion</entry>
+</row>
+<row>
+<entry>&vertextool;</entry>
+<entry valign="middle">Vertex mode&mdash;clicking
+<indexterm><primary>vertex mode</primary></indexterm>
+creates a new vertex at the indicated location</entry>
+</row>
+<row>
+<entry>&edgetool;</entry>
+<entry valign="middle">Edge mode&mdash;clicking
+<indexterm><primary>edge mode</primary></indexterm>
+and dragging creates a new edge</entry>
+</row>
+<row>
+<entry>&subquerytool;</entry>
+<entry valign="middle">Subquery mode&mdash;dragging
+<indexterm><primary>subquery mode</primary></indexterm>
+a surrounding box indicates which vertices belong to a subquery</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+<para>The sections below provide instructions for creating queries and
+working with the Query Editor.</para>
+ 
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To start the Query Editor                           -->
+
+<bridgehead renderas="sect2" id="qe_startQE" xreflabel="To start the
+Query Editor">To start the Query Editor:</bridgehead>
+<indexterm><primary>Query Editor</primary>
+           <secondary>starting</secondary></indexterm>
+<indexterm><primary>starting the Query Editor</primary></indexterm>
+
+<para>You can start the Query Editor with no specified query (to
+create a new query), or specify an existing query to edit
+<indexterm><primary>editing</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>editing in Query Editor</secondary></indexterm>
+that query
+in the Query Editor.</para>
+
+<itemizedlist spacing="compact">
+<listitem>
+<para>Choose the appropriate action from the
+<guimenu>Queries</guimenu> menu:
+
+  <itemizedlist spacing="compact">
+  <listitem>
+  <para>To create a new query, select 
+        <guimenuitem>New Query</guimenuitem>.</para>
+  </listitem>
+  <listitem>
+  <para>To edit an existing query, select
+        <guimenuitem>Edit Query</guimenuitem>.
+  <indexterm><primary>Query Editor</primary>
+             <secondary>opening queries</secondary></indexterm>
+  <indexterm><primary>opening queries</primary></indexterm>
+  <indexterm><primary>Query Editor</primary>
+           <secondary>editing queries</secondary></indexterm>
+  </para></listitem>
+  </itemizedlist>
+</para>
+<para>If you are editing a previously saved query, Proximity display
+the <guilabel>Open</guilabel> dialog so that you can select the query
+to edit.</para>
+</listitem>
+</itemizedlist>
+
+<para>Proximity allows you to open multiple Query
+Editor windows.  All Query Editor windows are closed when you close
+the &proxui;.</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To close the Query Editor                           -->
+
+<bridgehead renderas="sect2" id="qe_closeQE" xreflabel="To close the
+Query Editor">To close the Query Editor:</bridgehead>
+<indexterm><primary>Query Editor</primary>
+           <secondary>exiting</secondary></indexterm>
+<indexterm><primary>exiting the Query Editor</primary></indexterm>
+<indexterm><primary>closing the Query Editor</primary></indexterm>
+
+<para>Proximity asks whether to save
+any unsaved queries
+<indexterm><primary>saving queries</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>saving queries</secondary></indexterm>
+before closing the Query Editor.
+<itemizedlist spacing="compact">
+<listitem>
+  <para>In the <guimenu>File</guimenu> menu, select <guimenuitem>Exit
+  Query Editor</guimenuitem>.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To change zoom level                                -->
+
+<bridgehead renderas="sect2" id="qe_zoom" xreflabel="To change zoom
+level">To change zoom level:</bridgehead>
+<indexterm><primary>Query Editor</primary>
+           <secondary>zooming in display</secondary></indexterm>
+<indexterm><primary>zooming</primary></indexterm>
+
+<para>Changing the zoom level can be helpful when working with large
+queries.  Zooming out lets you see the entire query structure at once
+while zooming in lets you easily work with individual query elements.
+<itemizedlist spacing="compact">
+<listitem>
+  <para>To zoom in: In the <guimenu>View</guimenu> menu, select
+  <guimenuitem>Zoom In</guimenuitem> or press <keycap>Ctrl-=</keycap>.</para>
+</listitem>
+<listitem>
+  <para>To zoom out: In the <guimenu>View</guimenu> menu, select
+  <guimenuitem>Zoom Out</guimenuitem> or press
+  <keycap>Ctrl-&nbsp;&ndash;</keycap>
+  (Ctrl-minus).</para>
+</listitem>
+<listitem>
+  <para>To zoom contents to fit the display area: In the
+  <guimenu>View</guimenu> menu, select <guimenuitem>Zoom To
+  Fit</guimenuitem> or press <keycap>Ctrl-0</keycap>
+  (Ctrl-zero).</para>
+</listitem>
+<listitem>
+  <para>To reset the zoom to its default setting: In the
+  <guimenu>View</guimenu> menu, select <guimenuitem>Reset
+  Zoom</guimenuitem> or press <keycap>Ctrl-Backspace</keycap>.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: Keyboard shortcuts                                  -->
+
+<bridgehead renderas="sect2" id="qe_keys" xreflabel="Keyboard
+shortcuts">Keyboard shortcuts:</bridgehead>
+<indexterm><primary>Query Editor</primary>
+           <secondary>keyboard shortcuts</secondary></indexterm>
+<indexterm><primary>keyboard shortcuts</primary></indexterm>
+
+<para>Many Query Editor commands can be invoked using keyboard
+shortcuts instead of using the mouse.  You can open,
+close,
+<indexterm><primary>Query Editor</primary>
+           <secondary>closing queries</secondary></indexterm>
+save, and run
+<indexterm><primary>Query Editor</primary>
+           <secondary>executing queries</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>executing</secondary></indexterm>
+<indexterm><primary>executing queries</primary></indexterm>
+queries, select tools, and change the Query Editor&rsquo;s mode
+<indexterm><primary>Query Editor</primary>
+           <secondary>modes</secondary></indexterm>
+<indexterm><primary>modes in Query Editor</primary></indexterm>
+(select tools) 
+using keyboard shortcuts.   Keyboard shortcuts are shown next to the
+corresponding command in the Query Editor&rsquo;s menus.  The table
+below summarizes these shortcuts.</para>
+
+&qeshortcuttable;
+</sect1>
+
+<?pagebreak?>
+<!-- ============================================================== -->
+<!--                WORKING WITH VERTICES AND EDGES                 -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Working with Vertices and Edges</title>
+
+<para><glossterm baseform="vertex">Vertices</glossterm> and
+<glossterm baseform="edge">edges</glossterm> are the foundation of
+&qgraph; queries.  All 
+queries must contain at least one vertex.  Queries with multiple
+vertices must form a connected graph.</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To add a vertex                                     -->
+
+<bridgehead renderas="sect2" id="qe_addvertex"
+ xreflabel="To add a vertex">To add a vertex:</bridgehead>
+<indexterm><primary>vertices</primary>
+           <secondary>creating in Query Editor</secondary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>creating vertices</secondary></indexterm>
+
+<para>To add new vertices to a query, enter vertex mode and use the
+mouse to position the new vertex.
+<orderedlist spacing="compact">
+<listitem>
+  <para>In the Query Editor toolbar, click &vertextool; or press
+  <keycap>Ctrl-2</keycap> to choose the vertex tool and enter vertex
+  mode.  The Query Editor remains in vertex mode (all clicks in the
+  Query Editor display area create a new vertex) until you change modes
+  by choosing a different tool from the toolbar.</para>
+</listitem>
+<listitem>
+  <para>Click in the Query Editor display area. The Query Editor
+  creates a new vertex.</para>
+</listitem>
+<listitem>
+  <para>[Optional] Provide a name
+<indexterm><primary>labels</primary><see>names</see></indexterm>
+<indexterm><primary>names</primary>
+  <secondary sortas="vertices">of vertices</secondary></indexterm>
+<indexterm><primary>vertices</primary>
+  <secondary>names of</secondary></indexterm>
+  for the new vertex. (Alternatively,
+  you can continue using the default name provided by the Query
+  Editor.)
+  <orderedlist spacing="compact">
+  <listitem>
+    <para>In the Query Editor toolbar, click &selecttool; or press
+    <keycap>Ctrl-1</keycap> to choose the selection tool and enter
+    selection mode.</para>
+  </listitem>
+  <listitem>
+    <para>Click the vertex to be re-named.  The Query Editor
+    displays the vertex&rsquo;s properties in the element properties
+    pane.</para>
+  </listitem>
+  <listitem>
+    <para>In the element properties pane,
+<indexterm><primary>Query Editor</primary>
+           <secondary>element properties pane</secondary></indexterm>
+<indexterm><primary>element properties pane</primary></indexterm>
+    click the current (default)
+    name for this vertex.  Edit the name and press
+    <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+  </listitem></orderedlist></para>
+</listitem>
+</orderedlist>
+</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To add an edge                                      -->
+
+<bridgehead renderas="sect2" id="qe_addedge"
+ xreflabel="To add an edge">To add an edge:</bridgehead>
+<indexterm><primary>edges</primary>
+           <secondary>creating in Query Editor</secondary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>creating edges</secondary></indexterm>
+
+<para>To add new edges to a query, enter edge mode and use the
+mouse to draw the new edge.
+<orderedlist spacing="compact">
+<listitem>
+  <para>In the Query Editor toolbar, click &edgetool; or press
+  <keycap>Ctrl-3</keycap> to choose the edge tool and enter edge mode.
+  The Query Editor remains in edge mode (clicks in the
+  Query Editor display area create a new edge) until you change modes
+  by choosing a different tool from the toolbar.</para>
+</listitem>
+<listitem>
+  <para>Drag the mouse from one vertex to another vertex.  The
+  Query Editor creates a <glossterm>directed edge</glossterm> from the
+  starting vertex to the ending vertex.</para>
+</listitem>
+<listitem>
+  <para>[Optional] Provide a name
+<indexterm><primary>names</primary>
+  <secondary sortas="edges">of edges</secondary></indexterm>
+<indexterm><primary>edges</primary>
+  <secondary>names of</secondary></indexterm>
+  for the new edge. (Alternatively,
+  you can continue using the default name provided by the Query
+  Editor.)
+  <orderedlist spacing="compact">
+  <listitem>
+    <para>In the Query Editor toolbar, click &selecttool; or press
+    <keycap>Ctrl-1</keycap> to choose the selection tool and enter
+    selection mode.</para>
+  </listitem>
+  <listitem>
+    <para>Click the edge to be re-named.  The Query Editor
+    displays the edge&rsquo;s properties in the element properties
+    pane.</para>
+  </listitem>
+  <listitem>
+    <para>In the element properties pane, click the current (default)
+    name for this edge.  Edit the name and press
+    <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+  </listitem></orderedlist></para>
+</listitem>
+</orderedlist>
+</para>
+
+<para>Edges may be directed or 
+<glossterm baseform="undirected edge">undirected</glossterm>.
+Directionality is an edge 
+property and is set in the element properties pane.</para>
+
+<orderedlist spacing="compact">
+<title>To add an undirected edge:</title>
+<indexterm><primary>edges</primary>
+           <secondary>directed vs. undirected</secondary></indexterm>
+<listitem>
+  <para>Create a directed edge.</para>
+</listitem>
+<listitem>
+  <para>Click &selecttool; or press <keycap>Ctrl-1</keycap> to choose
+  the selection tool.</para></listitem>
+<listitem>
+  <para>Click the edge to be modified</para>
+</listitem>
+<listitem>
+  <para>In the element properties pane, change the value of
+  <guilabel>Is Directed</guilabel> from <userinput>true</userinput> to
+  <userinput>false</userinput>.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<?pagebreak?>
+<orderedlist spacing="compact">
+<title>To change edge direction:</title>
+<indexterm><primary>edges</primary>
+           <secondary>changing direction</secondary></indexterm>
+<listitem>
+  <para>Click &selecttool; or press <keycap>Ctrl-1</keycap> to choose
+  the selection tool.</para></listitem>
+<listitem>
+  <para>Click the edge to be modified.</para>
+</listitem>
+<listitem>
+  <para>In the <guimenu>Edit</guimenu> menu, choose <guimenuitem>Flip
+  Edge Direction</guimenuitem> or press
+  <keycap>Ctrl-F</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<para>A <glossterm baseform="self link">self-link</glossterm> edge
+connects a single vertex to itself and matches 
+links in the database that connect an object to itself.</para>
+
+<orderedlist spacing="compact">
+<title>To add a self-link (loop) edge:</title>
+<indexterm><primary>edges</primary>
+           <secondary>self-link (loop)</secondary></indexterm>
+<indexterm><primary>self-links</primary></indexterm>
+<listitem>
+  <para>Click &edgetool; to choose the edge tool.</para>
+</listitem>
+<listitem>
+  <para>Click the target vertex without dragging. The Query Editor
+  creates an edge that begins and ends at the target vertex (a
+  self-link or loop edge).</para>
+</listitem>
+</orderedlist>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To select a query element                           -->
+
+<bridgehead renderas="sect2" id="qe_selectelement"
+ xreflabel="To select a query element">To select a query
+ element:</bridgehead>
+
+<para>Use selection mode
+<indexterm><primary>selection mode</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>selecting elements</secondary></indexterm>
+to re-position query elements in the display
+and to select existing query elements for editing,
+such as adding or modifying conditions and annotations on that element.
+<orderedlist spacing="compact">
+<listitem>
+  <para>In the Query Editor toolbar, click &selecttool; or press
+  <keycap>Ctrl-1</keycap> to choose the selection tool and enter
+  selection mode.</para>
+</listitem>
+<listitem>
+  <para>Click the query element you want to select. The Query Editor
+  draws handles around the selected element.</para>
+</listitem>
+</orderedlist>
+The Query Editor remains in selection mode (clicks in the
+Query Editor display select query elements) until you change modes
+by choosing a different tool from the toolbar.</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To delete a vertex or edge                          -->
+
+<bridgehead renderas="sect2" id="qe_delelement"
+ xreflabel="To delete a vertex or edge">To delete a vertex or
+ edge:</bridgehead>
+<indexterm><primary>Query Editor</primary>
+           <secondary>deleting elements</secondary></indexterm>
+<indexterm><primary>deleting</primary>
+           <secondary>query elements</secondary></indexterm>
+<indexterm><primary>removing</primary>
+           <see>deleting</see></indexterm>
+
+<para>Deleting a vertex also deletes any edges linked to that
+vertex.  Make sure that your query remains connected after deleting
+any elements.</para>
+
+<orderedlist spacing="compact">
+<listitem>
+  <para>Click &selecttool; or press <keycap>Ctrl-1</keycap> to choose
+  the selection tool.</para></listitem>
+<listitem>
+  <para>Click the element to be deleted.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Delete</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To add or edit a condition                          -->
+
+<bridgehead renderas="sect2" id="qe_addcondition" xreflabel="To add a
+condition">To add or edit a condition:</bridgehead>
+<indexterm><primary>Query Editor</primary>
+           <secondary>creating conditions</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>creating in Query Editor</secondary></indexterm>
+
+<para><glossterm baseform="condition">Conditions</glossterm> and 
+<glossterm baseform="numeric annotation">annotations</glossterm> are
+properties of a specific vertex 
+or edge.  Select the element to be modified and use the element
+properties pane
+<indexterm><primary>Query Editor</primary>
+           <secondary>element properties pane</secondary></indexterm>
+<indexterm><primary>element properties pane</primary></indexterm>
+to add or edit any conditions or annotations on that element.</para>
+
+<para><glossterm baseform="complex condition">Complex conditions</glossterm>
+<indexterm><primary>complex conditions</primary></indexterm>
+must be entered using <glossterm>disjunctive normal form</glossterm>
+<indexterm><primary>disjunctive normal form</primary></indexterm>
+in <glossterm>prefix notation</glossterm>.
+<indexterm><primary>prefix notation</primary></indexterm>
+See <xref xrefstyle="pageref" linkend="qg_cond_impl_complex" />
+for additional information on entering complex conditions in the Query
+Editor.</para>
+
+<orderedlist spacing="compact">
+<listitem>
+  <para>Click &selecttool; or press <keycap>Ctrl-1</keycap> to choose
+  the selection tool.</para></listitem>
+<listitem>
+  <para>Click the vertex or edge that requires a condition.</para>
+</listitem>
+<listitem>
+  <para>In the element properties pane, click in the Value
+  column for <guilabel>Condition</guilabel>.</para>
+</listitem>
+<listitem>
+  <para>Enter the new condition or edit the value of the current
+  condition.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To add an annotation                                -->
+
+<?pagebreak?>
+<bridgehead renderas="sect2" id="qe_addannot" xreflabel="To add an
+annotation">To add or edit an annotation:</bridgehead>
+<indexterm><primary>Query Editor</primary>
+           <secondary>creating annotations</secondary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>creating in Query Editor</secondary></indexterm>
+
+<para>All edges adjacent to an annotated vertex must also be
+annotated.
+<indexterm><primary>adjacency requirements</primary></indexterm>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>adjacency requirements</secondary></indexterm>
+To help avoid validation
+<indexterm><primary>validity of a query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>validity of</secondary></indexterm>
+errors
+<indexterm><primary>errors in queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>errors in</secondary></indexterm>
+due to unannotated edges,
+you can elect to automatically add a <token role="annot">[1..]</token>
+annotation to any new edge (see <xref linkend="qe_annotpref"/>,
+below, for instructions).</para>
+
+<orderedlist spacing="compact">
+<listitem>
+  <para>Click &selecttool; to choose the selection tool and select the
+  vertex or edge to be annotated.</para>
+</listitem>
+<listitem>
+  <para>In the element properties pane, click in the value
+  column for <guilabel>Annotation</guilabel>.</para>
+</listitem>
+<listitem>
+  <para>Enter the annotation text.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To change automatic annotation preferences             -->
+
+<bridgehead renderas="sect2" id="qe_annotpref" xreflabel="To change
+automatic annotation preferences">To change automatic annotation
+preferences:</bridgehead>
+<indexterm><primary>numeric annotations</primary>
+           <secondary>adding automatically</secondary></indexterm>
+<indexterm><primary>edges</primary>
+           <secondary>automatic annotation of</secondary></indexterm>
+
+<para>The Query Editor provides the option of automatically annotating
+every new edge with <token role="annot">[1..]</token>.  Because edges
+adjacent to annotated vertices must be annotated, adding this
+annotation automatically can help to prevent validation errors.  The 
+<token role="annot">[1..]</token> annotation is the most common edge
+annotation and is typically the correct edge annotation for most
+queries involving annotated vertices.  Adding a 
+<token role="annot">[1..]</token> annotation to edges that are not adjacent to
+annotated vertices is rarely a problem for most datasets, although
+care should be taken to understand how this differs from unannotated
+edges when the dataset contains instances of multiple links connecting
+two objects.
+<itemizedlist spacing="compact">
+<listitem>
+  <para>In the <guimenu>Edit</guimenu> menu, choose <guimenuitem>Add
+  [1..] To New Edges</guimenuitem>.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>Selecting the <guimenuitem>Add [1..] To New Edges</guimenuitem>
+command toggles the automatic edge annotation behavior:
+<itemizedlist spacing="compact">
+<listitem>
+  <para>If automatic edge annotation is disabled, choosing this
+  command turns <emphasis role="strong">on</emphasis> automatic edge
+  annotation.</para>
+</listitem>
+<listitem>
+  <para>If automatic edge annotation is enabled, choosing this
+  command turns <emphasis role="strong">off</emphasis> automatic edge
+  annotation.</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                      WORKING WITH UPDATES                      -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Working with Updates</title>
+
+<para>You can use &qgraph; queries to update (add, delete, or modify)
+database elements.  However, implementation in Proximity is currently
+limited to using queries to add new links to the database.
+<indexterm><primary>links</primary>
+           <secondary>adding with queries</secondary></indexterm>
+<indexterm><primary>updating data</primary></indexterm>
+</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To create new links                                 -->
+
+<bridgehead renderas="sect2" id="qe_update_newlinks" xreflabel="To
+create new links">To create new links:</bridgehead>
+
+<para>You must specify an attribute value for all new links created by
+queries. The attribute must currently exist in the database and all
+new links (defined by a single link specification) must be assigned
+the same value for this attribute.</para>
+
+<orderedlist spacing="compact">
+<listitem>
+  <para>Create a query that matches the desired objects and links.</para>
+</listitem>
+<listitem>
+  <para>In the <guilabel>Add-link</guilabel> area at the bottom of the
+  query properties pane, click <guibutton>Add</guibutton>.  The Query
+  Editor adds a temporary, example link specification, shown in the
+  query properties pane.</para>
+</listitem>
+<listitem>
+  <para>Edit the temporary, example link specification to show the
+  correct link information.  Specify the vertices corresponding to the
+  starting and ending objects and attribute value for the new
+  links.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+</listitem>
+</orderedlist>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                     WORKING WITH SUBQUERIES                    -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Working with Subqueries</title>
+
+<para>The Query Editor identifies 
+<glossterm baseform="subquery">subqueries</glossterm> by
+drawing a box around 
+the subquery elements and changing the color of the subquery&rsquo;s
+vertices from blue to red.  You must define at least some of the
+subquery&rsquo;s component elements by creating vertices and edges
+before you can define the subquery itself.
+You can add additional elements to the subquery
+<indexterm><primary>subqueries</primary>
+           <secondary>adding elements to</secondary></indexterm>
+by creating new vertices and edges within the subquery box.</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To add a subquery                                   -->
+
+<bridgehead renderas="sect2" id="qe_addsubquery" xreflabel="To add a
+subquery">To add a subquery:</bridgehead>
+<indexterm><primary>subqueries</primary>
+           <secondary>creating in Query Editor</secondary></indexterm>
+
+<orderedlist spacing="compact">
+<listitem>
+  <para>Create the vertices and edges that will form the
+  subquery.</para>
+</listitem>
+<listitem>
+  <para>In the Query Editor toolbar, click &subquerytool; or press
+  <keycap>Ctrl-4</keycap> to choose the subquery tool.</para> 
+</listitem>
+<listitem>
+  <para>Drag a rectangle around the subquery elements. The Query
+  Editor draws a rectangle around the target elements and changes
+  subquery vertices to red.</para>
+</listitem>
+</orderedlist>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To delete a subquery                                -->
+
+<bridgehead renderas="sect2" id="qe_delsubquery" xreflabel="To delete
+a subquery">To delete a subquery:</bridgehead>
+
+<orderedlist spacing="compact">
+<listitem>
+  <para>Click &selecttool; or press <keycap>Ctrl-1</keycap> to choose
+  the selection tool.</para></listitem>
+<listitem>
+  <para>Select the subquery by clicking the subquery rectangle&rsquo;s
+  boundary edge.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Delete</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<para>The Query Editor removes the subquery rectangle but leaves the
+subquery&rsquo;s vertices and edges in place.  Vertices that were in
+the subquery are changed back to blue.</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       WORKING WITH QUERIES                     -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Working with Queries</title>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To edit a saved query                               -->
+
+<bridgehead renderas="sect2" id="qe_edit" xreflabel="To edit an
+existing query">To edit an existing query:</bridgehead>
+<indexterm><primary>queries</primary>
+           <secondary>editing in Query Editor</secondary></indexterm>
+<indexterm><primary>editing</primary>
+           <secondary>queries</secondary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>opening queries</secondary></indexterm>
+<indexterm><primary>opening queries</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>editing queries</secondary></indexterm>
+
+<para>You can load an existing (previously saved) query in the Query
+Editor.  Editing an existing query is often an efficient way to create
+similar queries.  You can elect to edit a saved query from either the
+&proxui; or from within the Query Editor.</para>
+
+<orderedlist spacing="compact">
+<title>To edit a saved query from the &proxui;:</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>Database Browser</secondary></indexterm>
+
+<listitem>
+<para>From the <guimenu>Query</guimenu> menu, select <guimenuitem>Edit
+Query</guimenuitem>.
+<indexterm><primary>Query Editor</primary>
+           <secondary>starting</secondary></indexterm>
+<indexterm><primary>starting the Query Editor</primary></indexterm>
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</listitem>
+
+<listitem>
+<para>Navigate the the directory containing the query file.  Select
+the query to be edited and press <guibutton>OK</guibutton>.
+</para>
+</listitem>
+</orderedlist>
+
+<orderedlist spacing="compact">
+<title>To edit a saved query from the Query Editor:</title>
+<listitem>
+<para>In the <guimenu>File</guimenu> menu, choose
+<guimenuitem>Open</guimenuitem> or press <keycap>Ctrl-O</keycap>.
+Proximity displays the <guilabel>Open</guilabel> dialog.
+</para>
+</listitem>
+<listitem>
+<para>Navigate the the directory containing the query file.  Select
+the query to be edited and press <guibutton>OK</guibutton>.
+</para>
+</listitem>
+</orderedlist>
+
+<para>Proximity displays the selected query in the Query Editor
+display area.</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To add a constraint                                 -->
+
+<bridgehead renderas="sect2" id="qe_addconst" xreflabel="To add a
+constraint">To add a constraint:</bridgehead>
+<indexterm><primary>constraints</primary>
+           <secondary>creating in Query Editor</secondary></indexterm>
+
+<para>Because <glossterm baseform="constraint">constraints</glossterm>
+compare the 
+<glossterm baseform="identity constraint">identity</glossterm> or
+<glossterm baseform="attribute constraint">attribute values</glossterm> of
+two different query elements, constraints are properties of a query as
+a whole rather than of any individual query element.</para>
+
+<orderedlist spacing="compact">
+<listitem>
+  <para>In the <guilabel>Constraints</guilabel> area at the bottom of
+  the query properties pane, click <guibutton>Add</guibutton>. The
+  Query Editor adds a temporary, example constraint, shown in the
+  query properties pane.</para>
+</listitem>
+<listitem>
+  <para>Edit the temporary, example constraint to show the correct
+  constraint.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To delete a constraint                              -->
+
+<bridgehead renderas="sect2" id="qe_delconst" xreflabel="To delete
+a constraint">To delete a constraint:</bridgehead>
+
+<orderedlist spacing="compact">
+<listitem>
+  <para>Select the constraint you want to delete by clicking the
+  corresponding entry in the query properties pane&rsquo;s
+  <guilabel>Value</guilabel> column.</para>
+</listitem>
+<listitem>
+  <para>In the <guilabel>Constraints</guilabel> area, click
+  <guibutton>Remove</guibutton>. The Query Editor deletes the selected
+  constraint.</para>
+</listitem>
+</orderedlist>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To add query information                            -->
+
+<bridgehead renderas="sect2" id="qe_addinfo" xreflabel="To add query
+information">To add query information:</bridgehead>
+<indexterm><primary>queries</primary>
+           <secondary>meta-information</secondary></indexterm>
+<indexterm><primary>meta-information in queries</primary></indexterm>
+
+<para>To help you remember the purpose of or other information about a
+query, you can save meta-information with your query.
+The XML query format supports saving a name and description for
+each query.</para>
+
+<orderedlist spacing="compact">
+<title>To add a query name:</title>
+<indexterm><primary>names</primary>
+           <secondary sortas="queries">of queries</secondary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>names of</secondary></indexterm>
+<listitem>
+  <para>In the query properties pane, click the value for
+  <guilabel>Name</guilabel>.</para>
+</listitem>
+<listitem>
+  <para>Change the value to the new query name.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<orderedlist spacing="compact">
+<title>To add a query description:</title>
+<indexterm><primary>descriptions of queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>descriptions of</secondary></indexterm>
+<listitem>
+  <para>In the query properties pane, click the value for
+  <guilabel>Description</guilabel>.</para>
+</listitem>
+<listitem>
+  <para>Change the value to the correct query description.</para>
+</listitem>
+<listitem>
+  <para>Press <keycap>Tab</keycap> or <keycap>Return</keycap>.</para>
+</listitem>
+</orderedlist>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To save a query                                     -->
+
+<bridgehead renderas="sect2" id="qe_save" xreflabel="To save a
+query">To save a query:</bridgehead>
+<indexterm><primary>Query Editor</primary>
+           <secondary>saving queries</secondary></indexterm>
+<indexterm><primary>saving queries</primary></indexterm>
+
+<para>It is frequently useful to save a query for future use.  Saved
+queries are written out to an XML file.  The Query Editor understands
+this XML format
+<indexterm><primary>XML representation of queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>XML representation</secondary></indexterm>
+and can reload saved queries for future use or
+editing.  Make sure that your query is valid before saving
+it&mdash;invalid queries may not be saved correctly or may not display
+correctly in the Query Editor when reloaded.</para>
+
+<itemizedlist spacing="compact">
+<listitem>
+  <para>In the <guimenu>File</guimenu> menu, choose
+  <guimenuitem>Save</guimenuitem> or press <keycap>Ctrl-S</keycap>.</para>
+  <itemizedlist spacing="compact">
+  <listitem>
+    <para>If the query has been saved previously, the new information is
+    written out to the associated file.</para></listitem>
+  <listitem>
+    <para>If the query has not been saved previously, Proximity displays
+    the <guilabel>Open</guilabel> dialog.</para>
+    <orderedlist spacing="compact">
+    <listitem>
+      <para>Navigate to the target directory.</para>
+    </listitem>
+    <listitem>
+       <para>Enter a filename in the <guilabel>Save As</guilabel>
+       box.</para>
+    </listitem>
+    <listitem>
+      <para>Click <guibutton>Save</guibutton>.</para>
+    </listitem>
+    </orderedlist>
+  </listitem>
+  </itemizedlist>
+</listitem>
+</itemizedlist>
+
+<para>Once a query has been saved to an XML file, you can save any
+new changes by selecting <guimenuitem>Save</guimenuitem> or pressing
+<keycap>Ctrl-S</keycap>.</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To validate a query                                 -->
+
+<bridgehead renderas="sect2" id="qe_validate" xreflabel="To validate a
+query">To validate a query:</bridgehead>
+<indexterm><primary>validity of a query</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>validity of</secondary></indexterm>
+
+<para>The Query Editor checks only that the query is syntactically
+correct; it cannot verify semantic information.  For example, it
+reports an error if the query is 
+<glossterm baseform="disconnected query">disconnected</glossterm> but
+cannot check whether 
+attributes listed in conditions or constraints actually exist in the
+database.</para>
+
+<para>A query must be valid before it can be executed.  Additionally,
+invalid queries may not be correctly displayed in the Query Editor
+when reloaded after saving.  
+The Query Editor&rsquo;s status list
+<indexterm><primary>status list</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>status list</secondary></indexterm>
+shows whether the currently displayed
+query is valid or not.  Check the status bar before executing or
+saving queries.</para>
+
+<itemizedlist spacing="compact">
+<listitem>
+<para>Check the message displayed in the <guilabel>status
+list</guilabel> at the bottom of the Query Editor window.</para>
+
+<itemizedlist spacing="compact">
+<listitem><para>If the query contains no syntactic errors, the
+  <guilabel>status list</guilabel> shows <computeroutput>Query is
+  Valid</computeroutput>.</para></listitem>
+<listitem><para>If the query contains errors, the <guilabel>status
+  list</guilabel> shows the number of validation
+  errors.</para></listitem>
+</itemizedlist>
+
+</listitem>
+</itemizedlist>
+
+<para>If the <guilabel>status list</guilabel> shows one or more errors,
+<indexterm><primary>errors in queries</primary></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>errors in</secondary></indexterm>
+click the up/down arrows to the right of the <guilabel>status
+list</guilabel> to display the specific errors for this query.
+Fix any errors before executing or saving the query.</para>
+
+<!-- ************************************************************** -->
+<!-- PROCEDURE: To execute a query                                  -->
+
+<bridgehead renderas="sect2" id="qe_execute" xreflabel="To execute a
+query">To execute a query:</bridgehead>
+<indexterm><primary>queries</primary>
+           <secondary>executing</secondary></indexterm>
+<indexterm><primary>executing queries</primary></indexterm>
+<indexterm><primary>Query Editor</primary>
+           <secondary>executing queries</secondary></indexterm>
+
+<para>You can execute queries from the &proxui;
+or from within the Query Editor.</para>
+
+<orderedlist spacing="compact">
+<title>To execute the current query (Query Editor):</title>
+<listitem>
+  <para>In the <guimenu>File</guimenu> menu,
+  choose <guimenuitem>Run</guimenuitem> or press
+  <keycap>Ctrl-R</keycap>. Proximity asks you to provide a name for
+  the <glossterm>container</glossterm><indexterm><primary>containers</primary>
+      <secondary>names of</secondary></indexterm>
+<indexterm><primary>names</primary>
+      <secondary sortas="containers">of containers</secondary></indexterm>
+  that will hold the query&rsquo;s results.</para>
+</listitem>
+<listitem>
+  <para>Enter a name for the container and press
+  <keycap>OK</keycap>. Proximity prints a trace of the query&rsquo;s
+  execution in a new window.</para>
+</listitem>
+<listitem>
+  <para>Close the trace window after query execution completes and
+  you have finished examining the trace.</para>
+</listitem>
+</orderedlist>
+
+<orderedlist spacing="compact">
+<title>To execute a saved query (&proxui;):</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>Database Browser</secondary></indexterm>
+<listitem>
+<para>From the <guimenu>Query</guimenu> menu, select <guimenuitem>Run
+Query</guimenuitem>.  Proximity asks you to provide a name for
+the container that will hold the query&rsquo;s results.</para>
+</listitem>
+<listitem>
+  <para>Enter a name for the container and press
+  <keycap>OK</keycap>. Proximity prints a trace of the query&rsquo;s
+  execution in a new window.</para>
+</listitem>
+<listitem>
+  <para>Close the trace window after query execution completes and
+  you have finished examining the trace.</para>
+<indexterm startref="idx_qg_creatingqueries" class="endofrange"/>
+<indexterm startref="idx_qg_proxqe" class="endofrange"/>
+<indexterm startref="idx_qg_queryeditor" class="endofrange"/>
+
+
+</listitem>
+</orderedlist>
+
+</sect1>
+
+</appendix>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

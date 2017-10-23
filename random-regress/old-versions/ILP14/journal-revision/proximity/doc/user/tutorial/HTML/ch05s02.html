@@ -1,0 +1,777 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>A First Proximity Query</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="prev" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="next" href="ch05s03.html" title="Exploring Containers and Subgraphs">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Querying the Database</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_simple"></a>A First Proximity Query
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <p>The ProxWebKB database contains 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_object"><span class="glossterm">objects</span></a> and 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_link"><span class="glossterm">links</span></a> corresponding to
+            web pages and the links between them. Each object has a 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">pagetype</span>
+            attribute that identifies whether the page belongs to or describes a
+            student, faculty member, staff member, research project, course, or
+            something else (other).
+         </p>
+         <p>The following exercise steps through the process of creating
+            <a class="indexterm" name="idx_queries_new1"></a>
+            <a class="indexterm" name="idx_queries_new2"></a>
+            <a class="indexterm" name="d0e6107"></a>
+            a simple query using the Query Editor. The query finds all the research
+            project pages in the database along with the pages directly linked to
+            that research project page.
+            Each successful match of the query identifies a portion of the
+            database that matches this structure. Because a Proximity database can
+            be represented as a large graph, a match is represented as a 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraph</span></a>.
+            
+         </p>
+         <div class="procedure"><a name="ex_queries_rc1"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;5.1.&nbsp;Creating a first Proximity query:</b></p>
+            <p>The query created in this exercise is also available in the
+               Proximity&nbsp;4.3 distribution in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/research-clusters1.qg2.xml</code>.
+            </p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+            </p>
+            <ol type="1">
+               <li>
+                  <p>If you plan to execute any of the saved queries in
+                     <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code>, 
+                     copy <code class="filename">graph-query.dtd</code>
+                     <a class="indexterm" name="d0e6136"></a>
+                     <a class="indexterm" name="d0e6140"></a>
+                     from <code class="filename">$PROX_HOME/resources</code> to the directory
+                     containing the example queries.
+                     
+                     
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>cp $PROX_HOME/resources/graph-query.dtd $PROX_HOME/doc/user/tutorial/examples/</code></strong>
+</pre><p>
+                     
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>Proximity queries are represented using an XML format. The 
+                                 <a href="go01.html#d18e304"><span class="glossterm">DTD</span></a>
+                                 that describes this format must be in the directory containing the
+                                 query file to execute the query.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">Query</strong></span> menu, choose
+                     <span><strong class="guimenuitem">New Query</strong></span>.
+                     <a class="indexterm" name="d0e6170"></a>
+                     <a class="indexterm" name="d0e6176"></a>
+                     Proximity starts the Query Editor.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_Interface.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     The Query Editor includes two properties panes at the bottom of the
+                     window.  The query properties pane displays properties of the
+                     query as a whole. The element properties pane displays the
+                     properties of the selected query element.  The element properties pane
+                     is blank when no query element is selected.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Click <img src="images/QE_BUTTON_VertexTool.png" width="18"> or press <span class="keycap">Ctrl-2</span>
+                     to choose the vertex tool.
+                     <a class="indexterm" name="d0e6196"></a>
+                     <a class="indexterm" name="d0e6200"></a>
+                     <a class="indexterm" name="idx_vertices"></a>
+                     <a class="indexterm" name="idx_vertices2"></a>
+                     Tool selection is persistent; the vertex tool remains selected until
+                     you choose another tool.
+                  </p>
+                  <div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Tip">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>Use keyboard shortcuts
+                                 <a class="indexterm" name="d0e6221"></a>
+                                 <a class="indexterm" name="d0e6225"></a>
+                                 <a class="indexterm" name="d0e6231"></a>
+                                 to change the Query Editor selection mode.
+                                 You can open, close, save, and run queries, select
+                                 tools, and select query elements using keyboard shortcuts.  
+                                 Keyboard shortcuts are shown next to the corresponding command in the
+                                 Query Editor&#8217;s menus; a summary of the tool selection shortcuts
+                                 is shown below:
+                                 
+                              </p>
+                              <div class="informaltable">
+                                 <table border="0" width="100%">
+                                    <colgroup>
+                                       <col width="22%">
+                                       <col width="11%">
+                                       <col width="44%">
+                                       <col width="23%">
+                                    </colgroup>
+                                    <tbody valign="top">
+                                       <tr>
+                                          <td> </td>
+                                          <td><span class="keycap">Ctrl-1</span></td>
+                                          <td>Choose the selection tool</td>
+                                          <td> </td>
+                                       </tr>
+                                       <tr>
+                                          <td> </td>
+                                          <td><span class="keycap">Ctrl-2</span></td>
+                                          <td>Choose the vertex tool</td>
+                                          <td> </td>
+                                       </tr>
+                                       <tr>
+                                          <td> </td>
+                                          <td><span class="keycap">Ctrl-3</span></td>
+                                          <td>Choose the edge tool</td>
+                                          <td> </td>
+                                       </tr>
+                                       <tr>
+                                          <td> </td>
+                                          <td><span class="keycap">Ctrl-4</span></td>
+                                          <td>Choose the subquery tool</td>
+                                          <td> </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </div>
+                              <p>
+                                 A complete list of keyboard shortcuts for the Query Editor is included
+                                 in <a href="apa.html" title="Appendix&nbsp;A.&nbsp;Proximity Quick Reference">Appendix&nbsp;A, <i>Proximity Quick Reference</i></a>.
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>Click in the Query Editor display area. The Query Editor creates
+                     a new <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e824"><span class="glossterm">vertex</span></a>.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_NewVertex.png" align="middle" width="517.5"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Tip">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>To delete an element from a query in the Query Editor, 
+                                 <a class="indexterm" name="d0e6302"></a>
+                                 <a class="indexterm" name="d0e6308"></a>
+                                 click <img src="images/QE_BUTTON_SelectTool.png" width="18"> to choose the selection tool, select the
+                                 element, then press <span class="keycap">Delete</span>.
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>Click <img src="images/QE_BUTTON_SelectTool.png" width="18"> or press <span class="keycap">Ctrl-1</span>
+                     to choose the selection tool. 
+                     <a class="indexterm" name="d0e6327"></a>
+                     <a class="indexterm" name="d0e6331"></a>
+                     Click the vertex you just created to select it. 
+                     <a class="indexterm" name="d0e6337"></a>
+                     <a class="indexterm" name="d0e6343"></a>
+                     <a class="indexterm" name="d0e6351"></a>
+                     <a class="indexterm" name="d0e6359"></a>
+                     <a class="indexterm" name="d0e6367"></a>
+                     The Query Editor selects the vertex and displays the vertex&#8217;s
+                     properties in the element properties pane.
+                     
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_EditVertex.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Tip">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>To rearrange a query&#8217;s layout, use the selection tool to
+                                 drag vertices inside the display area.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>In the element properties pane, double-click the vertex 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e528"><span class="glossterm">name</span></a>
+                     <a class="indexterm" name="d0e6390"></a>
+                     <a class="indexterm" name="d0e6396"></a>
+                     <a class="indexterm" name="d0e6402"></a>
+                     (currently &#8220;Vertex1&#8221;) to edit its value.  Enter
+                     <strong class="userinput"><code>start_page</code></strong> and press <span class="keycap">Tab</span>.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_EditVertexLabel.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     Vertex and edge names
+                     <a class="indexterm" name="d0e6420"></a>
+                     <a class="indexterm" name="d0e6426"></a>
+                     <a class="indexterm" name="d0e6432"></a>
+                     <a class="indexterm" name="d0e6438"></a>
+                     are used for your convenience in creating
+                     the query, in understanding and using query results, and for
+                     identifying subgraph elements in learning and applying models.
+                     
+                     Although
+                     we may label query elements with names that remind us of specific attribute
+                     values, these names have no effect on how query elements match
+                     different database elements.
+                     
+                  </p>
+                  <div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Tip">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>Double-click a vertex or edge in the Query Editor
+                                 display area to edit the corresponding label.
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>Other vertex 
+                     properties&#8212;<a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e555"><span class="glossterm">annotations</span></a>
+                     and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e162"><span class="glossterm">conditions</span></a>&#8212;are
+                     <a class="indexterm" name="d0e6455"></a>
+                     optional mechanisms for restricting matches in the database.
+                     Conditions restrict matches to those entities (objects or links) that 
+                     match specified <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attribute</span></a>
+                     values. In this exercise, you specify a
+                     condition for one of the vertices. Numeric annotations are covered in
+                     the next example.
+                  </p>
+               </li>
+               <li>
+                  <p>Double-click in the (currently blank) value column of the
+                     <span class="guilabel">Condition</span> property to edit
+                     <a class="indexterm" name="d0e6470"></a>
+                     <a class="indexterm" name="d0e6476"></a>
+                     <a class="indexterm" name="d0e6480"></a>
+                     its value.  Enter 
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p><strong class="userinput"><code>pagetype&nbsp;=&nbsp;ResearchProject</code></strong></p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     and press <span class="keycap">Tab</span>.
+                     Attribute names and values containing spaces must be surrounded by
+                     single quotes.  Spaces surrounding the &#8220;=&#8221; sign are
+                     not significant.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_EditVertexCond.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p><a class="indexterm" name="d0e6500"></a><a class="indexterm" name="d0e6501"></a><div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>
+                                 Proximity ignores case when matching attribute <span class="emphasis"><em>names</em></span>
+                                 <a class="indexterm" name="d0e6508"></a>
+                                 <a class="indexterm" name="d0e6514"></a>
+                                 in a query&#8217;s condition or <a href="go01.html#d18e228"><span class="glossterm">constraint</span></a>
+                                 to those in the database. (All attribute names in
+                                 the database are automatically converted to lower case during import.)
+                                 Proximity obeys case, however, when matching attribute
+                                 <span class="emphasis"><em>values</em></span> specified in a query with those in the
+                                 database.
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>Proximity supports two types of conditions:
+                     
+                  </p>
+                  <div class="itemizedlist">
+                     <ul type="disc" compact>
+                        <li>
+                           <p>Attribute value conditions compare the value of an object&#8217;s
+                              or link&#8217;s attribute with a specified value.
+                           </p>
+                        </li>
+                        <li>
+                           <p>Existence conditions merely check to see whether an object or
+                              link has <span class="emphasis"><em>any</em></span> value for the specified
+                              attribute.
+                           </p>
+                        </li>
+                     </ul>
+                  </div>
+                  <p>
+                     Both of these types of conditions are described more formally, below.
+                     
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>
+                                 The general form of an <a href="go01.html#d18e49"><span class="glossterm">attribute value condition</span></a> is
+                                 <a class="indexterm" name="d0e6543"></a>
+                                 <a class="indexterm" name="d0e6549"></a>
+                                 <a class="indexterm" name="d0e6555"></a>
+                                 
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p>
+                                       <em class="replaceable"><code>attribute</code></em>&nbsp;&nbsp;<em class="replaceable"><code>operator</code></em>&nbsp;&nbsp;<em class="replaceable"><code>value</code></em>
+                                       
+                                    </p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                 where
+                                 
+                              </p>
+                              <div class="itemizedlist">
+                                 <ul type="disc" compact>
+                                    <li>
+                                       <p><em class="replaceable"><code>attribute</code></em> is the name of an
+                                              attribute
+                                       </p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>value</code></em> is a legal value for
+                                              <em class="replaceable"><code>attribute</code></em></p>
+                                    </li>
+                                    <li>
+                                       <p><em class="replaceable"><code>operator</code></em> is one of
+                                              <code class="literal">=</code>, <code class="literal">&lt;</code>,
+                                              <code class="literal">&lt;=</code>, <code class="literal">&gt;</code>,
+                                              <code class="literal">&gt;=</code>, and
+                                              <code class="literal">&lt;&gt;</code>.
+                                          <a class="indexterm" name="d0e6608"></a>
+                                          <a class="indexterm" name="d0e6612"></a>
+                                          
+                                       </p>
+                                    </li>
+                                 </ul>
+                              </div>
+                              <p>
+                                 
+                              </p>
+                              <p>A vertex or edge may have at most one
+                                 condition statement; however, that condition may be 
+                                 <a class="indexterm" name="d0e6621"></a>
+                                 <a class="indexterm" name="d0e6625"></a>
+                                 <a href="go01.html#d18e156"><span class="glossterm">complex</span></a>, that is,
+                                 it may include boolean combinations of simple 
+                                 conditions. Proximity requires the use of 
+                                 <a href="go01.html#d18e292"><span class="glossterm">disjunctive normal form</span></a>
+                                 <a class="indexterm" name="d0e6637"></a>
+                                 <a class="indexterm" name="d0e6641"></a>
+                                 <a class="indexterm" name="d0e6645"></a>
+                                 <a class="indexterm" name="d0e6651"></a>
+                                 in <a href="go01.html#d18e601"><span class="glossterm">prefix notation</span></a>
+                                 for combining simple conditions. For example, to match all
+                                 research project pages at either Cornell or Wisconsin, enter
+                                 
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p>
+                                       <code class="literal">AND(pagetype=ResearchProject, OR(school=Cornell, school=Wisconsin))</code>.
+                                       
+                                    </p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                 Proximity also supports 
+                                 <span class="emphasis"><em><a href="go01.html#d18e340"><span class="glossterm">existence conditions</span></a></em></span>
+                                 that require only that an 
+                                 <a class="indexterm" name="d0e6669"></a>
+                                 <a class="indexterm" name="d0e6673"></a>
+                                 an attribute value be defined for the target object or edge, rather than
+                                 requiring a specific value or value range. The syntax for an existence
+                                 condition is
+                                 
+                              </p>
+                              <div class="blockquote">
+                                 <blockquote class="blockquote">
+                                    <p><code class="literal">exists(</code><em class="replaceable"><code>attribute</code></em><code class="literal">)</code>
+                                       
+                                    </p>
+                                 </blockquote>
+                              </div>
+                              <p>
+                                 See the <em class="citetitle"><span class="phrase"><a href="../../qgraph/HTML/index.html" target="_top">Proximity QGraph Guide</a></span>
+                                       
+                                       
+                                       </em> for more information on and
+                                 examples of attribute and existence conditions.
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>Create a second vertex labeled
+                     <strong class="userinput"><code>linked_page</code></strong>.  Because we don&#8217;t 
+                     want to restrict the kinds of pages linked to research project pages,
+                     do not enter a condition for this vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <img src="images/QE_BUTTON_EdgeTool.png" width="18"> or press <span class="keycap">Ctrl-3</span>
+                     to choose the edge tool. 
+                     <a class="indexterm" name="d0e6709"></a>
+                     <a class="indexterm" name="d0e6713"></a>
+                     <a class="indexterm" name="d0e6719"></a>
+                     <a class="indexterm" name="d0e6725"></a>
+                     Drag the mouse from <em class="token">start_page</em> to 
+                     <em class="token">linked_page</em>.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_AddEdge.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     The Query Editor creates a new, directed edge connecting the first
+                     vertex to the second vertex.
+                     
+                  </p>
+                  <div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Tip">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>To create a &#8220;loop&#8221; edge (an edge connecting a vertex
+                                 back to itself), choose the edge tool and click the target vertex
+                                 without dragging.
+                                 
+                              </p>
+                              <div class="mediaobject" align="center">
+                                 <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                       <td align="center" valign="bottom"><img src="images/QE_LoopEdge.png" align="middle" width="382.5"></td>
+                                    </tr>
+                                 </table>
+                              </div>
+                              <p>
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>Choose the selection tool and click the new edge to edit its
+                     properties.  The Query Editor selects the edge and displays the
+                     edge&#8217;s properties in the element properties pane. 
+                     <a class="indexterm" name="d0e6755"></a>
+                     Enter <strong class="userinput"><code>linked_to</code></strong> for the edge&#8217;s label.
+                     
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Double-click in the value column of the edge&#8217;s 
+                     <span class="guilabel">Is Directed</span> property to change this value.  Enter
+                     <strong class="userinput"><code>false</code></strong> and press <span class="keycap">Tab</span>.
+                     For this example, we don&#8217;t care about the direction of matching
+                     links.
+                     
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>
+                                 Proximity queries can use either 
+                                 <a href="go01.html#d18e279"><span class="glossterm">directed</span></a> or 
+                                 <a href="go01.html#d18e803"><span class="glossterm">undirected edges</span></a>.
+                                 <a class="indexterm" name="d0e6785"></a>
+                                 <a class="indexterm" name="d0e6791"></a>
+                                 <a class="indexterm" name="d0e6795"></a>
+                                 <a class="indexterm" name="d0e6799"></a>
+                                 <a class="indexterm" name="d0e6805"></a>
+                                 Although Proximity&#8217;s data model uses only directed links,
+                                 QGraph lets you use undirected edges in a query when you do not know
+                                 or do not care about the directionality of a link.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>In the query properties pane, double-click in the value column
+                     of the query&#8217;s <span class="guilabel">Name</span> property
+                     <a class="indexterm" name="d0e6817"></a>
+                     to edit its value (currently &#8220;new query&#8221;). Enter
+                     <strong class="userinput"><code>research-clusters1</code></strong> and
+                     press <span class="keycap">Tab</span>.
+                  </p>
+               </li>
+               <li>
+                  <p>Enter a description for the query and press <span class="keycap">Tab</span>.
+                     This query finds pages connected to research project pages.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Check the status list at the bottom of the Query Editor window
+                     to make sure your completed query is 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e815"><span class="glossterm">valid</span></a>.
+                     <a class="indexterm" name="d0e6842"></a>
+                     <a class="indexterm" name="d0e6846"></a>
+                     
+                  </p>
+                  <p>Proximity checks to make sure that the query obeys the
+                     syntactic requirements of the DTD. 
+                     <a class="indexterm" name="d0e6854"></a>
+                     No semantic checking is
+                     performed. Specifically, validation does not check whether
+                     attribute names correspond to actual database entities.
+                     If a query is invalid, the status list shows the number of
+                     errors and provides a list of the errors in the query.
+                  </p>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">File</strong></span> menu, choose <span><strong class="guimenuitem">Save
+                           As</strong></span> to save your query.
+                     <a class="indexterm" name="d0e6869"></a>
+                     Save the query as <code class="filename">rc1.qg2.xml</code> in the
+                     <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory.
+                  </p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>The Proximity distribution includes this query in the file
+                                 <code class="filename">$PROX_HOME/doc/user/tutorial/examples/research-clusters1.qg2.xml</code>.
+                                 <a class="indexterm" name="d0e6887"></a>
+                                 <a class="indexterm" name="d0e6891"></a>
+                                 Be careful not to overwrite this file.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>The Query Editor also saves basic layout
+                     <a class="indexterm" name="d0e6901"></a>
+                     <a class="indexterm" name="d0e6907"></a>
+                     <a class="indexterm" name="d0e6913"></a>
+                     information for the
+                     query so that it will be displayed as shown when you next open the
+                     query in the Query Editor.  If you prefer a different arrangement, you
+                     can rearrange the query by dragging vertices and saving the query again.
+                     If the query was invalid when saved, the Query Editor attempts to read
+                     and display the query; however, some errors may
+                     result in the query being partially or incorrectly displayed.
+                     <a class="indexterm" name="d0e6919"></a>
+                     <a class="indexterm" name="d0e6921"></a>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">File</strong></span> menu, choose
+                     <span><strong class="guimenuitem">Run</strong></span> or press <span class="keycap">Ctrl-R</span>
+                     <a class="indexterm" name="d0e6935"></a>
+                     <a class="indexterm" name="d0e6941"></a>
+                     <a class="indexterm" name="d0e6947"></a>
+                     to execute your query.
+                     
+                  </p>
+                  <p>Proximity prompts you for a name for the results
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">container</span></a>. Enter
+                     <strong class="userinput"><code>research-clusters1</code></strong> and click 
+                     <span><strong class="guibutton">OK</strong></span>.
+                  </p>
+                  <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+                     <table border="0" bgcolor="#CCCCFF">
+                        <tr>
+                           <td>
+                              <p>
+                                 <a class="indexterm" name="d0e6967"></a>
+                                 <a class="indexterm" name="d0e6973"></a>
+                                 <a class="indexterm" name="d0e6979"></a>
+                                 <a class="indexterm" name="d0e6987"></a>
+                                 Container names may not include <code class="literal">/</code>,
+                                 <code class="literal">?</code>, <code class="literal">!</code>, 
+                                 <code class="literal">&lt;</code>, <code class="literal">&gt;</code>, or <code class="literal">#</code>.
+                                 
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>If the database already includes a container with this name,
+                                 Proximity asks whether you want to delete the existing container.
+                                 Answering yes lets Proximity overwrite the contents of this
+                                 container. This also deletes any containers inside the existing
+                                 container.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+                  <p>Proximity opens a window to show you a trace of the
+                     query execution.  The last lines should be
+                     similar to the following excerpt 
+                     
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                  </p><pre class="screen">INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; found 1294 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; query results saved in
+   container: research-clusters1
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</pre><p>
+                     
+                     Close the trace window after the query finishes.
+                  </p>
+               </li>
+            </ol>
+         </div>
+         <p>The next section describes how to view the results of your
+            query.
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;5.&nbsp;Querying the Database&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Exploring Containers and Subgraphs</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

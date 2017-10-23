@@ -1,0 +1,393 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Chapter&nbsp;6.&nbsp;Subqueries</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="prev" href="ch05s07.html" title="Summary">
+      <link rel="next" href="ch06s02.html" title="Subqueries and Constraints">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s07.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">&nbsp;</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="chapter" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title"><a name="qg_ch_subqueries"></a>Chapter&nbsp;6.&nbsp;Subqueries
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <div class="toc">
+            <p><b>Table of Contents</b></p>
+            <dl>
+               <dt><span class="sect1"><a href="ch06.html#d0e6570">Subqueries and Annotations</a></span></dt>
+               <dt><span class="sect1"><a href="ch06s02.html">Subqueries and Constraints</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s02.html#d0e6675">Constraints within a subquery</a></span></dt>
+                     <dt><span class="sect2"><a href="ch06s02s02.html">Constraints crossing the subquery boundary</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s03.html">Multiple Subqueries</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s03.html#d0e7019">Nested subqueries</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s04.html">Implementation in Proximity</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch06s04.html#d0e7128">Edge requirements</a></span></dt>
+                     <dt><span class="sect2"><a href="ch06s04s02.html">Annotation requirements</a></span></dt>
+                     <dt><span class="sect2"><a href="ch06s04s03.html">Nested subqueries</a></span></dt>
+                     <dt><span class="sect2"><a href="ch06s04s04.html">Constraint restrictions</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch06s05.html">Summary</a></span></dt>
+            </dl>
+         </div>
+         <p>A <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e755"><span class="glossterm">subquery</span></a> is a connected subgraph of
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e824"><span class="glossterm">vertices</span></a> and 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e310"><span class="glossterm">edges</span></a> that 
+            can be treated as a logical unit.  Using subqueries expands the
+            expressive power of QGraph, enabling you to identify more complex
+            structures than could be found otherwise.
+         </p>
+         <p>The example with which we opened this
+            <span class="emphasis"><em>Guide</em></span>, repeated in <a href="ch06.html#fig_subq_db01_q01" title="Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]">Figure&nbsp;6.1</a>,
+            shows a query that finds 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e749"><span class="glossterm">subgraphs</span></a> containing a
+            director, all the 
+            movies he or she has directed, and all the actors who have appeared in
+            those movies.  This example contains a subquery, denoted
+            <a class="indexterm" name="d0e6301"></a>
+            <a class="indexterm" name="d0e6307"></a>
+            by the box surrounding the <em class="token">movie</em> and
+            <em class="token">actor</em> vertices and the
+            <em class="token">acted-in</em> edge.
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db01_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB01_Q01.png" align="middle" width="495" alt="Example query with subquery [Intro_DB01_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>The subquery in <a href="ch06.html#fig_subq_db01_q01" title="Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]">Figure&nbsp;6.1</a>
+            is linked to its parent query by an edge connecting the
+            <em class="token">movie</em> vertex to the 
+            <em class="token">director</em> vertex.  We call this edge
+            (the edge labeled <em class="token">directed</em> in the above query)
+            a <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e75"><span class="glossterm">boundary edge</span></a></em></span>
+            <a class="indexterm" name="d0e6348"></a>
+            <a class="indexterm" name="d0e6352"></a>
+            of the subquery.
+            All subqueries must be connected to one or more vertices in the
+            main query.  (However, see <a href="ch06s04.html" title="Implementation in Proximity">&#8220;Implementation in Proximity&#8221;</a> later in
+            this chapter for restrictions on how
+            subqueries can be connected to the main query in Proximity.)
+         </p>
+         <p>Subqueries expand QGraph&#8217;s expressive power by letting
+            you attach a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e555"><span class="glossterm">numeric annotation</span></a>
+            <a class="indexterm" name="d0e6365"></a>
+            <a class="indexterm" name="d0e6371"></a>
+            to a connected 
+            set of vertices and edges instead of just a single vertex or edge.
+            This effectively lets you treat a more complex structure as if it were
+            a single vertex.  For example, if we replace the subquery in
+            <a href="ch06.html#fig_subq_db01_q01" title="Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]">Figure&nbsp;6.1</a> with a single vertex, we
+            see the familiar <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e733"><span class="glossterm">star query</span></a> structure.
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db01_mainstructure"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB01_MainStructure.png" align="middle" width="328.50000000000006" alt="Conceptual structure of query in"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.2.&nbsp;Conceptual structure of query in 
+                         <a href="ch06.html#fig_subq_db01_q01" title="Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]">Figure&nbsp;6.1</a></b></p>
+         </div>
+         <p><br class="figure-break">
+            This diagram shows the subquery as a single vertex.
+            <a class="indexterm" name="d0e6392"></a>
+            The <code class="token">[1..]</code> annotation on the subquery means
+            that the complex structures matching the subquery are grouped
+            <a class="indexterm" name="d0e6401"></a>
+            <a class="indexterm" name="d0e6405"></a>
+            <a class="indexterm" name="d0e6411"></a>
+            in the same way that objects are grouped when matching an annotated vertex.
+            Thus all the movies and their linked actors for a specific director
+            will be included in a single subgraph. Executing this query on the
+            sample database contained in 
+            <code class="filename">Intro_DB01.xml</code> returns six subgraphs, one for
+            each <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">director</span> object in the database.
+            The subgraph where the <em class="token">director</em> vertex
+            matches Steven Spielberg is shown in
+            <a href="ch06.html#fig_subq_db01_q01_res" title="Figure&nbsp;6.3.&nbsp;Query results for director = Steven Spielberg&#xA;       (edge labels omitted)">Figure&nbsp;6.3</a> (Edge labels have been removed
+            for space reasons.)
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db01_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB01_Q01_resB.png" align="middle" width="630" alt="Query results for director = Steven Spielberg (edge labels omitted)"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.3.&nbsp;Query results for director = Steven Spielberg
+                         (edge labels omitted)</b></p>
+         </div>
+         <p><br class="figure-break">
+            All the movies directed by Steven Spielberg, as well as all the
+            actors linked to those movies, are included in this single subgraph.
+            
+         </p>
+         <p>Compare the subgraph shown in 
+            <a href="ch06.html#fig_subq_db01_q01_res" title="Figure&nbsp;6.3.&nbsp;Query results for director = Steven Spielberg&#xA;       (edge labels omitted)">Figure&nbsp;6.3</a> to the results of a similar
+            query that does not use subqueries.  
+            <a href="ch06.html#fig_subq_db01_q01_nosubq" title="Figure&nbsp;6.4.&nbsp;Similar query without subquery [SubQ_DB01_Q02.qg2.xml]">Figure&nbsp;6.4</a> shows the query from 
+            <a href="ch06.html#fig_subq_db01_q01" title="Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]">Figure&nbsp;6.1</a>, but without the subquery box and
+            subquery annotation.
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db01_q01_nosubq"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB01_Q01_NoSubQ.png" align="middle" width="468" alt="Similar query without subquery [SubQ_DB01_Q02.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.4.&nbsp;Similar query without subquery [SubQ_DB01_Q02.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>Executing this query on the same data returns 23 subgraphs, one for
+            each movie in the database.  The subgraphs in which the
+            <em class="token">director</em> vertex matches Steven Spielberg
+            are shown in <a href="ch06.html#fig_subq_db01_q02_res" title="Figure&nbsp;6.5.&nbsp;Query results for director = Steven Spielberg&#xA;      (edge labels omitted)">Figure&nbsp;6.5</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db01_q02_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB01_Q02_res.png" align="middle" width="630" alt="Query results for director = Steven Spielberg (edge labels omitted)"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.5.&nbsp;Query results for director = Steven Spielberg
+                        (edge labels omitted)</b></p>
+         </div>
+         <p><br class="figure-break">
+            Because the <em class="token">movie</em> vertex is not
+            annotated, the query cannot group all the movies for a single director
+            and must return a separate subgraph for each director-movie pair in
+            the data.
+         </p>
+         <p>The <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e417"><span class="glossterm">inner structure</span></a></em></span>
+            <a class="indexterm" name="d0e6477"></a>
+            <a class="indexterm" name="d0e6481"></a>
+            of a subquery must be a 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e848"><span class="glossterm">well-formed</span></a>
+            <a class="indexterm" name="d0e6490"></a>
+            query in its own right. (The inner structure of a subquery is the
+            part that remains after removing the boundary edges and the subquery
+            box with its annotation.) For example, the inner structure of the
+            subquery shown in <a href="ch06.html#fig_subq_db01_q01" title="Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]">Figure&nbsp;6.1</a>, shown below,
+            forms a valid query in its own right.
+            
+         </p>
+         <div class="figure"><a name="fig_subq_db01_q01_subq"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_DB01_Q01_SubQ.png" align="middle" width="328.50000000000006" alt="Inner structure of subquery [SubQ_DB01_Q01_SubQ.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.6.&nbsp;Inner structure of subquery [SubQ_DB01_Q01_SubQ.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The inner structure of this subquery is the familiar star query
+            <a class="indexterm" name="d0e6507"></a>
+            <a class="indexterm" name="d0e6511"></a>
+            that finds all actors linked to a single movie.  If we choose, we can
+            create and execute a new query containing just this structure.
+            
+         </p>
+         <p>In particular, because 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e286"><span class="glossterm">disconnected queries</span></a>
+            <a class="indexterm" name="d0e6522"></a>
+            <a class="indexterm" name="d0e6528"></a>
+            <a class="indexterm" name="d0e6532"></a>
+            <a class="indexterm" name="d0e6538"></a>
+            are not well-formed,
+            subqueries cannot be disconnected. That is, all the vertices and edges
+            inside the subquery box must be connected in a single graph.
+            For example, the query shown in
+            <a href="ch06.html#fig_subq_badsubq01" title="Figure&nbsp;6.7.&nbsp;Illegal query containing disconnected subquery">Figure&nbsp;6.7</a> contains a disconnected
+            subquery.
+            
+         </p>
+         <div class="figure"><a name="fig_subq_badsubq01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/SubQ_BadSubQ01.png" align="middle" width="468" alt="Illegal query containing disconnected subquery"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.7.&nbsp;Illegal query containing disconnected subquery</b></p>
+         </div>
+         <p><br class="figure-break">
+            If we look only at the elements inside the subquery box, we see that
+            the <em class="token">D</em> vertex is not connected to the
+            other subquery components (the <em class="token">B</em> and
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">C</span> vertices and the
+            <em class="token">Z</em> edge).  
+            Although the the query as a whole is connected, because it
+            contains a disconnected subquery, the query shown in
+            <a href="ch06.html#fig_subq_badsubq01" title="Figure&nbsp;6.7.&nbsp;Illegal query containing disconnected subquery">Figure&nbsp;6.7</a> is illegal.
+            
+         </p>
+         <div class="sect1" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h2 class="title" style="clear: both"><a name="d0e6570"></a>Subqueries and Annotations
+                     </h2>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e6573"></a><a class="indexterm" name="d0e6578"></a><p>QGraph requires that all subqueries must be 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e555"><span class="glossterm">annotated</span></a>.  An
+               unannotated subquery is equivalent to the same query structure without
+               the subquery box.  If we could remove the annotation from the subquery
+               box and then run the query shown in 
+               <a href="ch06.html#fig_subq_db01_q01" title="Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]">Figure&nbsp;6.1</a>, we would see the same results we
+               saw in <a href="ch06.html#fig_subq_db01_q02_res" title="Figure&nbsp;6.5.&nbsp;Query results for director = Steven Spielberg&#xA;      (edge labels omitted)">Figure&nbsp;6.5</a>. 
+               Because an unannotated subquery duplicates capabilities available via
+               other QGraph elements, unannotated subqueries add nothing to
+               QGraph&#8217;s expressive power and QGraph therefore requires that
+               all subqueries must be annotated.
+            </p>
+            <p>Because subqueries are annotated, they
+               must obey all the QGraph rules that apply to
+               annotated query elements.  For example, QGraph requires that the
+               edge adjacent to an annotated element must itself be annotated.
+               Therefore the boundary edge(s)
+               <a class="indexterm" name="d0e6594"></a>
+               <a class="indexterm" name="d0e6598"></a>
+               of an annotated subquery must always be
+               annotated.
+            </p>
+            <p>The query shown in <a href="ch06.html#fig_subq_db01_q01" title="Figure&nbsp;6.1.&nbsp;Example query with subquery [Intro_DB01_Q01.qg2.xml]">Figure&nbsp;6.1</a>
+               illustrates the proper annotation of a subquery&#8217;s boundary
+               edge.  As we saw earlier in 
+               <a href="ch04.html" title="Chapter&nbsp;4.&nbsp;Numeric Annotations">Chapter&nbsp;4, <i>Numeric Annotations</i></a>,
+               although other annotations are also legal, most queries will
+               probably use the <code class="token">[1..]</code> annotation on the
+               boundary edge.
+            </p>
+            <p>Because QGraph prohibits edges connecting two annotated
+               elements, no numeric annotation is allowed on a vertex
+               adjacent to an annotated subquery.  For example, the query structure
+               shown below is illegal:
+               
+            </p>
+            <div class="figure"><a name="fig_subq_badannot01"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/SubQ_BadAnnot01.png" align="middle" width="495" alt="Illegal annotation (vertex A)"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.8.&nbsp;Illegal annotation (vertex <em class="token">A</em>)</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>As we saw in the first part this chapter, we can mentally
+               substitute a single vertex for a subquery to better understand the
+               conceptual structure of a query.  This heuristic also works well for
+               seeing potential annotation problems involving subqueries.  For
+               example, we can visualize the query
+               <a class="indexterm" name="d0e6629"></a>
+               shown in <a href="ch06.html#fig_subq_badannot01" title="Figure&nbsp;6.8.&nbsp;Illegal annotation (vertex A)">Figure&nbsp;6.8</a>
+               as the structure shown below:
+               
+            </p>
+            <div class="figure"><a name="fig_subq_badannot01B"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/SubQ_BadAnnot01B.png" align="middle" width="328.50000000000006" alt="Conceptual structure of illegally annotated query"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.9.&nbsp;Conceptual structure of illegally annotated query</b></p>
+            </div>
+            <p><br class="figure-break">
+               This conceptual view helps us see that the query includes an edge
+               connecting two annotated elements, the subquery and the 
+               <em class="token">A</em> vertex.  Because this conceptual
+               structure includes an illegal annotation, we can more easily see that the
+               corresponding query is also illegal.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s07.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center">&nbsp;</td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Summary&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Subqueries and Constraints</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

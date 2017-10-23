@@ -1,0 +1,155 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Conditions</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="apb.html" title="Appendix&nbsp;B.&nbsp;XML Representation">
+      <link rel="prev" href="apbs05.html" title="Edges">
+      <link rel="next" href="apbs07.html" title="Numeric Annotations">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="apbs05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Appendix&nbsp;B.&nbsp;XML Representation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="apbs07.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="apx_queryxml_cond"></a>Conditions
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e9797"></a><a class="indexterm" name="d0e9802"></a><p>A <code class="sgmltag-element">condition</code> is a boolean
+            combination of <code class="sgmltag-element">test</code> elements, each
+            of which defines a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e162"><span class="glossterm">condition</span></a> on the vertex (or
+            link). Condition <code class="sgmltag-element">test</code> elements can
+            be combined with the 
+            <code class="sgmltag-element">and</code>,
+            <code class="sgmltag-element">or</code>, and
+            <code class="sgmltag-element">not</code> elements using
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e292"><span class="glossterm">disjunctive normal form</span></a>.
+            <a class="indexterm" name="d0e9833"></a>
+            
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>Legal operators for conditions are <code class="literal">eq</code>,
+                        <code class="literal">lt</code>, <code class="literal">le</code>, <code class="literal">gt</code>,
+                        <code class="literal">ge</code>, and <code class="literal">ne</code>.
+                        You can also use the <code class="literal">exists</code>
+                        operator to define an 
+                        <a href="go01.html#d17e340"><span class="glossterm">existence condition</span></a>,
+                        <a class="indexterm" name="d0e9864"></a>
+                        requiring only that an object or link 
+                        have a specific attribute without concern for its value.
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <h2><a name="d0e9870"></a><code class="code">&lt;condition&gt;</code></h2>
+         <p><b xmlns:exsl="http://exslt.org/common">Attributes&nbsp;</b>
+            None.
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Children&nbsp;</b>
+            
+         </p>
+         <div class="informaltable">
+            <table border="0" width="100%">
+               <colgroup>
+                  <col width="27%" align="left">
+                  <col width="18%" align="left">
+                  <col width="55%" align="left">
+               </colgroup>
+               <tbody valign="top">
+                  <tr>
+                     <td align="left"><a href="apbs10.html" title="Test Expressions"><code class="sgmltag-element">test</code></a></td>
+                     <td align="left">member of a required set</td>
+                     <td align="left">A requirement for the corresponding vertex&#8217;s or edge&#8217;s
+                        attribute values
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">and</code></td>
+                     <td align="left">member of a required set</td>
+                     <td align="left">Requires all of the included tests be satisfied</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">or</code></td>
+                     <td align="left">member of a required set</td>
+                     <td align="left">Requires one of the included tests be satisfied</td>
+                  </tr>
+                  <tr>
+                     <td align="left"><code class="sgmltag-element">not</code></td>
+                     <td align="left">member of a required set</td>
+                     <td align="left">Requires that the specified test not be satisfied</td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <p>
+            
+         </p>
+         <p><b xmlns:exsl="http://exslt.org/common">Content Model&nbsp;</b></p>
+         <div class="blockquote">
+            <blockquote class="blockquote">
+               <p>
+                  <code class="literal">(or | and | not | test)</code>
+                  
+               </p>
+            </blockquote>
+         </div>
+         <p><a name="apx_queryxml_cond_ex"></a><b xmlns:exsl="http://exslt.org/common">Example&nbsp;</b>
+            
+         </p><pre class="programlisting">&lt;condition&gt;
+  &lt;and&gt;
+    &lt;test&gt;
+      &lt;operator&gt;eq&lt;/operator&gt;
+      &lt;attribute-name&gt;objtype&lt;/attribute-name&gt;
+      &lt;value&gt;person&lt;/value&gt;
+    &lt;/test&gt;
+    &lt;not&gt;
+      &lt;test&gt;
+        &lt;operator&gt;exists&lt;/operator&gt;
+        &lt;attribute-name&gt;cluster-coeff&lt;/attribute-name&gt;
+      &lt;/test&gt;
+    &lt;/not&gt;
+  &lt;/and&gt;
+&lt;/condition&gt;
+</pre><p>
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="apbs05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="apb.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="apbs07.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Edges&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Numeric Annotations</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

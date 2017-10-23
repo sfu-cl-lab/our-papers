@@ -1,0 +1,3211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="ch_scripts">
+<title>Using Scripts</title>
+<indexterm><primary>scripts</primary></indexterm>
+
+<!-- ============================================================== -->
+<!--                            OVERVIEW                            -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Overview</title>
+
+<para>In addition to using the &uiname; and command shell scripts to
+work with Proximity data, you can
+access the complete Proximity API through the Proximity scripting
+interface. This interface supports Python scripts run via the Jython
+<indexterm><primary>Python</primary>
+           <secondary>scripting</secondary></indexterm>
+<indexterm><primary>Jython</primary></indexterm>
+interpreter, permitting access to the full Proximity Java class library.
+<indexterm><primary>API</primary></indexterm>
+<indexterm><primary>accessing the API</primary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>API</secondary></indexterm>
+Scripts provide the means for many Proximity tasks including
+learning and applying models. Proximity lets you run full Python
+programs from files as well as providing a full-featured Python
+<indexterm><primary>interpreter</primary>
+           <see>Python interpreter</see></indexterm>
+<indexterm><primary>Python</primary>
+           <secondary>interpreter</secondary></indexterm>
+interpreter within the Proximity interface for convenient access to
+Proximity&rsquo;s scripting interface.</para>
+
+<para>The examples in this chapter are written in Jython, a Java
+implementation of Python that lets you interact with Java code. The
+classes and methods used in these examples are, of course, also
+available for use in Java code. Source code files for all the scripts
+discussed in this chapter are available in
+<filename>&scriptpath;</filename>.</para>
+
+<para>For each exercise in this chapter, we first walk through the
+source code and identify how Proximity classes and methods are used to
+accomplish the desired task. This is followed by instructions for
+running the script in Proximity.</para>
+
+<para>
+<itemizedlist spacing="compact">
+<title>Objectives</title>
+<para>The exercises in this chapter demonstrate how to</para>
+  <listitem>
+    <para>run scripts from the &uiname;</para>
+  </listitem>
+  <listitem>
+    <para>run scripts from the command line</para>
+  </listitem>
+  <listitem>
+    <para>execute Python statements interactively using Proximity&rsquo;s
+    Python interpreter</para>
+  </listitem>
+  <listitem>
+    <para>find objects having specified attribute values</para>
+  </listitem>
+  <listitem>
+    <para>sample containers to create training and test sets</para>
+  </listitem>
+  <listitem>
+    <para>access database elements (containers, subgraphs,
+    objects, links, and attributes) from a script</para>
+  </listitem>
+  <listitem>
+    <para>add a new attribute to the database</para>
+  </listitem>
+  <listitem>
+    <para>create synthetic data that exhibits specific 
+    <glossterm>autocorrelation</glossterm>
+    and <glossterm>degree disparity</glossterm> effects</para>
+  </listitem>
+  <listitem>
+    <para>use 
+    <glossterm baseform="social network analysis">social networking</glossterm> 
+    algorithms to 
+    understand database structure</para>
+  </listitem>
+</itemizedlist></para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                     WORKING WITH SCRIPTS                        -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Working with Scripts</title>
+
+<!-- .............................................................. -->
+<!--                       Processing overview                      -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Processing overview</title>
+
+<para>You can execute scripts from the &uiname; or from the command
+line using the Proximity shell scripts. Proximity also provides a
+Python interpreter that lets you execute Python statements
+interactively so that you can explore results and run short programs
+without needing to create script files.  Both methods for running
+scripts from files are described in 
+<xref xrefstyle="pageref" linkend="scripts_running"/>.
+The interactive Proximity Python interpreter is described in
+<xref xrefstyle="pageref" linkend="scripts_interpreter"/>.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                    Importing Proximity packages                -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Importing Proximity packages</title>
+<indexterm><primary>scripts</primary>
+           <secondary>importing classes</secondary></indexterm>
+<indexterm><primary>importing</primary>
+           <secondary>classes in scripts</secondary></indexterm>
+<indexterm><primary>packages</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary sortas="aaa">importing in scripts</secondary></indexterm>
+
+<para>You only need to import a Proximity class or package when you
+refer to a class by name, such as when 
+<glossterm baseform="instantiation">instantiating</glossterm> a class
+object, using a static method, or referring to one of its class
+variables. You do not need to import Proximity classes to use their
+non-static methods.</para>
+
+</sect2>
+
+<?pagebreak?>
+<!-- .............................................................. -->
+<!--                         The PROX object                        -->
+<!-- .............................................................. -->
+
+<sect2 id="scripts_proxobject">
+<title>The <varname role="heading">prox</varname> object</title>
+<indexterm><primary>prox object</primary></indexterm>
+
+<para>When Proximity runs a script or executes commands in the
+Proximity Python interpreter, it makes an instance of the
+&ProximityClass; class available. 
+<indexterm><primary>Proximity class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>Proximity class</secondary></indexterm>
+This instance is stored in the variable
+<varname>prox</varname>. The &ProximityClass; class and
+<varname>prox</varname> object provide access to the database itself
+as well as much of Proximity&rsquo;s higher level functionality including
+querying the database, creating samples, and 
+<glossterm baseform="instantiation">instantiating</glossterm>
+models.</para>
+
+<para>The <varname>prox</varname> object provides shortcuts
+<indexterm><primary>shortcuts</primary>
+           <secondary sortas="data">to data structures</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>shortcut names</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>shortcut names</secondary></indexterm>
+to many important Proximity data structures.  In particular, you can
+directly access the data structures containing database objects,
+links, attributes, and containers through the <varname>prox</varname>
+object:</para>
+
+<blockquote>
+<informaltable frame="none">
+<tgroup cols="2" align="left" rowsep="0" colsep="0">
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="1.5*"/>
+<thead>
+<row>
+  <entry>Data structure</entry>
+  <entry>Shortcut</entry>
+</row>
+</thead>
+<tbody valign="top">
+<row>
+  <entry>objects</entry>
+  <entry><code>prox.objectNST</code></entry>
+</row>
+<row>
+  <entry>links</entry>
+  <entry><code>prox.linkNST</code></entry>
+</row>
+<row>
+  <entry>object attributes</entry>
+  <entry><code>prox.objectAttrs</code></entry>
+</row>
+<row>
+  <entry>link attributes</entry>
+  <entry><code>prox.linkAttrs</code></entry>
+</row>
+<row>
+  <entry>root container</entry>
+  <entry><code>prox.rootContainer</code></entry>
+</row>
+<row>
+  <entry>arbitrary container</entry>
+  <entry><code>prox.getContainer("<varname>container-name</varname>")</code></entry>
+</row>
+<row>
+  <entry>container attributes</entry>
+  <entry><code>prox.containerAttrs</code></entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</blockquote>
+
+<para>See the example scripts in this chapter and in 
+<xref linkend="ch_models"/> for examples of using these shortcuts in
+Proximity scripts.</para>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                    RUNNING PROXIMITY SCRIPTS                   -->
+<!-- ============================================================== -->
+
+<sect1 id="scripts_running">
+<title>Running Proximity Scripts</title>
+<indexterm><primary>scripts</primary>
+           <secondary>running</secondary></indexterm>
+<indexterm><primary>running</primary>
+           <secondary>scripts</secondary></indexterm>
+<indexterm><primary>executing</primary>
+           <secondary>scripts</secondary></indexterm>
+
+<para>Proximity provides two methods for running scripts:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>from the &uiname;</para>
+  </listitem>
+  <listitem>
+    <para>from the command line</para>
+  </listitem>
+</itemizedlist>
+The exercises in this section demonstrate both methods of running
+scripts in Proximity. The script used in these exercises prints
+a &ldquo;Hello world&rdquo; greeting along with the 
+connection information (host and port) for the database. See
+<xref xrefstyle="pageref" linkend="scripts_interpreter"/> for
+information on using Proximity&rsquo;s interactive Python
+interpreter.</para>
+
+<!-- .............................................................. -->
+<!--                   Code Example: Hello World                    -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Code example: helloworld.py</title>
+<indexterm><primary>helloworld.py script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>examples</secondary>
+           <tertiary>helloworld.py</tertiary></indexterm>
+<indexterm><primary>Python</primary>
+           <secondary>running scripts</secondary></indexterm>
+
+<para>This section describes the script found in 
+<filename>&scriptpath;/helloworld.py</filename>.</para>
+
+<para>
+Proximity scripts use the <varname>prox</varname> object to access the
+&ProximityClass; class&rsquo;s methods.
+The method <methodname>getDbName()</methodname> 
+<indexterm><primary>getDbName()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getDbName()</secondary></indexterm>
+returns a string containing the connection information for the current
+database.
+
+<programlisting>dbname = prox.getDbName()
+print "Hello world, you're using database ", dbname
+</programlisting></para>
+
+<!--
+   EXERCISE: Running a script from the Proximity Database Browser
+-->
+
+<procedure>
+<title>Running a script from the &uiname;</title>
+<indexterm><primary>&uiname;</primary>
+           <secondary>running scripts</secondary></indexterm>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>From the <guimenu>Script</guimenu> menu, choose
+<guimenuitem>Run Script</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&scriptpath;</filename> directory and
+choose <filename>helloworld.py</filename>.
+Click <guibutton>Open</guibutton>.</para>
+<para>Proximity opens a window to show you any output from the script
+along with a trace of the script execution. Your output
+should look similar to the following:
+
+<screen>Status: starting running script:
+    /proximity/doc/user/tutorial/examples/helloworld.py
+Hello world, you're using database  [localhost, 30000]
+Status: finished running script
+</screen>
+
+You can close this window after the script finishes.</para>
+</step>
+</procedure>
+
+<para>You can create shortcuts to commonly used directories for easier
+access to script files. Shortcuts appear in the 
+<guilabel>Shortcuts</guilabel> pane of the <guilabel>Open</guilabel>
+dialog. See <xref xrefstyle="pageref" linkend="ex_shortcuts"/> for
+information on creating shortcuts.</para>
+
+<!--
+   EXERCISE: Running a script from the command line
+-->
+
+<para>You can also execute Python scripts directly from the command
+line using the Proximity <command>script.sh</command>
+<indexterm><primary>script.sh/script.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>script.sh</secondary></indexterm>
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>script.bat</secondary></indexterm>
+shell script or <command>query.bat</command> batch file.</para>
+
+<procedure>
+<title>Running a script from the command line</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver.</para>
+
+<step>
+<para>Execute the <command>script.sh</command> shell script or
+<command>script.bat</command> batch file, specifying
+<variablelist>
+  <varlistentry>
+    <term><replaceable>host:port</replaceable></term>
+    <listitem>
+      <para>the &monet; server&rsquo;s host and port</para>
+      <indexterm><primary>host:port specification</primary></indexterm>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>scriptName</replaceable></term>
+    <listitem>
+      <para>the file containing the Python script</para>
+    </listitem>
+  </varlistentry>
+</variablelist>
+
+Substitute the appropriate host and port information if you are
+running the &monet; server on a different machine or are using a
+different port.</para>
+
+<para><synopsis>&prompt; <userinput>cd &proxpath;</userinput>
+&prompt; <userinput>bin/script.sh localhost:30000 \
+  &scriptpath;/helloworld.py</userinput>
+</synopsis>
+
+<!--
+Windows:
+<synopsis>&winprompt; <userinput>cd &winproxpath;</userinput>
+&prompt; <userinput>bin\script.bat localhost:30000 \
+  &winscriptpath;\helloworld.py</userinput>
+</synopsis>
+-->
+
+Proximity writes the execution trace to the window from which you
+executed the above command. The last lines should be
+similar to the following excerpt
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>INFO  app.PythonScript: * connecting to db
+INFO  app.PythonScript: * executing script:
+      /proximity/doc/user/tutorial/examples/helloworld.py
+Hello world, you're using database  [localhost, 30000]
+INFO  app.PythonScript: * done executing script
+</screen></para></step>
+</procedure>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--               USING THE PROXIMITY PYTHON INTERPRETER           -->
+<!-- ============================================================== -->
+
+<sect1 id="scripts_interpreter">
+<title>Using the Proximity Python Interpreter</title>
+<indexterm><primary>Python</primary>
+           <secondary>interpreter</secondary></indexterm>
+
+<para>Proximity also lets you execute Python statements interactively
+from a special Python interpreter. The interpreter provides the same
+access to Proximity methods and to the special <varname>prox</varname>
+object available in the other scripting interfaces.</para>
+
+<para>The interpreter is a complete Jython interpreter and behaves
+in much the same way as the command line Python interpreter:
+
+<itemizedlist spacing="compact">
+<listitem>
+   <para>Variables defined during an interpreter session remain available
+     for use in later commands until you close the
+     interpreter window. New interpreter windows have a separate
+     namespace; variables defined in one interpreter window are not
+     available in another.</para>
+</listitem>
+
+<listitem>
+   <para>Nested blocks are indented as usual. You must indent
+   lines with tabs.  As in other Python environments,
+   all statements in a single block must be indented consistently.</para>
+</listitem></itemizedlist></para>
+
+<?pagebreak?>
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+<!--                  Method name completion                       -->
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+
+<bridgehead renderas="sect3">Method name completion</bridgehead>
+
+<para>The Proximity Python interpreter provides method name completion
+<indexterm><primary>completion in interpreter</primary></indexterm>
+<indexterm><primary>method name completion</primary></indexterm>
+for command lines that begin with a variable name.  Press
+<keycap>Ctrl-Space</keycap> to display a menu of possible methods for
+the current context.  For example:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Enter <code>prox.</code> followed by
+    <keycap>Ctrl-Space</keycap> to show all the methods in the
+    &ProximityClass; class. (Note the trailing period.)</para>
+  </listitem>
+  <listitem>
+    <para>Enter <code>prox.add</code> followed by
+    <keycap>Ctrl-Space</keycap> to show all the methods in the
+    &ProximityClass; class that begin with <literal>"add"</literal>.</para>
+  </listitem>
+  <listitem>
+    <para>Enter <code>prox.addA</code> followed by
+    <keycap>Ctrl-Space</keycap> to complete the command line with the
+    only &ProximityClass; class method that begins with
+    <literal>"addA"</literal>
+    (&addAttributeMethod;).</para>
+  </listitem>
+</itemizedlist>
+Method name completion works for variables other than the
+<varname>prox</varname> object and can be invoked recursively.  For
+example, typing <code>prox.getContainer().</code> followed by
+<keycap>Ctrl-Space</keycap> displays the methods in the
+&Container; class.</para>
+
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+<!--                     Parameter lists                           -->
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+
+<bridgehead renderas="sect3">Parameter lists</bridgehead>
+
+<para>Use <keycap>Ctrl-P</keycap> (after an opening parenthesis) to
+display a menu of parameter overloads for the current method.  For
+example, typing <code>prox.addAttribute(</code> followed by
+<keycap>Ctrl-P</keycap> shows the two signatures for the
+&addAttributeMethod; method.</para>
+
+<caution>
+<para>Method name completion and parameter list display are
+enabled only for command lines that begin with a variable name.  They
+do not work for variables elsewhere on the command line.</para>
+</caution>
+
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+<!--              Command line history and editing                 -->
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+
+<bridgehead renderas="sect3">Command line history and editing</bridgehead>
+
+<para>The Proximity Python interpreter also includes selected
+functionality for working with the command-line
+<indexterm><primary>history in interpreter</primary></indexterm>
+history and editing the current command line.  The key bindings for
+command-line editing in the Proximity 
+Python interpreter follow those used for command-line editing in the
+bash and csh shells.
+<indexterm><primary>editing</primary>
+      <secondary>command line in interpreter</secondary></indexterm>
+<indexterm><primary>command-line editing in interpreter</primary></indexterm>
+
+<informaltable>
+<tgroup cols="4" align="left">
+<colspec colnum="1" colname="col1" colwidth="1*"/>
+<colspec colnum="2" colname="col2" colwidth="2*"/>
+<colspec colnum="3" colname="col3" colwidth="1*"/>
+<colspec colnum="4" colname="col4" colwidth="2*"/>
+<thead>
+<row valign="top">
+  <entry>Command</entry>
+  <entry>Description</entry>
+  <entry>Command</entry>
+  <entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row valign="top">
+  <entry>Up arrow</entry>
+  <entry>Previous command in history</entry>
+  <entry>Down arrow</entry>
+  <entry>Next command in history</entry>
+</row>
+<row valign="top">
+  <entry>Right arrow, <keycap>Ctrl-B</keycap></entry>
+  <entry>Move backward one character</entry>
+  <entry>Left arrow, <keycap>Ctrl-F</keycap></entry>
+  <entry>Move forward one character</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Ctrl-A</keycap></entry>
+  <entry>Move to beginning of line</entry>
+  <entry><keycap>Ctrl-E</keycap></entry>
+  <entry>Move to end of line</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Del</keycap></entry>
+  <entry>Delete one character backward</entry>
+  <entry><keycap>Ctrl-D</keycap></entry>
+  <entry>Delete one character forward</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Ctrl-K</keycap></entry>
+  <entry>Kill to end of line</entry>
+  <entry><keycap>Ctrl-Y</keycap></entry>
+  <entry>Paste contents of clipboard</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Ctrl-Alt-S</keycap><footnote><para>The &macosx;
+  equivalent to <keycap>Ctrl-Alt</keycap> is
+  <keycap>Ctrl-Option</keycap>.</para></footnote></entry>
+  <entry>Save command history</entry>
+  <entry><keycap>Ctrl-Alt-C</keycap></entry>
+  <entry>Clear command history</entry>
+</row>
+<row valign="top">
+  <entry><keycap>Ctrl-Alt-X</keycap></entry>
+  <entry>Execute Jython file</entry>
+  <entry> </entry>
+  <entry> </entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable></para>
+
+<!--
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Use the up arrow key to move back in the command history
+    stack; use the down arrow key to move forward in the command
+    history stack.</para>
+  </listitem>
+  <listitem>
+    <para>Use the right arrow key or <keycap>Ctrl-F</keycap> to move
+    the cursor to the right within the command line; use the left
+    arrow key or <keycap>Ctrl-B</keycap> to move the cursor to the left
+    within the command line.</para>
+  </listitem>
+  <listitem>
+    <para>Use <keycap>Ctrl-A</keycap> to move the cursor to the
+    beginning of the line; use <keycap>Ctrl-E</keycap> to move the
+    cursor to the end of the line.</para>
+  </listitem>
+  <listitem>
+    <para>Use <keycap>Delete</keycap> to delete characters to the left
+    of the cursor; use <keycap>Ctrl-D</keycap> to delete characters to
+    the right of the cursor.</para>
+  </listitem>
+  <listitem>
+    <para>Use <keycap>Ctrl-K</keycap> to delete text to the end of the
+    line and place that text on the clipboard; use
+    <keycap>Ctrl-Y</keycap> to paste text from the 
+    clipboard.</para>
+  </listitem></itemizedlist></para>
+-->
+
+<para>After you have developed a sequence of commands for accomplishing
+a task, you can save the command history to a file for future use.
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Use <keycap>Ctrl-Alt-S</keycap> to save the current command
+    history to a file.</para>
+  </listitem>
+  <listitem>
+    <para>Use <keycap>Ctrl-Alt-C</keycap> to clear the command history.
+    (<keycap>Ctrl-Alt-C</keycap> does not clear the interpreter
+    window or change any variable values.)</para>
+  </listitem>
+  <listitem>
+    <para>Use <keycap>Ctrl-Alt-X</keycap> to execute a Jython file, such
+    as a saved history file.</para>
+  </listitem></itemizedlist></para>
+
+<para>The Proximity Python interpreter runs in the same thread as the
+&uiname;. Statements that take a long time to execute will prevent
+interacting with the browser until execution finishes.</para>
+
+<!-- .............................................................. -->
+<!--             Code Example: Finding Selected Objects             -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Code Example: Finding Selected Objects</title>
+<indexterm><primary>attributes</primary>
+           <secondary>finding specified values</secondary></indexterm>
+<indexterm><primary>finding</primary>
+           <secondary>attribute values</secondary></indexterm>
+<indexterm>
+<primary>searching for attribute values</primary></indexterm>
+
+<para>This exercise walks through a series of interactive Python
+commands that find objects with a specified attribute value. 
+In this example, we find and explore objects with a value of 
+<token role="attr">ftp</token> for the 
+<token role="attr">url_protocol</token> attribute.
+The steps described below also show how to use the
+interpreter&rsquo;s history, command-line editing, and completion
+features.</para>
+
+<para>This exercise
+illustrates two methods in the &ProximityClass; class
+useful for exploring the information in a database:
+&findMethod;
+<indexterm><primary>find()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>find()</secondary></indexterm>
+and &browseMethod;.
+<indexterm><primary>browse()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>browse()</secondary></indexterm>
+The &findMethod; method searches for objects
+whose attribute values match the specified pattern.  This pattern
+accepts the wildcards
+<indexterm><primary>wildcards in interactive Python interpreter</primary></indexterm>
+<literal>_</literal> (underscore, matches a single instance of any
+character), and <literal>%</literal> (matches zero or more characters).
+The &browseMethod; method opens a new browser window
+to display the specified object or container.</para>
+<!--
+   EXERCISE: Running a script interactively
+-->
+
+<procedure>
+<title>Running a script interactively</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>If the interactive Python interpreter window is not already
+open, choose <guimenuitem>Open Interpreter</guimenuitem> from the
+<guimenu>Script</guimenu> menu.
+Proximity opens a Proximity Python interpreter window.</para>
+
+<para>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_InterpWelcome.png"
+    width="5.75in"
+    format="PNG"/>
+</imageobject>
+<imageobject role="html">
+    <imagedata valign="bottom" align="center"
+    fileref="&graphicspath;/GUI_InterpWelcome.png"
+    contentwidth="7.0in"
+    format="PNG"/>
+</imageobject>
+</mediaobject>
+The initial Proximity Python interpreter window includes reminders of
+the keyboard commands for using the interpreter&rsquo;s history,
+command-line editing, and completion features.  (The
+<methodname>printNST</methodname> method operates on 
+<glossterm baseform="nested synchronized table">NSTs</glossterm>, an internal
+Proximity data structure described in 
+<xref linkend="scripts_nst" />.</para></step>
+
+<step>
+<para>Use the &findMethod;
+method to identify objects with an attribute value of 
+<token role="attr">ftp</token>.
+<orderedlist spacing="compact" numeration="loweralpha">
+  <listitem>
+    <para>In the Proximity Python interpreter, type
+    <userinput>prox.</userinput> and press
+    <keycap>Ctrl-Space</keycap>.  (Note the trailing period.)
+    Proximity displays a menu of applicable methods in the
+    &ProximityClass; class.</para>
+    <mediaobject>
+    <imageobject role="fo">
+       <imagedata valign="bottom" align="center"
+                  format="PNG"
+                  width="5.75in"
+                  fileref="&graphicspath;/GUI_InterpMethods.png"/>
+    </imageobject>
+    <imageobject role="html">
+       <imagedata valign="bottom" align="center"
+                  format="PNG"
+                  contentwidth="7.0in"
+                  fileref="&graphicspath;/GUI_InterpMethods.png"/>
+    </imageobject>
+    </mediaobject>
+  </listitem>
+  <listitem>
+    <para>Choose <methodname>find</methodname> from the menu.
+    Proximity adds the method name to the current command line.</para>
+  <?pagebreak?>
+  </listitem>
+  <listitem>
+    <para>Complete the method call by entering the pattern to match:
+    <blockquote role="indented">
+      <para><userinput>prox.find("%ftp%")</userinput></para>
+    </blockquote></para>
+    <para>The <code>%</code> wildcards before and after <code>ftp</code>
+    each match zero or more characters; this pattern
+    matches all attribute values that contain the
+    string <code>"ftp"</code> anywhere in the value.</para>
+  </listitem>
+  <listitem>
+    <para>Press <keycap>Return</keycap>.</para>
+  </listitem>
+</orderedlist>
+Proximity returns a map (Python dictionary) with attribute names as
+keys and a list of object IDs that match the specified pattern for
+that attribute as the value for each key.
+<screen>{url=[1086, 1087, 1088, 1089, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 
+1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111,
+1112, 1113, 1114, 1115, 1116, 1117, 1118, 1119, 1120, 1121, 1122, 3448], 
+url_protocol=[1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101,
+1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114,
+1115, 1116, 1117, 1118, 1119, 1120, 1121, 1122], url_server_info=[1086, 1087, 
+1088, 1089, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 
+1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114, 
+1115, 1116, 1117, 1118, 1119, 1120, 1121]}
+</screen>
+The returned value shows that three attributes
+(<token role="attr">url</token>, 
+<token role="attr">url_protocol</token>, and
+<token role="attr">url_server_info</token>) have values that
+contain the string <code>"ftp"</code>.</para>
+</step>
+
+<step>
+<para>Edit the previous command to find only those objects whose
+<token role="attr">url_protocol</token> attribute has a value of
+<token role="attr">ftp</token>.  We use an overload of the
+&findMethod; method that accepts a second argument,
+the name of the attribute to search.
+<orderedlist spacing="compact" numeration="loweralpha">
+  <listitem>
+    <para>Press the <keycap>up</keycap> arrow to display the previous
+    command.</para>
+  </listitem>
+  <listitem>
+    <para>Use the <keycap>arrow</keycap> keys to change the cursor
+    position so that it is immediately after the opening
+    parenthesis.</para>
+  </listitem>
+  <listitem>
+    <para>Press <keycap>Ctrl-K</keycap> to delete all text from the
+    cursor position to end of line. This text is placed on the
+    clipboard and can be pasted with <keycap>Ctrl-Y</keycap>.</para>
+  </listitem>
+  <listitem>
+    <para>Press <keycap>Ctrl-P</keycap> to display a menu of
+    parameter options for the &findMethod; method.
+    <mediaobject>
+    <imageobject role="fo">
+       <imagedata valign="bottom" align="center"
+                  format="PNG"
+                  width="5.75in"
+                  fileref="&graphicspath;/GUI_InterpParams.png"/>
+    </imageobject>
+    <imageobject role="html">
+       <imagedata valign="bottom" align="center"
+                  format="PNG"
+                  contentwidth="7.0in"
+                  fileref="&graphicspath;/GUI_InterpParams.png"/>
+    </imageobject>
+    </mediaobject>
+    This time we use the &findMethod; method that
+    takes two strings as arguments.  Press <keycap>Return</keycap> or
+    <keycap>Esc</keycap> to clear the parameter list menu.</para>
+  </listitem>
+  <listitem>
+    <para>Complete the command so that it now reads
+       <blockquote role="indented"><para><userinput>prox.find("ftp","url_protocol")</userinput></para></blockquote>
+       Note that this time we are searching for exact matches as the
+       search pattern has no wildcards.</para>
+  </listitem>
+  <listitem>
+    <para>Press <keycap>Return</keycap>.</para>
+  </listitem>
+</orderedlist>
+Proximity returns a map with the target attribute as the key and the
+list of object IDs with the specified attribute value as the value for
+that key.
+<screen>{url_protocol=[1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 
+1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114, 
+1115, 1116, 1117, 1118, 1119, 1120, 1121, 1122]}
+</screen></para></step>
+
+<step>
+<para>Create and execute a file containing the most recent
+<methodname>find</methodname> command.
+<orderedlist spacing="compact" numeration="loweralpha">
+  <listitem>
+    <para>Press <keycap>Ctrl-Alt-S</keycap> to save the command
+    history. Proximity displays the <guilabel>Open</guilabel>
+    dialog.  Save the history in the location of your choice.</para>
+  </listitem>
+  <listitem>
+    <para>Edit the saved file to remove the first
+    <methodname>find</methodname> command and assign the results of
+    the remaining <methodname>find</methodname> command to the
+    variable <varname>ftp_protocols</varname>.  The file should now
+    read
+    <programlisting># Proximity Interpreter History
+ftp_protocols=prox.find("ftp","url_protocol")</programlisting>
+    Save the edited file.</para>
+  <?pagebreak?>
+  </listitem>
+  <listitem>
+    <para>In the Proximity Python interpreter, press 
+    <keycap>Ctrl-Alt-C</keycap> to clear the command
+    history. Proximity displays a confirmation message in a pop-up
+    window.  Click <guibutton>OK</guibutton> to dismiss the
+    confirmation message.</para>
+  </listitem>
+  <listitem>
+    <para>Press <keycap>Ctrl-Alt-X</keycap> to execute a saved Jython
+    file. Proximity displays the <guilabel>Open</guilabel> dialog.
+    Choose the file you just saved and edited.
+    Proximity responds by printing and executing the
+    <code>execfile</code> command that runs the saved script file:
+    <screen>&gt;&gt;&gt; execfile("/proximity/saved-interpreter-history.py")</screen></para>
+  </listitem>
+  <listitem>
+    <para>To verify that the script completed successfully, enter 
+    <userinput>ftp_protocols</userinput> in the
+    Proximity Python interpreter window and press
+    <keycap>Return</keycap>. Proximity returns the value of
+    <varname>ftp_protocols</varname>.</para>
+  </listitem>
+</orderedlist></para></step>
+
+<step>
+<para>Examine one of the listed objects.
+<orderedlist spacing="compact" numeration="loweralpha">
+  <listitem>
+    <para>In the Proximity Python interpreter window, enter
+    <userinput>prox.b</userinput> and press 
+    <keycap>Ctrl-Space</keycap>.  Proximity completes the method name
+    (<methodname>browse</methodname>).</para>
+  </listitem>
+  <listitem>
+    <para>Enter <userinput>(</userinput> and press
+    <keycap>Ctrl-P</keycap> to display the parameter 
+    options for the &browseMethod; method.  This
+    method takes either an <code>int</code> (object ID) or
+    <code>String</code> (container name) as its argument. Press
+    <keycap>Return</keycap> or <keycap>Esc</keycap> to dismiss the
+    list of parameter options.</para>
+  </listitem>
+  <listitem>
+    <para>Complete the command line to read
+      <blockquote role="indented"><para><userinput>prox.browse(1091)</userinput></para></blockquote>
+    and press <keycap>Return</keycap>. </para>
+  </listitem>
+</orderedlist>
+Proximity displays object&nbsp;1091 in a new browser window.</para>
+</step>
+
+<step>
+<para>Click <guibutton>attrs</guibutton> to display the attribute
+values for object&nbsp;1091 and confirm that the value of the 
+<token role="attr">url_protocol</token> attribute is 
+<token role="attr">ftp</token>.</para></step>
+
+</procedure>
+
+<para>Close the second browser window when you have finished exploring
+object&nbsp;1091.</para>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                      SAMPLING THE DATABASE                     -->
+<!-- ============================================================== -->
+
+<sect1 id="scripts_sampling">
+<title>Sampling the Database</title>
+<indexterm id="idx_sampling1" class="startofrange">
+           <primary>sampling</primary></indexterm>
+<indexterm id="idx_sampling2" class="startofrange">
+           <primary>databases</primary>
+           <secondary>sampling</secondary></indexterm>
+<indexterm id="idx_sampling3" class="startofrange">
+           <primary>containers</primary>
+           <secondary>sampling</secondary></indexterm>
+
+<para>To use the Proximity models, you need to create sets of
+subgraphs. In the simplest case, one or more of these sets is used to
+learn (train) the model. You then test the results of that training by
+applying the model to the remaining set of subgraphs. You can create
+these sets of subgraphs by 
+<glossterm baseform="sampling"><emphasis>sampling</emphasis></glossterm>
+a container.</para>
+
+<para>Proximity provides a &sampleContainerMethod;
+method for creating random samples of existing containers.<footnote>
+<para>You cannot sample the  root container.</para></footnote>
+You can either create a specified number of samples, or create samples
+suitable for <glossterm>cross validation</glossterm>.  Because
+subgraphs in a container may 
+contain objects and links that also appear in other subgraphs, the
+resulting samples may not satisfy strict independence requirements
+imposed by some experimental designs.
+<xref linkend="ex_scripts_sampling"/> illustrates the simplest case of
+creating two samples&mdash;one for 
+<glossterm baseform="training set">training</glossterm> and one for
+<glossterm baseform="test set">testing</glossterm>.
+<!-- 
+These samples are used in later <citetitle>Tutorial</citetitle>
+exercises.
+-->
+</para>
+
+<sidebar>
+<para>Running the sample-1d-clusters script creates
+<glossterm baseform="container">containers</glossterm> used by
+later tutorial exercises.  Make sure that you complete this exercise
+if you plan to complete the exercises in the following
+chapters.</para>
+</sidebar>
+
+<!-- .............................................................. -->
+<!--               Code example: Sampling 1d-clusters               -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Code example: sample-1d-clusters.py</title>
+<indexterm><primary>sample-1d-clusters.py script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>examples</secondary>
+           <tertiary>sample-1d-clusters.py</tertiary></indexterm>
+
+<para>This section describes the script found in 
+<filename>&scriptpath;/sample-1d-clusters.py</filename>.</para>
+
+<para>To create the samples, we need to write a script that calls the
+&sampleContainerMethod; method 
+<indexterm><primary>sampleContainer()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>sampleContainer()</secondary></indexterm>
+on the <varname>prox</varname> object.
+<indexterm><primary>prox object</primary></indexterm>
+For this example, we
+create two samples. Each will be placed in a new container and each
+will hold approximately one-half the subgraphs from the original
+container. The counts are approximate because the initial container
+may not contain an even number of subgraphs.
+
+<programlisting>print "Sampling database..."
+prox.sampleContainer("1d-clusters",2,"samples")
+</programlisting></para>
+
+<para>This use of the <methodname>sampleContainer()</methodname> method
+requires three arguments:
+<variablelist>
+  <varlistentry>
+    <term><varname>containerName</varname></term>
+    <listitem><para>the container to be sampled</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>numFolds</varname></term>
+    <listitem><para>the number of samples to create from this
+    container</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>sampleName</varname></term>
+    <listitem><para>the name of the container that holds the sample
+    containers</para>
+    </listitem>
+  </varlistentry>
+</variablelist></para>
+
+<para>The <methodname>sampleContainer()</methodname> method creates both
+a parent container, <varname>sampleName</varname>, to hold the
+samples as well as the sample containers themselves.
+The <varname>sampleName</varname> container is in turn,
+contained by the initial <varname>containerName</varname> container. For
+example, the script above creates the following container hierarchy:
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata valign="bottom" align="center"
+     fileref="&graphicspath;/FIG_NestedCollections.png"
+     width="5.75in"
+     format="PNG" />
+</imageobject>
+<imageobject role="html">
+<imagedata valign="bottom" align="center"
+     fileref="&graphicspath;/FIG_NestedCollections.png"
+     contentwidth="7.0in"
+     format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure></para>
+<para>where the 1d-clusters container existed in the database before
+running the scripts and the samples, 0, and 1 containers were
+created as a result of running the script.</para>
+
+<para>The &sampleContainerMethod; method provides an overload for
+creating samples for <glossterm>cross validation</glossterm>.  This
+overload omits the 
+<parameter>sampleName</parameter> parameter, placing the resulting
+samples in either a <token role="container">training</token> or
+<token role="container">test</token> container.  For example, when
+creating samples for 10-fold cross validation, the method partitions
+the data into 10 segments and creates 10 
+<glossterm baseform="training set">training sets</glossterm>, each
+containing nine of those segments, and 10 corresponding 
+<glossterm baseform="test set">test sets</glossterm>
+containing the remaining tenth segment.</para>
+
+<!--
+   EXERCISE: Creating training and test sets
+-->
+
+<procedure id="ex_scripts_sampling">
+<title>Creating training and test sets</title>
+<indexterm><primary>training sets</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm><primary>test sets</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>training and test sets</secondary></indexterm>
+
+<para>This script requires the container created in 
+<xref linkend="ex_queries_1dclusters"/>. You must have completed
+<xref linkend="ex_queries_1dclusters"/> before running the current
+exercise.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>From the <guimenu>Script</guimenu> menu, choose
+<guimenuitem>Run Script</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&scriptpath;</filename> directory and
+choose <filename>sample-1d-clusters.py</filename>.
+Click <guibutton>Open</guibutton>.</para>
+<para>Proximity opens a window to show you any output from the script
+along with a trace of the script execution. 
+Proximity reports:
+
+<screen>Status: starting running script: 
+   /proximity/doc/user/tutorial/examples/sample-1d-clusters.py
+Sampling database...
+Status: finished running script
+</screen>
+
+when the script successfully completes. You can close
+this window after the script finishes.</para>
+</step>
+
+<step>
+<para>To verify that the script created the sample containers,
+click <guibutton>Containers</guibutton> to display the list of
+containers in the database.</para>
+</step>
+
+<step>
+<para>Click <guibutton>&onedclusters;</guibutton>. Proximity shows you
+that &onedclusters; has a child container, &samples;.</para>
+</step>
+
+<step>
+<para>Click <guibutton>&samples;</guibutton>. Proximity displays
+&samples;&rsquo;s child containers, numbered 0 and 1.</para>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Samples.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/GUI_Samples.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+<para>The <guibutton>view query</guibutton> link is disabled because
+this container was created by a script rather than by querying.</para>
+</step>
+
+</procedure>
+
+<para>Sampling adds an attribute to each of the sampled subgraphs
+<indexterm><primary>attributes</primary>
+           <secondary>added by sampling</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="subgraphs">of subgraphs</secondary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>attributes of</secondary></indexterm>
+<emphasis>in the initial container</emphasis>
+indicating which sample they belong to.  In this case, subgraphs in
+&onedclusters; get the new attribute, but corresponding subgraphs in
+containers 0 and 1 do not.
+This attribute will be overwritten if the container is re-sampled.</para>
+
+<indexterm startref="idx_sampling1" class="endofrange"/>
+<indexterm startref="idx_sampling2" class="endofrange"/>
+<indexterm startref="idx_sampling3" class="endofrange"/>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                     ADDING A NEW ATTRIBUTE                     -->
+<!-- ============================================================== -->
+
+<sect1 id="scripts_attrs">
+<title>Adding a New Attribute</title>
+<indexterm><primary>attributes</primary>
+           <secondary>creating</secondary></indexterm>
+<indexterm><primary>creating</primary>
+           <secondary>attributes</secondary></indexterm>
+
+<para>Sometimes a database doesn&rsquo;t include the necessary representation
+required for a specific task.  For example, one of the classification models
+used in <xref linkend="ch_models"/> uses a boolean attribute to
+identify members of a class. The &webkb; database doesn&rsquo;t include such
+an attribute, so we must create one based on other existing attribute
+values. 
+Although you can create attributes directly in the &uiname;,
+<indexterm><primary>Proximity Database Browser</primary>
+           <secondary>updating data</secondary>
+           <tertiary>creating attributes</tertiary></indexterm>
+it is sometimes more convenient to do so as part of a script.  This section
+describes how to create a new attribute and use a function to assign
+values to that new attribute in a script.  The syntax for the
+assignment function is identical, regardless of whether the attribute
+is created in a script or directly in the &uiname;.</para>
+
+<para>In this example, we create an attribute needed for later
+<citetitle>Tutorial</citetitle> exercises: a binary 
+<token role="attr">isStudent</token> object attribute
+that indicates whether or not a web page belongs to a
+student. We assign the value <token role="attr">1</token> to the 
+<token role="attr">isStudent</token>
+attribute if the page&rsquo;s <token role="attr">pagetype</token>
+attribute is <token role="attr">Student</token>, and 
+<token role="attr">0</token> otherwise.</para>
+
+<para>Creating a useful attribute requires two steps: creating the
+appropriate database tables and populating its values. 
+The &ProximityClass; class&rsquo;s <methodname>addAttribute()</methodname>
+<indexterm><primary>addAttribute()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>addAttribute()</secondary></indexterm>
+method lets you accomplish both of these steps in one 
+method call and provides great flexibility in how you assign values to
+the new attribute.</para>
+
+<para>To create and populate a new attribute, you specify a function
+that describes how to assign values to the new attribute for each
+entity. New attribute values can be constants or can be based on
+existing attribute values. In this example, we use the value of the
+existing <token role="attr">pagetype</token> attribute to determine the
+value of the new <token role="attr">isStudent</token>
+attribute. This function is specified as a string passed into the
+<methodname>addAttribute()</methodname> method.  You can create
+attributes for any class of database entity&mdash;objects, links,
+containers, or subgraphs.
+See the &AddAttribute; 
+<indexterm><primary>AddAttribute class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>AddAttribute</secondary></indexterm>
+class for a full description of the syntax for
+specifying the creation function.</para>
+
+<sidebar>
+<para>You can also create a new attribute directly in the &uiname;.
+Both methods use the same syntax to define the function that assigns
+values to the new attribute.
+See <xref linkend="ex_exploringattrs"/> for
+information on creating attributes in the &uiname;.</para>
+</sidebar>
+
+<!-- .............................................................. -->
+<!--         Code example: Creating the isStudent attribute         -->
+<!-- .............................................................. -->
+
+<?pagebreak?>
+<sect2>
+<title>Code example: create-isStudent-attr.py</title>
+<indexterm><primary>scripts</primary>
+           <secondary>create-isStudent-attr.py</secondary></indexterm>
+<indexterm><primary>create-isStudent-attr.py script</primary></indexterm>
+
+<para>This section describes the script found in 
+<filename>&scriptpath;/create-isStudent-attr.py</filename>.</para>
+
+<para>Get the current set of object attributes and define the new
+attribute name. We use the set of current attributes to determine
+whether the new attribute already exists in the database.
+
+<programlisting>currentAttrs = prox.objectAttrs
+newAttrName = "isStudent"
+</programlisting>
+
+Define the function that determines the new attribute value.
+This example uses a switch function. It sets the value of the new
+attribute to <token role="attr">1</token> if the object&rsquo;s 
+<token role="attr">pagetype</token> attribute is equal to
+<token role="attr">Student</token>
+and <token role="attr">0</token> otherwise.  See the &AddAttribute;
+class for details on
+specifying function strings for defining new attributes.
+
+<programlisting>newAttrFunction = "pagetype = \"Student\" ==> 1, default ==> 0"
+</programlisting>
+
+See if this object attribute already exists in the database.
+<indexterm><primary>attributes</primary>
+           <secondary>existence of</secondary></indexterm>
+
+If it does, ask the user if we should delete it so we can redefine
+it.  Proximity provides two methods,
+<methodname>getYesNoFromUser()</methodname> 
+<indexterm><primary>methods</primary>
+           <secondary>getYesNoFromUser()</secondary></indexterm>
+<indexterm><primary>getYesNoFromUser()</primary></indexterm>
+and <methodname>getStringFromUser()</methodname>,
+<indexterm><primary>methods</primary>
+           <secondary>getStringFromUser()</secondary></indexterm>
+<indexterm><primary>getStringFromUser()</primary></indexterm>
+both members of the
+&ProximityClass; class, that you can use to interact with your Python
+programs. Both methods display a dialog with the specified prompt. The
+<methodname>getYesNoFromUser()</methodname> method returns
+<literal>true</literal> if the user selects Yes and
+<literal>false</literal> if the user selects No. The
+<methodname>getStringFromUser()</methodname> method returns the string
+entered by the user.
+
+<programlisting>prompt = "Attribute already exists. Delete and recreate?"
+
+if currentAttrs.isAttributeDefined(newAttrName):
+   deleteExisting = prox.getYesNoFromUser(prompt)
+</programlisting>
+
+If yes, delete the existing attribute and create it again.
+
+<programlisting>   if deleteExisting:
+      currentAttrs.deleteAttribute(newAttrName)
+      print "Creating new ", newAttrName, " attribute"
+      prox.addAttribute(currentAttrs,newAttrName,newAttrFunction)
+</programlisting>
+
+If the attribute does not already exist, go ahead and create it.
+
+<programlisting>else:
+   print "Creating new ", newAttrName, " attribute"
+   prox.addAttribute(currentAttrs,newAttrName,newAttrFunction)
+</programlisting></para>
+
+<sidebar>
+<para>Running the <filename>create-isStudent-attr.py</filename> script
+creates an 
+attribute used by later tutorial exercises.  Make sure that you
+complete this exercise if you plan to complete the exercises in 
+<xref linkend="ch_models"/>.</para>
+</sidebar>
+
+<!--
+   EXERCISE: Adding a new attribute
+-->
+
+<procedure id="ex_scripts_adding">
+<title>Adding a new attribute</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>From the <guimenu>Script</guimenu> menu, choose
+<guimenuitem>Run Script</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&scriptpath;</filename> directory and
+choose <filename>create-isStudent-attr.py</filename>.
+Click <guibutton>Open</guibutton>.</para>
+<para>Proximity opens a window to show you any output from the script
+along with a trace of the script execution. 
+Proximity reports:
+
+<screen>Status: starting running script:
+   /proximity/doc/user/tutorial/examples/create-isStudent-attr.py
+Creating new  isStudent  attribute
+Status: finished running script
+</screen>
+
+You can close this window after the script finishes.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Object attributes</guibutton> to see the new
+isStudent attribute.</para>
+</step>
+
+</procedure>
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                 SOCIAL NETWORKING ALGORITHMS                   -->
+<!-- ============================================================== -->
+
+<sect1 id="scripts_sna">
+<title>Social Networking Algorithms</title>
+<indexterm><primary>social networking algorithms</primary></indexterm>
+<indexterm><primary>clustering coefficient</primary></indexterm>
+<indexterm><primary>connected components</primary></indexterm>
+<indexterm><primary>hubs and authorities</primary></indexterm>
+
+<para><glossterm baseform="social network analysis">Social networking</glossterm> 
+algorithms are a useful part of the analyst&rsquo;s 
+toolkit. The algorithms illustrated in this section help in understanding
+the structure of a database.</para>
+
+<para>The <glossterm>clustering coefficient</glossterm> is a measure
+of the interrelatedness 
+of an object&rsquo;s neighbors.  It indicates the ratio of existing links
+connecting an object&rsquo;s neighbors to each other to the maximum possible
+number of such links. An object must have at least two neighbors to
+calculate the clustering coefficient.  No value is calculated for
+objects having less than two neighbors.</para>
+
+<para>The <glossterm>connected components</glossterm> algorithm
+identifies the distinct components of the input data. Two objects are
+in the same component if there is a path from one object to the
+other.</para>
+
+<para>The <glossterm>hubs and authorities</glossterm> algorithm,
+originally developed with web 
+search in mind, attempts to identify objects that are likely to be
+good sources of information (authorities) and objects that are likely
+to point to many such authorities (hubs) through the link
+structure of the data.</para>
+
+<para>Proximity adds the results of running these algorithms to the
+database, either by creating new object attributes (clustering
+coefficient or hubs and authorities) or by creating a new container of
+subgraphs (connected components).</para>
+
+<!-- .............................................................. -->
+<!--           Code example: social-networking-algs.py              -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Code example: social-networking-algs.py</title>
+<indexterm><primary>scripts</primary>
+           <secondary>examples</secondary>
+           <tertiary>social-networking-algs.py</tertiary></indexterm>
+<indexterm><primary>social-networking-algs.py script</primary></indexterm>
+
+<para>This section describes the script found in 
+<filename>&scriptpath;/social-networking-algs.py</filename>.</para>
+
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+<!--                        Initialization                         -->
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+
+<sect3>
+<title>Initialization</title>
+
+<para>Define a prefix to use for attribute and container names.
+For example, when running these algorithms on the whole database, you
+might use the database name as a prefix (as shown below). You might
+use a container name when running the algorithms on the objects and
+links in a specified container.
+
+<programlisting>attrPrefix = "proxwebkb"
+</programlisting>
+
+Get the current set of object attributes. We use this to determine
+whether the new attributes already exist in the database.
+
+<programlisting>currentAttrs = prox.objectAttrs
+</programlisting></para>
+</sect3>
+
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+<!--                     Clustering coefficient                    -->
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+
+<sect3>
+<title>Clustering coefficient</title>
+
+<para>For the purposes of calculating the 
+<glossterm>clustering coefficient</glossterm>,
+Proximity ignores both link direction and the possibility of multiple
+links when calculating the number of actual and potential links among
+an object&rsquo;s neighbors. Proximity uses only the number of distinct
+object pairs to determine this number.</para>
+
+<programlisting>print "Computing clustering coefficients"
+</programlisting>
+
+<para>Proximity stores the value of the clustering coefficient in a
+new object attribute specified by the user. 
+We start by specifying the name of the new attribute.
+
+<programlisting>clusterAttrName = attrPrefix + "-cluster-coeff"
+</programlisting>
+
+In this example, we assume
+that the user wants to overwrite existing values so we automatically
+delete any existing attribute with 
+the same name. See <xref linkend="ex_scripts_adding"/> 
+for an example of asking the user whether to delete an existing
+attribute.
+
+<programlisting>if currentAttrs.isAttributeDefined(clusterAttrName):
+   print "  Attribute " + clusterAttrName + " already exists. Deleting..."
+   currentAttrs.deleteAttribute(clusterAttrName)
+</programlisting>
+
+Create and calculate values for the new clustering coefficient attribute.
+Proximity lets you calculate the clustering coefficient for
+either an entire database or limit execution to the data in a specified
+container. When limited to a container, Proximity runs the algorithm
+on the objects and links in the container,
+ignoring subgraph boundaries. The code in this example calculates
+clustering coefficients for the entire database.
+
+<programlisting>prox.addClusterCoeffAttribute(clusterAttrName)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>addClusterCoeffAttribute()</secondary></indexterm>
+<indexterm><primary>addClusterCoeffAttribute()</primary></indexterm>
+
+To compute the clustering coefficient for objects in a container, use
+the overloaded <methodname>addClusterCoeffAttribute()</methodname> method
+with the input container as the second argument, e.g.,
+<code>prox.addClusterCoeffAttribute(clusterAttrName,
+inputContainer)</code>.</para>
+</sect3>
+
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+<!--                       Connected components                    -->
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+
+<sect3>
+<title>Connected components</title>
+
+<para>Proximity ignores link direction in determining
+whether a path exists between two objects, implementing the weak sense of
+connectivity. Proximity creates a subgraph for each component and
+places all component subgraphs in a new container.
+
+<programlisting>print "Computing connected components"
+</programlisting>
+
+Define the name of the new container. Each subgraph in this container is
+a <glossterm baseform="connected components">connected component</glossterm>.
+The new container will be a child of the root
+container.
+
+<programlisting>outputContainerName = attrPrefix + "-connected-components"
+</programlisting>
+
+Delete this container if it already exists
+
+<programlisting>rootContainer = prox.rootContainer
+if rootContainer.hasChild(outputContainerName):
+   print "  Container " + outputContainerName + " already exists. Deleting..."
+   rootContainer.deleteChild(outputContainerName)
+</programlisting>
+
+Find the connected components.
+Proximity lets you calculate the connected components for
+either an entire database or limit execution to the data in a specified
+container. When limited to a container, Proximity runs the algorithm
+on the objects and links in the container,
+ignoring subgraph boundaries. The code in this example identifies
+connected components for the entire database.
+
+<programlisting>prox.computeConnectedComponents(outputContainerName)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>computeConnectedComponents()</secondary></indexterm>
+<indexterm><primary>computeConnectedComponents()</primary></indexterm>
+
+To find connected components within a container, use the overloaded
+method <methodname>computeConnectedComponents()</methodname> method
+with the input container as the second argument, e.g.,
+<code>prox.computeConnectedComponents(outputContainerName,
+inputContainer)</code>.</para>
+</sect3>
+
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+<!--                        Hubs and authorities                   -->
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+
+<sect3>
+<title>Hubs and authorities</title>
+
+<para>Due to the circular relationship between hubs and authorities, we
+use an iterative algorithm for calculating these weights. Proximity&rsquo;s
+implementation of the <glossterm>hubs and authorities</glossterm>
+algorithm is based on work by Kleinberg <xref linkend="kleinberg98"/>,
+which suggests that 20 iterations is usually sufficient for most
+applications.</para>
+
+<para>The <methodname>addHubsAndAuthoritiesAttributes()</methodname>
+<indexterm><primary>addHubsAndAuthoritiesAttributes()</primary></indexterm>
+<indexterm><primary>methods</primary>
+          <secondary>addHubsAndAuthoritiesAttributes()</secondary></indexterm>
+method adds
+two attributes to the input objects, an authority weight and hub
+weight.  Both weights are non-negative and normalized so that the
+values for each attribute sums to 1.0. Larger authority or hub
+weights indicate that the corresponding object
+is a better authority or hub, respectively.
+
+<programlisting>print "Computing hubs and authorities"
+</programlisting>
+
+Specify the name of the new attributes.
+
+<programlisting>hubsAttrName = attrPrefix + "-hubs"
+authoritiesAttrName = attrPrefix + "-authorities"
+</programlisting>
+
+Delete these attributes if they already exist.
+
+<programlisting>if currentAttrs.isAttributeDefined(hubsAttrName):
+   print "  Attribute " + hubsAttrName + " already exists. Deleting..."
+   currentAttrs.deleteAttribute(hubsAttrName)
+if currentAttrs.isAttributeDefined(authoritiesAttrName):
+   print "  Attribute " + authoritiesAttrName + " already exists. Deleting..."
+   currentAttrs.deleteAttribute(authoritiesAttrName)
+</programlisting>
+
+Specify the number of iterations.
+
+<programlisting>numIterations = 20
+</programlisting>
+
+Create and calculate values for the new hubs and authorities attributes.
+Proximity lets you calculate the hubs and authorities scores for
+either an entire database or limit execution to the data in a specified
+container. When limited to a container, Proximity runs the algorithm
+on the objects and links in the container,
+ignoring subgraph boundaries. The code in this example calculates
+hubs and authorities scores for the entire database.
+
+<programlisting>prox.addHubsAndAuthoritiesAttributes(numIterations, hubsAttrName,
+     authoritiesAttrName)
+</programlisting>
+
+To compute hubs and authorities scores for objects in a container, use
+the overloaded method
+<methodname>addHubsAndAuthoritiesAttributes()</methodname> with the
+input container as the fourth argument, e.g.,
+<code>prox.addHubsAndAuthoritiesAttributes(numIterations,
+hubsAttrName, authoritiesAttrName, input Container)</code>.</para>
+
+<!--
+   EXERCISE: Running social networking algorithms
+-->
+
+<procedure id="ex_scripts_sna">
+<title>Running social networking algorithms</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>From the <guimenu>Script</guimenu> menu, choose
+<guimenuitem>Run Script</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&scriptpath;</filename> directory and
+choose <filename>social-networking-algs.py</filename>.
+Click <guibutton>Open</guibutton>.</para>
+<para>Proximity opens a window to show you any output from the script
+along with a trace of the script execution.
+Note that this script may take several minutes to run.
+Proximity reports:
+
+<screen>Status: starting running script: 
+  /proximity/doc/user/tutorial/examples/social-networking-algs.py
+Computing clustering coefficients
+Computing connected components
+Computing hubs and authorities
+Status: finished running script
+</screen>
+
+You can close this window after the script finishes.</para>
+</step>
+
+<step>
+<para>Click <guibutton>Object Attributes</guibutton> to see the new
+attributes created by the clustering coefficient and hubs and
+authorities calculations.  If you wish, you can explore these
+attributes further.
+<itemizedlist spacing="compact">
+<listitem>
+  <para>The <token role="attr">proxwebkb-cluster-coeff</token>
+  attribute records the clustering
+  coefficient for each input object having two or more neighbors in
+  the input data. The clustering coefficient is a ratio, thus all
+  values lie between 0 and 1, inclusive.</para>
+</listitem>
+<listitem>
+  <para>The <token role="attr">proxwebkb-authorities</token>
+  attribute records the authority
+  weight calculated for each input object.</para>
+</listitem>
+<listitem>
+  <para>The <token role="attr">proxwebkb-hubs</token>
+  attribute records the hub weight calculated
+  for each input object.</para>
+</listitem>
+</itemizedlist></para></step>
+
+<step>
+<para>Return to the &uiname; start page and click
+<guibutton>Containers</guibutton> to see the new
+proxwebkb-connected-components container created by
+the connected components method.</para>
+</step>
+
+<step>
+<para>Click <guibutton>proxwebkb-connected-components</guibutton> to
+see the list of subgraphs in this container. Proximity found 17
+distinct components in the &webkb; data. If you wish, you can explore
+these subgraphs further.</para>
+</step>
+
+</procedure>
+</sect3>
+</sect2>
+</sect1>
+
+<?pagebreak?>
+<!-- ============================================================== -->
+<!--                 WORKING WITH PROXIMITY TABLES                  -->
+<!-- ============================================================== -->
+
+<sect1 id="scripts_nst">
+<title>Working with Proximity Tables</title>
+<indexterm id="idx_dbtables1" class="startofrange">
+           <primary>databases</primary>
+           <secondary>tables</secondary></indexterm>
+<indexterm><primary>nested synchronized tables</primary>
+           <see>NSTs</see></indexterm>
+<indexterm id="idx_nsts1" class="startofrange">
+           <primary>NSTs</primary></indexterm>
+<indexterm id="idx_nsts2" class="startofrange">
+           <primary>tables in Proximity databases</primary></indexterm>
+<indexterm id="idx_nstbrowser" class="startofrange">
+           <primary>NST browser</primary></indexterm>
+<indexterm id="idx_nstbrowser2" class="startofrange">
+           <primary>browser</primary>
+           <secondary>NST</secondary></indexterm>
+<indexterm id="idx_exploringNSTs" class="startofrange">
+           <primary>exploring</primary>
+           <secondary>NSTs</secondary></indexterm>
+<indexterm id="idx_exploringdata2" class="startofrange">
+           <primary>exploring</primary>
+           <secondary>data</secondary></indexterm>
+
+<para>The database engine underlying Proximity, &monet;, uses a
+<glossterm baseform="vertical database"><emphasis>vertically fragmented</emphasis></glossterm>
+design.  This design stores all data in two-column tables
+<indexterm><primary>data</primary>
+           <secondary>representation in Proximity</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>data model</secondary></indexterm>
+called BATs
+<indexterm><primary>BATs</primary></indexterm>
+<indexterm><primary>binary association tables</primary></indexterm>
+(binary association tables).  All BATs include a 
+<emphasis>head</emphasis> column that contains an identifier (OID)
+<indexterm><primary>OIDs</primary></indexterm>
+and a <emphasis>tail</emphasis> column that contains data.  The
+contents of the tail can also point to other tables.  Thus, rather than the
+object-centric view provided by familiar relational databases where
+an entity&rsquo;s attributes are stored in the columns of a table,
+Proximity uses separate tables for each attribute. Other tables store
+the Proximity ID 
+<indexterm><primary>IDs in Proximity</primary></indexterm>
+<indexterm><primary>objects</primary>
+           <secondary>IDs for</secondary></indexterm>
+<indexterm><primary>links</primary>
+           <secondary>IDs for</secondary></indexterm>
+for each object or link in the database. Each attribute value is
+associated with the appropriate entity through the corresponding
+ID.</para>
+
+<para>Proximity&rsquo;s vertically fragmented design makes some
+database operations more or less efficient than they would be in a
+traditional relational database.  Operations required by common
+knowledge discovery tasks, such as the joins required for finding
+subgraphs matching a query, are significantly faster than they would
+be in a common relational database.
+Object- and link-centric operations, such as finding all the attribute
+values for a specified object, are less efficient.</para>
+
+<para>To enable a more intuitive view of the data, Proximity provides
+an intermediate representation called 
+<glossterm baseform="nested synchronized table"><emphasis>nested synchronized tables</emphasis></glossterm>
+(NSTs) that combines the data from several related
+BATs into a single, multi-column table.  Proximity includes an
+&nstbrowser; for direct examination of these data structures.  For
+many tasks, using NSTs provides the best mechanism for working with
+data in Proximity databases.</para>
+
+<para>The exercise below illustrates how to use NSTs and 
+<glossterm baseform="filter">filtering</glossterm>
+<indexterm id="idx_filteringNSTs1" class="startofrange">
+           <primary>attributes</primary>
+           <secondary>filtering by value</secondary></indexterm>
+<indexterm id="idx_filteringNSTs2" class="startofrange">
+           <primary>filters</primary>
+           <secondary>conditions in</secondary></indexterm>
+<indexterm id="idx_filteringNSTs3" class="startofrange">
+           <primary>conditions</primary>
+           <secondary>in filters</secondary></indexterm>
+to identify objects and links based on attribute values&mdash;in this
+case, to find all links from Wisconsin staff web pages to Wisconsin
+faculty pages.  More specifically, we first identify all the objects that
+correspond to Wisconsin staff pages (all objects where the value of
+the <token role="attr">school</token> attribute equals 
+<token role="attr">Wisconsin</token> and the value of the 
+<token role="attr">pagetype</token> attribute equals 
+<token role="attr">Staff</token>).  We then similarly identify the
+objects that correspond to Wisconsin faculty pages.  Finally, we find
+all links that originate from an object in the first set and terminate
+at an object in the second set.</para>
+
+<para>To better understand the NSTs used in this example, the
+following exercise uses the Proximity interactive Python interpreter
+<indexterm><primary>Python</primary>
+           <secondary>interpreter</secondary></indexterm>
+rather than a Python script, allowing you to pause to examine the
+relevant NSTs as you proceed.  The exercise begins by exploring the
+standard Proximity NSTs and illustrating how to use the &nstbrowser;
+features.  This is followed by the steps needed to create the NSTs
+that identify the restricted sets of objects and links listed
+above.</para>
+
+<!--
+   EXERCISE: Finding specific links
+-->
+
+<procedure id="scripts_nsts">
+<title>Finding specific links</title>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>From the &uiname; start page, click 
+<guibutton>browse tables</guibutton> to browse the
+built-in Proximity NSTs.
+<indexterm><primary>NST browser</primary>
+           <secondary>starting</secondary></indexterm>
+<indexterm><primary>starting</primary>
+           <secondary>NST browser</secondary></indexterm>
+Proximity opens the &nstbrowser;.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_Home.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_Home.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</para>
+
+<para>The Proximity &nstbrowser; lets you directly examine Proximity
+data as represented by NSTs.  Every Proximity database uses several
+standard NSTs
+<indexterm><primary>NSTs</primary>
+           <secondary>standard Proximity tables</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>standard NST tables</secondary></indexterm>
+for storing objects, links, containers, and attributes
+for these entities.  A Proximity database can also have an arbitrary
+number of user-created NSTs that typically store subsets or joins of
+existing NSTs.  The Proximity &nstbrowser; includes a menu bar, top
+button bar for navigation, filter text box, bottom button bar for
+paging through long lists, and a large area used to display the data
+in the selected NST.</para>
+
+<para>The <guimenu>File</guimenu> menu&rsquo;s single command,
+<guimenuitem>Export to File</guimenuitem>,
+<indexterm><primary>NSTs</primary>
+           <secondary>exporting data from</secondary></indexterm>
+<indexterm><primary>exporting data</primary>
+           <secondary sortas="NSTs">from NSTs</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>exporting</secondary></indexterm>
+writes the data for the
+current NST to a tab-delimited text file for use in other
+applications. Exported NST data does not include the head column
+(OIDs), and the trailing <code>@0</code> is omitted from ID
+data.</para>
+
+<para>The initial &nstbrowser; display shows the standard
+NSTs included in all Proximity databases:
+<itemizedlist spacing="compact">
+<listitem>
+  <para>The <token role="table">prox_object</token> NST
+<indexterm><primary>objects</primary>
+           <secondary>Proximity tables for</secondary></indexterm>
+  stores the IDs of objects in the database.</para>
+</listitem>
+<listitem>
+  <para>The <token role="table">prox_obj_attr</token> NST
+<indexterm><primary>attributes</primary>
+           <secondary>Proximity tables for</secondary></indexterm>
+<indexterm><primary>objects</primary>
+           <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="objects">of objects</secondary></indexterm>
+  stores the name, data type, and pointers to tables that contain the
+  values for object attributes.</para>
+</listitem>
+<listitem>
+  <para>The <token role="table">prox_link</token> NST
+<indexterm><primary>links</primary>
+           <secondary>Proximity tables for</secondary></indexterm>
+  stores the IDs of the links and the IDs of the objects they connect
+  to and from (recall that all links in Proximity are directed).</para>
+</listitem>
+<listitem>
+  <para>The <token role="table">prox_link_attr</token> NST
+<indexterm><primary>links</primary>
+           <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="links">of links</secondary></indexterm>
+  stores the name, data type, and pointers to tables that contain the
+  values for link attributes.</para>
+</listitem>
+<listitem>
+  <para>The <token role="table">prox_container</token> NST
+<indexterm><primary>containers</primary>
+           <secondary>Proximity tables for</secondary></indexterm>
+  stores the ID, name, and parent container for all the containers in
+  the database, plus pointers to tables that contain the data (objects,
+  links, and attributes) for those subgraphs.</para>
+</listitem>
+<listitem>
+  <para>The <token role="table">prox_cont_attr</token> NST
+<indexterm><primary>containers</primary>
+           <secondary>attributes of</secondary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary sortas="containers">of containers</secondary></indexterm>
+  stores the name and data type for all the container attributes in
+  the database, plus pointers to tables that contain the values for
+  those attributes</para>
+</listitem>
+</itemizedlist>
+</para>
+</step>
+
+<step>
+<para>Double-click <guibutton>prox_object</guibutton>. Proximity
+displays the NST that stores object IDs.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_Objects.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_Objects.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+
+The <token role="annot">prox_object</token> NST includes two
+columns: the head column (labeled &ldquo;<code>-</code>&rdquo;), which
+stores the OIDs for each 
+object, and an <token role="column">id</token> column, which stores
+the object IDs for each object.</para>
+
+<para>The OID is an internal value used by Proximity; the ID is a
+visible value that you can use to refer to specific objects in the
+database.  Although they are identical in this case, the OID and ID
+values need not match.</para>
+<?pagebreak?>
+</step>
+
+<step>
+<para>Click <guibutton>Go Back</guibutton> and then double-click
+<guibutton>prox_obj_attr</guibutton>.  Proximity displays the NST that
+stores object attribute data.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_ObjectAttrs.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_ObjectAttrs.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+
+The <token role="table">prox_obj_attr</token> NST includes four
+columns: the head column, plus columns storing the attribute name,
+data type, and a <token role="column">data</token> column that
+contains a pointer to the table containing the values for this
+attribute.  Each of these attribute value tables is another NST.
+To see the values for an attribute, double-click the name of the
+corresponding attribute value table.</para>
+</step>
+
+<step>
+<para>Double-click the name of the attribute value table for the
+<token role="attr">page_num_inlinks</token> attribute
+(the name may vary but will start with <literal>tmp</literal>, e.g., 
+<token role="table">&lt;tmp-94&gt;</token>).  Proximity
+displays the table of values for the 
+<token role="attr">page_num_inlinks</token> attribute.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_InLinks.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_InLinks.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+
+Attribute value tables have three columns: the head column, an 
+<token role="column">id</token> column that stores the ID of a
+database entity (object, link, container, or subgraph) and a 
+<token role="column">value</token> column that stores the 
+value of the attribute for that entity.  Note that in this case the
+values in the <token role="column">id</token> column do 
+not match the OIDs in the head column.
+</para>
+<?pagebreak?>
+</step>
+
+<step>
+<para>Click <guibutton>Go Back</guibutton> and then double-click 
+<guibutton>&lt;tmp-100&gt;</guibutton>.  Proximity displays the table
+of values for the <token role="attr">page_words_top100</token> attribute.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_TopWords.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_TopWords.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+
+In contrast to the previous attribute NST, the table of values for
+<token role="attr">page_words_top100</token> contains multiple rows
+with the same <token role="column">id</token> value.  This indicates
+that <token role="attr">page_words_top100</token> is a set-valued
+attribute&mdash;objects in the database may have multiple values
+<indexterm><primary>attributes</primary>
+           <secondary>multiple values</secondary></indexterm>
+for this attribute.  And as we can see in the table shown above, this
+set can include the same value (e.g.,
+&ldquo;<code>science</code>&rdquo;) more than once.  Proximity
+entities may have zero, one, or many values for a specified
+attribute.</para>
+</step>
+
+<step id="guifilter">
+<para>Click <guibutton>Go Back</guibutton> and then double-click
+<guibutton>&lt;tmp-70&gt;</guibutton>.  Proximity displays the table
+of values for the <token role="attr">school</token> attribute.</para>
+
+<para>In the <guilabel>Filter</guilabel> box, enter
+<indexterm><primary>filtering</primary></indexterm>
+<indexterm><primary>NST browser</primary>
+           <secondary>filtering in</secondary></indexterm>
+<indexterm id="idx_filteringNSTs1b" class="startofrange">
+           <primary>attributes</primary>
+           <secondary>filtering by value</secondary></indexterm>
+<indexterm id="idx_filteringNSTs2b" class="startofrange">
+           <primary>filters</primary>
+           <secondary>conditions in</secondary></indexterm>
+<indexterm id="idx_filteringNSTs3b" class="startofrange">
+           <primary>conditions</primary>
+           <secondary>in filters</secondary></indexterm>
+<synopsis><userinput>value = "Wisconsin"</userinput></synopsis>
+and press <keycap>Return</keycap>.</para>
+
+<para><glossterm baseform="filter">Filters</glossterm> are a set of
+conditions that rows in the NST must 
+match.  For example, a common use for filters is identifying all
+objects having a specified attribute value.
+<indexterm><primary>attributes</primary>
+           <secondary>finding specified values</secondary></indexterm>
+<indexterm><primary>finding</primary>
+           <secondary>objects</secondary></indexterm>
+Filters can be used in Python
+scripts or entered directly in the &nstbrowser;&rsquo;s 
+<guilabel>Filter</guilabel> text box.</para>
+
+<para>This filter limits the displayed
+rows to those that have <token role="attr">Wisconsin</token> in
+the <token role="attr">value</token> column.
+The NST browser now shows only the objects that have this attribute value.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscPages.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscPages.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+
+Filters specify a set of conditions that rows in the NST must match.
+You can filter an NST based on values in any of the non-head columns
+in that NST.
+</para>
+
+<?pagebreak?>
+<sidebar>
+<para>The general form of a filter is
+<indexterm><primary>filters</primary>
+           <secondary>general form</secondary></indexterm>
+<blockquote>
+<para><code><replaceable>column-name</replaceable> 
+<replaceable>operator</replaceable>
+<replaceable>value</replaceable></code>
+</para></blockquote>
+where
+<itemizedlist spacing="compact">
+<listitem>
+  <para><replaceable>column-name</replaceable> is the name of a column
+  in the NST.  Although we typically filter on attribute values, we
+  can create a filter on any non-head column in the NST.</para>
+</listitem>
+<listitem>
+  <para><replaceable>operator</replaceable> is one of the operators
+<indexterm><primary>operators</primary>
+           <secondary>filter</secondary></indexterm>
+<indexterm><primary>filters</primary>
+           <secondary>operators for</secondary></indexterm>
+  listed in the &FilterFactory; class.  In addition to the familiar
+  comparison operators (<literal>=</literal>, 
+  <literal>!=</literal>, <literal>&lt;</literal>,
+  <literal>&lt;=</literal>, <literal>&gt;</literal>, and
+  <literal>&gt;=</literal>), Proximity provides common database
+  filter operators such as <code>DISTINCT ROWS</code> and 
+  <code>LIKE</code>.  See the Javadoc for this class for a complete
+  list of available operators.</para>
+</listitem>
+<listitem>
+  <para><replaceable>value</replaceable> is a specific value for this
+  attribute.  Note that string values must be quoted.
+  Some operators, such as <code>DISTINCT ROWS</code>, do not require a
+  <replaceable>value</replaceable> parameter.</para>
+</listitem>
+</itemizedlist>
+</para>
+</sidebar>
+</step>
+
+
+<step>
+<para>If it is not already available, open the interactive Python
+interpreter by choosing <guimenuitem>Open Interpreter</guimenuitem>
+from the <guimenu>Script</guimenu> menu.</para>
+</step>
+
+<step>
+<para>In the interactive Python interpreter, enter
+<synopsis><userinput>wiscPages = DB.getObjects("school = 'Wisconsin'")</userinput></synopsis>
+The &getObjects; method
+<indexterm><primary>getObjects()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getObjects()</secondary></indexterm>
+requires a single string argument that specifies the desired filter.
+<indexterm><primary>filters</primary>
+           <secondary sortas="method">as method parameters</secondary></indexterm>
+Note that because the filter requires a
+string <replaceable>value</replaceable>, 
+<code>'Wisconsin'</code>, it requires single quotes in addition to the
+double quotes surrounding the complete filter string.</para>
+
+<para>Proximity creates an NST named <code>wiscPages</code> containing
+the same set of objects as those listed in the filtered 
+NST from <xref linkend="guifilter" />.
+</para>
+
+<caution>
+<para>Although filters resemble conditions, they have
+different semantics.  Conditions operate on objects or links whereas
+filters operate on NST rows.  
+<!-- If an NST table contains rows for
+objects or links that do not have a value for the relevant attribute,
+these rows may still pass through an inequality filter.  In contrast,
+-->
+A database entity satisfies a condition only if it has a value for the 
+relevant attribute that satisfies the condition; entities having
+no value for the attribute cannot satisfy the condition.  Filters pass
+all rows that satisfy the filter.
+<!-- thus filtering the full object table
+will not only admit objects having a different value for the
+attribute, but also objects having no value (or more properly, a value
+of <code>nil</code> in the table) for the attribute.-->
+</para>
+
+<para>For example, if some but
+not all objects have a value for the 
+<token role="attr">school</token> attribute, only those objects having a
+value can satisfy the inequality condition 
+<token role="condition">school&nbsp;&lt;&nbsp;&gt;&nbsp;UTexas</token>.
+In contrast, a similar-looking filter,
+<code>school&nbsp;!=&nbsp;UTexas</code>, admits any NST row that does
+not have <token role="attr">UTexas</token> as a value.  When applied
+to the full objects NST, both objects having a different value for the
+<token role="attr">school</token> attribute as well as objects having
+no value pass through the filter.</para>
+
+<para>Add
+<code><replaceable>attribute</replaceable>&nbsp;!=&nbsp;nil</code> to
+a filter to omit entities having no value for the specified
+attribute.</para>
+</caution>
+
+</step>
+
+<step>
+<para>In the interactive Python interpreter, enter
+<synopsis><userinput>prox.browse(wiscPages)</userinput></synopsis>
+<indexterm><primary>browse()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>browse()</secondary></indexterm>
+<indexterm><primary>NST browser</primary>
+           <secondary>starting</secondary></indexterm>
+<indexterm><primary>starting</primary>
+           <secondary>NST browser</secondary></indexterm>
+Proximity opens another NST browser window that shows you the
+contents of the <code>wiscPages</code> NST you just created.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscPagesAgain.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscPagesAgain.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</para>
+
+<para>Although the <code>wiscPages</code> NST contains the same
+information as the filtered <token role="attr">school</token> NST,
+these NSTs are not identical.  Specifically, the values in the head
+column are different across the two NST browser windows.
+Remember to use the value in the <token role="column">id</token>
+column, not the OID in the head column, when you need the ID of a
+database entity.</para>
+
+<para>You can also use the &browseMethod; method to examine the
+standard Proximity NSTs.  Use the 
+&ldquo;shortcuts&rdquo; to these tables described in 
+<xref xrefstyle="pageref" linkend="scripts_proxobject"/>
+<indexterm><primary>shortcuts</primary>
+           <secondary sortas="data">to data structures</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>shortcut names</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>shortcut names</secondary></indexterm>
+as the argument to &browseMethod;.  For example, to display the
+objects NST in a new NST browser window, enter
+<synopsis><userinput>prox.browse(prox.objectNST)</userinput></synopsis>
+Note that the
+shortcut <code>prox.objectAttrs</code> returns an &Attributes; object;
+therefore, to browse one of the standard attribute NSTs use the form
+<synopsis><userinput>prox.browse(prox.objectAttrs.getAttrNST())</userinput></synopsis>
+<indexterm><primary>getAttrNST()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getAttrNST()</secondary></indexterm>
+to get the NST for this data.
+</para>
+</step>
+
+<step>
+<para>In the interactive Python interpreter, enter
+<synopsis><userinput>wiscPages2 = DB.getObjects("school = 'Wisconsin'","pagetype, url")
+prox.browse(wiscPages2)</userinput></synopsis>
+</para>
+
+<para>Proximity creates and displays an NST named 
+<token role="table">wiscPages2</token>
+containing columns for the <token role="attr">pagetype</token> and
+<token role="attr">url</token> attributes in addition to the head,
+<token role="column">id</token>, and <token
+role="column">value</token> columns we saw before.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscPagesPlus.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscPagesPlus.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</para>
+
+<para>In both of the previous methods of filtering the 
+<token role="attr">school</token> attribute, the resulting NST
+included only the head, <token role="column">id</token>, and
+<token role="column">value</token> columns.  We can include additional
+data in the NST by using an overload of the &getObjects2; method that
+lets us specify which additional columns to include in the resulting NST.
+This overload requires two string arguments: a filter, and a list of
+additional columns to be included in the resulting NST.  
+Proximity provides similar overloads for many methods that work with
+NSTs.
+</para>
+
+</step>
+
+<step>
+<para>In the interactive Python in interpreter, enter
+<synopsis><userinput>wiscPages.describe()</userinput></synopsis>
+<indexterm><primary>describe()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>describe()</secondary></indexterm>
+Proximity reports
+<screen>1,247 rows, 2 columns [id,school:oid,str] -- in memory</screen>
+</para>
+<para>The &describeMethod; method provides summary information about
+an NST.  As was the case for the
+&browseMethod; method, use the &ldquo;shortcut&rdquo; names to pass one
+of the standard tables
+<indexterm><primary>shortcuts</primary>
+           <secondary sortas="data">to data structures</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>shortcut names</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>shortcut names</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>standard Proximity tables</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>standard NST tables</secondary></indexterm>
+as an argument to &describeMethod;. Remember that the attribute
+shortcuts return an &Attributes; object, not an NST, so you must
+explicitly get the corresponding NST, for example,
+<synopsis><userinput>prox.objectAttrs.getAttrNST().describe()</userinput></synopsis>
+</para>
+</step>
+ 
+<step>
+<para>In the interactive interpreter, enter
+<synopsis><userinput>wiscStaff = DB.getObjects("school = 'Wisconsin' AND pagetype = 'Staff'")
+prox.browse(wiscStaff)</userinput></synopsis>
+</para>
+
+<para>Proximity creates and displays an NST named
+<token role="table">wiscStaff</token>.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscStaffPages.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscStaffPages.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+
+To find the objects that correspond to Wisconsin staff web pages, we
+need to create a filter that requires matching
+<emphasis>two</emphasis> conditions:
+<indexterm><primary>complex conditions</primary>
+           <secondary>in filters</secondary></indexterm>
+<indexterm><primary>filters</primary>
+           <secondary>complex conditions in</secondary></indexterm>
+the value of the <token role="attr">school</token> attribute must be
+<token role="attr">Wisconsin</token> and the value of the
+<token role="attr">pagetype</token> attribute must be
+<token role="attr">Staff</token>.  
+The filter combines these two conditions with the logical operator
+<indexterm><primary>logical operators</primary></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>logical</secondary></indexterm>
+<code>AND</code>.</para>
+
+<para>Filter conditions can be combined with
+<code>AND</code> and <code>OR</code>, using 
+<glossterm>infix notation</glossterm>.
+The filter is passed in as a single
+string parameter to the &getObjects; method.  
+String values must be quoted; note the single quotes
+surrounding the required attribute values.
+For more information about
+using logical operators in filters, see the &FilterFactory; class.
+<indexterm><primary>FilterFactory class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>FilterFactory</secondary></indexterm>
+</para>
+
+<para>Because the filter used values
+from both the <token role="column">school</token> and
+<token role="column">pagetype</token> columns, these columns are
+automatically included in the resulting NST.  You can use the overload
+of the &getObjects2; method, described above, to include data from
+additional columns in the resulting NST.</para>
+</step>
+
+<step>
+<para>In the interactive Python interpreter, enter
+<synopsis><userinput>wiscFaculty = DB.getObjects("school = 'Wisconsin' AND pagetype = 'Faculty'")</userinput></synopsis>
+
+This filter combines two conditions to find all the Wisconsin faculty
+pages. The results are stored in a new NST named
+<token role="table">wiscFaculty</token>.</para>
+
+<para>Next, we need to find the links from objects in the set of
+Wisconsin staff pages (<token role="table">wiscStaff</token>) to
+objects in the set of Wisconsin Faculty pages
+(<token role="table">wiscFaulty</token>).  We begin by getting the
+standard Proximity links NST.</para>
+</step>
+
+<step>
+<para>In the interactive Python interpreter, enter
+<synopsis><userinput>linksNST = prox.linkNST</userinput></synopsis>
+
+Examine this NST in the browser by either entering
+
+<synopsis><userinput>prox.browse(linksNST)</userinput></synopsis>
+
+in the interactive Python interpreter or by double-clicking 
+<guibutton>prox_link</guibutton> in the NST browser&rsquo;s home page.
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_Links.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_Links.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+
+The links NST has four columns: the head column, the ink IDs
+(<token role="column">link_id</token>), and the starting
+(<token role="column">o1_id</token>) and ending
+(<token role="column">o2_id</token>) objects for each link.</para>
+
+<para>Now we need to identify those links where the starting object is
+a Wisconsin staff page (the link&rsquo;s 
+<token role="column">o1_id</token> value must be in the list of IDs
+from the <token role="table">wiscStaff</token> NST) and the ending
+object is a Wisconsin faculty page (the link&rsquo;s 
+<token role="column">o2_id</token> value must be in the list of IDs
+from the <token role="column">wiscFaculty</token> NST.</para>
+</step>
+
+<step>
+<para>In the interactive Python interpreter, enter
+<synopsis><userinput>facOutLinks = linksNST.intersect(wiscStaff, "o1_id = id")</userinput></synopsis>
+<indexterm><primary>intersect()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>intersect()</secondary></indexterm>
+
+This identifies those links where the starting object 
+(<token role="column">o1_id</token>) is a 
+Wisconsin staff page.   That is, the link&rsquo;s 
+<token role="column">o1_id</token> value must equal the value of 
+<token role="column">id</token> for an object in the 
+<token role="table">wiscStaff</token> NST.</para>
+
+<para>Once again, we use a filter to identify the relevant rows in
+these NSTs. But because we need to match values across two different
+NSTs, the filter is used as an argument to the &intersect; method.  The
+filter for this instance, <code>o1_id = id</code>, compares the values
+in <token role="table">linksNST</token>&rsquo;s 
+<token role="column">o1_id</token> column with the values in 
+<token role="table">wiscStaff</token>&rsquo;s 
+<token role="column">id</token> column.</para>
+
+<para>Because these NSTs have unique column names, Proximity knows which
+NST each column comes from.  When both NSTs share a column name that you
+want to use in a filter, add a prefix
+indicating which NST it comes from.  For example, if both NSTs had
+an <token role="column">id</token> column, write
+<code>A.id</code> to indicate that this refers to the
+<token role="column">id</token> column from
+NST that the method operates on
+(<token role="table">linksNST</token>)
+and <code>B.id</code> to indicate that this refers to the
+<token role="column">id</token> column from the NST passed in as a
+parameter to the &intersect; method
+(<token role="column">wiscStaff</token>).
+</para>
+<indexterm startref="idx_filteringNSTs1b" class="endofrange"/>
+<indexterm startref="idx_filteringNSTs2b" class="endofrange"/>
+<indexterm startref="idx_filteringNSTs3b" class="endofrange"/>
+<?pagebreak?>
+</step>
+
+<step>
+<para>In the interactive Python interpreter, enter
+<synopsis><userinput>wiscStaffFacLinks = facOutLinks.intersect(wiscFaculty, "o2_id = id")</userinput>
+<userinput>prox.browse(wiscStaffFacLinks)</userinput></synopsis>
+</para>
+
+<para>Proximity creates and displays an NST names
+<token role="table">wiscStaffFacLinks</token>.
+
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscStaffFacLinks.png"
+               width="4.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/NST_WiscStaffFacLinks.png"
+               contentwidth="5.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</para>
+
+<para>This identifies the links in <token role="table">facOutLinks</token>
+where the ending object is a Wisconsin faculty page.  That is, the
+link&rsquo;s <token role="column">o2_id</token> value must equal 
+the value of <token role="column">id</token> for an object in the 
+<token role="table">wiscFaculty</token> NST.
+Because <token role="table">facOutLinks</token> includes only the links
+beginning at a Wisconsin staff page, the
+<token role="table">wiscStaffFacLinks</token> NST contains the links
+we want&mdash;links from Wisconsin staff pages to Wisconsin faculty
+pages.  Remember, the <token role="column">link_id</token> column, not
+the head column, lists the IDs for the final set of links.</para>
+</step>
+
+<!-- Augustin suggests removing this to keep example cleaner and avoid
+     confusing readers with internal details; not releasing NSTs is
+     not a problem unless you create thousands of them.
+<step>
+<para>Once you are done examining and using the NSTs
+created during this exercise, release those temporary NSTs.
+
+<synopsis><userinput>wiscStaff.release()
+wiscFaculty.release()
+facOutLinks.release()</userinput></synopsis>
+<indexterm><primary>release()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>release()</secondary></indexterm>
+<indexterm><primary>NSTs</primary>
+           <secondary>releasing</secondary></indexterm>
+<indexterm><primary>releasing temporary tables</primary></indexterm>
+
+Every Proximity database table uses memory.   In general, it is good
+practice to release any temporary NSTs after you have finished using
+them to free the associated memory.</para>
+</step>
+-->
+</procedure>
+
+<indexterm startref="idx_filteringNSTs1"  class="endofrange"/>
+<indexterm startref="idx_filteringNSTs2"  class="endofrange"/>
+<indexterm startref="idx_filteringNSTs3"  class="endofrange"/>
+<indexterm startref="idx_dbtables1"   class="endofrange"/>
+<indexterm startref="idx_nsts1"       class="endofrange"/>
+<indexterm startref="idx_nsts2"       class="endofrange"/>
+<indexterm startref="idx_nstbrowser"  class="endofrange"/>
+<indexterm startref="idx_nstbrowser2" class="endofrange"/>
+<indexterm startref="idx_exploringNSTs" class="endofrange"/>
+<indexterm startref="idx_exploringdata2" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                    SYNTHETIC DATA GENERATION                   -->
+<!-- ============================================================== -->
+
+<sect1 id="scripts_sdg">
+<title>Synthetic Data Generation</title>
+<indexterm id="idx_datagen1" class="startofrange">
+           <primary>data</primary>
+           <secondary>generating</secondary></indexterm>
+<indexterm id="idx_datagen2" class="startofrange">
+           <primary>synthetic data generation</primary></indexterm>
+<indexterm id="idx_datagen3" class="startofrange">
+           <primary>generating synthetic data</primary></indexterm>
+
+<para>Researchers frequently need to explore the effects of certain data
+characteristics on their models.  To help construct datasets
+exhibiting specific properties, such as 
+<glossterm>autocorrelation</glossterm>
+<indexterm><primary>autocorrelation</primary>
+           <secondary>generating data with</secondary></indexterm>
+or <glossterm>degree disparity</glossterm>,
+<indexterm><primary>degree disparity in generated data</primary></indexterm>
+Proximity can generate synthetic data
+having one of several types of graph structure:
+<itemizedlist spacing="compact">
+<listitem>
+  <para>random graphs</para>
+</listitem>
+<listitem>
+  <para><glossterm>independent and identically distributed</glossterm>
+  (i.i.d.) connected components
+<indexterm><primary>independent and identically distributed</primary>
+</indexterm>
+<indexterm><primary>i.i.d.</primary>
+           <see>independent and identically distributed</see></indexterm>
+  </para>
+</listitem>
+<listitem>
+  <para><glossterm baseform="lattice graph">lattice graphs</glossterm>
+  having a ring structure</para>
+</listitem>
+<listitem>
+  <para>lattice graphs having a grid structure</para>
+</listitem>
+<listitem>
+  <para>forest fire graphs</para>
+</listitem>
+<listitem>
+  <para>cluster graphs with nodes arranged in separate clusters
+  (cliques)</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>In all cases, the data generation process follows the same
+process:
+<orderedlist spacing="compact">
+  <listitem>
+    <para>Generate the empty graph structure.</para>
+  </listitem>
+  <listitem>
+    <para>Generate attribute values based on user-supplied
+    prior probabilities.</para>
+  </listitem>
+</orderedlist>
+Because the attribute values of one object may depend on the
+attribute values of related objects, the attribute generation process
+assigns values collectively.</para>
+
+<para>Details for each of these steps are presented in the context of
+a script that generates i.i.d. data, shown below.</para>
+
+<!-- .............................................................. -->
+<!--                     Generating i.i.d. data                     -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Generating i.i.d. data</title>
+
+<para>The i.i.d. graph generation process creates a set of independent
+<glossterm>connected components</glossterm>
+<indexterm><primary>connected components</primary></indexterm>
+containing two object types: 
+<token role="class">S</token>
+and <token role="class">T</token>.  Each component contains a single
+<token role="class">S</token> object that is linked to a variable
+number (<symbol role="Symbol">&ge;</symbol>&nbsp;0)
+of <token role="class">T</token> objects.  The number
+of linked <token role="class">T</token> objects (the degree of
+<token role="class">S</token>) follows a normal distribution with
+user-specified mean and standard deviation.
+You can specify multiple normal distributions to create
+<token role="class">S</token> objects having different degree
+distributions.</para>
+
+<para>We typically consider the <token role="class">S</token> objects
+to be the target objects to be classified, with the 
+<token role="class">T</token> objects used as peripheral objects
+during classification.  Each <token role="class">S</token> object is
+assigned a single, discrete attribute
+(<token role="attr">s_class_label</token> in this example) that can be
+used as a class label.  In order to generate datasets with 
+<glossterm>degree disparity</glossterm>, the
+assignment of 
+<glossterm baseform="class label">class labels</glossterm> is
+conditioned
+<indexterm><primary>conditioning attribute values</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>conditioning during data generation</secondary></indexterm>
+on the <glossterm>degree</glossterm> of the object
+in the graph.  The generation process can also add additional
+discrete attributes to the 
+<token role="class">S</token> and <token role="class">T</token> 
+objects, respectively.</para>
+
+<para>The following script creates four connected components using two
+different degree distributions.  Both <token role="class">S</token> and
+<token role="class">T</token> objects are given one additional
+attribute each (<token role="attr">s_attr0_label</token> and
+<token role="attr">t_attr1_label</token>, respectively).   
+These attribute values are conditioned by the models in
+<filename>s-attr-rpt.xml</filename> and
+<filename>t-attr-rpt.xml</filename>.
+<!--
+RPTs&mdash;<glossterm baseform="relational probability tree">relational
+probability trees</glossterm>&mdash;are a form of classification tree
+that provide a
+<glossterm>conditional probability distribution</glossterm> suitable
+for use in this conditioning process.  RPTs are discussed in 
+<xref xrefstyle="pageref" linkend="models_rpt"/>.-->
+</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--             Code example: generate-iid-data.py                 -->
+<!-- .............................................................. -->
+
+<sect2 id="ex_gen_iid">
+<title>Code example: generate-iid-data.py</title>
+<indexterm><primary>scripts</primary>
+           <secondary>examples</secondary>
+           <tertiary>generate-iid-data.py</tertiary></indexterm>
+<indexterm><primary>generate-iid-data.py script</primary></indexterm>
+
+<para>This section describes the script found in
+<filename>&scriptpath;/generate-iid-data.py</filename>.</para>
+
+<para>Import needed classes.
+
+<programlisting>from kdl.prox.datagen2.structure import SyntheticGraphIID
+from kdl.prox.datagen2.attributes import AttributeGenerator
+from kdl.prox.model2.rpt import RPT
+from kdl.prox.util.stat import NormalDistribution
+from java.io import File
+</programlisting>
+
+Define a helper function that loads an RPT from a file.
+
+<programlisting>def loadRPT(modelFile):
+    return RPT().load(modelFile)
+def loadFile(fileName):
+    return File(fileName)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>load()</secondary></indexterm>
+<indexterm><primary>load()</primary></indexterm>
+
+Data generation requires an empty database. Check to see if the
+database already contains data so we can warn users accordingly.
+The method <methodname>isProxTablesEmpty()</methodname>
+returns true if the top-level tables are defined and empty.
+<indexterm><primary>methods</primary>
+           <secondary>isProxTablesEmpty()</secondary></indexterm>
+<indexterm><primary>isProxTablesEmpty()</primary></indexterm>
+
+<programlisting>isEmpty = DB.isProxTablesEmpty()
+</programlisting>
+
+If the database is not empty, ask the user whether to overwrite the
+existing data.
+
+<programlisting>genData = 1
+if (not isEmpty):
+   prompt = "Database is not empty. Overwrite existing data?"
+   genData = prox.getYesNoFromUser(prompt)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>getYesNoFromUser()</secondary></indexterm>
+<indexterm><primary>getYesNoFromUser()</primary></indexterm>
+
+Do nothing if the database is not empty and the user says not to
+overwrite the existing data.
+
+<programlisting>if (not genData):
+   print 'No data generated'
+</programlisting>
+
+Continue with data generation if the database is empty or if the user
+says to overwrite existing data.</para>
+
+<para>Clear and initialize the database.
+
+<programlisting>else:
+   print 'Clearing database'
+   DB.clearDB()
+   print 'Initializing database'
+   DB.initEmptyDB()
+</programlisting></para>
+
+<para>To define the i.i.d structure, we specify a probability
+distribution over degree distributions for
+the <token role="class">S</token> objects.
+This script creates connected components with two different degree
+distributions for the <token role="class">S</token> objects.  One half
+of the <token role="class">S</token> objects have normally 
+distributed degrees with a mean of 2 and standard deviation
+approaching zero. The second half have normally distributed
+degrees with a mean of 5 and standard deviation of 1.  The exact
+number of components having each of the specified degree distributions
+is determined probabilistically so you may not end up with exactly two
+<token role="class">S</token> objects for each degree distribution.
+
+<?pagebreak?>
+<programlisting>   degreeDistribs = [[0.5, NormalDistribution(2.0, 0.0000001)],
+                     [0.5, NormalDistribution(5.0, 1.0)]]
+</programlisting>
+<indexterm><primary>classes</primary>
+           <secondary>NormalDistribution</secondary></indexterm>
+<indexterm><primary>NormalDistribution class</primary></indexterm>
+</para>
+
+<para>Generate the i.i.d. graph structure by calling a constructor for
+the &SyntheticGraphIID; class.
+The &SyntheticGraphIID; generator creates objects and gives them
+a type (saved in an <token role="attr">objecttype</token> attribute):
+<token role="class">S</token> for the core objects and 
+<token role="class">T</token> for the peripheral objects (the objects
+linked to the core <token role="class">S</token> objects).  Generating
+i.i.d. data is unique in this regard&mdash;other
+structure generators do not attach any attributes to the objects or
+links that they create.  The generated data will
+include four <token role="class">S</token> objects.
+
+<programlisting>   print 'creating graph structure'
+   SyntheticGraphIID(4, degreeDistribs)
+</programlisting>
+<indexterm><primary>classes</primary>
+           <secondary>SyntheticGraphIID</secondary></indexterm>
+<indexterm><primary>SyntheticGraphIID class</primary></indexterm>
+</para>
+
+<para>After creating the structure, we generate the attribute
+values.  Note that the attribute generator can only generate
+attributes on objects and that all attributes are string
+valued.</para>
+
+
+<para>We use a
+<glossterm>relational dependency network</glossterm>
+<indexterm><primary>relational dependency networks</primary>
+           <secondary>use in data generation</secondary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>relational dependency networks</secondary></indexterm>
+(RDN) to generate the
+values for the attributes.  The attribute names and their
+distributions are specified by the constituent models of this RDN in
+the form of 
+<glossterm baseform="relational probability tree">relational probability trees</glossterm>
+<indexterm><primary>relational probability trees</primary>
+           <secondary>use in data generation</secondary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>relational probability trees</secondary></indexterm>(RPTs).
+The data generator requires one RPT
+<indexterm><primary>relational probability trees</primary>
+           <secondary>use in data generation</secondary></indexterm>
+and one query
+<indexterm><primary>queries</primary>
+           <secondary>use in data generation</secondary></indexterm>
+for each attribute
+in the generated data.  In this example, we provide an RPT for the 
+<token role="class">S</token> class labels and one each 
+for the other attributes on <token role="class">S</token> and 
+<token role="class">T</token> objects.
+For each each attribute in the generated data, the attribute
+generator executes a query that produces subgraphs having the
+structure required by the corresponding RPT, saving the results in
+a temporary container.  For example, the
+<filename>iid-coreS-query</filename> query creates the 1d-star
+subgraphs required by the RPT for the
+<token role="attr">s_attr0_label</token> attribute
+(<filename>s-attr-rpt.xml</filename>).</para>
+
+<para>The data generation process iterates the
+specified number of times, applying the RPTs one by one to the
+subgraphs in the corresponding container, in a random order.
+Applying the RPT predicts values for the associated attribute,
+<indexterm><primary>attributes</primary>
+           <secondary>predicting</secondary></indexterm>
+<indexterm><primary>predicting attributes</primary></indexterm>
+which are recorded in the database.  The values predicted by one application
+of the RPT are used as input to succeeding applications.  In this way,
+the attribute values change over time (are
+<emphasis>conditioned</emphasis>)
+<indexterm><primary>conditioning attribute values</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>conditioning during data generation</secondary></indexterm>
+from their
+initial random values to values consistent with the provided model.
+See <xref linkend="ch_models"/> for more information on RPTs and
+RDNs.</para>
+
+<para>The attribute generator
+appends the string &ldquo;<literal>_label</literal>&rdquo; and
+prepends &ldquo;<literal>s_</literal>&rdquo; or
+&ldquo;<literal>t_</literal>&rdquo; as appropriate to the attribute
+names specified in the RPTs.  For example, if you specify an attribute
+named &ldquo;<token role="attr">class</token>&rdquo; in
+<filename>s-class-rpt.xml</filename>, the <token
+role="class">S</token> objects will be given an attribute named 
+<token role="attr">s_class_label</token>.  Similarly, specifying an
+attribute named &ldquo;<literal>attr1</literal>&rdquo; in
+<filename>t-attr-rpt.xml</filename> results in an attribute named
+<token role="attr">t_attr1_label</token> in the generated
+data.  Although Proximity modifies the final attribute names as outlined
+above, all attribute names must be unique within the RPT files.
+</para>
+
+<para>Proximity requires that the RPT and query files be in the
+current working directory (<filename>&proxpath;</filename> if you are
+following the tutorial).
+
+<programlisting>   print 'generating i.i.d. attributes'
+
+   sClassQuery = loadFile("iid-class-query.xml")
+   sClassRPT   = loadRPT("s-class-rpt.xml")
+
+   sAttrQuery  = loadFile("iid-coreS-query.xml")
+   sAttrRPT    = loadRPT("s-attr-rpt.xml")
+
+   tAttrQuery  = loadFile("iid-coreT-query.xml")
+   tAttrRPT    = loadRPT("t-attr-rpt.xml")
+</programlisting>
+
+The first two queries get the 1d-stars for each 
+<token role="class">S</token> object&mdash;all the 
+<token role="class">T</token> objects connected to their core 
+<token role="class">S</token> objects.
+The last query, <filename>iid-coreT-query</filename>,
+gets the 2d-stars for each <token role="class">T</token>
+object&mdash;for each <token role="class">T</token> object it finds
+any connected <token role="class">S</token> objects and any 
+<token role="class">T</token> objects connected to those 
+<token role="class">S</token> objects.
+<!-- making sure that the linked
+<token role="class">T</token> objects do not match the initial core
+<token role="class">T</token> object.-->
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/Datagen_Queries.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/Datagen_Queries.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+The <token role="class">S</token> class RPT
+(<filename>s-class-rpt.xml</filename>) infers the value of 
+<token role="attr">s_class_label</token> based on the degree of the
+<token role="class">S</token> objects.  The other two RPTs infer
+the value of their respective attributes based on the value of 
+<token role="attr">s_class_label</token> for the current object (for
+<filename>s-attr-rpt</filename>) or linked <token role="class">S</token>
+objects (for <filename>t-attr-rpt</filename>).
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/Datagen_RPTs.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/Datagen_RPTs.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+
+<para>Store the queries and RPTs in a Python dictionary that pairs
+queries with the RPTs that specify the corresponding attributes.
+<programlisting>   queriesAndModels = {sClassQuery: sClassRPT, \
+       sAttrQuery: sAttrRPT, tAttrQuery: tAttrRPT}
+</programlisting>
+
+Specify the number of <glossterm>Gibbs sampling</glossterm>
+<indexterm><primary>Gibbs sampling</primary></indexterm>
+iterations to use in conditioning the data.
+
+<programlisting>   iters = 3
+</programlisting>
+
+To generate the attribute values, we call a constructor for the
+&AttributeGenerator; class.
+<indexterm><primary>classes</primary>
+           <secondary>AttributeGenerator</secondary></indexterm>
+<indexterm><primary>AttributeGenerator class</primary></indexterm>
+<programlisting>   AttributeGenerator(queriesAndModels, iters)
+</programlisting>
+</para>
+
+<!--
+   EXERCISE: Generating synthetic i.i.d. data
+-->
+
+<procedure id="ex_scripts_sdg-iid">
+<title>Generating synthetic i.i.d. data</title>
+
+<caution><para>The i.i.d. data generation script clears and overwrites the
+current database. Make sure that you are serving an empty or test
+database.</para></caution>
+
+<step>
+<para>All <glossterm baseform="relational probability tree">RPT</glossterm>
+files required for this exercise must be
+available in the current working directory
+(<filename>&proxpath;</filename> if you are 
+following the tutorial).  Copy the required files to the correct
+directory.
+<synopsis>&prompt; <userinput>cd &proxpath;</userinput>
+&prompt; <userinput>cp &scriptpath;/s-class-rpt.xml .</userinput>
+&prompt; <userinput>cp &scriptpath;/s-attr-rpt.xml .</userinput>
+&prompt; <userinput>cp &scriptpath;/t-attr-rpt.xml .</userinput>
+&prompt; <userinput>cp &scriptpath;/iid-class-query.xml .</userinput>
+&prompt; <userinput>cp &scriptpath;/iid-coreS-query.xml .</userinput>
+&prompt; <userinput>cp &scriptpath;/iid-coreT-query.xml .</userinput>
+</synopsis>
+The <glossterm baseform="document type definition">DTD</glossterm> 
+describing the RPT format must be present in the same
+directory as the RPT files.  If you have not already done so, copy
+this file to the current working directory.
+<synopsis>&prompt; <userinput>cp &proxpath;/resources/rpt2.dtd .</userinput>
+</synopsis></para>
+</step>
+
+<step>
+<para>Serve a new (empty) database.
+<synopsis>&prompt; <userinput>Mserver --dbname DataGen_IID &proxpath;/resources/init-mserver.mil</userinput>
+</synopsis>
+Remember to use a port number&nbsp;&gt;&nbsp;40000 if you are using
+MonetDB&nbsp;&monetoldversion;.</para>
+</step>
+
+<step>
+<para>Initialize the new Proximity
+database. Substitute the appropriate host and port information if you are
+running the &monet; server on a different machine or are using a
+different port.
+<synopsis>&prompt; <userinput>cd &proxpath;</userinput>
+&prompt; <userinput>bin/db-util.sh localhost:30000 init-db</userinput>
+</synopsis></para>
+<indexterm><primary>db-util.sh/db-util.bat</primary></indexterm>
+<indexterm><primary>shell scripts</primary>
+           <secondary>db-util.sh</secondary></indexterm>
+<indexterm><primary>batch files (Windows)</primary>
+           <secondary>db-util.bat</secondary></indexterm>
+<indexterm><primary>init-db (<command>db-util</command> 
+           option)</primary></indexterm>
+</step>
+
+<step>
+<para>Start the &uiname;.</para>
+</step>
+
+<step>
+<para>From the <guimenu>Script</guimenu> menu, choose
+<guimenuitem>Run Script</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&scriptpath;</filename> directory and
+choose <filename>generate-iid-data.py</filename>.
+Click <guibutton>Open</guibutton>.</para>
+
+<para>Proximity opens a window to show you any output from the script
+along with a trace of the script execution.  The final lines
+of your output should look similar to the following
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+
+<screen>INFO kdl.prox.qgraph2.QueryGraph2CompOp  - * done executing query
+INFO kdl.prox.model2.rdn.RDN  - RDN Iteration: 0
+Status: finished running script</screen>
+
+You can close this window after the script finishes.</para>
+
+<para>Examine the generated objects and attributes in the
+&uiname;. You may want to execute a 1d-star query that
+finds all <token role="class">T</token> objects directly connected to
+each <token role="class">S</token> object (for example,
+<filename>iid-coreS-query.xml</filename>).  The subgraphs created by
+such a query are shown below.  The results of each data
+generation run will be different and your results will not necessarily
+look exactly like that shown here.
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/Datagen_Thumbs.png"
+   width="5.75in"
+   format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+   fileref="&graphicspath;/Datagen_Thumbs.png"
+   contentwidth="7.0in"
+   format="PNG" />
+</imageobject>
+</mediaobject>
+</para>
+
+</step>
+</procedure>
+
+<indexterm startref="idx_datagen1" class="endofrange"/>
+<indexterm startref="idx_datagen2" class="endofrange"/>
+<indexterm startref="idx_datagen3" class="endofrange"/>
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        TIPS AND REMINDERS                      -->
+<!-- ============================================================== -->
+<sect1>
+<title>Tips and Reminders</title>
+
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>The &ProximityClass; class provides methods that support
+    many Proximity operations including accessing databases, executing
+    queries, adding attributes, sampling containers, and instantiating
+    models.</para>
+  </listitem>
+  <listitem>
+    <para>Use the <varname>prox</varname> object to access methods in
+    the &ProximityClass; class.</para>
+  </listitem>
+  <listitem>
+    <para>Use the shortcuts provided by the <varname>prox</varname>
+    object to refer to important Proximity data structures.</para>
+  </listitem>
+  <listitem>
+    <para>You only need to import a Proximity class or package when
+    you refer to a class by name.</para>
+  </listitem>
+  <listitem>
+    <para>Use the Proximity Python interpreter to execute individual
+    Python statements interactively when you do not need to create a
+    script.</para>
+  </listitem>
+  <listitem>
+    <para>Indent lines and blocks using tabs rather than spaces in the
+    Proximity Python interpreter.</para>
+  </listitem>
+  <listitem>
+    <para>Each Proximity Python interpreter window has its own
+    namespace.</para>
+  </listitem>
+  <listitem>
+    <para>Use the &nstbrowser; to examine Proximity internal data
+    structures when you need to work directly with Proximity
+    entities.</para>
+  </listitem>
+  <listitem>
+    <para>Filters and conditions have different semantics.  Conditions
+    operate on objects or links whereas filters operate on NST
+    rows.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Additional Information</title>
+  <listitem>
+    <para>See the &proxcookbook; and <xref linkend="ch_models"/> in this
+    tutorial for additional examples of
+    Proximity scripts.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref linkend="apx_quickref"/> for a summary of command
+    line editing options in the interactive Proximity Python
+    interpreter.</para>
+  </listitem>
+  <listitem>
+    <para>See <xref xrefstyle="pageref"
+                    linkend="ex_shortcuts"/> for information on
+    creating shortcuts to commonly used files and directories.</para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

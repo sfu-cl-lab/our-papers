@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/local/sgml/docbook-xml-4.5/docbookx.dtd" [
+<!ENTITY % entities SYSTEM "../../ProxCommonEntities.ent">
+<!ENTITY % recipeentities SYSTEM "ProxCookbookEntities.ent">
+%entities;
+%recipeentities;
+]>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+
+<!-- ============================================================== -->
+<!--                            RECIPE:                             -->
+<!--             CONVERTING DATABASES TO 64-BIT MONETDB             -->
+<!-- ============================================================== -->
+
+<section id="recipe_monet64">
+<title>Converting Databases to 64-Bit MonetDB</title>
+
+<indexterm><primary>importing data</primary>
+           <secondary>using import-text script</secondary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>importing</secondary>
+           <tertiary>using import-text script</tertiary></indexterm>
+<indexterm><primary>exporting data</primary></indexterm>
+<indexterm><primary>data</primary>
+           <secondary>exporting</secondary></indexterm>
+<indexterm><primary>MonetDB databases</primary></indexterm>
+<indexterm><primary>converting databases</primary></indexterm>
+<indexterm><primary>databases</primary></indexterm>
+<indexterm><primary>init-mserver.mil script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>init-mserver.mil</secondary></indexterm>
+<indexterm><primary>initializing databases</primary></indexterm>
+
+<!-- classes used in the recipe -->
+
+<!-- methods used in this recipe -->
+
+
+<!-- ============================================================== -->
+<!-- PROBLEM                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Problem</title>
+
+<para>MonetDB is giving you &ldquo;Out of memory&rdquo; errors, and you
+realize that your database no longer fits within the 2GB memory
+limit. What can do you?</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SOLUTION                                                        -->
+<!-- ============================================================== -->
+
+<section>
+<title>Solution</title>
+
+<para>The obvious solution is to switch to the version of MonetDB that
+supports 64-bit pointers, which allows you to use much more memory
+than you will ever need
+(<ulink url="http://www.isbc.com/business/mistakes.cfm">famous last
+words</ulink>). The problem is that the database files are not
+compatible across the two versions&mdash;because one stores its
+data using longer words&mdash;so you will have to use a conversion
+utility before you can switch servers.</para>
+
+<para>One alternative is to dump your 32-bit database into an XML file
+band then re-import it into a clean 64-bit version. Since XML is too
+verbose and too slow for large databases, we have created another pair
+of import and export utilities that use plain text files
+instead. These files are saved in a format that MonetDB can
+read directly, without much intervention from Proximity.  These files
+don&rsquo;t have the extra structure from XML files, take up less
+space, and don&rsquo;t need to be parsed.  Using this file format, the
+conversion from 32 to 64 bits can be done simply, and in a matter of
+minutes.</para>
+
+<para>You can use these import and export utilities directly from the
+command line. First, create a temporary directory to hold the converted
+files:</para>
+
+<synopsis>&dollarprompt; <userinput>mkdir <varname>temp-dir</varname></userinput>
+&dollarprompt; <userinput>cd <varname>temp-dir</varname></userinput></synopsis>
+
+<para>Then start the 32-bit version of MonetDB on your original data,
+and export its contents into the current directory:</para>
+
+<synopsis>&dollarprompt; <userinput>$PROX_HOME/bin/export-text.sh <varname>host:post</varname> `pwd`</userinput></synopsis>
+
+<para>where <varname>host:port</varname> will be
+<literal>localhost:30000</literal> if you are running this script from
+the same machine as the MonetDB server (which is required, see
+<xref linkend="64bit_disc" />, below) and using the default
+<filename>init-mserver.mil</filename> MonetDB initialization
+script.</para>
+
+<para>Quit the MonetDB server and start a 64-bit server on a new
+database. Initialize the database with Proximity&rsquo;s schema, and
+import the data saved in the current directory:</para>
+
+<synopsis>&dollarprompt; <userinput>$PROX_HOME/bin/db-util.sh <varname>host:port</varname> init-db</userinput>
+&dollarprompt; <userinput>$PROX_HOME/bin/import-text.sh <varname>host:port</varname> `pwd`</userinput></synopsis>
+
+<para>Your 64-bit database is now ready to be used. The entire
+operation should be quick&mdash;dumping and reloading one
+database containing 5GB worth of data took less than 30 minutes
+on one of our servers.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- DISCUSSION                                                     -->
+<!-- ============================================================== -->
+
+<section id="64bit_disc">
+<title>Discussion</title>
+
+<para>These utilities are convenient because they create an
+intermediate representation of your data that is succinct and can be
+easily reloaded. You can use them any time that you need to transport
+or convert data.  Example uses include creating a tarball of your data
+(where the text dump of your database will be noticeably smaller than
+its XML counterpart) and porting a database from a little-endian
+platform to a big-endian architecture (for example, to switch between
+&macosx; and Linux/Windows).</para>
+
+<para>Note that these utilities must be run on the same machine as
+your MonetDB servers&mdash;otherwise, MonetDB won&rsquo;t be able to
+write or read into the <varname>temp-dir</varname> where the
+conversion files live.</para>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- SUPPORTING FILES                                                -->
+<!-- ============================================================== -->
+
+<?pagebreak?>
+<section>
+<title>Supporting Files</title>
+
+<para>There are no files for this recipe, but you can take a look at
+the unit tests for these two utilities:
+<filename>&testpath;/app/ExportTextTest.java</filename> and
+<filename>&testpath;/app/ImportTextTest.java</filename>.</para>
+
+</section>
+
+<!-- === End of recipe ============================================ -->
+</section>
+
+<!--
+</chapter>
+-->
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("ProxCookbook.xml" "chapter" "section")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

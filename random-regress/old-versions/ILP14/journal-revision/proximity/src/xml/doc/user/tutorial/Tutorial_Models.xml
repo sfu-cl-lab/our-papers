@@ -1,0 +1,2384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="ch_models">
+<title>Learning Models</title>
+
+<!-- ============================================================== -->
+<!--                            OVERVIEW                            -->
+<!-- ============================================================== -->
+
+<sect1 id="models_intro">
+<title>Overview</title>
+<indexterm><primary>classification models</primary></indexterm>
+<indexterm><primary>probabilistic models</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>probabilistic</secondary></indexterm>
+
+<para>The exercises in this chapter walk through the process of
+training, testing, and evaluating several 
+<glossterm baseform="probabilistic model">probabilistic models</glossterm>
+designed for relational
+knowledge discovery. For each exercise in this chapter, we first walk
+through the source code and identify how Proximity classes and methods
+are used to accomplish the desired task. This is followed by
+instructions for executing the script in Proximity.</para>
+
+<sidebar>
+<para>Probabilistic relational models can consider huge amounts of data
+and take a corresponding amount of time to learn and apply.
+The exercises in this chapter were designed to run in a reasonable
+amount of time, and they therefore limit the number of input attributes to
+be considered.  These examples may therefore not necessarily represent
+realistic or rigorous experimental design.</para>
+</sidebar>
+
+<para>The examples in this chapter are written in Jython, a Java
+<indexterm><primary>Jython</primary></indexterm>
+<indexterm><primary>Python</primary>
+           <secondary>scripting</secondary></indexterm>
+implementation of Python that lets you interact with Java code. The
+classes and methods used in these examples are, of course, also
+available for use in Java code. Source code files for all the scripts
+discussed in this chapter are available in
+<filename>&scriptpath;</filename>.</para>
+
+<para>
+<itemizedlist spacing="compact">
+<title>Objectives</title>
+<para>The exercises in this chapter demonstrate how to</para>
+  <listitem>
+    <para>learn, apply, and evaluate the 
+    <glossterm baseform="relational Bayesian classifier">&RBC;</glossterm>
+    model</para>
+  </listitem>
+  <listitem>
+    <para>learn, apply, and evaluate the 
+    <glossterm baseform="relational probability tree">&RPT;</glossterm>
+    model</para>
+  </listitem>
+  <listitem>
+    <para>learn, apply, and evaluate the
+    <glossterm baseform="relational dependency network">&RDN;</glossterm>
+    model</para>
+  </listitem>
+  <listitem>
+    <para>use temporal attributes to restrict the set of applicable
+    attribute values in a relational probability tree</para>
+  </listitem>
+<!--
+  <listitem>
+    <para>select <glossterm baseform="feature">features</glossterm>
+    for use by models</para>
+  </listitem>
+-->
+  <listitem>
+    <para>display and interpret graphical representations of
+    relational probability trees</para>
+  </listitem>
+  <listitem>
+    <para>display and interpret graphical representations of
+    relational dependency networks</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                THE MODELING PROCESS IN PROXIMITY               -->
+<!-- ============================================================== -->
+
+<sect1 id="models_process">
+<title>The Modeling Process in Proximity</title>
+
+<para>The process of learning, applying, and evaluating a model is
+substantially the same for each of Proximity&rsquo;s models.  In each
+case we will
+<orderedlist spacing="compact">
+<listitem>
+  <para><emphasis>Define the problem.</emphasis>
+  We identify the attribute that we want to predict (the 
+  <glossterm baseform="class label"><emphasis>class label</emphasis></glossterm>)
+  <indexterm><primary>attributes</primary>
+             <secondary>predicting</secondary></indexterm>
+  <indexterm><primary>predicting attributes</primary></indexterm>
+  and the pieces of
+  information that can be used in making that prediction
+  (<glossterm baseform="input source"><emphasis>sources</emphasis></glossterm>).
+  Sources can include attributes on 
+  objects or links in the subgraph, attributes on the subgraph itself,
+  or structural features of objects in the subgraph.</para>
+</listitem>
+<listitem>
+  <para><emphasis>Instantiate the model.</emphasis>
+  A simple constructor call instantiates a default version of the
+  model. For some models, you can add modules to change the
+  behavior as desired.</para>
+</listitem>
+<listitem>
+  <para><emphasis>Learn the model.</emphasis>
+  Proximity uses labeled data to determine how to
+  predict class labels.  The process for predicting class labels
+  varies depending on the type of model being learned.</para>
+</listitem>
+<listitem>
+  <para><emphasis>Save the model.</emphasis> [Optional]
+  Proximity lets you save the model to an XML file.  You can then
+  import the saved model at a later time, avoiding the need to
+  regenerate the model.</para>
+</listitem>
+<listitem>
+  <para><emphasis>Apply the model.</emphasis>
+  Use the model to make predictions about the class label.</para>
+</listitem>
+<listitem>
+  <para><emphasis>Write the model&rsquo;s predictions to the
+  database.</emphasis> [Optional]
+  You can save the predicted values in the database,
+  typically as an attribute on the corresponding subgraph.</para>
+</listitem>
+<listitem>
+  <para><emphasis>Evaluate the model.</emphasis>  Calculating
+  evaluation metrics lets you compare and evaluate model
+  performance.</para>
+</listitem>
+</orderedlist>
+</para>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                RELATIONAL BAYESIAN CLASSIFIER                  -->
+<!-- ============================================================== -->
+
+<sect1 id="models_rbc">
+<title>Relational Bayesian Classifier</title>
+<indexterm><primary>RBC</primary>
+           <see>relational Bayesian classifier</see></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>classification</secondary></indexterm>
+<indexterm id="idx_models_RBC1" class="startofrange">
+           <primary>relational Bayesian classifier</primary></indexterm>
+<indexterm id="idx_models_RBC2" class="startofrange">
+           <primary>models</primary>
+           <secondary>relational Bayesian classifier</secondary></indexterm>
+<indexterm><primary>Bayesian classification</primary></indexterm>
+
+<para>The <glossterm>relational Bayesian classifier</glossterm> (RBC)
+is a simple Bayesian 
+classification  algorithm adapted to the context of
+<glossterm>relational data</glossterm>
+<xref linkend="neville03_rbc"/>. Like many classification systems, the
+RBC is trained on one set of instances and then applied to (or tested
+on) another.  Because the RBC operates on relational data, the
+training and test sets are sets of subgraphs, defined by a
+<glossterm>container</glossterm> in Proximity.
+Each <glossterm>subgraph</glossterm> in the
+container is assumed to contain one target item 
+(the <glossterm baseform="core vertex">core item</glossterm>) to
+be classified. Attributes and structural characteristics of the target
+item, of the other objects and links in the subgraph, and of the subgraph
+itself can all be used by the model in classifying the target
+item.  Because these instances preserve the relational structure of the
+data, the model can exploit the connections among objects to improve
+classification accuracy.</para>
+
+<para>In the example below, we want to predict whether or not a web
+page is a student page, that is, whether the value of its 
+<token role="attr">isStudent</token> attribute
+is &ldquo;1&rdquo;.  Each input subgraph consists of a target web
+page and all objects (also web pages) connected to it, including both
+links to and links from the target page.
+The following script learns an RBC on one of the samples we created in
+<xref linkend="ex_scripts_sampling"/>, then
+applies the RBC to the other sample to evaluate the its
+predictions.</para>
+
+<!-- .............................................................. -->
+<!--            Code example: run-1d-clusters-rbc.py                -->
+<!-- .............................................................. -->
+
+<sect2 id="model_rbc_code">
+<title>Code example: run-1d-clusters-rbc.py</title>
+<indexterm><primary>run-1d-clusters-rbc.py script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>examples</secondary>
+           <tertiary>run-1d-clusters-rbc.py</tertiary></indexterm>
+
+<para>This section describes the script found in 
+<filename>&scriptpath;/run-1d-clusters-rbc.py</filename>.
+</para>
+
+<para>
+Import the necessary class definitions.
+
+<programlisting>from kdl.prox.model2.common.sources import *
+from kdl.prox.model2.rbc import RBC
+</programlisting>
+
+We use the samples created in <xref linkend="ex_scripts_sampling"/>
+as our training and test sets.
+Make sample &ldquo;0&rdquo; the <glossterm>training set</glossterm>
+and sample &ldquo;1&rdquo; the <glossterm>test set</glossterm>.
+
+<programlisting>trainContainer = prox.getContainer("1d-clusters/samples/0")
+testContainer = prox.getContainer("1d-clusters/samples/1")
+</programlisting>
+
+First we identify the 
+<glossterm baseform="core vertex"><emphasis>core item</emphasis></glossterm>,
+the database entity whose <glossterm>label</glossterm> (attribute value) we 
+want to predict.  In this case, we want 
+to predict the label for the central object in our 
+<token role="container">1d-clusters</token>
+subgraphs.  This object was named &ldquo;core_page&rdquo; in the query that
+generated these subgraphs, and thus also in the resulting subgraphs.
+
+<programlisting>coreItemName = 'core_page'
+</programlisting>
+
+Next we specify the name of the attribute we want to predict
+<indexterm><primary>attributes</primary>
+           <secondary>predicting</secondary></indexterm>
+<indexterm><primary>predicting attributes</primary></indexterm>
+(the class label).  Our
+model predicts whether the object in question is a student web
+page.  We use the boolean attribute 
+<token role="attr">isStudent</token> to identify whether
+or not a page belongs to a student.
+The RBC model requires that the predicted attribute be
+discrete.
+
+<programlisting>attrToPredict = 'isStudent'
+</programlisting>
+
+We create an &AttributeSource;
+<indexterm><primary>AttributeSource class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>AttributeSource</secondary></indexterm>
+instance to represent the
+information about the class label.  This attribute source specifies the
+item in the subgraph that we want to label 
+(<token role="object">core_page</token>) and the name of the attribute
+that we want to predict (<token role="attr">isStudent</token>).
+
+<programlisting>classLabel = AttributeSource(coreItemName, attrToPredict)
+</programlisting>
+
+Next, we specify the set of sources to use in learning the model.
+<indexterm><primary>features</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>features in</secondary></indexterm>
+Recall that sources can be attributes on any of the objects or links
+in the input subgraph
+including attributes on the core item, attributes of links
+connecting to the core item, or attributes of objects linked to the
+core item.  In principle, we can extend this to use attributes on
+objects and links multiple &ldquo;hops&rdquo; away from the core
+object, provided that such items are included in the subgraphs that
+the model will use.
+In this example, because the subgraphs only extend a single hop from
+the core object, we are limited to attributes of objects of the core
+object and of objects and links directly connected to that core
+object. Sources can also include structural characteristics of the
+subgraph or attributes on the subgraph itself, although neither of
+these types of sources are used in this example.
+See <xref linkend="ex_models_rpt"/>
+for an example of using the degree of an object (a structural
+characteristic) as a source.</para>
+
+<para>Each source is specified as an instance of &AttributeSource;.
+Each &AttributeSource; provides the name of an item (object or link)
+from the input subgraphs and the attribute whose values will be
+evaluated for their predictive value to the model.
+We provide the set of sources as a Python list.
+
+<programlisting>inputSources = [ \
+   AttributeSource('core_page', 'url_server_info'), \
+   AttributeSource('core_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_from_page', 'url_server_info'), \
+   AttributeSource('linked_from_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_from_page', 'page_num_outlinks'), \
+   AttributeSource('linked_from_page', 'page_num_inlinks'), \
+   AttributeSource('linked_to_page', 'url_server_info'), \
+   AttributeSource('linked_to_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_to_page', 'page_num_outlinks'), \
+   AttributeSource('linked_to_page', 'page_num_inlinks'), \
+   AttributeSource('linked_to', 'link_tag'), \
+   AttributeSource('linked_from', 'link_tag')]
+</programlisting>
+
+Begin the modeling portion of the script by 
+<glossterm baseform="instantiation">instantiating</glossterm> the model.
+<indexterm><primary>models</primary>
+           <secondary>instantiating</secondary></indexterm>
+<indexterm><primary>instantiating models</primary></indexterm>
+Instantiation is a simple &RBCClass; constructor call.
+
+<programlisting>print "Beginning modeling section"
+print "Instantiating model..."
+rbc = RBC()
+</programlisting>
+<indexterm><primary>classes</primary>
+           <secondary>RBC</secondary></indexterm>
+<indexterm><primary>RBC class</primary></indexterm>
+
+Train (learn) the model on the training set.
+<indexterm><primary>models</primary>
+           <secondary>inducing</secondary></indexterm>
+<indexterm><primary>training models</primary></indexterm>
+<indexterm><primary>inducing models</primary></indexterm>
+<indexterm><primary>training sets</primary>
+           <secondary>use in models</secondary></indexterm>
+
+<programlisting>print "Learning model..."
+rbc.learn(trainContainer, classLabel, inputSources)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>learn()</secondary></indexterm>
+<indexterm><primary>learn()</primary></indexterm>
+
+Write the trained model to an XML file. The file is written to the current
+<indexterm><primary>XML</primary>
+           <secondary>model representation</secondary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>XML representation of</secondary></indexterm>
+<indexterm><primary>saving</primary>
+           <secondary>relational Bayesian classifiers</secondary></indexterm>
+working directory, which is
+<filename>&proxpath;</filename> if you are following the tutorial.
+
+<programlisting>xmlFileName = 'ProxWebKB_RBC.xml'
+rbc.save(xmlFileName)
+print "RBC written to ", xmlFileName
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>save()</secondary></indexterm>
+<indexterm><primary>save()</primary></indexterm>
+
+You can read in the XML file at a later time to apply the model
+to other data sets having the same structure and features without
+having to retrain the model.</para>
+
+<para>Apply the model to the test set.
+<indexterm><primary>applying models</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>applying</secondary></indexterm>
+<indexterm><primary>test sets</primary>
+           <secondary>use in models</secondary></indexterm>
+
+<programlisting>print "Applying model..."
+predictions = rbc.apply(testContainer)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>apply()</secondary></indexterm>
+<indexterm><primary>apply()</primary></indexterm>
+
+Applying the learned model returns a &Predictions;
+<indexterm><primary>Predictions class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>Predictions</secondary></indexterm>
+instance that stores the predicted class labels.  To save these predictions,
+we store the predicted values as attributes on the subgraphs.  The
+&savePredictions;
+<indexterm><primary>savePredictions()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>savePredictions</secondary></indexterm>
+method silently overwrites any existing values for
+this subgraph attribute.
+<programlisting>print "Writing predictions..."
+rbcAttrName = "rbc_isstudent_prediction"
+predictions.savePredictions(testContainer.getSubgraphAttrs(), rbcAttrName)
+</programlisting>
+<indexterm><primary>getSubgraphAttrs()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getSubgraphAttrs()</secondary></indexterm>
+
+Finally, we evaluate the model&rsquo;s results. The &Predictions; class
+provides several methods for calculating the error of the predictions,
+but to use them, we have to first tell the predictions instance where
+to find the true values for the class labels.  The true values
+are stored in the <token role="attr">isStudent</token>
+attribute on the core items in the test container&rsquo;s subgraphs.
+
+<programlisting>predictions.setTrueLabels(testContainer, classLabel)
+</programlisting>
+<indexterm><primary>setTrueLabels()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>setTrueLabels()</secondary></indexterm></para>
+
+<para>
+Proximity provides several built-in evaluation functions.
+<glossterm baseform="accuracy">Accuracy</glossterm>
+<indexterm><primary>evaluating models</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>evaluating</secondary></indexterm>
+<indexterm><primary>accuracy</primary></indexterm>
+measures the percentage of test instances correctly classified by the
+model.  Because accuracy requires knowing the correct prior
+distribution of instances in the population and does not consider that
+false positive and false negative errors may entail widely different
+costs, other evaluation measures, such as area under the ROC curve, are
+often more useful.
+<glossterm baseform="area under the ROC curve">Area under the ROC
+(receiver operating characteristic) curve</glossterm>
+<indexterm><primary>ROC curve</primary></indexterm>
+<indexterm><primary>area under ROC curve</primary></indexterm>
+<xref linkend="provost98"/>
+provides a method of evaluating the accuracy of a ranking of
+all the test instances according to their estimated probability,
+letting you compare one model&rsquo;s performance against
+another&rsquo;s, independent of <glossterm>error cost</glossterm>
+and without knowing the 
+<glossterm baseform="prior probability distribution">prior class
+distribution</glossterm>.
+Accuracy and area under the ROC curve
+approach 1.0 as the results improve; a value of 0.5 for area under
+the ROC curve indicates random performance. Conditional log likelihood
+<indexterm><primary>conditional log likelihood</primary></indexterm>
+is less intuitive and useful only for relative comparison of
+comparable entities, with higher values signifying better
+performance.
+
+<programlisting>print "Computing accuracy (ACC)..." 
+acc = (1 - predictions.getZeroOneLoss())
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>getZeroOneLoss()</secondary></indexterm>
+<indexterm><primary>getZeroOneLoss()</primary></indexterm>
+</para>
+
+<para>Computing area under the ROC curve requires a 
+<glossterm>binary classification problem</glossterm>.  We identify the
+<glossterm baseform="positive instance">positive instances</glossterm>
+and group all other class values into the 
+<glossterm baseform="negative instance">negative instances</glossterm>.  In this example,
+student pages (pages with 
+<token role="attr">isStudent</token>&nbsp;=&nbsp;<token role="attr">1</token>)
+are positive
+instances.
+
+<programlisting>print "Computing area under ROC curve (AUC)..."
+auc = predictions.getAUC("1")
+print "Computing conditional likelihood (CLL)..."
+cll = predictions.getConditionalLogLikelihood()
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>getAUC()</secondary></indexterm>
+<indexterm><primary>getAUC()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getConditionalLogLikelihood()</secondary></indexterm>
+<indexterm><primary>getConditionalLogLikelihood()</primary></indexterm>
+
+Finally, print a summary of the evaluation results.
+
+<programlisting>print "RBC results:"
+print "  ACC: ", str(acc)
+print "  AUC: ", str(auc)
+print "  CLL: ", str(cll)
+</programlisting>
+
+</para>
+
+<!--
+   EXERCISE: Learning and applying the RBC model
+-->
+
+<procedure>
+<title>Learning and applying the &RBC; model</title>
+
+<para>This script requires entities created in 
+<xref linkend="ex_queries_1dclusters"/>,
+<xref linkend="ex_scripts_sampling"/> and 
+<xref linkend="ex_scripts_adding"/>. You must have completed these
+exercises before running the script in the current exercise.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>From the <guimenu>Script</guimenu> menu, choose
+<guimenuitem>Run Script</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&scriptpath;</filename> directory and
+choose <filename>run-1d-clusters-rbc.py</filename>.
+Click <guibutton>Open</guibutton>.</para>
+<para>Proximity opens a window to show you any output from the script
+along with a trace of the script execution. 
+Your output should look similar to the following 
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>Status: starting running script:
+   /proximity/doc/user/tutorial/examples/run-1d-clusters-rbc.py
+Beginning modeling section
+Instantiating model...
+Inducing model...
+INFO kdl.prox.model2.rbc.RBC - starting to induce model...
+INFO kdl.prox.model2.rbc.RBC - updating model with [core_page.url_server_info]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [core_page.url_hierarchy1b]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from_page.url_server_info]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from_page.url_hierarchy1b]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from_page.page_num_outlinks]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from_page.page_num_inlinks]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to_page.url_server_info]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to_page.url_hierarchy1b]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to_page.page_num_outlinks]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to_page.page_num_inlinks]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to.link_tag]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from.link_tag]...
+INFO kdl.prox.model2.rbc.RBC - induce model done...
+RBC written to  ProxWebKB_RBC.xml
+Applying model...
+INFO kdl.prox.model2.rbc.RBC - starting to apply model...
+INFO kdl.prox.model2.rbc.RBC - apply model done...
+Writing predictions...
+Computing accuracy (ACC)...
+Computing area under ROC curve (AUC)...
+Computing conditional likelihood (CLL)...
+RPT results: 
+  ACC:  0.946298984034833
+  AUC:  0.9747484409075087
+  CLL:  -495.61207422760805
+Status: finished running script
+</screen>
+
+Due to the probabilistic nature of the RBC algorithm, your results may
+differ slightly from that shown above.
+You can close this window after the script finishes.
+</para>
+</step>
+
+<step>
+<para>Examine the values predicted by the
+RBC. The script stored the predicted values in the
+<token role="attr">rbc_isstudent_prediction</token> subgraph
+attribute.  Recall that our testing instances are in the
+<token role="container">/1d-clusters/samples/1</token> container.
+To see these values, drill down through the container hierarchy in the
+&uiname; to display the list of subgraphs for this container.  Click a
+subgraph ID, then click <guibutton>attrs</guibutton> to display the
+attributes for that subgraph.  The example below shows the value for
+subgraph&nbsp;<token role="subgraph">0</token>, which indicates that the
+model predicts that the core page for this subgraph
+(object&nbsp;<token role="object">1</token>) is not a Student page.
+You can compare this to the actual value of the 
+<token role="attr">isStudent</token> attribute by examining the
+attribute values for object&nbsp;<token role="object">1</token>.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_RBCAttrs.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_RBCAttrs.png"
+     contentwidth="7.0in"
+     format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+
+<para>Recall that the RBC only makes predictions for core objects in
+the test container.  Therefore, after learning the model,
+only the subgraphs in the 
+<token role="container">1d-clusters/samples/1</token> container have a
+value for the <token role="attr">rbc_isstudent_prediction</token>
+attribute.
+</para>
+</step>
+
+</procedure>
+<indexterm startref="idx_models_RBC1" class="endofrange"/>
+<indexterm startref="idx_models_RBC2" class="endofrange"/>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                  RELATIONAL PROBABILITY TREES                  -->
+<!-- ============================================================== -->
+
+<sect1 id="models_rpt">
+<title>Relational Probability Trees</title>
+<indexterm id="idx_models_RPT1" class="startofrange">
+           <primary>relational probability trees</primary></indexterm>
+<indexterm id="idx_models_RPT2" class="startofrange">
+           <primary>models</primary>
+           <secondary>relational probability trees</secondary></indexterm>
+<indexterm><primary>RPT</primary>
+           <see>relational probability trees</see></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>classification</secondary></indexterm>
+<indexterm><primary>classification models</primary></indexterm>
+
+<para>
+A <glossterm>relational probability tree</glossterm> (RPT) 
+<xref linkend="neville03_rpt"/>
+is a form of classification tree for <glossterm>relational data</glossterm>
+<indexterm><primary>classification trees</primary></indexterm>
+that considers <glossterm baseform="attribute">attributes</glossterm>
+of related objects and links, and 
+automatically constructs complex relational 
+<glossterm baseform="aggregation">aggregates</glossterm> of these
+attributes to build a <glossterm>probabilistic model</glossterm>.
+<indexterm><primary>aggregation functions</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>probabilistic</secondary></indexterm>
+<indexterm><primary>probabilistic models</primary></indexterm>
+These relational aggregations include
+mode, average, count, and proportion. Each of these aggregations can
+operate on related objects or links and each dynamically determines the best
+threshold. In addition to the aggregation functions, RPTs also
+consider structural features of the data.  Specifically, RPTs can include
+degree features (counts of named objects or links in a subgraph) in the
+resulting models.  Advantages of this model include ease of model
+understanding (the model is a series of hierarchical rules) and the
+ability to dynamically select predictive 
+<glossterm baseform="feature">features</glossterm> and
+thresholds.</para>
+
+<!-- Currently does not provide these corrections (10/29/07)
+<para>Advantages of this model include (optional) corrections for the
+<glossterm>autocorrelation</glossterm> and 
+<glossterm>degree disparity</glossterm> properties found in many
+<indexterm><primary>autocorrelation</primary>
+           <secondary>model corrections for</secondary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>statistical corrections for</secondary></indexterm>
+<indexterm><primary>degree disparity</primary></indexterm>
+<indexterm><primary>corrections, statistical</primary></indexterm>
+<indexterm><primary>statistical</primary>
+           <secondary>corrections</secondary></indexterm>
+<indexterm><primary>bias</primary></indexterm>
+relational data sets <xref linkend="jensen02_icml"/>,
+<xref linkend="jensen03_icml"/>. Traditional classification 
+tree building algorithms are not able to correct for these biases and
+build larger trees with lower accuracies. 
+Other advantages include ease of model understanding 
+(the model is a series of hierarchical
+rules) and the ability to dynamically select predictive 
+<glossterm baseform="feature">features</glossterm> and
+thresholds.</para>
+-->
+
+<para>Proximity&rsquo;s RPT code has been modularized to permit
+easier maintenance of and additions to the code.  Model creation
+has been split into learning and pruning modules, with each of these
+having their own set of components used to specify particular performance
+parameters.</para>
+
+<para>The learning module includes several component modules that
+control the learning phase:
+<itemizedlist>
+  <listitem>
+    <para>The <emphasis>splitting module</emphasis> evaluates the
+    possible splits at each branch point in the tree, selecting the
+    best split according to scores calculated by the scoring module.</para>
+  </listitem>
+  <listitem>
+    <para>The <emphasis>scoring module</emphasis> computes a score for
+    each possible split in the tree.  The results of the scoring
+    module are used to select the best split by the splitting module.</para>
+  </listitem>
+  <listitem>
+    <para>The <emphasis>significance module</emphasis> determines
+    whether the split chosen by the splitting module reaches the
+    specified level of statistical significance.  If not, that point
+    in the tree becomes a leaf node.</para>
+  </listitem>
+  <listitem>
+    <para>The <emphasis>stopping module</emphasis> determines when to
+    stop looking for additional splits in the tree.  The current
+    release only includes a single implementation,
+    &DefaultStoppingModule;, which stops splitting a tree after it
+    reaches the specified depth (with a default depth of three).</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+<para>The pruning module provides the ability to apply different
+pruning strategies to the completed tree.  Implementing pruning
+strategies is planned for future releases; the current release
+includes only the &DefaultPruningModule;, which does no pruning.</para>
+
+<para>The example below performs the same classification task as the
+previous RBC example&mdash;we want to infer whether or not a web page
+is a student page. But this time we use the value of the
+<token role="attr">pagetype</token>
+attribute to identify known student pages in the training phase.
+This attribute can take one of six (string) values: Student, Course,
+Faculty, Staff, ResearchProject, and Other.
+We use the same <glossterm baseform="training set">training</glossterm> 
+and <glossterm baseform="test set">test sets</glossterm> as in the RBC
+example.</para>
+
+<!-- .............................................................. -->
+<!--            Code example: run-1d-clusters-rpt.py                -->
+<!-- .............................................................. -->
+
+<sect2 id="model_rpt_code">
+<title>Code example: run-1d-clusters-rpt.py</title>
+<indexterm><primary>run-1d-clusters-rpt.py script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>examples</secondary>
+           <tertiary>run-1d-clusters-rpt.py</tertiary></indexterm>
+
+<para>This section describes the script found in 
+<filename>&scriptpath;/run-1d-clusters-rpt.py</filename>.
+</para>
+
+<para>
+Import the necessary class definitions.
+
+<programlisting>from kdl.prox.model2.common.sources import *
+from kdl.prox.model2.rpt import RPT
+</programlisting>
+
+As before, sample 0 serves as the 
+<glossterm>training set</glossterm> and sample 1 is the
+<glossterm>test set</glossterm>.
+
+<programlisting>trainContainer = prox.getContainer("1d-clusters/samples/0")
+testContainer = prox.getContainer("1d-clusters/samples/1")
+</programlisting>
+
+Our classification task remains the same&mdash;we want to predict the
+value of one of the attributes for the 
+<glossterm baseform="core vertex">central object</glossterm> in our
+1d-clusters subgraphs.  This object is named 
+<token role="vertex">core_page</token>
+in the subgraphs in both our test and training containers.
+
+<programlisting>coreItemName = 'core_page'
+</programlisting>
+
+This time, we&rsquo;re predicting the value of the 
+<token role="attr">pagetype</token> attribute.
+<indexterm><primary>attributes</primary>
+           <secondary>predicting</secondary></indexterm>
+<indexterm><primary>predicting attributes</primary></indexterm>
+
+<programlisting>attrToPredict = 'pagetype'
+</programlisting>
+
+Create an &AttributeSource;
+<indexterm><primary>AttributeSource class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>AttributeSource</secondary></indexterm>
+instance that stores both the core item
+name and the class label (attribute) we want to predict for that item.
+
+<programlisting>classLabel = AttributeSource(coreItemName, attrToPredict)
+</programlisting>
+
+As before, we specify the set of sources to be considered in
+determining the model&rsquo;s features.
+<indexterm><primary>features</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>features in</secondary></indexterm>
+See <xref linkend="model_rbc_code"/>
+for more information on specifying attribute sources.</para>
+
+<para>In addition to attribute sources, models can also consider structural
+features such as the degree of an object.  To tell Proximity to also
+consider structural attributes, we provide an &ItemSource;
+<indexterm><primary>ItemSource class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>ItemSource</secondary></indexterm>
+instance for
+the appropriate subgraph item.  In this example, we want to consider
+structural features for the related objects 
+(<token role="object">linked_to_page</token> and 
+<token role="object">linked_from_page</token>), but not for the core
+object.  Although the 
+<code>('linked_from_page', 'page_num_inlinks')</code>
+attribute source provides similar information, these sources are not
+the same. The value of <token role="attr">page_num_inlinks</token> for
+related <token role="object">linked_from_page</token> objects does not
+consider the full degree of the object (it ignores out links and only
+counts in links) and the value is stored as an attribute on the
+object.  It must therefore be defined as an attribute source.
+The full degree of the linked objects is not available as an attribute
+value but must be calculated for each object.  It must therefore be
+specified as an item (structural) source.</para>
+
+<programlisting>inputSources = [ \
+   AttributeSource('core_page', 'url_server_info'), \
+   AttributeSource ('core_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_from_page', 'page_num_outlinks'), \
+   AttributeSource('linked_to_page', 'page_num_inlinks'), \
+   ItemSource("linked_from_page"), \
+   ItemSource("linked_to_page")]
+</programlisting>
+
+<para>Proximity uses these attributes to construct the specific features
+used by the RPT model. Relational features typically identify an
+attribute and a test for the values of that attribute.  For example,
+an RPT feature might test to see if an attribute is equal to a
+designated value. Relational features can also examine and aggregate
+the set of values found in linked objects. For example, the RPT might
+use the number of 
+<token role="vertex">linked_to_page</token> objects that have more
+than 10 outlinks as a feature in the trained model.</para>
+
+<para>We instantiate the model by calling the appropriate constructor.
+
+<programlisting>print "Beginning modeling section"
+print "Instantiating model..."
+rpt = RPT()
+</programlisting>
+<indexterm><primary>RPT class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>RPT</secondary></indexterm>
+
+This instantiates the model using default values for all parameters.
+You can override these defaults by specifying particular modules to be
+used with the model.  For this example, we want a maximum tree depth
+of three, so we add that specification to the stopping module.
+
+<programlisting>rpt.learningModule.stoppingModule.setMaxDepth(3)
+</programlisting>
+</para>
+
+<para>Train (learn) the model on the training set.
+<indexterm><primary>models</primary>
+           <secondary>inducing</secondary></indexterm>
+<indexterm><primary>training models</primary></indexterm>
+<indexterm><primary>inducing models</primary></indexterm>
+<indexterm><primary>training sets</primary>
+           <secondary>use in models</secondary></indexterm>
+
+<programlisting>print "Learning model..."
+rpt.learn(trainContainer, classLabel, inputSources)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>learn()</secondary></indexterm>
+<indexterm><primary>learn()</primary></indexterm>
+
+Write the trained model to an XML file. The file is written to the current
+<indexterm><primary>XML</primary>
+           <secondary>model representation</secondary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>XML representation of</secondary></indexterm>
+<indexterm><primary>saving</primary>
+           <secondary>relational probability trees</secondary></indexterm>
+working directory, which is 
+<filename>&proxpath;</filename> if you are following the tutorial.
+
+<programlisting>xmlFileName = 'ProxWebKB_RPT.xml'
+rpt.save(xmlFileName)
+print "RPT written to ", xmlFileName
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>save()</secondary></indexterm>
+<indexterm><primary>save()</primary></indexterm>
+
+Unlike the RBC, the learned RPT model is
+designed to be human interpretable. The XML file for an RPT describes a
+<glossterm baseform="probability estimation tree">probability estimation tree</glossterm>, 
+<indexterm><primary>probability estimation trees</primary></indexterm>
+which can be viewed in the &uiname;
+(see <xref linkend="ex_graph_rpt"/>, below).
+The tree represents a series of questions
+to ask about a web page and the pages in its relational
+neighborhood. The leaf nodes contain the predicted class label for
+pages that correspond to the matching path through the tree.</para>
+
+<para>Apply the model to the test set.
+<indexterm><primary>applying models</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>applying</secondary></indexterm>
+<indexterm><primary>test sets</primary>
+           <secondary>use in models</secondary></indexterm>
+
+<programlisting>print "Applying model..."
+predictions = rpt.apply(testContainer)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>apply()</secondary></indexterm>
+<indexterm><primary>apply()</primary></indexterm>
+
+Tell the &Predictions;
+<indexterm><primary>Predictions class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>Predictions</secondary></indexterm>
+instance where to find the true values for the
+class labels. The true values are required for evaluating the
+model&rsquo;s predictions.
+
+<programlisting>predictions.setTrueLabels(testContainer, classLabel)
+</programlisting>
+<indexterm><primary>setTrueLabels()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>setTrueLabels()</secondary></indexterm>
+
+To save the predicted values, save them as attributes on the
+subgraphs.  The &savePredictions;
+<indexterm><primary>savePredictions()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>savePredictions</secondary></indexterm>
+method silently overwrites any
+existing values for this subgraph attribute.
+
+<programlisting>print "Writing predictions..."
+rptAttrName = "rpt_pagetype_prediction"
+predictions.savePredictions(testContainer.getSubgraphAttrs(), rptAttrName)
+</programlisting>
+<indexterm><primary>getSubgraphAttrs()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getSubgraphAttrs()</secondary></indexterm>
+
+Evaluate the model.  <glossterm baseform="accuracy">Accuracy</glossterm> and 
+<glossterm>area under the ROC curve</glossterm>
+<indexterm><primary>evaluating models</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>evaluating</secondary></indexterm>
+<indexterm><primary>accuracy</primary></indexterm>
+<indexterm><primary>ROC curve</primary></indexterm>
+<indexterm><primary>area under ROC curve</primary></indexterm>
+<indexterm><primary>conditional log likelihood</primary></indexterm>
+approach 1.0 as the results improve. Conditional log likelihood
+is useful only for relative comparison of comparable 
+entities with higher values signifying better performance.
+
+<?pagebreak?>
+<programlisting>print "Computing accuracy (ACC)..." 
+acc = (1 - predictions.getZeroOneLoss())
+</programlisting></para>
+
+<para>Computing area under the ROC curve requires a 
+<glossterm>binary classification problem</glossterm>.  We identify the
+positive instances and group 
+all other class values into the negative instances.  In this example,
+student pages (pages with a value of 
+<token role="attr">Student</token> for the
+<token role="attr">pagetype</token> attribute)
+are positive instances.
+
+<programlisting>print "Computing area under ROC curve (AUC)..."
+auc = predictions.getAUC("Student")
+print "Computing conditional likelihood (CLL)..."
+cll = predictions.getConditionalLogLikelihood()
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>getZeroOneLoss()</secondary></indexterm>
+<indexterm><primary>getZeroOneLoss()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getAUC()</secondary></indexterm>
+<indexterm><primary>getAUC()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getConditionalLogLikelihood()</secondary></indexterm>
+<indexterm><primary>getConditionalLogLikelihood()</primary></indexterm>
+</para>
+
+<para>Print a summary of the evaluation results.
+
+<programlisting>print "RPT results:"
+print "  ACC: ", str(acc)
+print "  AUC: ", str(auc)
+print "  CLL: ", str(cll)
+</programlisting>
+
+</para>
+
+<!--
+   EXERCISE: Learning and applying the RPT model
+-->
+
+<procedure id="ex_models_rpt">
+<title>Learning and applying the &RPT; model</title>
+
+<para>This script requires entities created in 
+<xref linkend="ex_queries_1dclusters"/> and
+<xref linkend="ex_scripts_sampling"/>. You must have completed these
+exercises before running the script in the current exercise.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>From the <guimenu>Script</guimenu> menu, choose
+<guimenuitem>Run Script</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&scriptpath;</filename> directory and
+choose <filename>run-1d-clusters-rpt.py</filename>.
+Click <guibutton>Open</guibutton>.</para>
+<para>Proximity opens a window to show you the output from the script
+along with a trace of the script execution.  The
+<filename>run-1d-clusters-rpt.py</filename> script may take several
+minutes or longer to run.
+Your output should look similar to the following
+<!-- (leading digits that indicate the number of milliseconds elapsed
+since the start of execution have been omitted from the trace for
+brevity): -->
+(leading information showing elapsed time and execution thread 
+has been omitted from the trace for brevity):
+<screen>Status: starting running script:
+    /proximity/doc/user/tutorial/examples/run-1d-clusters-rpt.py
+Beginning modeling section
+Instantiating model...
+Inducing model...
+INFO kdl.prox.model2.rpt.RPT - Creating feature tables
+INFO kdl.prox.model2.rpt.RPT - Done creating feature tables: 792 features.
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Choosing split for 2068 subgs
+
+    <emphasis>portion of trace deleted</emphasis>
+
+<!--
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Chose split FS=prop([linked_to_page.page_num_inlinks]=1)>=0.083333333333333329,
+    SCORE=gStat=602.8215839209455, pVal=0.0
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Choosing split for 1203 subgs
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Chose split FS=degree([linked_to_page])>=1,
+    SCORE=gStat=469.9089838132018, pVal=0.0
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Choosing split for 315 subgs
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Chose split FS=nop([core_page.url_hierarchy1b])=courses,
+    SCORE=gStat=71.24924980449977, pVal=5.6288307348495437E-14
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Choosing split for 888 subgs
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Chose split FS=prop([linked_from_page.page_num_outlinks]=147)>=0.125,
+     SCORE=gStat=27.089532966269648, pVal=5.479739323754895E-5
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Choosing split for 1753 subgs
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Chose split FS=prop([linked_from_page.page_num_outlinks]=147)>=0.16666666666666666,
+    SCORE=gStat=201.43387920942396, pVal=0.0
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Choosing split for 63 subgs
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Choosing split for 1715 subgs
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule
+    - Chose split FS=count([linked_from_page.page_num_outlinks]=129)>=1,
+    SCORE=gStat=160.30673085382165, pVal=0.0
+-->
+RPT written to  ProxWebKB_RPT.xml
+Applying model...
+Writing predictions...
+Computing accuracy (ACC)...
+Computing area under ROC curve (AUC)...
+Computing conditional likelihood (CLL)...
+RPT results: 
+  ACC:  0.8355104015481374
+  AUC:  0.8423346214179187
+  CLL:  -1312.0900625717052
+Status: finished running script
+</screen>
+
+Note that some parts of the RPT model, such as choosing between two
+equivalent <glossterm baseform="feature">features</glossterm>, are
+non-deterministic, so your results may differ 
+slightly from that shown above.
+You can close this window after the script finishes.</para>
+<?pagebreak?>
+</step>
+
+<step>
+<para>Examine the values predicted by the
+RPT.  Drill down through the container hierarchy in the &uiname;
+to display the list of subgraphs for the
+<token role="container">/1d-clusters/samples/1</token> container.
+Click a subgraph ID, then click <guibutton>attrs</guibutton> to
+display the attributes for that subgraph.  The example below shows the
+value for subgraph&nbsp;<token role="subgraph">0</token>, which shows
+that the model predicts that the core page for this subgraph
+(object&nbsp;<token role="object">1</token>) has a
+<token role="attr">pagetype</token> of
+<token role="attr">Other</token>
+You can compare this to the actual value of
+<token role="attr">pagetype</token> by examining the
+attribute values for object&nbsp;<token role="object">1</token>.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     width="5.0in"
+     fileref="&graphicspath;/GUI_RPTAttrs.png" format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     contentwidth="6.1in"
+     fileref="&graphicspath;/GUI_RPTAttrs.png" format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+
+<para>Recall that the RPT only makes predictions for 
+<glossterm baseform="core vertex">core objects</glossterm> in
+the test container.  Therefore, after learning the model,
+only the subgraphs in the 
+<token role="container">1d-clusters/samples/1</token> container have a
+value for <token role="attr">rpt_pagetype_prediction</token>.
+</para>
+</step>
+
+</procedure>
+</sect2>
+
+<!-- .............................................................. -->
+<!--     Understanding and viewing relational probabiliy trees      -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Understanding and viewing relational probability trees</title>
+<indexterm><primary>graphing</primary>
+           <secondary>relational probability trees</secondary></indexterm>
+<indexterm><primary>visualizing</primary>
+           <secondary>relational probability trees</secondary></indexterm>
+<indexterm><primary>relational probability trees</primary>
+           <secondary>visualizing</secondary></indexterm>
+
+<para>To help you understand and visualize the resulting RPT model,
+Proximity provides an RPT viewer.  This section describes
+how to display a graphic representation of the RPT and how interpret
+the labels on the tree&rsquo;s nodes.</para>
+
+<!--
+   EXERCISE: Viewing RPTs
+-->
+
+<procedure id="ex_graph_rpt">
+<title>Viewing relational probability trees</title>
+
+<para>This script requires the RPT created in 
+<xref linkend="ex_models_rpt"/>. You must have completed
+<xref linkend="ex_models_rpt"/> before running the
+current exercise. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>If you have not already done so, copy
+<filename>rpt2.dtd</filename> to the directory containing the saved RPT
+XML file, <filename>ProxWebKB_RPT.xml</filename>.
+<synopsis>&prompt; <userinput>cp &proxpath;/resources/rpt2.dtd &proxpath;</userinput>
+</synopsis>
+Proximity requires that the DTD 
+<filename>rpt2.dtd</filename>
+<indexterm><primary>DTDs</primary>
+           <secondary>rpt2.dtd</secondary></indexterm>
+<indexterm><primary>rpt2.dtd</primary></indexterm>
+be in the same directory as the RPT XML file to be displayed,
+(<filename>&proxpath;</filename> if you are following the tutorial).</para>
+</step>
+
+<step>
+<para>From the <guimenu>Model</guimenu> menu, choose
+<guimenuitem>Graph RPT</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step id="step_graph_rpt">
+<para>Navigate to the current working directory 
+(<filename>&proxpath;</filename> if you are following the tutorial)
+and choose <filename>ProxWebKB_RPT.xml</filename>. Click
+<guibutton>Open</guibutton>.</para>
+
+<para>Proximity opens a window showing a tree view of the RPT learned
+for this data.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_RPT01.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_RPT01.png"
+     contentwidth="7.0in"
+     format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+</step>
+
+<step>
+<para>If the graph does not fit the window properly, you can change
+the magnification level to adjust the display.
+<itemizedlist spacing="compact">
+<listitem>
+  <para>To make the graph fit the current window, choose
+  <guimenuitem>Zoom to Fit</guimenuitem> from the
+  <guimenu>View</guimenu> menu.  Proximity adjusts the size of the
+  graph to fit the window.  Proximity cannot shrink the graph
+  beyond a certain size, so large graphs may still extend beyond small
+  window borders.</para>
+</listitem>
+<listitem>
+  <para>To display the graph at the default magnification, choose
+  <guimenuitem>Center on Root</guimenuitem> from the
+  <guimenu>View</guimenu> menu.</para>
+</listitem>
+<listitem>
+  <para>To zoom in, click the <guibutton>+</guibutton>
+  button at the bottom of the graph window.</para>
+</listitem>
+<listitem>
+  <para>To zoom out, click the <guibutton>-</guibutton> button at the
+  bottom of the graph window.</para>
+</listitem>
+</itemizedlist>
+You can drag the graph to a different position in the window,
+or use the bottom and side scroll bars to reposition the graph in the
+window.</para>
+</step>
+
+<step>
+<para>You can optionally save the tree as a JPEG file.
+<indexterm><primary>saving</primary>
+           <secondary>relational probability trees</secondary></indexterm>
+</para>
+<substeps>
+  <step>
+    <para>In the RPT display window, choose
+    <guimenuitem>Save as JPEG Image</guimenuitem> from the 
+    <guimenu>File</guimenu> menu.
+    Proximity displays the <guilabel>Save</guilabel> dialog.</para>
+  </step>
+  <step>
+    <para>Navigate to the target directory and enter a name for the
+    JPEG file. Click &save;.</para>
+  </step>
+</substeps>
+</step>
+</procedure>
+
+<para>The following section discusses how to interpret the displayed
+RPT.</para>
+
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+<!--         Understanding relational probability trees            -->
+<!-- . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . -->
+
+<sect3>
+<title>Understanding relational probability trees</title>
+<indexterm><primary>relational probability trees</primary>
+           <secondary>interpreting</secondary></indexterm>
+<indexterm><primary>interpreting RPTs</primary></indexterm>
+
+<para>An RPT represents a series of questions to ask about an item to
+be classified and its relational neighborhood.  At each node in the
+tree, the RPT can ask questions about any of the attributes used to
+train and test the model.  The answers to those question determine the
+path through the tree.  The leaf nodes in the tree tell us the
+class label predicted by the model.
+In this example, the target item is a web page, and the model
+predicts the value for the page&rsquo;s 
+<token role="attr">pagetype</token> attribute.</para>
+
+<para>To see how the model makes predictions, we examine an
+<indexterm><primary>attributes</primary>
+           <secondary>predicting</secondary></indexterm>
+<indexterm><primary>predicting attributes</primary></indexterm>
+example web page, object <token role="object">535</token>, and see how
+the RPT classifies this object.  As we can see from the RPT, 
+to classify this page we 
+need to know the attribute values not just for the target object, but
+also for the objects that link to and are linked
+from this object.  In the <token role="subgraph">1d-clusters</token>
+subgraphs, these related objects are identified as
+<token role="vertex">linked_to_page</token> and 
+<token role="vertex">linked_from_page</token> objects, respectively.
+The subgraph whose <token role="vertex">core_page</token> object is
+<token role="object">535</token> is shown below.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_Subg534.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_Subg534.png"
+     contentwidth="7.0in"
+     format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+
+<para>
+The root node in the RPT starts by examining the value of the 
+<token role="attr">page_num_inlinks</token> attribute for the 
+<token role="vertex">linked_to_page</token> objects
+in the current subgraph (denoted by
+<token role="attr">linked_to_page.page_num_inlinks</token> in the RPT).
+If the proportion of all <token role="object">linked_to_page</token>
+objects having
+<token role="attr">page_num_inlinks</token>&nbsp;=&nbsp;1 is greater
+than or equal to 0.083, 
+we traverse the left edge in the RPT.</para>
+
+<sidebar>
+<para>For all nodes in the RPT, if the subgraph matches the feature
+specified in a node, we traverse the left or &ldquo;yes&rdquo; edge;
+if the subgraph does not match the node&rsquo;s feature, we traverse
+the right or &ldquo;no&rdquo; edge.
+Hover the mouse over an edge in the tree to see its label.</para>
+</sidebar>
+
+<para>Subgraph&nbsp;<token role="subgraph">534</token> has two
+<token role="vertex">linked_to_pages</token>, so we
+check the value of the <token role="attr">page_num_inlinks</token>
+attribute for these pages.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/RPT_LinkedToPages.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/RPT_LinkedToPages.png"
+     format="PNG"
+     contentwidth="7.0in"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+Object <token role="object">1468</token> has a value of 1 for its 
+<token role="attr">page_num_inlinks</token> attribute, and 
+object <token role="object">1281</token> has a value of 100 for its
+<token role="attr">page_num_inlinks</token> attribute.
+The proportion of <token role="object">linked_to_pages</token> with
+a value of&nbsp;1 is thus&nbsp;0.50, which is greater than&nbsp;0.083.
+Therefore, subgraph&nbsp;<token role="subgraph">534</token> satisfies
+the first test, and we traverse the left edge in the RPT to the next
+node in the tree.</para>
+
+<para>The next test looks at how many
+<token role="vertex">linked_to_page</token> objects are linked to
+the core object in the subgraph, represented by
+<token role="attr">degree(linked_to_page)</token> in the tree.
+Specifically, we test whether the subgraph contains at least one 
+<token role="vertex">linked_to_page</token> object.
+Subgraph&nbsp;<token role="subgraph">534</token> contains two
+<token role="vertex">linked_to_page</token> objects,
+so we pass this test and again traverse the left edge to the next
+node in the tree.</para>
+
+<para>The third node examines the value of the 
+<token role="attr">url_hierarchy1b</token> attribute for the
+subgraph&rsquo;s <token role="vertex">core_page</token> object.
+Specifically, the RPT asks whether the value of this attribute is 
+<token role="attr">courses</token>.  Because this node examines a
+single value for a single object, it does not require an
+aggregation function
+<indexterm><primary>aggregation functions</primary></indexterm>
+like proportion or degree.  This is indicated by the
+<literal>nop</literal> (no operator) aggregation function as
+<token role="attr">nop([core_page.url_hierarchy1b])=courses</token>.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_Obj535_URLHierarchy1b.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_Obj535_URLHierarchy1b.png"
+     format="PNG"
+     contentwidth="7.0in"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+The value of <token role="attr">url_hierarchy1b</token> for
+object&nbsp;535 is <token role="attr">People</token>, so this time we
+fail the test and traverse the right edge to the leaf node.</para>
+
+<para>Leaf nodes in the RPT tell us the probabilistic counts (out of all
+objects from the training set that reach this leaf node) for
+each potential classification of this object.
+Because some training instances may not have the information necessary
+to determine which path to take at a split (e.g., it may not have a
+value for the relevant attribute), the model assigns an appropriate
+percentage of the instance to each path, resulting in non-integer
+values at the leaf nodes.
+We can see that objects that reach this leaf node are much more likely
+to be student pages than any other page type.  Therefore, the model
+predicts that  object&nbsp;<token role="object">535</token> has a 
+<token role="attr">pagetype</token> of <token role="attr">Student</token>,
+which our script stored in the
+<token role="attr">rpt_pagetype_prediction</token> attribute for the
+subgraph.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/RPT_LeafAndSubg534Attrs.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/RPT_LeafAndSubg534Attrs.png"
+     contentwidth="7.0in"
+     format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+Examining the attributes of 
+object&nbsp;<token role="object">535</token>, we see that its
+<token role="attr">pagetype</token> attribute is indeed 
+<token role="attr">Student</token> and that the model made the correct
+prediction for this subgraph.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_Obj535_Pagetype.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_Obj535_Pagetype.png"
+     contentwidth="7.0in"
+     format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+<indexterm startref="idx_models_RPT1" class="endofrange"/>
+<indexterm startref="idx_models_RPT2" class="endofrange"/>
+</para>
+
+</sect3>
+</sect2>
+
+<!-- .............................................................. -->
+<!--   Using temporal attributes in a relational probability tree   -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Using temporal attributes in a relational probability
+tree</title>
+<indexterm id="idx_trpt01" class="startofrange">
+           <primary>relational probability trees</primary>
+           <secondary>temporal attributes in</secondary></indexterm>
+<indexterm id="idx_trpt02" class="startofrange">
+           <primary>temporal attributes</primary>
+</indexterm>
+
+<para>In some datasets, objects or links may have an attribute
+that specifies a timestamp associated with that object.  For
+example, a <token role="object">movie</token> object might have a
+<token role="attr">date</token> attribute whose value is the
+movie&rsquo;s opening date.  Proximity allows you to use such
+<glossterm baseform="temporal attribute">temporal attributes</glossterm>
+to restrict the set of related items considered by an RPT.
+(More specifically, it uses the temporal attribute to restrict which
+values for another attribute can be aggregated by the RPT.)
+To use temporal attributes, we provide a &TemporalAttributeSource; 
+instead of an &AttributeSource; to specify the related items and
+attributes that the RPT is to consider.</para>
+
+<para>To illustrate how to use temporal attributes in an RPT, consider
+a database of actors linked by co-starring relationships (an actor is
+linked to another actor if both appeared in the same movie).  The task
+for our RPT is to estimate the likelihood that an actor has won an
+award.  Each actor has attributes for the actor&rsquo;s birth
+year and for any awards won (<token role="attr">birth_year</token> and
+<token role="attr">num_awards_won</token>, respectively).</para>
+
+<para>As input to the RPT, we construct 1-dimensional
+&ldquo;stars&rdquo; around each actor.  That is, each subgraph contains
+a <token role="vertex">core-actor</token> object and zero to many
+linked <token role="vertex">co-starring-actor</token> objects.
+We consider the number of awards won by an actor&rsquo;s
+costars in estimating whether the core actor has won any awards, but
+we only want to consider awards won by an actor&rsquo;s
+peers in terms of age.  In this example, we consider awards won by costars
+born within ten years (five years before to five years after) of
+the core actor, but not those won by actors born earlier or later.
+That is, we use the temporal attribute <token role="attr">birth_year</token>
+to restrict which <token role="attr">num_awards_won</token>
+values are aggregated.  Only those values for actors born within the
+specified range are aggregated; the rest are ignored.</para>
+
+<para>The following text describes how
+to set up an RPT to use the temporal
+<token role="attr">birth_year</token> attribute in this manner.</para>
+
+<para>Before setting up the input source, we must import the
+necessary class definitions:
+<programlisting>from kdl.prox.model2.common.sources import AttributeSource
+from kdl.prox.model2.common.sources import TemporalAttributeSource
+</programlisting>
+<indexterm><primary>AttributeSource class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>AttributeSource</secondary></indexterm>
+<indexterm><primary>TemporalAttributeSource class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>TemporalAttributeSource</secondary></indexterm>
+
+To specify the temporal range relative for the 
+<token role="attr">birth_year</token> attribute, we first create an
+&AttributeSource; that indicates which attribute on the 
+<glossterm baseform="core vertex">core item</glossterm> the range is
+relative to.
+<programlisting>coreTemporalAttr = AttributeSource('core-actor', 'birth_year')
+</programlisting>
+Here <code>core-actor</code> is the name of the core item, and
+<code>birth_year</code> is the name of the attribute on the core item
+that the related item&rsquo;s attribute will be relative to.
+</para>
+
+<para>We also must create an &AttributeSource; that
+specifies the related item and the temporal attribute on that item that is
+considered relative to the core item&rsquo;s attribute.
+<programlisting>relatedTemporalAttr = AttributeSource('co-starring-actor', 'birth_year')
+</programlisting>
+In this case, values of the attribute on the related item are
+considered relative to the value of the same attribute 
+(<token role="attr">birth_year</token>) on the
+core item, but this need not always be the case.  We might consider
+actors with birth years less than 30 years before a movie&rsquo;s
+opening date, for example.  The only requirement is that both
+attributes must be of <glossterm>comparable types</glossterm>.
+<indexterm><primary>comparable data types</primary></indexterm>
+<indexterm><primary>data type</primary></indexterm>
+</para>
+
+<para>The following code specifies the range around the core
+item&rsquo;s value for <token role="attr">birth_year</token> that we
+allow for the related item&rsquo;s 
+<token role="attr">birth_year</token> values. 
+In this case, we consider related actors born within ten years (five
+years before to five years after) of the core actor.
+<programlisting>interval = "-5.0:5.0"
+</programlisting>
+
+We then create an &AttributeSource; that specifies 
+the item whose values are to be aggregated
+(<token role="object">co-starring-actor</token>) and the attribute
+whose values we want to aggregate
+(<token role="attr">num_awards_won</token>).
+<programlisting>attrOfInterest = AttributeSource('co-starring-actor','num_awards_won')
+</programlisting>
+
+The above sources are used to specify the &TemporalAttributeSource;
+for this model.  As we did for the non-temporal RPT example, above, the
+&TemporalAttributeSource; is placed in a list of sources.
+<programlisting>inputSources = [ \
+   TemporalAttributeSource(attrOfInterest, coreTemporalAttr, \
+      relatedTemporalAttr, interval) \
+   ]
+</programlisting>
+As we saw in the previous RPT example, the list of input sources can
+specify multiple sources, including additional temporal or
+non-temporal sources.</para>
+
+<para>You can also use a temporal attribute to determine how
+structural features are aggregated.  For example, you could use the
+<token role="attr">birth_year</token> of 
+<token role="object">co-starring-actor</token> objects to determine
+which objects are counted when determining the degree of the core
+item.  In such cases, use a &TemporalItemSource;
+<indexterm><primary>TemporalItemSource class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>TemporalItemSource</secondary></indexterm>
+(the temporal
+equivalent of an &ItemSource;) to define the input source.</para>
+
+<para>You can specify multiple temporal attributes and mix temporal
+attributes and non-temporal attributes in the list of
+<code>inputSources</code>.  You can also specify multiple ranges for
+a given temporal attribute.  You must provide a separate
+&TemporalAttributeSource; or &TemporalItemSource; for each range.
+</para>
+
+<para>Proximity imposes two important restrictions on the use of
+temporal attributes in RPTs:
+<orderedlist spacing="compact">
+  <listitem>
+    <para>Temporal attributes must be single valued.  Multiple values
+    and ranges are not permitted.</para>
+  </listitem>
+  <listitem>
+    <para>The related temporal attribute must be on the same item as the
+    attribute to be aggregated.  In our example, the 
+    <token role="attr">birth-year</token> attribute is on the same
+    object as the aggregated <token role="attr">num_awards_won</token>
+    attribute.</para>
+  </listitem>
+</orderedlist>
+</para>
+
+<para>The attribute used for the
+<code>coreTemporalAttr</code> need not necessarily be located on the
+core object of the subgraph.  The only requirement is that the
+subgraph contain only a single instance of the &ldquo;core&rdquo;
+temporal attribute.  (Other items in the subgraph can also have this
+attribute, but there must be only one object or link that matches the
+definition of <code>coreTemporalAttr</code>.)  Because
+subgraphs can only contain a single core object, we
+typically use an attribute on the core object for the
+<code>coreTemporalAttr</code>.</para>
+<indexterm startref="idx_trpt01" class="endofrange"/>
+<indexterm startref="idx_trpt02" class="endofrange"/>
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                  SELECTING MODEL FEATURES                      -->
+<!-- ============================================================== -->
+
+<!-- no longer supported as of 9/07; old text stored in
+     OldFiles/TU_SelectingModelFeatures.xml
+-->
+
+<!-- ============================================================== -->
+<!--                  RELATIONAL DEPENDENCY NETWORK                 -->
+<!-- ============================================================== -->
+
+<sect1 id="models_rdn">
+<title>Relational Dependency Networks</title>
+<indexterm id="idx_models_RDN1" class="startofrange">
+           <primary>relational dependency networks</primary></indexterm>
+<indexterm id="idx_models_RDN2" class="startofrange">
+           <primary>models</primary>
+           <secondary>relational dependency networks</secondary></indexterm>
+<indexterm><primary>RDN</primary>
+           <see>relational dependency networks</see></indexterm>
+
+<para>A <glossterm>relational dependency network</glossterm> (RDN)
+<xref linkend="neville03_rdn"/>, <xref linkend="neville04_icdm"/>
+is a graphical model that extends the concept of a 
+<glossterm>dependency network</glossterm>
+<indexterm><primary>dependency networks</primary></indexterm>
+<xref linkend="heckerman00"/> for relational domains. RDNs approximate
+a <glossterm>joint probability distribution</glossterm> over the
+attributes of objects in a network with a set of 
+<glossterm baseform="conditional probability distribution">conditional probability distributions</glossterm>.
+The RDN learning algorithm is based on 
+<glossterm>pseudolikelihood</glossterm> techniques, which
+estimate a set of conditional probability distributions
+independently. This approach avoids the complexities of estimating a 
+full joint distribution and can incorporate existing techniques for
+learning conditional probability distributions of relational
+data (e.g., RPTs). <glossterm>Gibbs sampling</glossterm>
+<indexterm><primary>Gibbs sampling</primary></indexterm>
+inference techniques are used to recover a full
+joint distribution and to estimate probabilities of interest.</para>
+
+<para>The example below continues the task of classifying web
+pages.  The web pages in the &webkb; database use the 
+<token role="attr">pagetype</token> attribute to indicate a page&rsquo;s
+type.  We train a new RPT to use as the conditional probability
+distribution for the <token role="attr">pagetype</token> attribute in the
+RDN.  The RDN uses this conditional probability distribution (i.e.,
+this RPT) to 
+<glossterm baseform="collective classification">collectively infer</glossterm>
+<indexterm><primary>collective inference</primary></indexterm>
+the value of the <token role="attr">pagetype</token>
+attribute for all of the 
+<glossterm baseform="core vertex">core objects</glossterm> in the 
+<glossterm>test set</glossterm>.</para>
+
+<!-- .............................................................. -->
+<!--            Code example: run-1d-clusters-rdn.py                -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Code example: run-1d-clusters-rdn.py</title>
+<indexterm><primary>run-1d-clusters-rdn.py script</primary></indexterm>
+<indexterm><primary>scripts</primary>
+           <secondary>examples</secondary>
+           <tertiary>run-1d-clusters-rdn.py</tertiary></indexterm>
+
+<para>This section describes the script found in 
+<filename>&scriptpath;/run-1d-clusters-rdn.py</filename>.
+</para>
+
+<para>
+Import the necessary class definitions.
+
+<programlisting>from kdl.prox.model2.common.sources import *
+from kdl.prox.model2.rpt import RPT
+from kdl.prox.model2.rdn RDN
+from kdl.prox.model2.rdn.modules.listeners import LoggingListener
+</programlisting>
+
+Get the <glossterm baseform="training set">training</glossterm> and
+<glossterm baseform="test set">test sets</glossterm>.  We use the same
+containers for the training and test sets as we did for the previous
+RBC and RPT examples.
+
+<programlisting>trainContainer = prox.getContainer("1d-clusters/samples/0")
+testContainer = prox.getContainer("1d-clusters/samples/1")
+</programlisting>
+</para>
+
+<para>Train an 
+<glossterm baseform="relational probability tree">RPT</glossterm> that
+predicts the value of the 
+<token role="attr">pagetype</token> attribute.
+<indexterm><primary>attributes</primary>
+           <secondary>predicting</secondary></indexterm>
+<indexterm><primary>predicting attributes</primary></indexterm>
+For this RPT, we also
+consider the value of <token role="attr">pagetype</token> for related 
+objects in predicting its value for the core object.  
+Because we may not know the value of <token role="attr">pagetype</token> 
+for the related objects during inference, the RDN uses the conditional
+probability distribution represented by the RPT in a 
+<glossterm>Gibbs sampling</glossterm>
+procedure to collectively infer the value of 
+<token role="attr">pagetype</token> for all core objects
+simultaneously.</para>
+
+<para>See <xref linkend="ex_models_rpt"/> for a more detailed
+description of the data structures used in the RPT portion of this
+script.
+
+<programlisting>coreItemName = 'core_page'
+attrToPredict = 'pagetype'
+classLabel = AttributeSource(coreItemName, attrToPredict)
+</programlisting>
+
+Define the set of sources to be used in learning the RPT.
+
+<programlisting>inputSources = [ \
+   AttributeSource('core_page', 'url_server_info'), \
+   AttributeSource('core_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_from_page', 'page_num_outlinks'), \
+   AttributeSource('linked_from_page', 'pagetype'), \
+   AttributeSource('linked_to_page', 'page_num_inlinks'), \
+   AttributeSource('linked_to_page', 'pagetype'), \
+   ItemSource('linked_from_page'), \
+   ItemSource('linked_to_page') ]
+</programlisting>
+<indexterm><primary>AttributeSource class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>AttributeSource</secondary></indexterm>
+<indexterm><primary>ItemSource class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>ItemSource</secondary></indexterm>
+</para>
+
+<para>Begin the modeling portion of the script by 
+<glossterm baseform="instantiation">instantiating</glossterm> the
+component RPT.  Set the maximum tree depth to three.
+
+<programlisting>print "Beginning modeling section"
+print "Instantiating component RPT..."
+rpt = RPT()
+rpt.learningModule.stoppingModule.setMaxDepth(3)
+</programlisting>
+<indexterm><primary>RPT class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>RPT</secondary></indexterm>
+
+Train (learn) the tree.
+
+<programlisting>print "Learning component RPT..."
+rpt.learn(trainContainer, classLabel, inputSources)
+</programlisting>
+<indexterm><primary>learn()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>learn()</secondary></indexterm>
+
+Write the RPT to an XML file. The file is written to the current
+<indexterm><primary>XML</primary>
+           <secondary>model representation</secondary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>XML representation of</secondary></indexterm>
+<indexterm><primary>saving</primary>
+           <secondary>relational probability trees</secondary></indexterm>
+working directory, which is 
+<filename>&proxpath;</filename> if you are following the tutorial.
+
+<programlisting>xmlFileName = 'ProxWebKB_RPTforRDN.xml'
+rpt.save(xmlFileName)
+print "RPT written to ", xmlFileName
+</programlisting>
+</para>
+
+<para>Begin the RDN portion of the script by instantiating the RDN
+using the default constructor.
+
+<programlisting>print "Instantiating RDN..."
+rdn = RDN()
+</programlisting>
+<indexterm><primary>RDN class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>RDN</secondary></indexterm>
+
+Like the RPT code, Proximity&rsquo;s RDN code has been modularized to permit
+easier maintenance and additions to the code. Use these modules to
+override the default values for the model&rsquo;s parameters.</para>
+
+<para>RDNs use <glossterm>Gibbs sampling</glossterm>
+<indexterm><primary>Gibbs sampling</primary></indexterm>
+for inference.  Use the statistics module to specify the parameters
+for the Gibbs sampling.  For this example, we skip the first 100
+trials (<parameter>burnIn</parameter>) before 
+beginning sampling and record every third trial.
+A value of 2 means that we skip two trials between recordings.
+
+<programlisting>rdn.statisticModule.setBurnInSteps = 100
+rdn.statisticModule.setSkipSteps = 2
+</programlisting>
+
+The example script
+stops after 200 iterations to limit execution time for the purposes of
+the this tutorial.  Determining the appropriate number of Gibbs
+sampling iterations can require judgment and experience with
+this technique.  Many more iterations will likely be needed in practice.
+
+<programlisting>numIterations = 200
+</programlisting>
+
+Finally, to help us trace script execution, we print a logging
+statement every 10 iterations.
+<programlisting>rdn.addListener(LoggingListener(10))
+</programlisting>
+<indexterm><primary>LoggingListener class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>LoggingListener</secondary></indexterm>
+</para>
+
+<para>Because the RPT has already been trained, 
+<indexterm><primary>models</primary>
+           <secondary>inducing</secondary></indexterm>
+<indexterm><primary>training models</primary></indexterm>
+<indexterm><primary>inducing models</primary></indexterm>
+there is no separate training step in this script and we can apply the
+RDN to the test container.
+<indexterm><primary>applying models</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>applying</secondary></indexterm>
+<indexterm><primary>test sets</primary>
+           <secondary>use in models</secondary></indexterm>
+Each component RPT makes predictions about the subgraphs in the test
+container.  Applying the RDN returns a map of RPTs to &Predictions;
+<indexterm><primary>Predictions class</primary></indexterm>
+<indexterm><primary>classes</primary>
+           <secondary>Predictions</secondary></indexterm>
+objects. In this example, we have a single component RPT.
+
+<programlisting>print "Applying RDN..."
+predictionMap = rdn.apply({rpt: testContainer}, numIterations)
+rptPredictions = predictionMap.get(rpt)
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>apply()</secondary></indexterm>
+<indexterm><primary>apply()</primary></indexterm>
+
+As we saw in <xref linkend="ex_models_rpt"/>, we
+have to tell the RPT where to find the true values for the class labels.
+<programlisting>rptPredictions.setTrueLabels(testContainer, classLabel)
+</programlisting>
+<indexterm><primary>setTrueLabels()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>setTrueLabels()</secondary></indexterm>
+</para>
+
+<para>Write the predictions to the database as attributes on the
+subgraphs in the training container. The RDN uses Gibbs sampling to
+jointly estimate the marginal probabilities for each of its
+component models (the single RPT in this case). The RDN then sets the
+predictions in each component model.  Therefore, we write out the
+predictions from this component RPT rather than the RDN.
+
+<programlisting>print "Writing predictions..."
+rdnAttrName = "rdn_pagetype_prediction"
+rptPredictions.savePredictions(testContainer.getSubgraphAttrs(), rdnAttrName)
+</programlisting>
+<indexterm><primary>savePredictions()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>savePredictions</secondary></indexterm>
+<indexterm><primary>getSubgraphAttrs()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getSubgraphAttrs()</secondary></indexterm>
+
+Evaluate the RDN.
+<indexterm><primary>evaluating models</primary></indexterm>
+<indexterm><primary>models</primary>
+           <secondary>evaluating</secondary></indexterm>
+<indexterm><primary>accuracy</primary></indexterm>
+<programlisting>print "Computing accuracy..."
+acc = (1 - rptPredictions.getZeroOneLoss())
+</programlisting>
+<indexterm><primary>getZeroOneLoss()</primary></indexterm>
+<indexterm><primary>methods</primary>
+           <secondary>getZeroOneLoss()</secondary></indexterm>
+
+To compute <glossterm>area under the ROC curve</glossterm>
+<indexterm><primary>ROC curve</primary></indexterm>
+<indexterm><primary>area under ROC curve</primary></indexterm>
+we need to know which <token role="attr">pagetype</token> value is
+considered to be a <glossterm>positive instance</glossterm>.  A
+student page (a positive 
+instance) has a value of &ldquo;Student&rdquo; for the 
+<token role="attr">pagetype</token> attribute.
+<programlisting>print "Computing area under ROC curve..."
+auc = rptPredictions.getAUC('Student')
+</programlisting>
+<indexterm><primary>methods</primary>
+           <secondary>getAUC()</secondary></indexterm>
+<indexterm><primary>getAUC()</primary></indexterm>
+
+Print a summary of evaluation results.
+<programlisting>print "RDN results:"
+print "  Accuracy:                        ", str(acc)
+print "  Area under ROC curve (Student):  ", str(auc)
+</programlisting>
+</para>
+
+<!--
+   EXERCISE: Creating and applying the RDN model
+-->
+
+<procedure id="ex_models_rdn">
+<title>Learning and applying the &RDN; model</title>
+
+<para>This script requires entities created in 
+<xref linkend="ex_scripts_sampling"/> and
+<xref linkend="ex_models_rpt"/>. You must have completed these
+exercises before running the script in the current exercise.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>If you have not already done so, copy 
+<filename>rpt2.dtd</filename> to the same directory as that containing
+the saved RPT XML file, <filename>ProxWebKB_RPT.xml</filename>.
+<synopsis>&prompt; <userinput>cp &proxpath;/resources/rpt2.dtd &proxpath;</userinput>
+</synopsis>
+Proximity requires that the 
+<glossterm baseform="document type definition">DTD</glossterm> 
+file <filename>rpt2.dtd</filename>
+<indexterm><primary>DTDs</primary>
+           <secondary>rpt2.dtd</secondary></indexterm>
+<indexterm><primary>rpt2.dtd</primary></indexterm>
+be in the same directory as the RPT file to be read.
+</para>
+</step>
+
+<step>
+<para>From the <guimenu>Script</guimenu> menu, choose
+<guimenuitem>Run Script</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the <filename>&scriptpath;</filename> directory and
+choose <filename>run-1d-clusters-rdn.py</filename>.
+Click <guibutton>Open</guibutton>.</para>
+<para>Proximity opens a window to show you the output from the script
+along with a trace of the script execution.  The
+<filename>run-1d-clusters-rdn.py</filename> script may take many
+minutes to run.
+Your output should look similar to the following trace
+(a portion of the trace as well as leading information showing elapsed
+time and execution thread have been omitted from the trace for
+brevity):
+<?pagebreak?>
+<screen>Status: starting running script:
+   /proximity/doc/user/tutorial/examples/run-1d-clusters-rdn.py
+Beginning modeling section
+Instantiating model...
+Inducing model...
+INFO kdl.prox.model2.rpt.RPT - Creating feature tables
+INFO kdl.prox.model2.rpt.RPT - Done creating feature tables: 908 features.
+INFO kdl.prox.model2.rpt.modules.learning.DefaultLearningModule -
+   Choosing split for 2068 subgs
+
+    <emphasis>portion of trace deleted</emphasis>
+
+RPT written to  ProxWebKB_RPTforRDN.xml
+Instantiating RDN...
+Applying RDN...
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 0
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 10
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 20
+
+    <emphasis>portion of trace deleted</emphasis>
+
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 190
+INFO kdl.prox.model2.rdn.RDN - RDN Iteration: 200
+Writing predictions...
+Computing accuracy...
+Computing area under ROC curve...
+RDN results: 
+  Accuracy:                        0.8180938558297048
+  Area under ROC curve (Student):  0.8578509392814735
+Status: finished running script
+</screen>
+
+Note that some parts of the RPT model used in creating the RDN are
+non-deterministic, so your results may differ slightly from that shown above.
+You can close this window after the script finishes.</para>
+</step>
+
+<step>
+<para>Examine the values predicted by the
+RDN.  Drill down through the container hierarchy in the &uiname;
+to display the list of subgraphs for the
+<token role="container">/1d-clusters/samples/1</token> container.
+Click a subgraph ID, then click <guibutton>attrs</guibutton> to
+display the attributes for that subgraph.  The example below shows the
+value for subgraph&nbsp;<token role="subgraph">0</token>, which shows
+that the model predicts that the core page for this subgraph
+(object&nbsp;<token role="object">1</token>) has a
+<token role="attr">pagetype</token> of
+<token role="attr">Other</token>
+You can compare this to the actual value of
+<token role="attr">pagetype</token> by examining the
+attribute values for object&nbsp;<token role="object">1</token>.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_RDNAttrs.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_RDNAttrs.png"
+     contentwidth="7.0in"
+     format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+</para>
+
+<para>Recall that the RDN only makes predictions for 
+<glossterm baseform="core vertex">core objects</glossterm> in
+the test container.  Therefore, after learning the model,
+only the subgraphs in the 
+<token role="container">1d-clusters/samples/1</token> container have a 
+value for the <token role="attr">rdn_pagetype_prediction</token>
+attribute.
+</para>
+</step>
+</procedure>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                          Viewing RDNs                          -->
+<!-- .............................................................. -->
+
+<?pagebreak?>
+<sect2>
+<title>Viewing relational dependency networks</title>
+<indexterm id="idx_rdns_viz1" class="startofrange">
+           <primary>relational dependency networks</primary>
+           <secondary>visualizing</secondary></indexterm>
+<indexterm id="idx_rdns_viz2" class="startofrange">
+           <primary>graphing</primary>
+           <secondary>relational dependency networks</secondary></indexterm>
+<indexterm id="idx_rdns_viz3" class="startofrange">
+           <primary>visualizing</primary>
+           <secondary>relational dependency networks</secondary></indexterm>
+
+<para>Proximity provides an RDN viewer to graphically illustrate the
+dependencies in the RDN.  The figure below shows an artificial RDN
+constructed to illustrate its components.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+   <imagedata valign="bottom" align="center"
+      fileref="&graphicspath;/RDN_Example.png"
+      width="3.5in"
+      format="PNG" />
+</imageobject>
+<imageobject role="html">
+   <imagedata valign="bottom" align="center"
+      fileref="&graphicspath;/RDN_Example.png"
+      contentwidth="4.3in"
+      format="PNG" />
+</imageobject>
+</mediaobject>
+</informalfigure>
+This RDN describes the probabilistic dependencies between attributes
+of movies and actors. Each plate corresponds to an 
+<glossterm baseform="type">object type</glossterm>,
+circles represent attributes on those types, and arrows indicate
+probabilistic dependencies among these attributes.</para>
+
+<para>In the example above, movie genre depends on movie
+success (represented by the <token
+role="attr">isOWBlockbuster</token> attribute, which indicates whether
+the movie is an opening weekend blockbuster).  That is, if we know
+whether a movie grossed over 
+two million dollars in its opening weekend, we are better able to
+predict its genre.  (Strictly speaking, the 
+<glossterm>conditional probability distribution</glossterm> for genre
+includes movie success.)  Similarly, predicting genre also 
+depends on whether the movie&rsquo;s actors have won any awards.  In
+this case, the arrow points in both directions indicating that
+predicting whether a movie&rsquo;s actors have won any awards depends
+on genre, as well.
+</para>
+
+<para>The loop leaving and re-entering the movie plate connecting
+<token role="attr">isOWBlockbuster</token> 
+to itself indicates <glossterm>autocorrelation</glossterm>.
+<indexterm><primary>autocorrelation</primary>
+           <secondary>visualizing in relational dependency networks</secondary></indexterm>
+The success of a movie can be
+predicted more accurately if we know the success of other movies that
+link directly or indirectly to the target object.  In this
+case, we link indirectly through <token role="object">studio</token>
+objects&mdash;if 
+other movies made by the same studio are successful, we are more
+likely to predict that the current movie will have a big opening
+weekend.  Because RPTs do not represent these intermediate objects,
+the RDN viewer does not show these connecting studio objects.</para>
+
+<para>The arrow from the large dot on the actor plate to movie genre
+indicates that genre also depends on the degree of related actor
+objects (how many actors are linked to this movie in the database).
+Linking to the dot indicates that this dependency involves a graph
+feature (degree) rather than one based on attribute values.</para>
+
+<para>To view an RDN, you must construct an RDN &ldquo;wrapper&rdquo; 
+<indexterm><primary>wrapper file for RDN visualization</primary></indexterm>
+file that lists the RPTs that were used by the RDN
+and identifies different labels (from these RPTs) that refer to the
+same object class.  The example below shows such a wrapper file for the
+RDN created in <xref linkend="ex_models_rdn"/>.
+<programlisting><![CDATA[<!DOCTYPE rdn SYSTEM "rdn.dtd">
+<rdn>
+  <rpt-files>
+    <file>ProxWebKB_RPTforRDN.xml</file>
+  </rpt-files>
+  <item-maps>
+    <map>
+      <from>core_page</from>
+      <to>linked_to_page</to>
+    </map>
+    <map>
+      <from>core_page</from>
+      <to>linked_from_page</to>
+    </map>
+  </item-maps>
+</rdn>]]>
+</programlisting>
+The <sgmltag class="starttag">rpt-files</sgmltag> element lists the
+component RPTs, each enclosed by
+<sgmltag class="starttag">file</sgmltag> tags.  Our RDN uses only a
+single RPT, <filename>ProxWebKB_RPTforRDN.xml</filename>.</para>
+
+<para>The <sgmltag class="starttag">item-map</sgmltag> section
+contains a sequence of <sgmltag class="starttag">map</sgmltag>
+elements. Each <sgmltag class="starttag">map</sgmltag> element
+contains a pair of <sgmltag class="starttag">item</sgmltag> names from
+the RPT, where both names refer to the same type of object in the
+database.  In this example, all database objects are web pages, so we
+map all the object labels to <code>core_object</code>.  The name in
+the <sgmltag class="starttag">from</sgmltag> element is used to label
+the corresponding plate in the RDN viewer.</para>
+
+<!--
+   EXERCISE: Viewing relational dependency network graphs
+-->
+
+<procedure>
+<title>Viewing relational dependency network graphs</title>
+
+<para>This script requires entities created in 
+<xref linkend="ex_models_rdn"/>. You must have completed this
+exercise before running the script in the current exercise.</para>
+
+<para>Before beginning, make sure that you are serving the &webkb;
+database using Mserver. Start the &uiname; if it is not already
+running.</para>
+
+<step>
+<para>All files required for viewing the RDN must be in the same directory.
+If you have not already done so, copy
+<filename>rpt2.dtd</filename> and <filename>rdn.dtd</filename>
+to the directory containing the
+saved RPT XML file, <filename>ProxWebKB_RPTforRDN.xml</filename>.
+<synopsis>&prompt; <userinput>cp &proxpath;/resources/rpt2.dtd &proxpath;</userinput>
+&prompt; <userinput>cp &proxpath;/resources/rdn.dtd &proxpath;</userinput>
+</synopsis>
+Proximity requires that <filename>rpt2.dtd</filename> 
+<indexterm><primary>rpt2.dtd</primary></indexterm>
+<indexterm><primary>DTDs</primary>
+           <secondary>rpt2.dtd</secondary></indexterm>
+be in the same directory as 
+the component RPT XML files and that <filename>rdn.dtd</filename>
+<indexterm><primary>rdn.dtd</primary></indexterm>
+<indexterm><primary>DTDs</primary>
+           <secondary>rdn.dtd</secondary></indexterm>
+be in the same directory as the RDN wrapper file.</para>
+</step>
+
+<step>
+<para>Copy the RDN wrapper file to the same directory.
+<synopsis>&prompt; <userinput>cp &scriptpath;/1d-clusters-rdn.xml &proxpath;</userinput>
+</synopsis>
+</para>
+</step>
+
+<step>
+<para>From the <guimenu>Model</guimenu> menu, choose
+<guimenuitem>Graph RDN</guimenuitem>.
+Proximity displays the <guilabel>Open</guilabel> dialog.</para>
+</step>
+
+<step>
+<para>Navigate to the directory containing the RDN files
+(<filename>&proxpath;</filename> if you are following the tutorial)
+and choose <filename>1d-clusters-rdn.xml</filename>. Click
+<guibutton>Open</guibutton>.</para>
+
+<para>Proximity opens a window showing a graph of the RDN learned
+for this data.
+<informalfigure>
+<mediaobject>
+<imageobject role="fo">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_ProxWebKB_RDN.png"
+     width="5.75in"
+     format="PNG"/>
+</imageobject>
+<imageobject role="html">
+<imagedata align="center" valign="bottom"
+     fileref="&graphicspath;/GUI_ProxWebKB_RDN.png"
+     contentwidth="7.0in"
+     format="PNG"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+You may need to drag some of the RDN elements to see the overlapping
+lines more clearly.
+</para>
+
+<para>The RDN for the &webkb; data shows the probabilistic
+dependencies used to predict the value of a page&rsquo;s 
+<token role="attr">pagetype</token> attribute.  Specifically, the value
+of a page&rsquo;s <token role="attr">pagetype</token> attribute
+depends on the the known values of <token role="attr">page_num_inlinks</token>
+and <token role="attr">page_num_outlinks</token> for related pages and
+the inferred value of <token role="attr">pagetype</token> for related
+pages.
+The link from the core_page dot in the upper left corner to the 
+<token role="attr">pagetype</token> attribute indicates that 
+<token role="attr">pagetype</token> is also dependent on structural
+features (i.e., the degree) of neighboring pages.
+All of the links in the RDN graph leave and re-enter the
+core_page plate, indicating that we use the attributes of related
+pages to predict the value of <token role="attr">pagetype</token>, rather
+than the attributes of the target page itself.
+<!-- 
+  Similarly, we use the degree of neighboring pages (how many pages
+  are linked to and from the page) to predict the value of 
+  <token role="attr">pagetype</token>.  Degree is a structural feature
+  and is represented by the arrow from the heavy dot in the upper left
+  corner to the circle representing the 
+  <token role="attr">pagetype</token> attribute.
+-->
+</para>
+
+</step>
+</procedure>
+<indexterm startref="idx_models_RDN1" class="endofrange"/>
+<indexterm startref="idx_models_RDN2" class="endofrange"/>
+<indexterm startref="idx_rdns_viz1" class="endofrange"/>
+<indexterm startref="idx_rdns_viz2" class="endofrange"/>
+<indexterm startref="idx_rdns_viz3" class="endofrange"/>
+
+</sect2>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                        TIPS AND REMINDERS                      -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Tips and Reminders</title>
+
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Save models to XML files for later use without having to
+    rerun the model code.</para>
+  </listitem>
+  <listitem>
+    <para>Save predictions to the database to preserve the predicted
+    values.</para>
+  </listitem>
+  <listitem>
+    <para>Instantiate models using the corresponding constructor, then
+    modify model parameters by adding the appropriate modules to the
+    model instance.</para>
+  </listitem>
+  <listitem>
+    <para>Model input sources can include attribute
+    values (&AttributeSource;) and structural characteristics
+    (&ItemSource;) for the target item as well as for entities in its
+    relational neighborhood.</para>
+  </listitem>
+  <listitem>
+    <para>Specify temporal input sources (&TemporalAttributeSource;
+    and &TemporalItemSource;) to use temporal attributes to restrict
+    how other attributes values are aggregated.</para>
+  </listitem>
+</itemizedlist>
+
+<!--
+<itemizedlist spacing="compact">
+<title>Additional Information</title>
+  <listitem>
+    <para></para>
+  </listitem>
+</itemizedlist>
+-->
+
+</sect1>
+
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-parent-document: ("Tutorial.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

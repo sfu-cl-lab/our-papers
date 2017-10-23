@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="Const_DB04_Q01">
+  <description>Books published before movie release</description>
+  <query-body>
+    <vertex name="movie">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>movie</value>
+        </test>
+      </condition>
+    </vertex>
+    <vertex name="book">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>ObjType</attribute-name>
+          <value>book</value>
+        </test>
+      </condition>
+    </vertex>
+    <edge name="linked-to">
+      <vertex1>book</vertex1>
+      <vertex2>movie</vertex2>
+      <directed>true</directed>
+    </edge>
+    <constraint>
+      <and>
+        <test>
+          <operator>lt</operator>
+          <item>
+            <item-name>book</item-name>
+            <attribute-name>PubDate</attribute-name>
+          </item>
+          <item>
+            <item-name>movie</item-name>
+            <attribute-name>ReleaseYear</attribute-name>
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="movie" x="442.0" y="132.0" />
+    <vertex-location name="book" x="117.0" y="133.0" />
+  </editor-data>
+</graph-query>
+

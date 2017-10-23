@@ -1,0 +1,278 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>2.3.&nbsp;Aggregation in NSTs</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Cookbook">
+      <link rel="up" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Database Manipulation">
+      <link rel="prev" href="ch02s02.html" title="2.2.&nbsp;Creating Attributes from Arbitrary Data">
+      <link rel="next" href="ch02s04.html" title="2.4.&nbsp;Creating a Degree Attribute">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;2.&nbsp;Database Manipulation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch02s04.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="section" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="recipe_aggregation01"></a>2.3.&nbsp;Aggregation in NSTs
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e959"></a><a class="indexterm" name="d0e962"></a><a class="indexterm" name="d0e967"></a><a class="indexterm" name="d0e972"></a><a class="indexterm" name="d0e977"></a><a class="indexterm" name="d0e982"></a><a class="indexterm" name="d0e987"></a><a class="indexterm" name="d0e992"></a><a class="indexterm" name="d0e995"></a><a class="indexterm" name="d0e998"></a><a class="indexterm" name="d0e1001"></a><a class="indexterm" name="d0e1004"></a><a class="indexterm" name="d0e1007"></a><a class="indexterm" name="d0e1010"></a><a class="indexterm" name="d0e1013"></a><a class="indexterm" name="d0e1016"></a><a class="indexterm" name="d0e1019"></a><a class="indexterm" name="d0e1024"></a><a class="indexterm" name="d0e1029"></a><a class="indexterm" name="d0e1034"></a><a class="indexterm" name="d0e1039"></a><a class="indexterm" name="d0e1045"></a><a class="indexterm" name="d0e1048"></a><a class="indexterm" name="d0e1053"></a><a class="indexterm" name="d0e1056"></a><a class="indexterm" name="d0e1062"></a><a class="indexterm" name="d0e1065"></a><a class="indexterm" name="d0e1070"></a><a class="indexterm" name="d0e1073"></a><a class="indexterm" name="d0e1078"></a><a class="indexterm" name="d0e1081"></a><a class="indexterm" name="d0e1086"></a><a class="indexterm" name="d0e1089"></a><a class="indexterm" name="d0e1094"></a><a class="indexterm" name="d0e1097"></a><a class="indexterm" name="d0e1102"></a><a class="indexterm" name="d0e1105"></a><div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1113"></a>Problem
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>You have a set-valued attribute, where a single object is
+               associated with more than one value, and you want to summarize
+               that information with a single value per object ID.
+               For example, an attribute that stores the historical salaries 
+               of company employees could be summarized by finding the maximum amount
+               ever received by each individual. In a SQL database, you can get such
+               a summary using a combination of <code class="code">GROUP BY id</code>
+               and an aggregation method (<code class="code">max</code> in this case) on the
+               <code class="token">salary</code> column.
+               How can you do this in Proximity?
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1130"></a>Solution
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>The NST class provides a powerful but (until now) less well
+               known <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a> method. Given a table with a
+               <span class="emphasis"><em>grouping column</em></span> (<em class="varname"><code>G</code></em>, typically the 
+               <code class="token">id</code> column) and a changing 
+               <span class="emphasis"><em>value column</em></span> (<em class="varname"><code>V</code></em>), this method lets you apply
+               a specified aggregation function on <em class="varname"><code>V</code></em> to groups of rows with the
+               same value in <em class="varname"><code>G</code></em>. For example, suppose that your multi-set 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">salary</span> attribute has the following content:
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> objAttrs = prox.objectAttrs
+ salaryNST = objAttrs.getAttrDataNST("salary")
+ printNST(salaryNST)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head, id, value WHERE * LIMIT *]
+[ 1@0,    1@0,    10    ]
+[ 2@0,    1@0,    20    ]
+[ 3@0,    2@0,     5    ]
+[ 4@0,    2@0,     7    ]
+[ 5@0,    3@0,    10    ]
+[ 6@0,    3@0,    10    ]
+</pre><p>You can apply the <code class="code">max</code> aggregator to find sets of
+               equal <code class="token">id</code> (the <em class="varname"><code>G</code></em>
+               column) and get their highest <code class="token">value</code>
+               (<em class="varname"><code>V</code></em> column):
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> maxSalaryNST = salaryNST.aggregate("max", "id", "value")
+ printNST(maxSalaryNST)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head, id, value WHERE * LIMIT *]
+[ 0@0,    1@0,    20    ]
+[ 1@0,    2@0,     7    ]
+[ 2@0,    3@0,    10    ]
+</pre><p>The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a> method is fast because it takes advantage of
+               MonetDB&#8217;s <code class="code">{operator}</code> syntax, a built-in construct
+               that very efficiently groups a BAT&#8217;s rows by their
+               <code class="code">HEAD</code> values and then applies the specified operator to
+               each set. Furthermore, most of MonetDB&#8217;s aggregation operators
+               are implemented as cache-conscious and type-specific C code, which
+               allows MonetDB to use highly optimized code for the most common
+               operations.
+            </p>
+            <p>Several aggregation operators are available:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p>min, max, mode</p>
+                  </li>
+                  <li>
+                     <p>sum, prod</p>
+                  </li>
+                  <li>
+                     <p>avg, variance</p>
+                  </li>
+                  <li>
+                     <p>count</p>
+                  </li>
+                  <li>
+                     <p>card</p>
+                  </li>
+                  <li>
+                     <p>size</p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               Most of these operators are self-explanatory. For example,
+               <code class="code">avg</code> computes the average of values within common values
+               of the <em class="varname"><code>G</code></em> column:
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> avgSalaryNST = salaryNST.aggregate("avg", "id", "value")
+ printNST(avgSalaryNST)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head, id, value WHERE * LIMIT *]
+[ 0@0,    1@0,    15    ]
+[ 1@0,    2@0,     6    ]
+[ 2@0,    3@0,    10    ]
+</pre><p>
+               
+               The definitions of the last two aggregation operators,
+               <code class="code">card</code> and <code class="code">size</code>, are less obvious. The 
+               <code class="code">card</code> operator counts the number of <code class="code">DISTINCT</code>
+               values associated with a given group, and the <code class="code">size</code>
+               operator returns a count of the number of <code class="code">true</code> 
+               values within a given group (on boolean columns). For example,
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> distinctSalaryNST = salaryNST.aggregate("card", "id", "value")
+ printNST(distinctSalaryNST)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head, id, value WHERE * LIMIT *]
+[ 0@0,    1@0,    2    ]
+[ 1@0,    2@0,    2    ]
+[ 2@0,    3@0,    1    ]
+</pre><p>
+               and
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> tempNST = salaryNST.copy()
+ tempNST.addConditionColumn("value &gt;= 10", "gte10")
+ gteNST = tempNST.aggregate("size", "id", "gte10")
+ printNST(gteNST)
+</code></strong></pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head, id, gte10 WHERE * LIMIT *]
+[ 0@0,    1@0,    2    ]
+[ 1@0,    2@0,    0    ]
+[ 2@0,    3@0,    2    ]
+</pre><p>
+               
+               It is also possible to write new aggregation operators directly in
+               MIL, and some packages in Proximity take advantage of that
+               ability, but that&#8217;s the subject of another recipe.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1272"></a>Discussion
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>There are many cases when you need to get summaries of tables
+               with more than one row per group.  The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a> method makes
+               this easy and efficient.  For example, to compute the out-degree of
+               all the objects in the system, all you have to do is:
+               
+               
+            </p><pre class="programlisting"><strong class="userinput"><code> DB.getLinkNST().aggregate("count", "o1_id", "o2_id")
+</code></strong></pre><p>
+               
+               
+               In general, <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a>
+               provides an efficient way to compute aggregates over groups.
+            </p>
+            <p>Keep in mind that <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#aggregate(java.lang.String,%20java.lang.String,%20java.lang.String)"><code class="methodname">aggregate()</code></a> always returns an NST of two
+               columns. The first column has the same name and type as the grouping
+               column <em class="varname"><code>G</code></em>, while the second column has the name of the value column
+               <em class="varname"><code>V</code></em>, but its type corresponds to the operator
+               used. For example, the call to compute the average of salaries returns
+               an NST where the second column is of type <code class="code">dbl</code>, even
+               though the original value column was of type <code class="code">int</code>.
+            </p>
+            <p>And remember that the new NST uses the old column name for the
+               column containing the aggregated value.  In the out-degree example,
+               above, the <code class="token">o2_id</code> column in the new NST
+               holds the out degree for each of the 
+               <code class="token">o1_id</code> IDs. You can use the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#renameColumn(java.lang.String,%20java.lang.String)"><code class="methodname">renameColumn()</code></a>
+               method to change the name of this column, if you want to provide a
+               more meaningful column name.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e1320"></a>Supporting Files
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Download the following files to demonstrate this recipe:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p>Database:
+                             <code class="filename"><a href="../examples/DBManip_Aggregation_DB.xml" target="_top">DBManip_Aggregation_DB.xml</a></code></p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               You may also want to examine the unit test file for this recipe at
+               <code class="filename">$PROX_HOME/test/java/kdl/prox/cookbook/AggregateTest.java</code>.
+               
+            </p>
+            <p>Also, the <code class="filename">aggregators</code> package in
+               <code class="filename">model2</code> makes extensive use of the techniques
+               described above.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch02s04.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">2.2.&nbsp;Creating Attributes from Arbitrary Data&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;2.4.&nbsp;Creating a Degree Attribute</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

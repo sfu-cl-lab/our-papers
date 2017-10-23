@@ -1,0 +1,166 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Existence Conditions</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Conditions">
+      <link rel="prev" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Conditions">
+      <link rel="next" href="ch03s03.html" title="Evaluating Conditions">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;3.&nbsp;Conditions</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s03.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="d0e1606"></a>Existence Conditions
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_cond_ex1"></a><a class="indexterm" name="idx_cond_ex2"></a><p>Proximity supports a heterogeneous database
+            <a class="indexterm" name="d0e1619"></a>
+            <a class="indexterm" name="d0e1627"></a>
+            <a class="indexterm" name="d0e1633"></a>
+            structure, in which
+            objects and links can have variable numbers of attributes, including none.
+            For example, if a database contains information about movies, some
+            movie objects might have a value for a <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Genre</span>
+            attribute while other movie objects might omit this attribute.
+            QGraph lets you test whether an object or link has a value for a
+            given attribute by using an 
+            <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e340"><span class="glossterm">existence condition</span></a></em></span>.
+            
+         </p>
+         <p>The graph in <a href="ch03s02.html#fig_cond_db01" title="Figure&nbsp;3.5.&nbsp;Database fragment [Cond_DB01.xml]">Figure&nbsp;3.5</a> represents
+            part of a database containing information about books and authors.
+            Because some authors write books under pseudonyms, we represent that
+            information with a <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">WrittenAs</span> attribute on
+            the link connecting authors and books they&#8217;ve written.  As shown below,
+            the author Ed McBain has written books both under his own name
+            as well as under multiple pseudonyms.
+            
+         </p>
+         <div class="figure"><a name="fig_cond_db01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Cond_DB01.png" align="middle" width="508.50000000000006" alt="Database fragment [Cond_DB01.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.5.&nbsp;Database fragment [Cond_DB01.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>The query in <a href="ch03s02.html#fig_cond_db01_q01" title="Figure&nbsp;3.6.&nbsp;Query with an existence condition [Cond_DB01_Q01.qg2.xml]">Figure&nbsp;3.6</a>
+            finds author-book pairs where the author wrote the book under
+            an assumed name.  We use an existence
+            condition to capture the fact that the link must have a
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">WrittenAs</span> 
+            attribute but that we do not care about its value.
+            
+         </p>
+         <div class="figure"><a name="fig_cond_db01_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Cond_DB01_Q01.png" align="middle" width="328.50000000000006" alt="Query with an existence condition [Cond_DB01_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.6.&nbsp;Query with an existence condition [Cond_DB01_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>The results of executing the query on this database fragment
+            are shown in <a href="ch03s02.html#fig_cond_db01_q01_res" title="Figure&nbsp;3.7.&nbsp;Query results">Figure&nbsp;3.7</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_cond_db01_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Cond_DB01_Q01_res.png" align="middle" width="328.50000000000006" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;3.7.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            Existence conditions test only whether the matching database
+            entity does or does not have the specified attribute.  The attribute&#8217;s
+            value is not specified in the query and is not examined when evaluating
+            the query.  The query returns all matching subgraphs
+            where the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">author-of</span> link has a
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">WrittenAs</span> attribute, regardless of that
+            attribute&#8217;s value.
+            
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>The general form of an existence condition is
+                        
+                     </p>
+                     <div class="blockquote">
+                        <blockquote class="blockquote">
+                           <p><code class="literal">exists(</code><em class="replaceable"><code>attribute</code></em><code class="literal">)</code></p>
+                        </blockquote>
+                     </div>
+                     <p>
+                        where
+                        
+                     </p>
+                     <div class="blockquote">
+                        <blockquote class="blockquote">
+                           <p><em class="replaceable"><code>attribute</code></em> is the name of an
+                              attribute for the corresponding database object or 
+                              link
+                           </p>
+                        </blockquote>
+                     </div>
+                     <p>
+                        
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div><a class="indexterm" name="d0e1720"></a><a class="indexterm" name="d0e1721"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s03.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;3.&nbsp;Conditions&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Evaluating Conditions</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

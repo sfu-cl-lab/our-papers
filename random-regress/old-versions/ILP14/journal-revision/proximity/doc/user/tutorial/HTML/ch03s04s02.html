@@ -1,0 +1,157 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Exporting database elements to XML</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch03s04.html" title="Exporting Data to XML">
+      <link rel="prev" href="ch03s04.html" title="Exporting Data to XML">
+      <link rel="next" href="ch03s05.html" title="Importing Plain Text Data">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch03s04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Exporting Data to XML</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch03s05.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect2" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h3 class="title"><a name="d0e2998"></a>Exporting database elements to XML
+                  </h3>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e3001"></a><p>Proximity lets you export individual 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attributes</span></a> and 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">containers</span></a>
+            for off-line storage or to share with other Proximity users.
+            
+            Care must be taken when importing this data back into Proximity.
+            You must ensure that all relevant 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e567"><span class="glossterm">identifiers</span></a> (for 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_object"><span class="glossterm">objects</span></a>, 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_link"><span class="glossterm">links</span></a>,
+            containers, and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraphs</span></a>)
+            in the data file correctly 
+            match the corresponding identifiers in the existing database.  You
+            cannot import attribute data if that attribute name is already used in
+            the destination database.  Similarly, you cannot import a container if
+            that container identifier is already used by the destination
+            database.<sup>[<a name="d0e3028" href="#ftn.d0e3028">1</a>]</sup>
+            Importing containers can be problematic if different sets of queries
+            have been run on the source and destination databases.
+         </p>
+         <p>Exporting a container
+            <a class="indexterm" name="d0e3039"></a>
+            exports all the container&#8217;s subgraphs, any
+            attributes on those subgraphs, and any containers nested
+            <a class="indexterm" name="d0e3045"></a>
+            <a class="indexterm" name="d0e3049"></a>
+            within the specified container. Exporting a container does not export
+            the container&#8217;s attributes;
+            <a class="indexterm" name="d0e3055"></a>
+            <a class="indexterm" name="d0e3061"></a>
+            you must export any container attributes
+            as a separate step using the <code class="literal">container-attribute</code>
+            export type.
+         </p>
+         <p>
+            <a href="ch03s04s02.html#ex_export_attr" title="Exercise&nbsp;3.5.&nbsp;Exporting an attribute to XML:">Exercise&nbsp;3.5</a> walks through the process of
+            exporting the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_server_info</span> object
+            attribute from the ProxWebKB database.
+            
+         </p>
+         <div class="procedure"><a name="ex_export_attr"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;3.5.&nbsp;Exporting an attribute to XML:</b></p>
+            <p>This exercise walks through the process of exporting an
+               attribute to the Proximity XML data format.
+               
+               Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver.  Data files can only be exported to the same
+               machine as that serving the database.
+            </p>
+            <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+               <table border="0" summary="Caution">
+                  <tr>
+                     <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                     <th align="left"></th>
+                  </tr>
+                  <tr>
+                     <td align="left" valign="top">
+                        <p>The export process overwrites any existing data in the output
+                           file without warning.  Make sure that output file is empty or can be
+                           safely overwritten.
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <ol type="1">
+               <li>
+                  <p>Change to the <code class="filename">$PROX_HOME</code> directory.
+                  </p>
+               </li>
+               <li>
+                  <p>Export the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">url_server_info</span> object
+                     attribute. (Substitute the appropriate port number if
+                     you are using a different port.)
+                  </p><pre class="synopsis">&gt; <strong class="userinput"><code>bin/export-xml.sh localhost:30000 \
+  $PROX_HOME/doc/user/tutorial/examples/url_server_info_attr.xml \
+  object-attribute url_server_info</code></strong>
+</pre><p>
+                     <a class="indexterm" name="d0e3106"></a>
+                     <a class="indexterm" name="d0e3110"></a>
+                     Data files can only be exported to the same machine as that serving the
+                     database.
+                  </p>
+                  <p>Proximity outputs the following trace
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                     
+                  </p><pre class="screen">INFO  app.ExportXMLApp: * exporting database to:
+   /proximity/doc/user/tutorial/examples/url_server_info_attr.xml
+INFO  app.ExportXMLApp: * saving attribute url_server_info
+INFO  app.ExportXMLApp: * done exporting
+</pre><p>
+                     
+                  </p>
+               </li>
+            </ol>
+         </div><a class="indexterm" name="d0e3121"></a><a class="indexterm" name="d0e3122"></a><a class="indexterm" name="d0e3123"></a><div class="footnotes"><br><hr width="100" align="left">
+            <div class="footnote">
+               <p><sup>[<a name="ftn.d0e3028" href="#d0e3028">1</a>] </sup>These import restrictions can be overridden
+                  by using the <code class="code">noChecks</code> option.  See
+                  <a href="ch03s02s03.html" title="Importing XML data using noChecks">&#8220;Importing XML data using <code class="code">noChecks</code>&#8221;</a>for information on using this import 
+                  option.
+               </p>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch03s04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch03s04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch03s05.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Exporting Data to XML&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Importing Plain Text Data</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

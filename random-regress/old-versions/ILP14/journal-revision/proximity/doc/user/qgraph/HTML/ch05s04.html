@@ -1,0 +1,247 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Evaluating Constraints</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Constraints">
+      <link rel="prev" href="ch05s03.html" title="Multiple Constraints">
+      <link rel="next" href="ch05s05.html" title="Constraints and Annotations">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s03.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Constraints</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s05.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="d0e5546"></a>Evaluating Constraints
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_evalconst0"></a><a class="indexterm" name="idx_evalconst2"></a><a class="indexterm" name="idx_evalconst1"></a><p>As we saw with conditions, the process of evaluating
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e41"><span class="glossterm">attribute constraints</span></a>
+            must take into account that attributes are set
+            <a class="indexterm" name="d0e5569"></a>
+            valued.  Constraints follow the same evaluation principle as do
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e162"><span class="glossterm">conditions</span></a>:
+            A constraint is satisfied if any member of
+            the set of attribute values satisfies the constraint.
+         </p>
+         <div xmlns:exsl="http://exslt.org/common" class="sidebar">
+            <table border="0" bgcolor="#CCCCFF">
+               <tr>
+                  <td>
+                     <p>The rule for evaluating attribute constraints can be more
+                        formally expressed as:
+                        
+                     </p>
+                     <div class="blockquote">
+                        <blockquote class="blockquote">
+                           <p>Given 
+                              
+                           </p>
+                           <div class="itemizedlist">
+                              <ul type="disc" compact>
+                                 <li>
+                                    <p>two database entities (objects or links)
+                                           <em class="varname"><code>A</code></em> and <em class="varname"><code>B</code></em></p>
+                                 </li>
+                                 <li>
+                                    <p>an attribute <em class="varname"><code>attr1</code></em> on
+                                           <em class="varname"><code>A</code></em></p>
+                                 </li>
+                                 <li>
+                                    <p>an attribute <em class="varname"><code>attr2</code></em> on
+                                           <em class="varname"><code>B</code></em>, where
+                                           <em class="varname"><code>attr1</code></em> and <em class="varname"><code>attr2</code></em> must be
+                                           comparable types and may be the same attribute
+                                    </p>
+                                 </li>
+                                 <li>
+                                    <p>a set of values <em class="varname"><code>V1</code></em> for <em class="varname"><code>attr1</code></em>
+                                           on <em class="varname"><code>A</code></em></p>
+                                 </li>
+                                 <li>
+                                    <p>a set of values <em class="varname"><code>V2</code></em> for <em class="varname"><code>attr2</code></em>
+                                           on <em class="varname"><code>B</code></em></p>
+                                 </li>
+                                 <li>
+                                    <p>an attribute constraint
+                                           <em class="varname"><code>A.attr1</code></em>&nbsp;&nbsp;<em class="varname"><code>operator</code></em>&nbsp;&nbsp;<em class="varname"><code>B.attr2</code></em></p>
+                                 </li>
+                              </ul>
+                           </div>
+                           <p>
+                              The constraint is satisfied if there exists a value <em class="varname"><code>a1</code></em>
+                              a member of <em class="varname"><code>V1</code></em>, and a value <em class="varname"><code>a2</code></em>
+                              a member of <em class="varname"><code>V2</code></em>, such that 
+                              <em class="varname"><code>a1</code></em>&nbsp;<em class="varname"><code>operator</code></em>&nbsp;<em class="varname"><code>a2</code></em>
+                              holds.
+                              
+                           </p>
+                        </blockquote>
+                     </div>
+                     <p>
+                        
+                     </p>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <p>As an example, let&#8217;s look at a fragment of a database
+            describing books and related movies, shown below.
+            
+         </p>
+         <div class="figure"><a name="fig_const_db04"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Const_DB04.png" align="middle" width="630" alt="Database fragment [Const_DB04.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.18.&nbsp;Database fragment [Const_DB04.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            Because books are often reissued or issued in different formats, they
+            can have multiple publication dates, as we see with
+            <span class="emphasis"><em>Carrie</em></span>.  Also, 
+            books and movies can have varying temporal relationships. Frequently,
+            movies are adapted from an existing book, as we see for <span class="emphasis"><em>A
+                  Beautiful Mind</em></span>, but occasionally a screenplay or novelization
+            is published after a successful movie, as is the case for
+            <span class="emphasis"><em>Shakespeare in Love</em></span>. And sometimes we know that a
+            book&#8217;s movie rights have been optioned, but the movie has not
+            yet been released, as we see for <span class="emphasis"><em>Bag of Bones</em></span>.
+         </p>
+         <p>This database has
+            no attributes on the links connecting books and their associated
+            movies. Although this is a directed link, as Proximity requires, the
+            lack of any attributes means that we have no semantics for this link
+            and thus cannot assign a temporal
+            ordering based on the arrow&#8217;s direction.  We could have just as easily
+            reversed the links without changing the information
+            represented by these objects and links.
+            
+         </p>
+         <p>Suppose we want to find both categories of books&#8212;those
+            released before their movie adaptation, and those initially published
+            after the movie&#8217;s release.  We need two queries to do so:
+            
+         </p>
+         <div class="figure"><a name="fig_const_db04_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Const_DB04_Q01andQ02.png" align="middle" width="630" alt="Queries"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.19.&nbsp;Queries</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>The results of executing the first query are shown below:
+            
+         </p>
+         <div class="figure"><a name="fig_const_db04_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Const_DB04_Q01_res.png" align="middle" width="341.99999999999994" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.20.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            The resulting container includes two subgraphs.
+            The movie <span class="emphasis"><em>A Beautiful Mind</em></span> was based on the book
+            written by Sylvia Nasar, so it came out after the book&#8217;s publication.
+            <span class="emphasis"><em>Carrie</em></span> was originally published before the movie
+            adaptation, then re-released in various formats after the movie&#8217;s
+            release.
+         </p>
+         <p>Compare these matches to those for the second query:
+            
+         </p>
+         <div class="figure"><a name="fig_const_db04_q02_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Const_DB04_Q02_res.png" align="middle" width="364.5" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;5.21.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            This time, the movie <span class="emphasis"><em>Shakespeare in Love</em></span> appears
+            in the results; its associated book is a screenplay based on the
+            movie.  But <span class="emphasis"><em>Carrie</em></span> appears again, this time
+            because re-releases of the book occurred after the movie&#8217;s
+            release.
+         </p>
+         <p>Because objects and links in a Proximity database can be
+            structurally heterogeneous, some entities may not have a value
+            <a class="indexterm" name="d0e5744"></a>
+            <a class="indexterm" name="d0e5750"></a>
+            for an attribute used in a constraint.  In our example database fragment,
+            because the movie version of <span class="emphasis"><em>Bag of Bones</em></span> has not
+            been released yet, the corresponding database object has no 
+            value for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ReleaseDate</span> attribute.
+            In such cases, an attribute constraint&#8217;s test always fails
+            because there are no values to compare against the constraint&#8217;s
+            requirements.  Therefore <span class="emphasis"><em>Bag of Bones</em></span> does not
+            appear in any of our query results.
+         </p>
+         <p>As we saw for conditions, the ability to have set-valued
+            attributes can result in satisfying apparently contradictory
+            constraints. In this case, the book-movie pair for
+            <span class="emphasis"><em>Carrie</em></span> appears in the results for both queries
+            because the multiple book publication dates contain values that
+            satisfy both constraints.
+            Specifically, the values for the book&#8217;s publication
+            date attribute include a value (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1974</span>) that
+            is before the movie&#8217;s release date of 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1976</span>, and several values
+            (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1981</span>, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1993</span>,
+            and <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">2003</span>) that are after the
+            movie&#8217;s release date.
+         </p><a class="indexterm" name="d0e5783"></a><a class="indexterm" name="d0e5784"></a><a class="indexterm" name="d0e5785"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s03.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s05.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Multiple Constraints&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Constraints and Annotations</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

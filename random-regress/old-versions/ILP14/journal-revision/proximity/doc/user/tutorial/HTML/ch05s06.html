@@ -1,0 +1,367 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Matching Complex Subgraphs with Subqueries</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="prev" href="ch05s05.html" title="Comparing Items in a Query">
+      <link rel="next" href="ch05s07.html" title="Adding Links to Data with Queries">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s05.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Querying the Database</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch05s07.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_subquery"></a>Matching Complex Subgraphs with Subqueries
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_subqueries1"></a><a class="indexterm" name="idx_subqueries2"></a><p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e755"><span class="glossterm">Subqueries</span></a> allow you
+            to group complex substructures with 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e555"><span class="glossterm">numeric
+                  annotations</span></a> just as you grouped individual query elements
+            in <a href="ch05s04.html#ex_queries_annotations" title="Exercise&nbsp;5.3.&nbsp;Creating a query with numeric annotations:">Exercise&nbsp;5.3</a>.
+         </p>
+         <p>In this example we want to find, for every faculty member, all
+            their research projects and all the individuals associated with each
+            of those research projects.  We interpret links from
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">faculty</span> pages to 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">research project</span> pages to mean that this
+            faculty member supervises the associated project. We similarly
+            interpret links connecting 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">research project</span> pages to other 
+            individuals&#8217; web pages as indicating involvement in or interest
+            in that project, regardless of the direction of the link.  Taken
+            together, all these links
+            identify individuals associated with a particular
+            project.  The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraphs</span></a>
+            that match the query created in this exercise each identify a single 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">faculty</span> web page, all the 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">research project</span> pages it links to, and all
+            the other <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">faculty</span>, 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">student</span>, and <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">staff</span>
+            pages linked to or from those <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">research project</span>
+            pages.
+         </p>
+         <p>The structure of this query is a <span class="emphasis"><em>2d-star</em></span>.
+            <a class="indexterm" name="d0e8609"></a>
+            <a class="indexterm" name="d0e8613"></a>
+            <a class="indexterm" name="d0e8617"></a>
+            Similar to the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e733"><span class="glossterm">1d-star query</span></a>
+            shown in 
+            <a href="ch05s04.html#ex_queries_annotations" title="Exercise&nbsp;5.3.&nbsp;Creating a query with numeric annotations:">Exercise&nbsp;5.3</a>, a 2d-star is
+            the cluster of 1d-stars directly linked to a 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e240"><span class="glossterm">core object</span></a>. We use a
+            subquery to specify the 1d-star substructure within a 2d-star
+            query.
+         </p>
+         <p>In describing this query we made several assumptions about how
+            objects and links in the database correspond to entities and
+            relationships in the world.  Although these assumptions may seem
+            reasonable, it&#8217;s important to remember that we might be
+            wrong in some or all of these assumptions. If we go on to use the
+            results of this query in a model, appropriate care must be taken in
+            applying the models&#8217;s predictions to real world
+            situations.
+         </p>
+         <div class="procedure"><a name="ex_subquery"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;5.5.&nbsp;Using subqueries in a query:</b></p><a class="indexterm" name="d0e8636"></a><a class="indexterm" name="d0e8639"></a><p>The query created in this exercise is also available in the
+               Proximity&nbsp;4.3 distribution in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/project-people.qg2.xml</code>.
+            </p>
+            <p>Before beginning, make sure that you are serving the ProxWebKB
+               database using Mserver. Start the Proximity Database Browser if it is not already
+               running.
+               
+            </p>
+            <ol type="1">
+               <li>
+                  <p>From the <span><strong class="guimenu">Query</strong></span> menu, choose
+                     <span><strong class="guimenuitem">New Query</strong></span>.
+                     Proximity starts the Query Editor.
+                  </p>
+               </li>
+               <li>
+                  <p>Create an unannotated <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e824"><span class="glossterm">vertex</span></a> labeled
+                     <strong class="userinput"><code>project</code></strong>.  Add the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e162"><span class="glossterm">condition</span></a>
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p><strong class="userinput"><code>pagetype&nbsp;=&nbsp;ResearchProject</code></strong></p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     to this vertex.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Create another vertex labeled <strong class="userinput"><code>person</code></strong>.
+                     Add the condition
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p>
+                             <strong class="userinput"><code>OR(pagetype&nbsp;=&nbsp;Faculty, 
+                                                 pagetype&nbsp;=&nbsp;Student,
+                                                 pagetype&nbsp;=&nbsp;Staff) </code></strong>
+                             
+                        </p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     to this vertex. Proximity requires the use of 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e601"><span class="glossterm">prefix notation</span></a> and 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e292"><span class="glossterm">disjunctive normal form</span></a> to express
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e156"><span class="glossterm">complex conditions</span></a>.
+                     <a class="indexterm" name="d0e8701"></a>
+                     <a class="indexterm" name="d0e8705"></a>
+                     <a class="indexterm" name="d0e8711"></a>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Add the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e555"><span class="glossterm">annotation</span></a>
+                     <strong class="userinput"><code>[0..]</code></strong> to the 
+                     <em class="token">person</em> vertex.  This annotation makes
+                     matching the <em class="token">person</em> vertex
+                     optional. Any pages matching the <em class="token">person</em>
+                     vertex will be included in the query results, but the query will match
+                     appropriate <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">research project</span> web pages
+                     regardless of whether they link to another faculty, student, or staff
+                     page.
+                  </p>
+               </li>
+               <li>
+                  <p>Create an <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e803"><span class="glossterm">undirected edge</span></a> labeled
+                     <strong class="userinput"><code>associated-with</code></strong> 
+                     linking the <em class="token">project</em> vertex to the 
+                     <em class="token">person</em> vertex.  If you do not have
+                     automatic edge annotation enabled, add the numeric
+                     annotation <strong class="userinput"><code>[1..]</code></strong> to this edge.
+                  </p>
+                  <p>The correct annotation for an edge adjacent to an 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e573"><span class="glossterm">optional</span></a>
+                     vertex is almost always <strong class="userinput"><code>[1..]</code></strong>.  See the
+                     <em class="citetitle"><span class="phrase"><a href="../../qgraph/HTML/index.html" target="_top">Proximity QGraph Guide</a></span>
+                           
+                           
+                           </em> for an explanation of
+                     why this is the appropriate annotation.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <img src="images/QE_BUTTON_SubqueryTool.png" width="18"> or press <span class="keycap">Ctrl-4</span>
+                     to choose the subquery tool.
+                     <a class="indexterm" name="d0e8776"></a>
+                     <a class="indexterm" name="d0e8780"></a>
+                     Drag the mouse to create a rectangle that contains both vertices and
+                     the connecting edge.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_Subquery.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     Release the mouse button.
+                     The Query Editor changes the color of the vertices inside the
+                     rectangle to red to indicate that they are part of a subquery.
+                     
+                  </p>
+                  <p>All subqueries must be annotated.  The Query Editor
+                     automatically adds a <code class="token">[1..]</code> annotation to
+                     new subqueries.  To change this annotation, click inside the subquery
+                     box and edit the subquery&#8217;s properties in the element properties
+                     pane.
+                  </p>
+               </li>
+               <li>
+                  <p>Create a vertex named <strong class="userinput"><code>prof</code></strong> outside the
+                     subquery area. Add the condition
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p><strong class="userinput"><code>pagetype&nbsp;=&nbsp;Faculty</code></strong></p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     to this vertex.
+                  </p>
+               </li>
+               <li>
+                  <p>Create a directed edge named <strong class="userinput"><code>supervises</code></strong>
+                     from the <em class="token">prof</em> vertex 
+                     to the <em class="token">project</em> vertex.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Add the numeric annotation <strong class="userinput"><code>[1..]</code></strong> to the
+                     <em class="token">supervises</em> edge. The 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e75"><span class="glossterm">boundary edge</span></a> of a
+                     subquery must be annotated.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/QE_Subquery_2.png" align="middle" width="540"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Add the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e385"><span class="glossterm">identity constraint</span></a>
+                     
+                  </p>
+                  <div class="blockquote">
+                     <blockquote class="blockquote">
+                        <p><strong class="userinput"><code>prof&nbsp;&lt;&gt;&nbsp;person</code></strong></p>
+                     </blockquote>
+                  </div>
+                  <p>
+                     to the query.  This <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e228"><span class="glossterm">constraint</span></a>
+                     <a class="indexterm" name="d0e8852"></a>
+                     <a class="indexterm" name="d0e8856"></a>
+                     ensures that the same object does not
+                     match both the <em class="token">prof</em> and 
+                     <em class="token">person</em> vertices in the same subgraph.
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Check the status list at the bottom of the Query Editor window
+                     to make sure the query is 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e815"><span class="glossterm">valid</span></a>.  If the query is
+                     not valid, examine the errors and fix any problems before
+                     continuing.
+                  </p>
+               </li>
+               <li>
+                  <p>[Optional] Add a name and description and save the query.</p>
+                  <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;">
+                     <table border="0" summary="Caution">
+                        <tr>
+                           <td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+                           <th align="left"></th>
+                        </tr>
+                        <tr>
+                           <td align="left" valign="top">
+                              <p>The Proximity distribution includes the new query in the file
+                                 <code class="filename">$PROX_HOME/doc/user/tutorial/examples/project-people.qg2.xml</code>.
+                                 <a class="indexterm" name="d0e8881"></a>
+                                 <a class="indexterm" name="d0e8885"></a>
+                                 Be careful not to overwrite this file.
+                              </p>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+               </li>
+               <li>
+                  <p>From the <span><strong class="guimenu">File</strong></span> menu, choose 
+                     <span><strong class="guimenuitem">Run</strong></span> or press <span class="keycap">Ctrl-R</span>
+                     to execute your query.
+                     Proximity prompts you for a name for the results
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">container</span></a>. Enter 
+                     <strong class="userinput"><code>proj-associated-people</code></strong> and click
+                     <span><strong class="guibutton">OK</strong></span>.
+                  </p>
+                  <p>Proximity opens a window to show you a trace of the
+                     query execution. The last lines should be
+                     similar to the following excerpt
+                     
+                     (leading information showing elapsed time and execution thread 
+                     has been omitted from the trace for brevity):
+                     
+                  </p><pre class="screen">INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; found 42 subgraphs
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - -&gt; query results saved in
+   container: proj-associated-people
+INFO kdl.prox.qgraph2.QueryGraph2CompOp - * query: done
+Status: finished running query
+</pre><p>
+                     Close this window after the query finishes.
+                  </p>
+               </li>
+               <li>
+                  <p>Examine the query results in the
+                     <span class="token">proj-associated-people</span> container.
+                     Click <span><strong class="guibutton">Home</strong></span> to go to the Proximity Database Browser start page. Click
+                     <span><strong class="guibutton">Containers</strong></span>, 
+                     then click <span><strong class="guibutton">proj-associated-people</strong></span>.  Proximity
+                     displays the list of 
+                     <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraphs</span></a> for this
+                     container.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">12</strong></span> to see the details of this
+                     subgraph. This subgraph includes two research project objects.
+                  </p>
+               </li>
+               <li>
+                  <p>Click <span><strong class="guibutton">graph</strong></span> to display the subgraph&#8217;s
+                     graph structure. Because graph layout is non-deterministic, your graph
+                     may look somewhat different than that shown below.
+                     
+                  </p>
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/GUI_ProjPeople_graph.png" align="middle" width="630"></td>
+                        </tr>
+                     </table>
+                  </div>
+                  <p>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>Continue to explore the results of your query. When you are
+                     finished, continue to the next section.
+                  </p>
+               </li>
+            </ol>
+         </div><a class="indexterm" name="d0e8960"></a><a class="indexterm" name="d0e8961"></a></div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s05.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch05s07.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Comparing Items in a Query&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Adding Links to Data with Queries</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

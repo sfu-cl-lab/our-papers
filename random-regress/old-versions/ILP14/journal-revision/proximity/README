@@ -1,0 +1,217 @@
+$Id: README 3751 2007-11-13 20:17:19Z schapira $
+
+Contents:
+  Installation
+  New features in Proximity 4.3
+  Changes from Proximity 4.2
+  Technical support
+  Mailing lists
+  Documentation
+  Importing data from previous Proximity releases into Proximity 4.3
+  Directory Structure
+  Contact information
+
+
+=============================================================
+Installation
+
+  See the INSTALL file for complete information on obtaining and
+  installing Proximity.
+
+
+=============================================================
+New features in Proximity 4.3
+
+This is a major release of Proximity, with many improvements:
+
+Support for newer versions of Monet (4.16 to 4.20), which fix
+important problems with TCP/IP communication, effectively making
+Proximity almost an order of magnitude faster.
+
+Completely re-written model code (RBC, RPT, RDN), with a much
+cleaner, more modular, and faster implementation of the modeling
+engine.
+
+A new RPT Viewer that displays more detailed information of the new
+RPTs built, such as the percentage of cases that fall on each branch
+of splits.
+
+A new visualization tool for displaying the database in a radial
+layout, with animation. Used also to visualize subgraphs.
+
+A new DataGeneration package, capable of generating several different
+kinds of graphs (random graphs, lattices, grids, forest fires, etc),
+as well as attributes on objects and links.
+
+New utilities to export a database to text files, and to import from
+text files, with orders of magnitude speed improvement over XML
+import/export.
+
+New Proximity Cookbook documentation containing "recipes" for
+common/prototypical Proximity tasks (in development, preliminary
+version released)
+
+
+See the Tutorial and HISTORY file for additional details on the new
+features in Proximity 4.3.
+
+
+=============================================================
+Changes from Proximity 4.2
+
+Proximity 4.3 is fully compatible with MonetDB 4.6.2 (the version of
+Monet distributed with Proximity 4.0 through 4.2), and current
+Proximity users may choose to stay with their existing MonetDB
+installation and databases.
+
+New Proximity users, or users concerned with performance, are
+encouraged to switch to MonetDB 4.18.2 (Windows) or 4.20 (Linux/Mac OS X)
+(the "mars" versions). These new MonetDB versions provide some
+performance improvements, but using these versions requires converting
+existing databases.  See "Updating MonetDB databases" in the
+INSTALL document for additional information on updating databases.
+
+Note that Proximity 4.3 now uses the port number to select the
+appropriate protocol for the version of MonetDB being used.  You must
+use a port number <= 40000 for the "mars" versions (4.20 and 4.18.2),
+and a port number > 40000 for MonetDB 4.6.2.  The new default is port
+30000, which works with the new versions of Monet. To run the server
+on a different port number, use (all on one line):
+
+        $ Mserver --dbname <db_name> <prox_home>/resources/init-mserver.mil
+          --set port=<nnnnn>
+
+     where <nnnnn> is the new port number.
+
+
+This new release makes use of two new third-party libraries:
+
+- JUNG (http://jung.sourceforge.net/), a graph data structure
+  and visualization package
+- Mantissa (http://www.spaceroots.org), a Mathematical Library
+
+
+See the HISTORY file for additional details on changes and bug fixes
+
+
+=============================================================
+Technical support
+
+  Please send all requests for general technical support to
+  proximity-support@kdl.cs.umass.edu.
+
+  Please send any bug reports including documentation errors to
+  proximity-bugs@kdl.cs.umass.edu.
+
+  Please send general comments, suggestions, and criticism to
+  proximity@kdl.cs.umass.edu.
+
+
+=============================================================
+Mailing lists
+
+There are two Proximity mailing lists:
+
+  proximity-announce
+     Only major project and other milestone announcements will be made
+     on this list (very low traffic). Posting rights are limited to
+     KDL staff.
+
+  proximity-list
+     Questions, suggestions, and general technical discussion should
+     be made on this list. You must be a list subscriber to post.
+
+See http://kdl.cs.umass.edu/proximity/mailing-lists.html for information
+on subscribing to these lists.
+
+
+=============================================================
+Documentation
+
+  Proximity 4.3 includes documentation in the form of the Proximity
+  Tutorial, QGraph Guide, and Proximity Cookbook. All documents are
+  available in both HTML and PDF in the proximity/doc/user/ directory.
+
+  The Tutorial includes instructions and example files for completing
+  common Proximity tasks including
+    - importing and exporting data into and out of Proximity
+    - using the Proximity Database Browser
+    - creating and executing QGraph queries
+    - writing and running Proximity Python scripts including
+        * creating new attributes
+        * generating synthetic data
+        * working with NSTs (internal Proximity data structures)
+    - learning and applying relational classification models
+  The Proximity Tutorial is available at
+    - proximity/doc/user/tutorial/HTML/index.html
+    - proximity/doc/user/tutorial/Tutorial.pdf
+
+  The QGraph Guide provides a complete description of the QGraph query
+  language. Numerous examples illustrate how QGraph uses graph
+  structure, conditions, annotations, and constraints to match queries
+  to database structures.
+  The Proximity QGraph Guide is available at
+    - proximity/doc/user/qgraph/HTML/index.html
+    - proximity/doc/user/qgraph/QGraphGuide.pdf
+
+  The Proximity Cookbook is in development with a preliminary version
+  included with this release.  The Cookbook provides detailed code
+  examples of how to accomplish common/prototypical Proximity tasks
+  including
+    - creating new data entities (links, attributes)
+    - aggregating data from multiple entities
+    - creating subsets of containers efficiently
+    - importing data when IDs conflict with existing data
+    - configuring the logging utility (log4j)
+  The Proximity Cookbook is available at
+    - proximity/doc/user/cookbook/HTML/index.html
+    - proximity/doc/user/cookbook/ProxCookbook.pdf
+
+=============================================================
+Importing data from previous Proximity releases into Proximity 4.3
+
+See "Changes from Proximity 4.2" for an explanation of new changes to
+the Proximity database requirements.
+
+See INSTALL for instructions on updating databases from previous version
+of Proximity.
+
+
+=============================================================
+Directory Structure
+
+The distribution includes the following files and directories:
+                
+proximity/
+
+  build.xml      - (developer) Ant build script
+  HISTORY        - chronological list of changes to Proximity
+  INSTALL        - instructions for installing the Proximity client and server
+  LICENSE        - the Proximity license
+  proximity.jar  - Proximity run-time (compiled) classes
+  README         - this file
+
+  bin/                  - sh, perl scripts, and Windows batch files
+                          for running applications 
+  doc/
+    user/
+      cookbook/         - 'recipes' for common Proximity tasks
+      impascii2/        - ascii import example files
+      qgraph/           - the Proximity QGraph Guide
+      text2xml/         - text-based import documentation
+      tutorial/         - the Proximity tutorial
+  example/
+    config/             - sample log4j (output logging) configuration files
+    example/text2xml/   - example for text-based import program
+  javadoc/              - (developer) JavaDoc API documentation
+  lib/                  - third-party libraries (jars) required by Proximity
+  resources/            - helpful MonetDB start scripts, and Proximity XML DTDs
+  src/                  - (developer) program Java source to Proximity
+  test/                 - (developer) unit test Java source to Proximity
+
+
+=============================================================
+Contact information
+
+  Please send any requests for additional information to
+  proximity@kdl.cs.umass.edu.

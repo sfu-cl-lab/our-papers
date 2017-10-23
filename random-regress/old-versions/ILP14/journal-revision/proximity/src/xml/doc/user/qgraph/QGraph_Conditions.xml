@@ -1,0 +1,1410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="qg_ch_conditions">
+<title>Conditions</title>
+
+<para>Being able to only match structure
+<indexterm><primary>matching queries</primary>
+           <secondary>structure</secondary></indexterm>
+is of limited
+usefulness in querying the database. We must also be able to
+consider the semantic information contained in object and link
+<glossterm baseform="attribute">attributes</glossterm> when defining
+and matching queries. 
+<emphasis><glossterm baseform="condition">Conditions</glossterm></emphasis>
+allow queries to move beyond purely structural matches 
+to consider database content.  Specifically, conditions serve to
+restrict the number of query matches by placing requirements on the
+attributes of an object or link in the database.</para>
+
+<para>Conditions are commonly, but certainly not exclusively, used to
+enforce <glossterm>type</glossterm>
+<indexterm><primary>type of an object or link</primary></indexterm>
+restrictions in query matches. However, &qgraph; only
+tests and compares attribute values; it makes no assumptions about how
+type information is stored.
+<indexterm><primary>representation in Proximity</primary>
+           <secondary>type information</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>representation</secondary>
+           <tertiary>type information</tertiary></indexterm>
+It&rsquo;s up to you to specify the appropriate attribute
+<indexterm><primary>attributes</primary>
+           <secondary>type information</secondary></indexterm>
+to examine.</para>
+
+<para>&qgraph; provides two types of conditions:
+<itemizedlist spacing="compact">
+  <listitem>
+    <para><emphasis><glossterm baseform="attribute value condition">Attribute value conditions</glossterm></emphasis>
+    restrict matches to only those database entities that match the
+    attribute values specified in the query.</para>
+  </listitem>
+  <listitem>
+    <para><emphasis><glossterm baseform="existence condition">Existence conditions</glossterm></emphasis>
+    test only to see whether the corresponding object or link has a
+    specified attribute, but does not require that the attribute have
+    any particular value.</para>
+  </listitem>
+</itemizedlist>
+</para>
+
+<!-- ============================================================== -->
+<!--                     ATTRIBUTE VALUE CONDITIONS                 -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Attribute Value Conditions</title>
+<indexterm id="idx_attrcond0" class="startofrange">
+           <primary>attribute value conditions</primary></indexterm>
+<indexterm id="idx_attrcond1" class="startofrange">
+           <primary>conditions</primary>
+           <secondary>attribute value</secondary></indexterm>
+
+<para>To see attribute value conditions in action, let&rsquo;s revisit
+the database originally shown in <xref linkend="fig_basics_db01"/> and
+repeated below.  This database contains information on authors,
+books, movies, and the relationships among these entities.
+<figure id="fig_cond_basicsdb01">
+<title>Database fragment [Basics_DB01.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01.png"
+               width="3.35in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01.png"
+               contentwidth="4.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+In this database, object type information is represented as the value of the 
+<token role="attr">ObjType</token> attribute and link type information is
+represented as the value of the <token role="attr">LinkType</token> attribute. 
+The query in <xref linkend="fig_basics_db01_q02"/>
+identifies all author-book pairs in the data by
+matching database structures that connect person objects to book
+objects via author-of links.
+<figure id="fig_basics_db01_q02">
+<title>Using conditions for type matching [Basics_DB01_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q02.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The text under each query element specifies a condition on that element.
+<indexterm><primary>conditions</primary>
+           <secondary>graphical representation</secondary></indexterm>
+<indexterm><primary>graphical representation</primary>
+           <secondary>conditions</secondary></indexterm>
+The <token role="vertex">author</token> vertex has the condition
+<token role="condition">ObjType&nbsp;=&nbsp;person</token>. Only
+objects having the value <token role="attr">person</token> for the
+<token role="attr">ObjType</token> attribute will match this vertex.
+Similarly, the query will only match links whose
+<token role="attr">LinkType</token> attribute have the value
+<token role="attr">author-of</token>.</para>
+
+<para>Once we add conditions, it&rsquo;s common to use semantically
+meaningful <glossterm baseform="name">names</glossterm>
+<indexterm><primary>names</primary>
+           <secondary>conventions</secondary></indexterm>
+for the vertices and edges in a query.  Such names usually
+reflect the restrictions imposed by the conditions, such as we see
+above.  Although these names may duplicate required attribute values, it is
+the condition, not the label, that determines query behavior.
+Executing this query on the database fragment above yields the
+results shown in
+<xref linkend="fig_basics_db01_q02_res"/>.
+<figure id="fig_basics_db01_q02_res">
+<title>Results of using conditions for type matching</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q02_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q02_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Compare these results to the purely structural matches shown in 
+<xref linkend="fig_basics_db01_q01_res"/>.
+Adding conditions to the query limits
+<indexterm><primary>queries</primary>
+           <secondary>limiting matches</secondary></indexterm>
+<indexterm><primary>limiting query matches</primary></indexterm>
+the results to only those
+<glossterm baseform="subgraph">subgraphs</glossterm> that have the
+required attribute values. Specifically, the new query requires that the 
+<token role="vertex">author</token> vertex match only
+<token role="object">person</token> objects, the
+<token role="vertex">book</token> vertex matches only
+<token role="object">book</token> objects, and the
+<token role="edge">author-of</token> edge matches only
+<token role="link">author-of</token> links.
+The new query yields only two matches versus the four subgraphs found
+by the original query.</para>
+
+<para>As we noted earlier, unlike the <literal>SELECT</literal>
+<indexterm><primary>SELECT (in SQL)</primary></indexterm>
+statement in SQL,
+<indexterm><primary>SQL</primary></indexterm>
+a &qgraph; query does not specify which attributes
+of matching objects or edges are included in the query results
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary></indexterm>
+<indexterm><primary>results of queries</primary></indexterm>
+<indexterm><primary>subgraphs</primary>
+           <secondary>contents</secondary></indexterm>
+(subgraphs).
+This continues to hold even when queries include conditions that
+mention only some of these attributes.
+All the object and link attributes, not just those mentioned in the
+query, are available for inspection in the query results.</para>
+
+<para>In addition to testing for equality, conditions can compare
+attribute values to the specified values using the comparison
+<indexterm><primary>comparison operators</primary>
+           <secondary>in conditions</secondary></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>comparison</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>comparison operators in</secondary></indexterm>
+operators <literal>&lt;&gt;</literal>, <literal>&lt;</literal>,
+<literal>&lt;=</literal>, <literal>&gt;</literal>, and
+<literal>&gt;=</literal>. 
+For example, to find authors who have published before 1990,
+we create the following query:
+<figure id="fig_cond_basicsdb01_q01">
+<title>Query [Basics_DB01_Q03.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q03.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Basics_DB01_Q03.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Because the book <emphasis>The Talisman</emphasis> is the only object
+with a <token role="attr">PubDate</token> before 
+<token role="attr">1990</token>, this query returns the
+same results as the earlier example.
+</para>
+
+<!-- ~~~~~~~~~ SIDEBAR: ATTRIBUTE VALUE CONDITION FORM ~~~~~~~~~~~~~ -->
+<sidebar><para>The general form of an attribute value condition is
+<blockquote>
+  <para><replaceable>attribute</replaceable>&nbsp;&nbsp;<replaceable>operator</replaceable>&nbsp;&nbsp;<replaceable>value</replaceable></para>
+</blockquote>
+where
+<blockquote>
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para><replaceable>attribute</replaceable> is the name of an
+      attribute for the corresponding database object or link</para>
+    </listitem>
+    <listitem>
+      <para><replaceable>value</replaceable> is a legal value for
+      <replaceable>attribute</replaceable></para>
+    </listitem>
+    <listitem>
+      <para><replaceable>operator</replaceable> is one of
+      <literal>=</literal>, <literal>&lt;&gt;</literal>, 
+      <literal>&lt;</literal>,
+      <literal>&lt;=</literal>, <literal>&gt;</literal>, or
+      <literal>&gt;=</literal>.</para></listitem></itemizedlist></blockquote>
+</para>
+<indexterm startref="idx_attrcond0" class="endofrange"/>
+<indexterm startref="idx_attrcond1" class="endofrange"/>
+</sidebar>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~ END SIDEBAR ~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       EXISTENCE CONDITIONS                     -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Existence Conditions</title>
+<indexterm id="idx_cond_ex1" class="startofrange"><primary>existence conditions</primary></indexterm>
+<indexterm id="idx_cond_ex2" class="startofrange"><primary>conditions</primary>
+           <secondary>existence</secondary></indexterm>
+
+<para>Proximity supports a heterogeneous database
+<indexterm><primary>Proximity</primary>
+           <secondary>databases</secondary>
+           <tertiary>attribute requirements</tertiary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>heterogeneous</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>Proximity</secondary>
+           <tertiary>attribute requirements</tertiary></indexterm>
+structure, in which
+objects and links can have variable numbers of attributes, including none.
+For example, if a database contains information about movies, some
+movie objects might have a value for a <token role="attr">Genre</token>
+attribute while other movie objects might omit this attribute.
+&qgraph; lets you test whether an object or link has a value for a
+given attribute by using an 
+<emphasis><glossterm>existence condition</glossterm></emphasis>.
+</para>
+
+<para>The graph in <xref linkend="fig_cond_db01"/> represents
+part of a database containing information about books and authors.
+Because some authors write books under pseudonyms, we represent that
+information with a <token role="attr">WrittenAs</token> attribute on
+the link connecting authors and books they&rsquo;ve written.  As shown below,
+the author Ed McBain has written books both under his own name
+as well as under multiple pseudonyms.
+<figure id="fig_cond_db01">
+<title>Database fragment [Cond_DB01.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB01.png"
+               width="4.65in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB01.png"
+               contentwidth="5.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The query in <xref linkend="fig_cond_db01_q01"/>
+finds author-book pairs where the author wrote the book under
+an assumed name.  We use an existence
+condition to capture the fact that the link must have a
+<token role="attr">WrittenAs</token> 
+attribute but that we do not care about its value.
+<figure id="fig_cond_db01_q01">
+<title>Query with an existence condition [Cond_DB01_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB01_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB01_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>The results of executing the query on this database fragment
+are shown in <xref linkend="fig_cond_db01_q01_res"/>.
+<figure id="fig_cond_db01_q01_res">
+<title>Query results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB01_Q01_res.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB01_Q01_res.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Existence conditions test only whether the matching database
+entity does or does not have the specified attribute.  The attribute&rsquo;s
+value is not specified in the query and is not examined when evaluating
+the query.  The query returns all matching subgraphs
+where the <token role="link">author-of</token> link has a
+<token role="attr">WrittenAs</token> attribute, regardless of that
+attribute&rsquo;s value.
+</para>
+
+<?pagebreak?>
+<!-- ~~~~~~~~~~~~ SIDEBAR: EXISTENCE CONDITION FORM ~~~~~~~~~~~~~~~~ -->
+<sidebar><para>The general form of an existence condition is
+<blockquote>
+  <para><literal>exists(</literal><replaceable>attribute</replaceable><literal>)</literal></para>
+</blockquote>
+where
+<blockquote>
+<para><replaceable>attribute</replaceable> is the name of an
+attribute for the corresponding database object or 
+link</para></blockquote>
+</para></sidebar>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~ END SIDEBAR ~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<indexterm startref="idx_cond_ex1" class="endofrange"/>
+<indexterm startref="idx_cond_ex2" class="endofrange"/>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       EVALUATING CONDITIONS                    -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_cond_eval">
+<title>Evaluating Conditions</title>
+<indexterm><primary>conditions</primary>
+           <secondary>evaluating</secondary></indexterm>
+<indexterm><primary>satisfying</primary>
+           <see>evaluating</see></indexterm>
+<indexterm><primary>matching queries</primary>
+           <secondary>satisfying conditions</secondary></indexterm>
+
+<para>&qgraph; is designed for use with databases that permit
+set-valued attributes.
+<indexterm><primary>attributes</primary>
+           <secondary>multiple values</secondary></indexterm>
+Therefore if an attribute has more than
+one value for an individual object or link, we must
+consider all of its values when evaluating conditions.
+And because the set of values may be empty,
+<indexterm><primary>attributes</primary>
+           <secondary>missing</secondary></indexterm>
+<indexterm><primary>missing attribute values</primary></indexterm>
+we also need to
+understand how &qgraph; evaluates 
+<glossterm baseform="attribute value condition">attribute value conditions</glossterm>
+when the object or link has no values for the given attribute.</para>
+
+<!-- .............................................................. -->
+<!--               Evaluating attribute value conditions            -->
+<!-- .............................................................. -->
+
+<sect2 id="qg_cond_eval_attr">
+<title>Evaluating attribute value conditions</title>
+<indexterm><primary>attribute value conditions</primary>
+           <secondary>evaluating</secondary></indexterm>
+<indexterm><primary>evaluating</primary>
+           <secondary>attribute value conditions</secondary></indexterm>
+
+<para>A condition is satisfied when the value of the corresponding
+attribute satisfies the test established in the
+condition.  When an object or link has more than one value for a particular
+attribute, a condition on that entity is satisfied if <emphasis>any 
+member</emphasis> of the set of attribute values for that entity
+satisfies the condition.<footnote><para>This reflects a change in the &qgraph;
+language since the publication of the technical report <citetitle>A
+Visual Language for Querying and Updating Graphs</citetitle>
+<xref linkend="blau02"/>.  The <citetitle>QGraph Guide</citetitle> provides
+the current and correct rules for how &qgraph; evaluates
+conditions on set-valued attributes.</para></footnote>
+</para>
+
+<para>Consider a movie database that links actors to the
+movies they appear in. Each of these links
+includes a <token role="attr">Role</token> attribute that lists the
+characters the actor played 
+in the movie. In <emphasis>Monty Python and the Holy Grail</emphasis>, Graham
+Chapman played several roles, so the edge connecting Graham
+Chapman to <emphasis>Monty Python and the Holy Grail</emphasis> has a
+<token role="attr">Role</token> 
+attribute with multiple values: <token role="attr">King Arthur</token>,
+<token role="attr">Voice of God</token>, 
+<token role="attr">Middle Head</token> and 
+<token role="attr">Hiccuping Guard</token>.
+A relevant fragment of such a database is shown
+in <xref linkend="fig_cond_db02"/>.
+
+<figure id="fig_cond_db02">
+<title>Database with multiple attribute values [Cond_DB02.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB02.png"
+               width="5.15in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB02.png"
+               contentwidth="6.3in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+
+To find actors and the movies in which they played King
+Arthur we create a query that requires an edge condition
+<literal>Role = King Arthur</literal>, as shown in 
+<xref linkend="cond_db02_q01"/>.
+
+<figure id="cond_db02_q01">
+<title>Query [Cond_DB02_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB02_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB02_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+
+The pair of Peter Cook and <emphasis>Jake&rsquo;s Journey</emphasis> is
+returned as a match because the link connecting them has a 
+<token role="attr">Role</token> attribute with a single value of 
+<token role="attr">King Arthur</token>.  The link connecting
+Graham Chapman to <emphasis>Monty Python and the Holy Grail</emphasis>
+has multiple values for the <token role="attr">Role</token> attribute.
+Because <token role="attr">King Arthur</token> is one of these values,
+this link also matches the condition on the query edge. The results of
+the query are shown in <xref linkend="fig_cond_db02_q01_res"/>.
+
+<figure id="fig_cond_db02_q01_res">
+<title>Results</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB02_Q01_res.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB02_Q01_res.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+As we have seen before, even though the condition only requires
+matching a single
+attribute value, the matching subgraph includes all values for the
+<token role="attr">Role</token> attribute.
+</para>
+
+<!-- ~~~~ SIDEBAR: EVALUATING ATTRIBUTE VALUE CONDITIONS ~~~~~~ -->
+<sidebar><para>The rule for evaluating attribute value conditions
+can be more formally expressed as:
+<blockquote>
+<para>Given 
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>a database entity (object or link)
+    <varname>E</varname></para>
+  </listitem>
+  <listitem>
+    <para>an attribute <varname>attribute</varname></para>
+  </listitem>
+  <listitem>
+    <para>a set of values <varname>Values</varname> for
+    <varname>attribute</varname> on <varname>E</varname></para>
+  </listitem>
+  <listitem>
+    <para>an attribute value condition
+    <varname>attribute</varname>&nbsp;&nbsp;<varname>operator</varname>&nbsp;&nbsp;<varname>value</varname></para>
+  </listitem>
+</itemizedlist>
+The condition is satisfied if there exists a value <varname>v</varname>
+a member of <varname>Values</varname>, such that 
+<varname>v</varname>&nbsp;<varname>operator</varname>&nbsp;<varname>value</varname>
+is true.</para></blockquote></para></sidebar>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~ END SIDEBAR ~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<para>Because &qgraph; considers the condition to be satisfied if any
+attribute value for the corresponding database entity satisfies the
+condition, care must be taken in defining queries and interpreting
+results when objects or links have multiple values for that
+attribute.  For example, books are often released in
+different formats over time: hard cover, trade paperback, mass market
+paperback, etc. As a result, a single book can have multiple
+publication dates, as shown in <xref linkend="fig_cond_multpubdates"/>.
+<figure id="fig_cond_multpubdates">
+<title>Book with multiple publication dates</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_MultPubDates.png"
+               width="3.25in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_MultPubDates.png"
+               contentwidth="4.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Consider a condition that tests the publication date for a
+book, e.g.,<blockquote>
+<para><literal>PubDate&nbsp;=&nbsp;1981</literal></para></blockquote>
+Because 1981 is a member of the set of values for
+<emphasis>Carrie</emphasis>&rsquo;s <token role="attr">PubDate</token>
+attribute, the condition is satisfied and <emphasis>Carrie</emphasis>
+matches a query vertex with this condition.</para>
+
+<para>But because <emphasis>Carrie</emphasis>&rsquo;s 
+<token role="attr">PubDate</token> attribute contains other values,
+the condition<blockquote><para><literal>PubDate &lt;&gt;
+1981</literal></para></blockquote> 
+is also satisfied. The other values for this attribute 
+(<token role="attr">1974</token>, <token role="attr">1993</token>, and
+<token role="attr">2003</token>) make the expression true.  Similarly, the
+conditions<blockquote><para><literal>PubDate&nbsp;&lt;&nbsp;1990, 
+PubDate&nbsp;&lt;=&nbsp;1990, PubDate&nbsp;&gt;&nbsp;1990,</literal>
+and <literal>PubDate&nbsp;&gt;=&nbsp;1990</literal></para></blockquote>are 
+also satisfied because at least one <token role="attr">PubDate</token>
+value satisfies each of these tests.</para>
+
+<para>Because objects and links in a Proximity database can be
+structurally heterogeneous, some entities may not have a value for the
+attribute
+<indexterm><primary>attributes</primary>
+           <secondary>missing</secondary></indexterm>
+<indexterm><primary>missing attribute values</primary></indexterm>
+listed in a condition.  In such cases, an attribute
+condition&rsquo;s test always fails because there are 
+no values to compare against the condition&rsquo;s requirements.
+Consider the database fragment shown in
+<xref linkend="fig_cond_db03"/>.
+<figure id="fig_cond_db03">
+<title>Books adapted to movies [Cond_DB03.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB03.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB03.png"
+               contentwidth="6.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Two of the movies, <emphasis>Carrie</emphasis> and
+<emphasis>It</emphasis>, have a <token role="attr">ReleaseType</token>
+attribute that indicates 
+whether the movie was released in theaters or made for TV.  The third
+movie, <emphasis>Pet Sematary</emphasis>, does not have a value for
+this attribute.  If we execute the query shown below
+<figure id="fig_cond_db03_q01">
+<title>Query for books made into theatrical movies [Cond_DB03_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB03_Q01.png"
+               width="3.2in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB03_Q01.png"
+               contentwidth="3.9in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+we get the results shown in <xref linkend="fig_cond_db03_q01_res"/>.
+<figure id="fig_cond_db03_q01_res">
+<title>Results for books made into theatrical movies</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB03_Q01_res.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB03_Q01_res.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+The query finds only a single matching movie, <emphasis>Carrie</emphasis>,
+which was released theatrically.  Both
+<emphasis>It</emphasis>, which was made into a TV movie, and
+<emphasis>Pet Sematary</emphasis>, which does not include a release
+type, do not match the query&rsquo;s condition.
+</para>
+
+<para>Objects and links that do not have the specified attribute
+similarly fail to match inequality conditions.  The
+query shown in <xref linkend="fig_cond_db03_q02"/>, below, also finds
+books made into theatrical movies.
+For the given database fragment, where the 
+<token role="attr">ReleaseType</token>
+attribute can only take a single value drawn from the choices 
+<token role="attr">theater</token> or
+<token role="attr">TV</token>, this query is equivalent to 
+the query shown earlier in <xref linkend="fig_cond_db03_q01"/>.
+<figure id="fig_cond_db03_q02">
+<title>Alternate query for books made into theatrical movies
+[Cond_DB03_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB03_Q02.png"
+               width="3.1in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB03_Q02.png"
+               contentwidth="3.80in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>This new query yields the same results as the original. In addition to
+excluding the movie <emphasis>It</emphasis> because its value for the
+<token role="attr">ReleaseType</token> attribute is <token role="attr">TV</token>, it also
+excludes the movie <emphasis>Pet Sematary</emphasis> because this
+object has no value for the <token role="attr">ReleaseType</token> attribute.
+It&rsquo;s important to note that the equivalence of these two queries
+depends on the database 
+enforcing the restriction of legal values for the
+<token role="attr">ReleaseType</token> attribute to those specified. 
+If, for example, the database also lets 
+<token role="attr">ReleaseType</token> assume values of 
+<token role="attr">video</token> and <token role="attr">DVD</token>,
+this equivalence no longer holds.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                 Evaluating existence conditions                -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Evaluating existence conditions</title>
+<indexterm><primary>existence conditions</primary>
+           <secondary>evaluating</secondary></indexterm>
+<indexterm><primary>evaluating</primary>
+           <secondary>existence conditions</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>evaluating</secondary></indexterm>
+
+<para>An <glossterm>existence condition</glossterm> is satisfied if
+the corresponding object 
+or link has at least one value for the specified attribute.  The condition
+fails if the database entity has no values for the attribute. The
+number of values (as long as it is more than zero) and actual
+attribute values have no impact on whether an existence condition
+is satisfied.</para>
+
+<!-- ~~~~~~~ SIDEBAR: EVALUATING EXISTENCE CONDITIONS ~~~~~~~~~~ -->
+<sidebar>
+<para>The rule for evaluating existence conditions against set-valued
+attributes can be more formally expressed as:
+<blockquote>
+<para>Given 
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>a database entity (object or link)
+    <varname>E</varname></para>
+  </listitem>
+  <listitem>
+    <para>an attribute <varname>attribute</varname></para>
+  </listitem>
+  <listitem>
+    <para>a set of values <varname>Values</varname> for
+    <varname>attribute</varname> on <varname>E</varname></para>
+  </listitem>
+  <listitem>
+    <para>an existence condition
+    <literal>exists(<varname>attribute</varname>)</literal></para>
+  </listitem>
+</itemizedlist>
+The condition is satisfied if <varname>Values</varname> is not 
+empty.</para></blockquote></para></sidebar>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~ END SIDEBAR ~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                       COMPLEX CONDITIONS                       -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_complex_conditions">
+<title>Complex Conditions</title>
+<indexterm id="idx_complexcond0" class="startofrange">
+           <primary>conditions</primary>
+           <secondary>complex</secondary></indexterm>
+<indexterm id="idx_complexcond1" class="startofrange">
+           <primary>complex conditions</primary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>multiple</secondary>
+           <see>complex conditions</see></indexterm>
+<indexterm><primary>multiple conditions</primary>
+           <see>complex conditions</see></indexterm>
+
+<para>Sometimes you cannot capture the necessary query restrictions
+using a single condition. For example, suppose we have a database that
+contains information not just on authors and books, but that also
+includes other published materials such as magazine articles and
+screenplays.  If we want to not just restrict matches to items
+published before 1990, but to also ensure that we only match 
+<token role="object">book</token> objects, we have to place two
+conditions on the <token role="vertex">book</token> vertex to correctly
+restrict the matching objects:
+
+<figure id="fig_cond_multi01">
+<title>Using multiple conditions</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_Multi01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_Multi01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Both of the conditions
+<token role="condition">ObjType&nbsp;=&nbsp;book</token> and
+<token role="condition">PubDate&nbsp;&lt;&nbsp;1990</token>
+must be satisfied
+<indexterm><primary>evaluating</primary>
+           <secondary>complex conditions</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>evaluating</secondary></indexterm>
+in order for the corresponding database object to match this vertex.
+Because both conditions must be satisfied, we can more correctly write
+this as the logical conjunction of two conditions, as shown in 
+<xref linkend="fig_cond_multi02"/>.
+<figure id="fig_cond_multi02">
+<title>Complex condition using <literal>AND</literal></title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_Multi02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_Multi02.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+In this example, the two conditions are combined using the logical
+<literal>AND</literal>
+<indexterm><primary>logical operators</primary>
+           <secondary>in conditions</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>logical operators in</secondary></indexterm>
+<indexterm><primary>AND</primary>
+           <see>logical operators</see></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>logical</secondary></indexterm>
+operator. For clarity, query diagrams use the
+English words <literal>AND</literal> and <literal>OR</literal>
+<indexterm><primary>OR</primary>
+           <see>logical operators</see></indexterm>
+instead of the symbols
+<literal><symbol role="Symbol">&and;</symbol></literal> and
+<literal><symbol role="Symbol">&or;</symbol></literal>.
+In principle, 
+<glossterm baseform="complex condition">complex conditions</glossterm>
+in &qgraph; can be any logical combination of simple conditions.
+For example, we could to modify the above query to find both books and
+screenplays published before 1990 by creating the following query.
+(However, see <xref xrefstyle="pageref" linkend="qg_cond_impl_complex"/>
+for important Proximity limitations
+on the form of complex conditions.)
+<figure id="fig_cond_multi03">
+<title>Example of a more complex condition</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_Multi03.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_Multi03.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>&qgraph; also permits the use of the logical
+<literal>NOT</literal>
+<indexterm><primary>NOT</primary>
+           <see>logical operators</see></indexterm>
+operator in complex conditions. The
+<literal>NOT</literal> operator has the expected effect of requiring
+that the condition&rsquo;s test must fail for the
+corresponding database entity to match the query.
+For example, to find items not published in 1990, we can create
+the query
+<figure id="fig_cond_neg01">
+<title>Example of a negated condition</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_Neg01.png"
+               width="3.1in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_Neg01.png"
+               contentwidth="3.8in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This query matches objects whose <token role="attr">PubDate</token>
+attribute does not include the value 
+<token role="attr">1990</token>.</para>
+
+<para>Remember that &qgraph; must consider all of an attribute&rsquo;s
+values for an object or link when evaluating a condition.  
+Therefore, when database items have multiple attribute values,
+we cannot assume that 
+<token role="condition">Attribute&nbsp;&lt;&gt;&nbsp;value</token> 
+is equivalent to 
+<token role="condition">NOT(Attribute&nbsp;=&nbsp;value)</token>.
+For example, in the query above, if an object&rsquo;s 
+<token role="attr">PubDate</token> attribute
+has the the value 
+<token role="attr">{1984, 1990}</token>, then the condition
+<token role="condition">PubDate&nbsp;&lt;&gt;&nbsp;1990</token> will be
+satisfied because 
+<token role="attr">1984</token>&nbsp;&lt;&gt;&nbsp;<token role="attr">1990</token>.
+But the condition
+<token role="condition">NOT(PubDate&nbsp;=&nbsp;1990)</token> will not
+be satisfied because <token role="attr">1990</token> is included in
+the value for <token role="attr">PubDate</token>.
+</para>
+
+<para>Similarly, the two conditions 
+<token role="condition">PubDate&nbsp;&lt;&gt;&nbsp;1990</token>
+and
+<token role="condition">NOT(PubDate&nbsp;=&nbsp;1990)</token>
+do not yield the same results when applied to objects or links having
+<emphasis>no</emphasis> values for the specified attribute.  In the
+case of an inequality condition, if an item has no 
+<token role="attr">PubDate</token> attribute, no value exists to
+satisfy the inequality, therefore the condition cannot be satisfied.
+In the case of a negated condition, no value exists to
+satisfy the <token role="condition">PubDate&nbsp;=&nbsp;1990</token>
+equality, therefore the condition is satisfied.</para>
+
+<indexterm startref="idx_complexcond0" class="endofrange"/>
+<indexterm startref="idx_complexcond1" class="endofrange"/>
+
+</sect1>
+
+<?pagebreak?>
+<!-- ============================================================== -->
+<!--                    IMPLEMENTATION IN PROXIMITY                 -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_cond_impl">
+<title>Implementation in Proximity</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>QGraph implementation</secondary>
+           <tertiary>conditions</tertiary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>implementation restrictions</secondary></indexterm>
+
+<!-- .............................................................. -->
+<!--                         Case sensitivity                       -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Case sensitivity</title>
+<indexterm><primary>case matching in Proximity</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>representation in Proximity</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>representation</secondary>
+           <tertiary>attributes</tertiary></indexterm>
+<indexterm><primary>representation in Proximity</primary>
+           <secondary>attributes</secondary></indexterm>
+
+<para>Proximity makes some decisions about obeying or ignoring case
+sensitivity that have an impact on how you write conditions, specifically
+<itemizedlist spacing="compact">
+  <listitem>
+    <para>Proximity ignores case when matching attribute 
+    <emphasis>names</emphasis>.
+    <indexterm><primary>names</primary>
+               <secondary sortas="attributes">of attributes</secondary></indexterm>
+    </para>
+  </listitem>
+  <listitem>
+    <para>Proximity obeys case when matching attribute 
+    <emphasis>values</emphasis>.</para>
+  </listitem>
+</itemizedlist>
+Proximity converts all attribute names to lower case for its
+internal representation both when importing data and when
+evaluating conditions and constraints on a query.  You can therefore
+ignore case when specifying the name of an attribute in a query&rsquo;s
+condition or constraint.</para>
+
+<para>Proximity does not change the case of any attribute value,
+however.  For example, you can write the condition
+<literal>ObjType&nbsp;=&nbsp;Movie</literal> with the attribute
+specified as <token role="attr">objtype</token>, 
+<token role="attr">Objtype</token>, or
+<token role="attr">OBJTYPE</token> because all of these will be
+converted to the lower case form.  But Proximity will not match objects with
+a value of <token role="attr">movie</token> for this attribute because
+the condition requires the capitalized value 
+<token role="attr">Movie</token> to be a match.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                  Attribute values in Proximity                 -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Attribute values in Proximity</title>
+
+<para>In addition to supporting set-valued attributes, Proximity also
+allows the use of 
+<glossterm baseform="multi-dimensional attribute">multi-dimensional attributes</glossterm>,
+<indexterm><primary>multi-dimensional attribute values</primary></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>multi-dimensional values</secondary></indexterm>
+such as having both
+<emphasis>x</emphasis> and <emphasis>y</emphasis> values for an 
+<token role="attr">area</token> attribute.  Proximity currently
+supports the use of multi-dimensional attributes for data representation,
+import, and display, but does not yet support the use of
+multi-dimensional attributes in queries.</para>
+
+<para>Proximity does not have a mechanism for assigning an attribute
+to a database entity without also assigning it a value.  The statement
+that an object (or link) does not have an attribute is equivalent to
+stating that it does not have a value for that attribute.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                        Comparison operators                    -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Comparison operators</title>
+<indexterm><primary>comparison operators</primary>
+           <secondary>in conditions</secondary></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>comparison</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>comparison operators in</secondary></indexterm>
+
+<para>&qgraph; does not explicitly restrict the comparison operators
+allowed for use in query conditions. In general, a condition can be
+any boolean combination of restrictions on attribute values.  However,
+Proximity&rsquo;s implementation of &qgraph; only supports the
+<literal>=</literal>, <literal>&lt;&gt;</literal>, <literal>&lt;</literal>, 
+<literal>&lt;=</literal>, <literal>&gt;</literal>, and
+<literal>&gt;=</literal> operators in
+simple conditions.</para>
+
+</sect2>
+
+<!-- .............................................................. -->
+<!--                  Complex conditions in Proximity               -->
+<!-- .............................................................. -->
+
+<sect2 id="qg_cond_impl_complex">
+<title>Complex conditions in Proximity</title>
+<indexterm><primary>complex conditions</primary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>complex</secondary></indexterm>
+
+<para>Proximity requires that each query entity (vertex or edge) have
+only a single, possibly complex, condition.  Proximity requires the
+use of <glossterm>disjunctive normal form</glossterm>
+<indexterm><primary>disjunctive normal form</primary></indexterm>
+for combining simple conditions into a
+single, complex condition.</para>
+
+<para>
+Disjunctive normal form requires that logical
+<indexterm><primary>logical operators</primary>
+           <secondary>in conditions</secondary></indexterm>
+<indexterm><primary>conditions</primary>
+           <secondary>logical operators in</secondary></indexterm>
+<indexterm><primary>operators</primary>
+           <secondary>logical</secondary></indexterm>
+expressions consist of a
+disjunction of conjunctions. That is, you can combine statements
+using <literal>OR</literal> as long as those statements only use
+<literal>AND</literal>. For example, to state the logical expression
+  <blockquote>
+    <para><literal>(A OR B) AND C</literal></para>
+  </blockquote>
+in disjunctive normal form you would use
+  <blockquote>
+    <para><literal>(A AND C) OR (B AND C)</literal>.</para>
+  </blockquote>
+</para>
+
+<para>The Proximity Query Editor requires 
+<glossterm>prefix notation</glossterm>
+<indexterm><primary>prefix notation</primary></indexterm>
+for complex conditions.  The condition above must be entered as
+<literal>OR (AND (A, C), AND (B, C))</literal> where
+<literal>A</literal>, <literal>B</literal>, and 
+<literal>C</literal>, are placeholders for simple conditions.
+</para>
+
+</sect2>
+
+
+<!-- .............................................................. -->
+<!--                     Efficiency considerations                  -->
+<!-- .............................................................. -->
+
+<sect2>
+<title>Efficiency considerations</title>
+<indexterm><primary>Proximity</primary>
+           <secondary>query efficiency</secondary></indexterm>
+<indexterm><primary>efficiency in Proximity</primary></indexterm>
+
+<para>The efficiency considerations described below are unlikely to
+have a noticeable effect on query processing speed under normal
+circumstances. You may find some of these points helpful, however, if
+you need to use extremely complex queries, or execute the query against an
+extremely large database.</para>
+
+<!--
+   Redundant information in conditions
+-->
+
+<sect3>
+<title>Redundant information in conditions</title>
+
+<para>In many cases, databases contain redundant information. For
+example, an <token role="edge">acted-in</token> link might only be legally
+used to connect actors to movies.  Thus if we require this 
+link type in a query edge condition, we know that the linked objects
+will always be actors and movies.  Given such limits on the how the
+database is structured, the queries shown in 
+<xref linkend="fig_cond_maybeequiv"/> are equivalent.
+<figure id="fig_cond_maybeequiv">
+<title>Potentially equivalent queries</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_MaybeEquiv.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_MaybeEquiv.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+</para>
+
+<para>Although both forms yield the same results,
+it is generally more efficient to include more
+rather than less information when adding conditions.
+The additional information prunes the candidate entities for the join
+needed to execute the query and thus reduces the number of items
+involved in the join.</para>
+
+<para>In general, reducing the number of items
+involved in a join improves processing speed, so adding additional
+information in the form of conditions to your query is usually a good
+idea, even when such information doesn&rsquo;t change the anticipated
+query results.  Even if you know that
+<token role="link">acted-in</token> links only 
+connect actors to movies, it&rsquo;s still worthwhile to include the
+conditions for these objects when query efficiency is
+a concern.</para>
+
+</sect3>
+
+<!--
+   Existence conditions versus attribute value conditions 
+-->
+
+<sect3>
+<title>Existence conditions versus attribute value conditions</title>
+
+<para>Checking for the existence of an attribute in Proximity is
+extremely efficient.  Use 
+<glossterm baseform="existence condition">existence conditions</glossterm>
+instead of 
+<glossterm baseform="attribute value condition">attribute value conditions</glossterm>
+when they match the same data.</para>
+
+<para>For example, suppose our database uses a 
+<token role="attr">Series</token> attribute to 
+indicate whether a book is part of a series, as shown in 
+<xref linkend="fig_cond_db04"/>.
+<figure id="fig_cond_db04">
+<title>Database fragment [Cond_DB04.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB04.png"
+               width="5.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB04.png"
+               contentwidth="6.1in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+As shown in this example, <emphasis>Wolves of the Calla</emphasis> is
+part of the <emphasis>Dark 
+Tower</emphasis> series, and <emphasis>Night Journey</emphasis> is
+part of the <emphasis>Green Mile</emphasis> series, so both have the
+attribute value <token role="attr">Series&nbsp;=&nbsp;true</token>.
+To find authors and their books that are part of a series, we
+might initially create the query shown in 
+<xref linkend="fig_cond_db04_q01"/>. 
+<figure id="fig_cond_db04_q01">
+<title>Query using attribute value condition [Cond_DB04_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB04_Q01.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB04_Q01.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+This typical query looks for book objects whose 
+<token role="attr">Series</token> attribute has a value of 
+<token role="attr">true</token>.  But because of how this database is
+designed, all 
+books that are part of a series have this same attribute value, while
+books that are not part of a series have no value for this attribute.
+This means that, for this database, the query above
+is equivalent to that shown in
+<xref linkend="fig_cond_db04_q02"/>, below.
+<figure id="fig_cond_db04_q02">
+<title>Query using existence condition [Cond_DB04_Q02.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB04_Q02.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Cond_DB04_Q02.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Because existence conditions are more efficiently processed than
+attribute value conditions, the second query is faster than the first, while
+yielding identical results.</para>
+
+<para>It&rsquo;s important to note that the efficiency considerations described
+above are only applicable when choosing which of a set of equivalent
+queries to execute.  Such a determination often relies on a thorough
+understanding of the target database.  In practice, we are often faced
+with unknown or ill-defined database schemas making this kind of
+choice moot&mdash;we simply have to design a query that finds the
+matches we want without being able to take advantage of such
+efficiency considerations.</para>
+
+</sect3>
+</sect2>
+</sect1>
+
+<!-- ============================================================== -->
+<!--                               SUMMARY                          -->
+<!-- ============================================================== -->
+
+<sect1 id="qg_cond_summary">
+<title>Summary</title>
+<indexterm><primary>queries</primary>
+           <secondary>rule summaries</secondary></indexterm>
+
+<itemizedlist spacing="compact">
+<title>Conditions</title>
+  <listitem>
+    <para>Conditions serve to restrict the number of query matches by
+    placing requirements on the attributes of an object or link in the
+    database.</para>
+  </listitem>
+  <listitem>
+    <para>Conditions are commonly, but not exclusively, used to
+    enforce <glossterm>type</glossterm>
+    restrictions in query matches.</para>
+  </listitem>
+  <listitem>
+    <para><glossterm baseform="attribute value condition">Attribute value conditions</glossterm>
+    restrict matches
+    to only those database entities that match the attribute values
+    specified in the query.</para>
+  </listitem>
+  <listitem>
+    <para><glossterm baseform="existence condition">Existence conditions</glossterm>
+    test only to see whether the
+    corresponding object or link has an instance of the specified
+    attribute, but do not require that the attribute have any
+    particular value.</para>
+  </listitem>
+  <listitem>
+    <para>Attribute value conditions can use the comparison operators
+    <literal>=</literal>, <literal>&lt;</literal>,
+    <literal>&gt;</literal>, <literal>&lt;=</literal>,
+    <literal>&gt;=</literal>, and <literal>&lt;&gt;</literal>
+    </para>
+  </listitem>
+  <listitem>
+    <para>Simple conditions can be combined using 
+    <glossterm>disjunctive normal form</glossterm>.</para>
+  </listitem>
+  <listitem>
+    <para>An attribute value condition is satisfied if any member of
+    the set of attribute 
+    values for the corresponding database entity satisfies the
+    condition.</para>
+  </listitem>
+  <listitem>
+    <para>If an object or link does not have a value for the attribute
+    listed in an attribute value condition, the condition&rsquo;s
+    expression is false 
+    and the condition fails (unless negated by <literal>NOT</literal>).
+    </para>
+  </listitem>
+  <listitem>
+    <para>The use of set-valued attributes means that different
+    attribute values for a single object or link may satisfy different
+    condition tests, yielding the result that
+    <literal>NOT(<replaceable>attr</replaceable>&nbsp;=&nbsp;<replaceable>value</replaceable>)</literal>
+    is not necessarily equivalent to
+    <literal><replaceable>attr</replaceable>&nbsp;&lt;&gt;&nbsp;<replaceable>value</replaceable></literal>.
+    </para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Case sensitivity</title>
+  <listitem>
+    <para>Proximity ignores case when matching attribute names.</para>
+  </listitem>
+  <listitem>
+    <para>Proximity obeys case when matching attribute values.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist spacing="compact">
+<title>Efficiency considerations</title>
+  <listitem>
+    <para>It is generally more efficient to include more rather than
+    fewer restrictions in the form of conditions.</para>
+  </listitem>
+  <listitem>
+    <para>Use 
+    <glossterm baseform="existence condition">existence conditions</glossterm>
+    instead of 
+    <glossterm baseform="attribute value condition">attribute value conditions</glossterm>
+    when they match the same data.</para>
+  </listitem>
+  <listitem>
+    <para>Taking advantage of some of these efficiency improvements
+    may require perfect information about a database&rsquo;s schema. In
+    practice, we frequently do not have thorough enough 
+    information about a database to be able to use efficiency
+    improvements with confidence.
+    </para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->

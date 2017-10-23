@@ -1,0 +1,467 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Relational Bayesian Classifier</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch07.html" title="Chapter&nbsp;7.&nbsp;Learning Models">
+      <link rel="prev" href="ch07s02.html" title="The Modeling Process in Proximity">
+      <link rel="next" href="ch07s04.html" title="Relational Probability Trees">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch07s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;7.&nbsp;Learning Models</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch07s04.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="models_rbc"></a>Relational Bayesian Classifier
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e14224"></a><a class="indexterm" name="d0e14229"></a><a class="indexterm" name="idx_models_RBC1"></a><a class="indexterm" name="idx_models_RBC2"></a><a class="indexterm" name="d0e14242"></a><p>The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e673"><span class="glossterm">relational Bayesian classifier</span></a> (RBC)
+            is a simple Bayesian 
+            classification  algorithm adapted to the context of
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e679"><span class="glossterm">relational data</span></a>
+            [<a href="bi01.html#neville03_rbc"><abbr class="abbrev">Neville, Jensen and Gallagher, 2003</abbr></a>]. Like many classification systems, the
+            RBC is trained on one set of instances and then applied to (or tested
+            on) another.  Because the RBC operates on relational data, the
+            training and test sets are sets of subgraphs, defined by a
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">container</span></a> in Proximity.
+            Each <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e749"><span class="glossterm">subgraph</span></a> in the
+            container is assumed to contain one target item 
+            (the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e240"><span class="glossterm">core item</span></a>) to
+            be classified. Attributes and structural characteristics of the target
+            item, of the other objects and links in the subgraph, and of the subgraph
+            itself can all be used by the model in classifying the target
+            item.  Because these instances preserve the relational structure of the
+            data, the model can exploit the connections among objects to improve
+            classification accuracy.
+         </p>
+         <p>In the example below, we want to predict whether or not a web
+            page is a student page, that is, whether the value of its 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span> attribute
+            is &#8220;1&#8221;.  Each input subgraph consists of a target web
+            page and all objects (also web pages) connected to it, including both
+            links to and links from the target page.
+            The following script learns an RBC on one of the samples we created in
+            <a href="ch06s05.html#ex_scripts_sampling" title="Exercise&nbsp;6.4.&nbsp;Creating training and test sets:">Exercise&nbsp;6.4</a>, then
+            applies the RBC to the other sample to evaluate the its
+            predictions.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="model_rbc_code"></a>Code example: run-1d-clusters-rbc.py
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e14277"></a><a class="indexterm" name="d0e14280"></a><p>This section describes the script found in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/run-1d-clusters-rbc.py</code>.
+               
+            </p>
+            <p>
+               Import the necessary class definitions.
+               
+               
+            </p><pre class="programlisting">from kdl.prox.model2.common.sources import *
+from kdl.prox.model2.rbc import RBC
+</pre><p>
+               
+               We use the samples created in <a href="ch06s05.html#ex_scripts_sampling" title="Exercise&nbsp;6.4.&nbsp;Creating training and test sets:">Exercise&nbsp;6.4</a>
+               as our training and test sets.
+               Make sample &#8220;0&#8221; the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e779"><span class="glossterm">training set</span></a>
+               and sample &#8220;1&#8221; the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e773"><span class="glossterm">test set</span></a>.
+               
+               
+            </p><pre class="programlisting">trainContainer = prox.getContainer("1d-clusters/samples/0")
+testContainer = prox.getContainer("1d-clusters/samples/1")
+</pre><p>
+               
+               First we identify the 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e240"><span class="glossterm"><span class="emphasis"><em>core item</em></span></span></a>,
+               the database entity whose <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e462"><span class="glossterm">label</span></a> (attribute value) we 
+               want to predict.  In this case, we want 
+               to predict the label for the central object in our 
+               <span class="token">1d-clusters</span>
+               subgraphs.  This object was named &#8220;core_page&#8221; in the query that
+               generated these subgraphs, and thus also in the resulting subgraphs.
+               
+               
+            </p><pre class="programlisting">coreItemName = 'core_page'
+</pre><p>
+               
+               Next we specify the name of the attribute we want to predict
+               <a class="indexterm" name="d0e14321"></a>
+               <a class="indexterm" name="d0e14327"></a>
+               (the class label).  Our
+               model predicts whether the object in question is a student web
+               page.  We use the boolean attribute 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span> to identify whether
+               or not a page belongs to a student.
+               The RBC model requires that the predicted attribute be
+               discrete.
+               
+               
+            </p><pre class="programlisting">attrToPredict = 'isStudent'
+</pre><p>
+               
+               We create an <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/AttributeSource.html"><code class="classname">AttributeSource</code></a>
+               <a class="indexterm" name="d0e14340"></a>
+               <a class="indexterm" name="d0e14344"></a>
+               instance to represent the
+               information about the class label.  This attribute source specifies the
+               item in the subgraph that we want to label 
+               (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">core_page</span>) and the name of the attribute
+               that we want to predict (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span>).
+               
+               
+            </p><pre class="programlisting">classLabel = AttributeSource(coreItemName, attrToPredict)
+</pre><p>
+               
+               Next, we specify the set of sources to use in learning the model.
+               <a class="indexterm" name="d0e14359"></a>
+               <a class="indexterm" name="d0e14363"></a>
+               Recall that sources can be attributes on any of the objects or links
+               in the input subgraph
+               including attributes on the core item, attributes of links
+               connecting to the core item, or attributes of objects linked to the
+               core item.  In principle, we can extend this to use attributes on
+               objects and links multiple &#8220;hops&#8221; away from the core
+               object, provided that such items are included in the subgraphs that
+               the model will use.
+               In this example, because the subgraphs only extend a single hop from
+               the core object, we are limited to attributes of objects of the core
+               object and of objects and links directly connected to that core
+               object. Sources can also include structural characteristics of the
+               subgraph or attributes on the subgraph itself, although neither of
+               these types of sources are used in this example.
+               See <a href="ch07s04.html#ex_models_rpt" title="Exercise&nbsp;7.2.&nbsp;Learning and applying the relational probability tree model:">Exercise&nbsp;7.2</a>
+               for an example of using the degree of an object (a structural
+               characteristic) as a source.
+            </p>
+            <p>Each source is specified as an instance of <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/AttributeSource.html"><code class="classname">AttributeSource</code></a>.
+               Each <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/sources/AttributeSource.html"><code class="classname">AttributeSource</code></a> provides the name of an item (object or link)
+               from the input subgraphs and the attribute whose values will be
+               evaluated for their predictive value to the model.
+               We provide the set of sources as a Python list.
+               
+               
+            </p><pre class="programlisting">inputSources = [ \
+   AttributeSource('core_page', 'url_server_info'), \
+   AttributeSource('core_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_from_page', 'url_server_info'), \
+   AttributeSource('linked_from_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_from_page', 'page_num_outlinks'), \
+   AttributeSource('linked_from_page', 'page_num_inlinks'), \
+   AttributeSource('linked_to_page', 'url_server_info'), \
+   AttributeSource('linked_to_page', 'url_hierarchy1b'), \
+   AttributeSource('linked_to_page', 'page_num_outlinks'), \
+   AttributeSource('linked_to_page', 'page_num_inlinks'), \
+   AttributeSource('linked_to', 'link_tag'), \
+   AttributeSource('linked_from', 'link_tag')]
+</pre><p>
+               
+               Begin the modeling portion of the script by 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e429"><span class="glossterm">instantiating</span></a> the model.
+               <a class="indexterm" name="d0e14385"></a>
+               <a class="indexterm" name="d0e14391"></a>
+               Instantiation is a simple <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/rbc/RBC.html"><code class="classname">RBC</code></a> constructor call.
+               
+               
+            </p><pre class="programlisting">print "Beginning modeling section"
+print "Instantiating model..."
+rbc = RBC()
+</pre><p>
+               <a class="indexterm" name="d0e14401"></a>
+               <a class="indexterm" name="d0e14407"></a>
+               
+               Train (learn) the model on the training set.
+               <a class="indexterm" name="d0e14411"></a>
+               <a class="indexterm" name="d0e14417"></a>
+               <a class="indexterm" name="d0e14421"></a>
+               <a class="indexterm" name="d0e14425"></a>
+               
+               
+            </p><pre class="programlisting">print "Learning model..."
+rbc.learn(trainContainer, classLabel, inputSources)
+</pre><p>
+               <a class="indexterm" name="d0e14434"></a>
+               <a class="indexterm" name="d0e14440"></a>
+               
+               Write the trained model to an XML file. The file is written to the current
+               <a class="indexterm" name="d0e14444"></a>
+               <a class="indexterm" name="d0e14450"></a>
+               <a class="indexterm" name="d0e14456"></a>
+               working directory, which is
+               <code class="filename">$PROX_HOME</code> if you are following the tutorial.
+               
+               
+            </p><pre class="programlisting">xmlFileName = 'ProxWebKB_RBC.xml'
+rbc.save(xmlFileName)
+print "RBC written to ", xmlFileName
+</pre><p>
+               <a class="indexterm" name="d0e14468"></a>
+               <a class="indexterm" name="d0e14474"></a>
+               
+               You can read in the XML file at a later time to apply the model
+               to other data sets having the same structure and features without
+               having to retrain the model.
+            </p>
+            <p>Apply the model to the test set.
+               <a class="indexterm" name="d0e14480"></a>
+               <a class="indexterm" name="d0e14484"></a>
+               <a class="indexterm" name="d0e14490"></a>
+               
+               
+            </p><pre class="programlisting">print "Applying model..."
+predictions = rbc.apply(testContainer)
+</pre><p>
+               <a class="indexterm" name="d0e14499"></a>
+               <a class="indexterm" name="d0e14505"></a>
+               
+               Applying the learned model returns a <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/predictions/Predictions.html"><code class="classname">Predictions</code></a>
+               <a class="indexterm" name="d0e14512"></a>
+               <a class="indexterm" name="d0e14516"></a>
+               instance that stores the predicted class labels.  To save these predictions,
+               we store the predicted values as attributes on the subgraphs.  The
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/predictions/Predictions.html#savePredictions(kdl.prox.db.Attributes,%20java.lang.String)"><code class="methodname">savePredictions()</code></a>
+               <a class="indexterm" name="d0e14525"></a>
+               <a class="indexterm" name="d0e14529"></a>
+               method silently overwrites any existing values for
+               this subgraph attribute.
+               
+            </p><pre class="programlisting">print "Writing predictions..."
+rbcAttrName = "rbc_isstudent_prediction"
+predictions.savePredictions(testContainer.getSubgraphAttrs(), rbcAttrName)
+</pre><p>
+               <a class="indexterm" name="d0e14538"></a>
+               <a class="indexterm" name="d0e14542"></a>
+               
+               Finally, we evaluate the model&#8217;s results. The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/model2/common/predictions/Predictions.html"><code class="classname">Predictions</code></a> class
+               provides several methods for calculating the error of the predictions,
+               but to use them, we have to first tell the predictions instance where
+               to find the true values for the class labels.  The true values
+               are stored in the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span>
+               attribute on the core items in the test container&#8217;s subgraphs.
+               
+               
+            </p><pre class="programlisting">predictions.setTrueLabels(testContainer, classLabel)
+</pre><p>
+               <a class="indexterm" name="d0e14557"></a>
+               <a class="indexterm" name="d0e14561"></a></p>
+            <p>
+               Proximity provides several built-in evaluation functions.
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e3"><span class="glossterm">Accuracy</span></a>
+               <a class="indexterm" name="d0e14571"></a>
+               <a class="indexterm" name="d0e14575"></a>
+               <a class="indexterm" name="d0e14581"></a>
+               measures the percentage of test instances correctly classified by the
+               model.  Because accuracy requires knowing the correct prior
+               distribution of instances in the population and does not consider that
+               false positive and false negative errors may entail widely different
+               costs, other evaluation measures, such as area under the ROC curve, are
+               often more useful.
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_auc"><span class="glossterm">Area under the ROC
+                     (receiver operating characteristic) curve</span></a>
+               <a class="indexterm" name="d0e14588"></a>
+               <a class="indexterm" name="d0e14592"></a>
+               [<a href="bi01.html#provost98"><abbr class="abbrev">Provost, Fawcett and Kohavi, 1998</abbr></a>]
+               provides a method of evaluating the accuracy of a ranking of
+               all the test instances according to their estimated probability,
+               letting you compare one model&#8217;s performance against
+               another&#8217;s, independent of <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e328"><span class="glossterm">error cost</span></a>
+               and without knowing the 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e619"><span class="glossterm">prior class
+                     distribution</span></a>.
+               Accuracy and area under the ROC curve
+               approach 1.0 as the results improve; a value of 0.5 for area under
+               the ROC curve indicates random performance. Conditional log likelihood
+               <a class="indexterm" name="d0e14604"></a>
+               is less intuitive and useful only for relative comparison of
+               comparable entities, with higher values signifying better
+               performance.
+               
+               
+            </p><pre class="programlisting">print "Computing accuracy (ACC)..." 
+acc = (1 - predictions.getZeroOneLoss())
+</pre><p>
+               <a class="indexterm" name="d0e14611"></a>
+               <a class="indexterm" name="d0e14617"></a>
+               
+            </p>
+            <p>Computing area under the ROC curve requires a 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e69"><span class="glossterm">binary classification problem</span></a>.  We identify the
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e589"><span class="glossterm">positive instances</span></a>
+               and group all other class values into the 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e543"><span class="glossterm">negative instances</span></a>.  In this example,
+               student pages (pages with 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span>&nbsp;=&nbsp;<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1</span>)
+               are positive
+               instances.
+               
+               
+            </p><pre class="programlisting">print "Computing area under ROC curve (AUC)..."
+auc = predictions.getAUC("1")
+print "Computing conditional likelihood (CLL)..."
+cll = predictions.getConditionalLogLikelihood()
+</pre><p>
+               <a class="indexterm" name="d0e14641"></a>
+               <a class="indexterm" name="d0e14647"></a>
+               <a class="indexterm" name="d0e14651"></a>
+               <a class="indexterm" name="d0e14657"></a>
+               
+               Finally, print a summary of the evaluation results.
+               
+               
+            </p><pre class="programlisting">print "RBC results:"
+print "  ACC: ", str(acc)
+print "  AUC: ", str(auc)
+print "  CLL: ", str(cll)
+</pre><p>
+               
+               
+            </p>
+            <div class="procedure"><a name="d0e14665"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;7.1.&nbsp;Learning and applying the relational Bayesian classifier model:</b></p>
+               <p>This script requires entities created in 
+                  <a href="ch05s08.html#ex_queries_1dclusters" title="Exercise&nbsp;5.7.&nbsp;Executing a saved query from the Proximity Database Browser:">Exercise&nbsp;5.7</a>,
+                  <a href="ch06s05.html#ex_scripts_sampling" title="Exercise&nbsp;6.4.&nbsp;Creating training and test sets:">Exercise&nbsp;6.4</a> and 
+                  <a href="ch06s06.html#ex_scripts_adding" title="Exercise&nbsp;6.5.&nbsp;Adding a new attribute:">Exercise&nbsp;6.5</a>. You must have completed these
+                  exercises before running the script in the current exercise.
+               </p>
+               <p>Before beginning, make sure that you are serving the ProxWebKB
+                  database using Mserver. Start the Proximity Database Browser if it is not already
+                  running.
+               </p>
+               <ol type="1">
+                  <li>
+                     <p>From the <span><strong class="guimenu">Script</strong></span> menu, choose
+                        <span><strong class="guimenuitem">Run Script</strong></span>.
+                        Proximity displays the <span class="guilabel">Open</span> dialog.
+                     </p>
+                  </li>
+                  <li>
+                     <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory and
+                        choose <code class="filename">run-1d-clusters-rbc.py</code>.
+                        Click <span><strong class="guibutton">Open</strong></span>.
+                     </p>
+                     <p>Proximity opens a window to show you any output from the script
+                        along with a trace of the script execution. 
+                        Your output should look similar to the following 
+                        
+                        (leading information showing elapsed time and execution thread 
+                        has been omitted from the trace for brevity):
+                        
+                     </p><pre class="screen">Status: starting running script:
+   /proximity/doc/user/tutorial/examples/run-1d-clusters-rbc.py
+Beginning modeling section
+Instantiating model...
+Inducing model...
+INFO kdl.prox.model2.rbc.RBC - starting to induce model...
+INFO kdl.prox.model2.rbc.RBC - updating model with [core_page.url_server_info]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [core_page.url_hierarchy1b]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from_page.url_server_info]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from_page.url_hierarchy1b]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from_page.page_num_outlinks]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from_page.page_num_inlinks]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to_page.url_server_info]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to_page.url_hierarchy1b]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to_page.page_num_outlinks]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to_page.page_num_inlinks]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_to.link_tag]...
+INFO kdl.prox.model2.rbc.RBC - updating model with [linked_from.link_tag]...
+INFO kdl.prox.model2.rbc.RBC - induce model done...
+RBC written to  ProxWebKB_RBC.xml
+Applying model...
+INFO kdl.prox.model2.rbc.RBC - starting to apply model...
+INFO kdl.prox.model2.rbc.RBC - apply model done...
+Writing predictions...
+Computing accuracy (ACC)...
+Computing area under ROC curve (AUC)...
+Computing conditional likelihood (CLL)...
+RPT results: 
+  ACC:  0.946298984034833
+  AUC:  0.9747484409075087
+  CLL:  -495.61207422760805
+Status: finished running script
+</pre><p>
+                        
+                        Due to the probabilistic nature of the RBC algorithm, your results may
+                        differ slightly from that shown above.
+                        You can close this window after the script finishes.
+                        
+                     </p>
+                  </li>
+                  <li>
+                     <p>Examine the values predicted by the
+                        RBC. The script stored the predicted values in the
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">rbc_isstudent_prediction</span> subgraph
+                        attribute.  Recall that our testing instances are in the
+                        <span class="token">/1d-clusters/samples/1</span> container.
+                        To see these values, drill down through the container hierarchy in the
+                        Proximity Database Browser to display the list of subgraphs for this container.  Click a
+                        subgraph ID, then click <span><strong class="guibutton">attrs</strong></span> to display the
+                        attributes for that subgraph.  The example below shows the value for
+                        subgraph&nbsp;<span class="token">0</span>, which indicates that the
+                        model predicts that the core page for this subgraph
+                        (object&nbsp;<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1</span>) is not a Student page.
+                        You can compare this to the actual value of the 
+                        <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">isStudent</span> attribute by examining the
+                        attribute values for object&nbsp;<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">1</span>.
+                        
+                     </p>
+                     <div class="informalfigure">
+                        <div class="mediaobject" align="center">
+                           <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                              <tr>
+                                 <td align="center" valign="bottom"><img src="images/GUI_RBCAttrs.png" align="middle" width="630"></td>
+                              </tr>
+                           </table>
+                        </div>
+                     </div>
+                     <p>
+                        
+                     </p>
+                     <p>Recall that the RBC only makes predictions for core objects in
+                        the test container.  Therefore, after learning the model,
+                        only the subgraphs in the 
+                        <span class="token">1d-clusters/samples/1</span> container have a
+                        value for the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">rbc_isstudent_prediction</span>
+                        attribute.
+                        
+                     </p>
+                  </li>
+               </ol>
+            </div><a class="indexterm" name="d0e14748"></a><a class="indexterm" name="d0e14749"></a></div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch07s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch07.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch07s04.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">The Modeling Process in Proximity&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Relational Probability Trees</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,391 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Social Networking Algorithms</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">
+      <link rel="prev" href="ch06s06.html" title="Adding a New Attribute">
+      <link rel="next" href="ch06s08.html" title="Working with Proximity Tables">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s06.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Using Scripts</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s08.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="scripts_sna"></a>Social Networking Algorithms
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e11868"></a><a class="indexterm" name="d0e11871"></a><a class="indexterm" name="d0e11874"></a><a class="indexterm" name="d0e11877"></a><p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e727"><span class="glossterm">Social networking</span></a> 
+            algorithms are a useful part of the analyst&#8217;s 
+            toolkit. The algorithms illustrated in this section help in understanding
+            the structure of a database.
+         </p>
+         <p>The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e117"><span class="glossterm">clustering coefficient</span></a> is a measure
+            of the interrelatedness 
+            of an object&#8217;s neighbors.  It indicates the ratio of existing links
+            connecting an object&#8217;s neighbors to each other to the maximum possible
+            number of such links. An object must have at least two neighbors to
+            calculate the clustering coefficient.  No value is calculated for
+            objects having less than two neighbors.
+         </p>
+         <p>The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e222"><span class="glossterm">connected components</span></a> algorithm
+            identifies the distinct components of the input data. Two objects are
+            in the same component if there is a path from one object to the
+            other.
+         </p>
+         <p>The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e379"><span class="glossterm">hubs and authorities</span></a> algorithm,
+            originally developed with web 
+            search in mind, attempts to identify objects that are likely to be
+            good sources of information (authorities) and objects that are likely
+            to point to many such authorities (hubs) through the link
+            structure of the data.
+         </p>
+         <p>Proximity adds the results of running these algorithms to the
+            database, either by creating new object attributes (clustering
+            coefficient or hubs and authorities) or by creating a new container of
+            subgraphs (connected components).
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e11904"></a>Code example: social-networking-algs.py
+                     </h3>
+                  </div>
+               </div>
+            </div><a class="indexterm" name="d0e11907"></a><a class="indexterm" name="d0e11914"></a><p>This section describes the script found in 
+               <code class="filename">$PROX_HOME/doc/user/tutorial/examples/social-networking-algs.py</code>.
+            </p>
+            <div class="sect3" lang="en">
+               <div class="titlepage">
+                  <div>
+                     <div>
+                        <h4 class="title"><a name="d0e11925"></a>Initialization
+                        </h4>
+                     </div>
+                  </div>
+               </div>
+               <p>Define a prefix to use for attribute and container names.
+                  For example, when running these algorithms on the whole database, you
+                  might use the database name as a prefix (as shown below). You might
+                  use a container name when running the algorithms on the objects and
+                  links in a specified container.
+                  
+                  
+               </p><pre class="programlisting">attrPrefix = "proxwebkb"
+</pre><p>
+                  
+                  Get the current set of object attributes. We use this to determine
+                  whether the new attributes already exist in the database.
+                  
+                  
+               </p><pre class="programlisting">currentAttrs = prox.objectAttrs
+</pre></div>
+            <div class="sect3" lang="en">
+               <div class="titlepage">
+                  <div>
+                     <div>
+                        <h4 class="title"><a name="d0e11938"></a>Clustering coefficient
+                        </h4>
+                     </div>
+                  </div>
+               </div>
+               <p>For the purposes of calculating the 
+                  <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e117"><span class="glossterm">clustering coefficient</span></a>,
+                  Proximity ignores both link direction and the possibility of multiple
+                  links when calculating the number of actual and potential links among
+                  an object&#8217;s neighbors. Proximity uses only the number of distinct
+                  object pairs to determine this number.
+               </p><pre class="programlisting">print "Computing clustering coefficients"
+</pre><p>Proximity stores the value of the clustering coefficient in a
+                  new object attribute specified by the user. 
+                  We start by specifying the name of the new attribute.
+                  
+                  
+               </p><pre class="programlisting">clusterAttrName = attrPrefix + "-cluster-coeff"
+</pre><p>
+                  
+                  In this example, we assume
+                  that the user wants to overwrite existing values so we automatically
+                  delete any existing attribute with 
+                  the same name. See <a href="ch06s06.html#ex_scripts_adding" title="Exercise&nbsp;6.5.&nbsp;Adding a new attribute:">Exercise&nbsp;6.5</a> 
+                  for an example of asking the user whether to delete an existing
+                  attribute.
+                  
+                  
+               </p><pre class="programlisting">if currentAttrs.isAttributeDefined(clusterAttrName):
+   print "  Attribute " + clusterAttrName + " already exists. Deleting..."
+   currentAttrs.deleteAttribute(clusterAttrName)
+</pre><p>
+                  
+                  Create and calculate values for the new clustering coefficient attribute.
+                  Proximity lets you calculate the clustering coefficient for
+                  either an entire database or limit execution to the data in a specified
+                  container. When limited to a container, Proximity runs the algorithm
+                  on the objects and links in the container,
+                  ignoring subgraph boundaries. The code in this example calculates
+                  clustering coefficients for the entire database.
+                  
+                  
+               </p><pre class="programlisting">prox.addClusterCoeffAttribute(clusterAttrName)
+</pre><p>
+                  <a class="indexterm" name="d0e11961"></a>
+                  <a class="indexterm" name="d0e11967"></a>
+                  
+                  To compute the clustering coefficient for objects in a container, use
+                  the overloaded <code class="methodname">addClusterCoeffAttribute()</code> method
+                  with the input container as the second argument, e.g.,
+                  <code class="code">prox.addClusterCoeffAttribute(clusterAttrName,
+                     inputContainer)</code>.
+               </p>
+            </div>
+            <div class="sect3" lang="en">
+               <div class="titlepage">
+                  <div>
+                     <div>
+                        <h4 class="title"><a name="d0e11980"></a>Connected components
+                        </h4>
+                     </div>
+                  </div>
+               </div>
+               <p>Proximity ignores link direction in determining
+                  whether a path exists between two objects, implementing the weak sense of
+                  connectivity. Proximity creates a subgraph for each component and
+                  places all component subgraphs in a new container.
+                  
+                  
+               </p><pre class="programlisting">print "Computing connected components"
+</pre><p>
+                  
+                  Define the name of the new container. Each subgraph in this container is
+                  a <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e222"><span class="glossterm">connected component</span></a>.
+                  The new container will be a child of the root
+                  container.
+                  
+                  
+               </p><pre class="programlisting">outputContainerName = attrPrefix + "-connected-components"
+</pre><p>
+                  
+                  Delete this container if it already exists
+                  
+                  
+               </p><pre class="programlisting">rootContainer = prox.rootContainer
+if rootContainer.hasChild(outputContainerName):
+   print "  Container " + outputContainerName + " already exists. Deleting..."
+   rootContainer.deleteChild(outputContainerName)
+</pre><p>
+                  
+                  Find the connected components.
+                  Proximity lets you calculate the connected components for
+                  either an entire database or limit execution to the data in a specified
+                  container. When limited to a container, Proximity runs the algorithm
+                  on the objects and links in the container,
+                  ignoring subgraph boundaries. The code in this example identifies
+                  connected components for the entire database.
+                  
+                  
+               </p><pre class="programlisting">prox.computeConnectedComponents(outputContainerName)
+</pre><p>
+                  <a class="indexterm" name="d0e12000"></a>
+                  <a class="indexterm" name="d0e12006"></a>
+                  
+                  To find connected components within a container, use the overloaded
+                  method <code class="methodname">computeConnectedComponents()</code> method
+                  with the input container as the second argument, e.g.,
+                  <code class="code">prox.computeConnectedComponents(outputContainerName,
+                     inputContainer)</code>.
+               </p>
+            </div>
+            <div class="sect3" lang="en">
+               <div class="titlepage">
+                  <div>
+                     <div>
+                        <h4 class="title"><a name="d0e12019"></a>Hubs and authorities
+                        </h4>
+                     </div>
+                  </div>
+               </div>
+               <p>Due to the circular relationship between hubs and authorities, we
+                  use an iterative algorithm for calculating these weights. Proximity&#8217;s
+                  implementation of the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e379"><span class="glossterm">hubs and authorities</span></a>
+                  algorithm is based on work by Kleinberg [<a href="bi01.html#kleinberg98"><abbr class="abbrev">Kleinberg, 1998</abbr></a>],
+                  which suggests that 20 iterations is usually sufficient for most
+                  applications.
+               </p>
+               <p>The <code class="methodname">addHubsAndAuthoritiesAttributes()</code>
+                  <a class="indexterm" name="d0e12034"></a>
+                  <a class="indexterm" name="d0e12038"></a>
+                  method adds
+                  two attributes to the input objects, an authority weight and hub
+                  weight.  Both weights are non-negative and normalized so that the
+                  values for each attribute sums to 1.0. Larger authority or hub
+                  weights indicate that the corresponding object
+                  is a better authority or hub, respectively.
+                  
+                  
+               </p><pre class="programlisting">print "Computing hubs and authorities"
+</pre><p>
+                  
+                  Specify the name of the new attributes.
+                  
+                  
+               </p><pre class="programlisting">hubsAttrName = attrPrefix + "-hubs"
+authoritiesAttrName = attrPrefix + "-authorities"
+</pre><p>
+                  
+                  Delete these attributes if they already exist.
+                  
+                  
+               </p><pre class="programlisting">if currentAttrs.isAttributeDefined(hubsAttrName):
+   print "  Attribute " + hubsAttrName + " already exists. Deleting..."
+   currentAttrs.deleteAttribute(hubsAttrName)
+if currentAttrs.isAttributeDefined(authoritiesAttrName):
+   print "  Attribute " + authoritiesAttrName + " already exists. Deleting..."
+   currentAttrs.deleteAttribute(authoritiesAttrName)
+</pre><p>
+                  
+                  Specify the number of iterations.
+                  
+                  
+               </p><pre class="programlisting">numIterations = 20
+</pre><p>
+                  
+                  Create and calculate values for the new hubs and authorities attributes.
+                  Proximity lets you calculate the hubs and authorities scores for
+                  either an entire database or limit execution to the data in a specified
+                  container. When limited to a container, Proximity runs the algorithm
+                  on the objects and links in the container,
+                  ignoring subgraph boundaries. The code in this example calculates
+                  hubs and authorities scores for the entire database.
+                  
+                  
+               </p><pre class="programlisting">prox.addHubsAndAuthoritiesAttributes(numIterations, hubsAttrName,
+     authoritiesAttrName)
+</pre><p>
+                  
+                  To compute hubs and authorities scores for objects in a container, use
+                  the overloaded method
+                  <code class="methodname">addHubsAndAuthoritiesAttributes()</code> with the
+                  input container as the fourth argument, e.g.,
+                  <code class="code">prox.addHubsAndAuthoritiesAttributes(numIterations,
+                     hubsAttrName, authoritiesAttrName, input Container)</code>.
+               </p>
+               <div class="procedure"><a name="ex_scripts_sna"></a><p xmlns:exsl="http://exslt.org/common" class="title"><b>Exercise&nbsp;6.6.&nbsp;Running social networking algorithms:</b></p>
+                  <p>Before beginning, make sure that you are serving the ProxWebKB
+                     database using Mserver. Start the Proximity Database Browser if it is not already
+                     running.
+                  </p>
+                  <ol type="1">
+                     <li>
+                        <p>From the <span><strong class="guimenu">Script</strong></span> menu, choose
+                           <span><strong class="guimenuitem">Run Script</strong></span>.
+                           Proximity displays the <span class="guilabel">Open</span> dialog.
+                        </p>
+                     </li>
+                     <li>
+                        <p>Navigate to the <code class="filename">$PROX_HOME/doc/user/tutorial/examples</code> directory and
+                           choose <code class="filename">social-networking-algs.py</code>.
+                           Click <span><strong class="guibutton">Open</strong></span>.
+                        </p>
+                        <p>Proximity opens a window to show you any output from the script
+                           along with a trace of the script execution.
+                           Note that this script may take several minutes to run.
+                           Proximity reports:
+                           
+                           
+                        </p><pre class="screen">Status: starting running script: 
+  /proximity/doc/user/tutorial/examples/social-networking-algs.py
+Computing clustering coefficients
+Computing connected components
+Computing hubs and authorities
+Status: finished running script
+</pre><p>
+                           
+                           You can close this window after the script finishes.
+                        </p>
+                     </li>
+                     <li>
+                        <p>Click <span><strong class="guibutton">Object Attributes</strong></span> to see the new
+                           attributes created by the clustering coefficient and hubs and
+                           authorities calculations.  If you wish, you can explore these
+                           attributes further.
+                           
+                        </p>
+                        <div class="itemizedlist">
+                           <ul type="disc" compact>
+                              <li>
+                                 <p>The <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">proxwebkb-cluster-coeff</span>
+                                      attribute records the clustering
+                                      coefficient for each input object having two or more neighbors in
+                                      the input data. The clustering coefficient is a ratio, thus all
+                                      values lie between 0 and 1, inclusive.
+                                 </p>
+                              </li>
+                              <li>
+                                 <p>The <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">proxwebkb-authorities</span>
+                                      attribute records the authority
+                                      weight calculated for each input object.
+                                 </p>
+                              </li>
+                              <li>
+                                 <p>The <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">proxwebkb-hubs</span>
+                                      attribute records the hub weight calculated
+                                      for each input object.
+                                 </p>
+                              </li>
+                           </ul>
+                        </div>
+                     </li>
+                     <li>
+                        <p>Return to the Proximity Database Browser start page and click
+                           <span><strong class="guibutton">Containers</strong></span> to see the new
+                           proxwebkb-connected-components container created by
+                           the connected components method.
+                        </p>
+                     </li>
+                     <li>
+                        <p>Click <span><strong class="guibutton">proxwebkb-connected-components</strong></span> to
+                           see the list of subgraphs in this container. Proximity found 17
+                           distinct components in the ProxWebKB data. If you wish, you can explore
+                           these subgraphs further.
+                        </p>
+                     </li>
+                  </ol>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s06.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s08.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Adding a New Attribute&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Working with Proximity Tables</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

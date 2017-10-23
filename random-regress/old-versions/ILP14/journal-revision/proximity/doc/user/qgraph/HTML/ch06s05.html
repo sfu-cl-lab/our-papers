@@ -1,0 +1,166 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Summary</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Subqueries">
+      <link rel="prev" href="ch06s04s04.html" title="Constraint restrictions">
+      <link rel="next" href="apa.html" title="Appendix&nbsp;A.&nbsp;Using the Proximity Query Editor">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s04s04.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Subqueries</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="apa.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="qg_subq_summary"></a>Summary
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e7276"></a><div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Subquery structure</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>Subqueries let you attach a 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e555"><span class="glossterm">numeric annotation</span></a> to a
+                         connected set of vertices and edges instead of just a single
+                         vertex or edge.
+                  </p>
+               </li>
+               <li>
+                  <p>A subquery must be connected to one or more vertices in the
+                         main query.
+                  </p>
+               </li>
+               <li>
+                  <p>A subquery&#8217;s
+                         <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e75"><span class="glossterm">boundary edge</span></a></em></span>
+                         <a class="indexterm" name="d0e7300"></a>
+                         <a class="indexterm" name="d0e7304"></a>
+                         connects a vertex inside the subquery (the boundary
+                         vertex) to a vertex outside of the subquery.
+                  </p>
+               </li>
+               <li>
+                  <p>A subquery&#8217;s
+                         <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e81"><span class="glossterm">boundary vertex</span></a></em></span>
+                         <a class="indexterm" name="d0e7317"></a>
+                         <a class="indexterm" name="d0e7321"></a>
+                         is a vertex inside the subquery box that is connected to the main
+                         query by a boundary edge.
+                  </p>
+               </li>
+               <li>
+                  <p>The 
+                         <span class="emphasis"><em><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e417"><span class="glossterm">inner structure</span></a></em></span> of a
+                         subquery is 
+                         the set of objects and links inside the subquery box. A boundary
+                         edge is not part of a subquery&#8217;s inner structure; a boundary
+                         vertex is included in the inner structure.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Subquery requirements</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>The inner structure of a subquery must be a
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e848"><span class="glossterm">well-formed</span></a>
+                         query in its own right.
+                  </p>
+               </li>
+               <li>
+                  <p>A subquery&#8217;s inner structure may not be 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e286"><span class="glossterm">disconnected</span></a>.
+                  </p>
+               </li>
+               <li>
+                  <p>All subqueries must be annotated.</p>
+               </li>
+               <li>
+                  <p>The boundary edge of a subquery must be annotated.</p>
+               </li>
+               <li>
+                  <p>The vertex outside the subquery connected to the boundary
+                         edge may not be annotated.
+                  </p>
+               </li>
+               <li>
+                  <p>Draw subqueries as single vertices to better understand
+                         query structure and annotation requirements.
+                  </p>
+               </li>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">Constraints</span></a> on
+                         elements within a subquery must obey the same 
+                         rules that apply to any QGraph constraint.
+                  </p>
+               </li>
+               <li>
+                  <p>Two subqueries may not be connected by a single edge.</p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Implementation restrictions</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>A subquery must be connected to the main query by a single
+                         edge; multiple boundary edges are not permitted.
+                  </p>
+               </li>
+               <li>
+                  <p>The boundary vertex of a subquery may not be annotated.</p>
+               </li>
+               <li>
+                  <p>Constraints that cross subquery boundaries require that one
+                         of the items being compared be
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e573"><span class="glossterm">optional</span></a> (have
+                         an annotation of <code class="token">[0..]</code> or
+                         <code class="token">[0..<em class="replaceable"><code>j</code></em>]</code>).
+                  </p>
+               </li>
+               <li>
+                  <p>Proximity prohibits constraints between an annotated item
+                         and an item within an annotated subquery.
+                  </p>
+               </li>
+               <li>
+                  <p>Nested subqueries are not permitted.</p>
+               </li>
+            </ul>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s04s04.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="apa.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Constraint restrictions&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Appendix&nbsp;A.&nbsp;Using the Proximity Query Editor</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

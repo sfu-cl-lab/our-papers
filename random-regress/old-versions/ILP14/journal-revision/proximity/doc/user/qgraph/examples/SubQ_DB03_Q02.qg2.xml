@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for 
+     copyright and license information). -->
+
+<graph-query name="SubQ_DB03_Q02">
+  <description>Two degrees of separation - with constraint</description>
+  <query-body>
+    <vertex name="start" />
+    <edge name="link1">
+      <vertex1>start</vertex1>
+      <vertex2>1degree</vertex2>
+      <directed>true</directed>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <subquery>
+      <vertex name="2degrees">
+        <numeric-annotation>
+          <min>0</min>
+        </numeric-annotation>
+      </vertex>
+      <vertex name="1degree" />
+      <edge name="link2">
+        <vertex1>1degree</vertex1>
+        <vertex2>2degrees</vertex2>
+        <directed>true</directed>
+        <numeric-annotation>
+          <min>1</min>
+        </numeric-annotation>
+      </edge>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </subquery>
+    <constraint>
+      <and>
+        <test>
+          <operator>ne</operator>
+          <item>
+            <item-name>start</item-name>
+            <id />
+          </item>
+          <item>
+            <item-name>2degrees</item-name>
+            <id />
+          </item>
+        </test>
+      </and>
+    </constraint>
+  </query-body>
+  <editor-data>
+    <vertex-location name="start" x="70.0" y="91.0" />
+    <vertex-location name="2degrees" x="470.0" y="93.0" />
+    <vertex-location name="1degree" x="282.0" y="92.0" />
+  </editor-data>
+</graph-query>
+

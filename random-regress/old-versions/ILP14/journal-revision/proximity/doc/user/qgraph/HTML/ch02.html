@@ -1,0 +1,163 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Chapter&nbsp;2.&nbsp;Query Basics</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="prev" href="ch01.html" title="Chapter&nbsp;1.&nbsp;Introduction">
+      <link rel="next" href="ch02s02.html" title="Query Results">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch01.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">&nbsp;</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch02s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="chapter" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title"><a name="qg_ch_basics"></a>Chapter&nbsp;2.&nbsp;Query Basics
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <div class="toc">
+            <p><b>Table of Contents</b></p>
+            <dl>
+               <dt><span class="sect1"><a href="ch02.html#d0e498">Query Structure</a></span></dt>
+               <dt><span class="sect1"><a href="ch02s02.html">Query Results</a></span></dt>
+               <dt><span class="sect1"><a href="ch02s03.html">Undirected Edges</a></span></dt>
+               <dt><span class="sect1"><a href="ch02s04.html">Handling Database Self-Links</a></span></dt>
+               <dt><span class="sect1"><a href="ch02s05.html">Implementation in Proximity</a></span></dt>
+               <dd>
+                  <dl>
+                     <dt><span class="sect2"><a href="ch02s05.html#d0e1072">Query results</a></span></dt>
+                     <dt><span class="sect2"><a href="ch02s05s02.html">Efficiency considerations</a></span></dt>
+                  </dl>
+               </dd>
+               <dt><span class="sect1"><a href="ch02s06.html">Summary</a></span></dt>
+            </dl>
+         </div>
+         <div class="sect1" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h2 class="title" style="clear: both"><a name="d0e498"></a>Query Structure
+                     </h2>
+                  </div>
+               </div>
+            </div>
+            <p>A QGraph query
+               <a class="indexterm" name="d0e503"></a>
+               is a labeled graph that describes the structure
+               and content of the database entities (objects and links) to be
+               matched.  <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e824"><span class="glossterm">Vertices</span></a> and
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e310"><span class="glossterm">edges</span></a> in the query correspond
+               to <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_object"><span class="glossterm">objects</span></a> and 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#gloss_link"><span class="glossterm">links</span></a> in the database. Every
+               query must have at least one vertex and 
+               every edge must have vertices at both ends. A QGraph query must be
+               a connected graph, with a single vertex being the simplest QGraph
+               query.
+            </p>
+            <p>QGraph queries are represented graphically.
+               <a class="indexterm" name="d0e523"></a>
+               <a class="indexterm" name="d0e529"></a>
+               The example below
+               shows a query that matches two objects connected by a directed link.
+               
+            </p>
+            <div class="figure"><a name="fig_basic_query"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/Basics_Query_Structure.png" align="middle" width="328.50000000000006" alt="Example query structure"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;2.1.&nbsp;Example query structure</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>Each vertex and edge in a QGraph query has a unique 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e528"><span class="glossterm">name</span></a>
+               <a class="indexterm" name="d0e549"></a>
+               <a class="indexterm" name="d0e555"></a>
+               <a class="indexterm" name="d0e561"></a>
+               <a class="indexterm" name="d0e567"></a>
+               within the context of the query. These names have no intrinsic
+               meaning and serve mostly to provide meaningful labels
+               to the user in query results.
+            </p>
+            <p>For the example queries in this document, we use either
+               arbitrary alphabetic labels
+               <a class="indexterm" name="d0e575"></a>
+               or semantically meaningful names for ease
+               in understanding the query.  For example, if we define a query
+               vertex that matches database objects with the attribute value 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ObjType&nbsp;=&nbsp;movie</span>, we might call this the
+               <em class="token">movie</em> vertex.  Similarly, a 
+               query edge defined to match links with the attribute value 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">LinkType&nbsp;=&nbsp;acted-in</span> might be named
+               <em class="token">appeared-in</em> in the query. 
+               By convention, when using alphabetic 
+               labels, we use letters at the beginning of the alphabet such as
+               <em class="token">A</em>, <em class="token">B</em>, and <em class="token">C</em>
+               to label vertices, and letters at the end of the alphabet such as
+               <em class="token">X</em>, <em class="token">Y</em>, and
+               <em class="token">Z</em> to label edges.
+               When context makes the intent clear, we will also use an informal
+               shorthand to refer to database entities within this document. For
+               example, we might refer to an object with the attribute 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Name&nbsp;=&nbsp;James Dean</span> as the 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">James Dean</span> object.
+               
+            </p>
+            <p>Although the underlying graph model uses only directed
+               <a class="indexterm" name="d0e619"></a>
+               <a class="indexterm" name="d0e625"></a>
+               <a class="indexterm" name="d0e633"></a>
+               <a class="indexterm" name="d0e641"></a>
+               <a class="indexterm" name="d0e647"></a>
+               <a class="indexterm" name="d0e653"></a>
+               links, QGraph supports both directed and undirected edges.  That is,
+               QGraph requires that the database use directed, binary links, but 
+               queries can either specify a required direction
+               for edges and thus for
+               corresponding links in the database, or indicate that the
+               directionality of a
+               link doesn&#8217;t matter when matching the query.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch01.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center">&nbsp;</td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch02s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;1.&nbsp;Introduction&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Query Results</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

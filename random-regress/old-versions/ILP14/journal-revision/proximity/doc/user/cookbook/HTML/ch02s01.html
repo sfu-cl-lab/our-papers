@@ -1,0 +1,308 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>2.1.&nbsp;Creating Shortcut Links</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Cookbook">
+      <link rel="up" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Database Manipulation">
+      <link rel="prev" href="ch02.html" title="Chapter&nbsp;2.&nbsp;Database Manipulation">
+      <link rel="next" href="ch02s02.html" title="2.2.&nbsp;Creating Attributes from Arbitrary Data">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;2.&nbsp;Database Manipulation</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch02s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="section" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="recipe_shortcutlinks"></a>2.1.&nbsp;Creating Shortcut Links
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e91"></a><a class="indexterm" name="d0e96"></a><a class="indexterm" name="d0e101"></a><a class="indexterm" name="d0e106"></a><a class="indexterm" name="d0e109"></a><a class="indexterm" name="d0e114"></a><a class="indexterm" name="d0e119"></a><a class="indexterm" name="d0e124"></a><a class="indexterm" name="d0e129"></a><a class="indexterm" name="d0e134"></a><a class="indexterm" name="d0e139"></a><a class="indexterm" name="d0e144"></a><a class="indexterm" name="d0e149"></a><a class="indexterm" name="d0e154"></a><a class="indexterm" name="d0e159"></a><a class="indexterm" name="d0e164"></a><a class="indexterm" name="d0e169"></a><a class="indexterm" name="d0e174"></a><a class="indexterm" name="d0e181"></a><a class="indexterm" name="d0e188"></a><a class="indexterm" name="d0e193"></a><a class="indexterm" name="d0e198"></a><a class="indexterm" name="d0e203"></a><a class="indexterm" name="d0e208"></a><a class="indexterm" name="d0e213"></a><a class="indexterm" name="d0e218"></a><a class="indexterm" name="d0e224"></a><a class="indexterm" name="d0e227"></a><a class="indexterm" name="d0e233"></a><a class="indexterm" name="d0e236"></a><a class="indexterm" name="d0e241"></a><a class="indexterm" name="d0e244"></a><a class="indexterm" name="d0e249"></a><a class="indexterm" name="d0e252"></a><a class="indexterm" name="d0e257"></a><a class="indexterm" name="d0e260"></a><a class="indexterm" name="d0e265"></a><a class="indexterm" name="d0e268"></a><a class="indexterm" name="d0e273"></a><a class="indexterm" name="d0e276"></a><a class="indexterm" name="d0e281"></a><a class="indexterm" name="d0e284"></a><div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e292"></a>Problem
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>You need to create direct links between all pairs of objects that are
+               connected to a common third item. A typical example of this task is
+               building the actor collaboration network 
+               in the IMDB: You want to
+               create a direct link between two actors if they have both acted in the
+               same movie (i.e., if they both have an 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ActedIn</span> link to the same 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Movie</span> object).
+            </p>
+            <p>Suppose for example that there are two movies in your database,
+               and three different actors:
+               
+            </p>
+            <div class="blockquote">
+               <blockquote class="blockquote">
+                  <div class="literallayout">
+                     <p>movie&nbsp;300&nbsp;linked&nbsp;to&nbsp;actors&nbsp;30&nbsp;and&nbsp;40<br>
+                        movie&nbsp;400&nbsp;linked&nbsp;to&nbsp;actors&nbsp;30,&nbsp;40,&nbsp;and&nbsp;50<br>
+                        
+                     </p>
+                  </div>
+               </blockquote>
+            </div>
+            <p>
+               You would then like to create a link between the following pairs of
+               actors (with one link in each direction):
+               
+            </p>
+            <div class="blockquote">
+               <blockquote class="blockquote">
+                  <div class="literallayout">
+                     <p>30&nbsp;and&nbsp;40,&nbsp;and&nbsp;40&nbsp;and&nbsp;30&nbsp;(because&nbsp;they&nbsp;were&nbsp;together&nbsp;in&nbsp;the&nbsp;two&nbsp;movies)<br>
+                        30&nbsp;and&nbsp;50,&nbsp;and&nbsp;50&nbsp;and&nbsp;30&nbsp;(because&nbsp;they&nbsp;were&nbsp;together&nbsp;in&nbsp;the&nbsp;second&nbsp;movie)<br>
+                        40&nbsp;and&nbsp;50,&nbsp;and&nbsp;50&nbsp;and&nbsp;40&nbsp;(because&nbsp;they&nbsp;were&nbsp;together&nbsp;in&nbsp;the&nbsp;second&nbsp;movie)<br>
+                        
+                     </p>
+                  </div>
+               </blockquote>
+            </div>
+            <p>
+               
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e316"></a>Solution
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>It is possible to solve this problem with QGraph, with a query
+               containing three vertices: a main <em class="token">actor</em>
+               vertex connected to a central <em class="token">movie</em>
+               vertex (via an <em class="token">acted-in</em> edge), which in turn
+               is connected to an annotated vertex named 
+               <em class="token">collaborator</em>. This query will create a
+               subgraph for each actor and each movie that she or he has been in,
+               with the list of all the people who have acted in the same film. You
+               can then use the Add-links feature of
+               QGraph to create a new link for each distinct pair
+               of <em class="token">actor</em> and 
+               <em class="token">collaborator</em>, adding the constraint
+               that 
+               <em class="token">actor</em>&nbsp;&lt;&nbsp;&gt;&nbsp;<em class="token">collaborator</em>
+               to avoid self links.
+            </p>
+            <p>Even though the QGraph approach works, it is very inefficient: QGraph
+               pays a high performance penalty in exchange for its support of very
+               complex queries. Sometimes it is more convenient to simulate the
+               execution of the query manually, to speed up the processing and avoid
+               unnecessary steps.
+            </p>
+            <p>In this particular case, all we need to do is find the links of
+               the type we are interested in (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ActedIn</span>) and
+               simply join them with themselves based on equal values of the 
+               movie endpoint (which in the IMDB are stored as the <code class="code">o2_id</code>
+               end&#8212;that is, the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ActedIn</span> links go from 
+               actors to movies).
+               We begin by getting all the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">ActedIn</span> links:
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>actedInLinks = DB.getLinks("link_type = 'ActedIn'")
+ printNST(actedInLinks)</code></strong>
+</pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,link_id,o1_id,o2_id,link_type WHERE * LIMIT *]
+[ 0@0,    1@0,    30@0,   300@0,   "ActedIn"    ]
+[ 1@0,    2@0,    40@0,   300@0,   "ActedIn"    ]
+[ 2@0,    3@0,    30@0,   400@0,   "ActedIn"    ]
+[ 3@0,    4@0,    40@0,   400@0,   "ActedIn"    ]
+[ 4@0,    5@0,    50@0,   400@0,   "ActedIn"    ]
+</pre><p>
+               
+            </p>
+            <p>A join of the table with itself based on equal 
+               <code class="code">o2_id</code> produces the table shown below:
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>collaboratedLinks = actedInLinks.join(actedInLinks , "o2_id = o2_id")
+ printNST(collaboratedLinks)</code></strong>
+</pre><p>
+               
+               
+               
+            </p><pre class="screen">[SHOWING head,A.link_id,A.o1_id,A.o2_id,A.link_type,B.link_id,B.o1_id,B.o2_id,\
+B.link_type WHERE * LIMIT *]
+[ 0@0,   1@0,   30@0,   300@0,   "ActedIn",   1@0,   30@0,   300@0,   "ActedIn"    ]
+[ 1@0,   1@0,   30@0,   300@0,   "ActedIn",   2@0,   40@0,   300@0,   "ActedIn"    ]
+[ 2@0,   2@0,   40@0,   300@0,   "ActedIn",   1@0,   30@0,   300@0,   "ActedIn"    ]
+[ 3@0,   2@0,   40@0,   300@0,   "ActedIn",   2@0,   40@0,   300@0,   "ActedIn"    ]
+[ 4@0,   3@0,   30@0,   400@0,   "ActedIn",   3@0,   30@0,   400@0,   "ActedIn"    ]
+[ 5@0,   3@0,   30@0,   400@0,   "ActedIn",   4@0,   40@0,   400@0,   "ActedIn"    ]
+[ 6@0,   3@0,   30@0,   400@0,   "ActedIn",   5@0,   50@0,   400@0,   "ActedIn"    ]
+[ 7@0,   4@0,   40@0,   400@0,   "ActedIn",   3@0,   30@0,   400@0,   "ActedIn"    ]
+[ 8@0,   4@0,   40@0,   400@0,   "ActedIn",   4@0,   40@0,   400@0,   "ActedIn"    ]
+[ 9@0,   4@0,   40@0,   400@0,   "ActedIn",   5@0,   50@0,   400@0,   "ActedIn"    ]
+[ 10@0,  5@0,   50@0,   400@0,   "ActedIn",   3@0,   30@0,   400@0,   "ActedIn"    ]
+[ 11@0,  5@0,   50@0,   400@0,   "ActedIn",   4@0,   40@0,   400@0,   "ActedIn"    ]
+[ 12@0,  5@0,   50@0,   400@0,   "ActedIn",   5@0,   50@0,   400@0,   "ActedIn"    ]
+</pre><p>
+               
+               We remove the self links, that is, those rows where the two
+               actors (<code class="code">o1_id</code>s) 
+               are the same, creating a new NST that contains only the two actor IDs
+               (<code class="code">A.o1_id</code> and <code class="code">B.o1_id</code>):
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>noLoops=collaboratedLinks.filter("A.o1_id != B.o1_id", "A.o1_id, B.o1_id")
+ printNST(noLoops)</code></strong>
+</pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,A.o1_id,B.o1_id WHERE * LIMIT *]
+[ 1@0,    30@0,   40@0    ]
+[ 2@0,    40@0,   30@0    ]
+[ 5@0,    30@0,   40@0    ]
+[ 6@0,    30@0,   50@0    ]
+[ 7@0,    40@0,   30@0    ]
+[ 9@0,    40@0,   50@0    ]
+[ 10@0,   50@0,   30@0    ]
+[ 11@0,   50@0,   40@0    ]
+</pre><p>
+               
+               The problem with this table is that we have more than one row
+               per pair of collaborating actors, one for each movie they collaborated
+               in. In particular, the pairs (30,40) and (40,30) appear twice, once
+               for the first movie and another time for the second. We want to create
+               a single link per pair of collaborating actors, so we use the
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/dbmgr/NST.html#distinct(java.lang.String)"><code class="methodname">distinct()</code></a> method to get the correct rows from the table above:
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>noRepeats=noLoops.distinct("A.o1_id, B.o1_id")
+ printNST(noRepeats)</code></strong>
+</pre><p>
+               
+               
+            </p><pre class="screen">[SHOWING head,A.o1_id,B.o1_id WHERE * LIMIT *]
+[ 0@0,   30@0,   40@0    ]
+[ 1@0,   40@0,   30@0    ]
+[ 2@0,   30@0,   50@0    ]
+[ 3@0,   40@0,   50@0    ]
+[ 4@0,   50@0,   30@0    ]
+[ 5@0,   50@0,   40@0    ]
+</pre><p>
+               
+               That is exactly what we want! We&#8217;re now ready to save the new
+               links permanently, which we can easily do with the 
+               <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/DB.html#createLinks(kdl.prox.dbmgr.NST)"><code class="methodname">createLinks()</code></a> method from the <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/DB.html"><code class="classname">DB</code></a> class. This method requires
+               that the passed in NST has columns named &#8220;from&#8221; and
+               &#8220;to&#8221;, so we rename them first:
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>DB.createLinks(noRepeats.renameColumns("from, to"))</code></strong>
+</pre><p>
+               
+               And that&#8217;s it. You now have six new links, connecting the
+               actors that have collaborated in the same movie.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e431"></a>Discussion
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>The combination of NST operations with <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/DB.html#createLinks(kdl.prox.dbmgr.NST)"><code class="methodname">createLinks()</code></a>
+               gives you a lot of power to add new links to your database. 
+               The <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/DB.html#createLinks(kdl.prox.dbmgr.NST)"><code class="methodname">createLinks()</code></a> method becomes particularly handy with its ability
+               to also create attributes on those new links: for every column named
+               <code class="code">attr_*</code> in the NST you pass in, it will create (add) the
+               corresponding values to the attribute for the new links, and create
+               the attribute first if it does not already exist. We can, for
+               example, set the <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">link_type</span> of the 
+               new actor-to-actor links to be
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">CollaboratedWith</span>:
+               
+               
+            </p><pre class="programlisting"> <strong class="userinput"><code>noRepeats.renameColumns("from, to")
+ noRepeats.addConstantColumn("attr_link_type", "str", "CollaboratedWith")
+ DB.createLinks(noRepeats);</code></strong>
+</pre><p>What&#8217;s more, the attribute columns don&#8217;t necessarily
+               have to be constants, but can instead hold any arbitrary value. 
+               For example, if you wanted to also save, as attributes on the links,
+               the names of the two actors, you could add to the noRepeats NST two
+               columns, say <code class="code">attr_actor1Name</code> and
+               <code class="code">attr_actor2Name</code> (by joining the NST with the attribute
+               table that holds the name of actors), before passing it to
+               <code class="code">DB.createLinks()</code>.
+            </p>
+            <p>The general lesson to keep in mind is that <a xmlns:exsl="http://exslt.org/common" href="../../../../javadoc/kdl/prox/db/DB.html#createLinks(kdl.prox.dbmgr.NST)"><code class="methodname">createLinks()</code></a> allows
+               you add new links to the database from the contents of any NST. You
+               can create shortcut links as in the example above, self-loop links,
+               links between objects for which there is no path, or in fact any kind
+               of links you want. It all depends on the contents of the arbitrary NST
+               that you pass in.
+            </p>
+         </div>
+         <div class="section" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e477"></a>Supporting Files
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Download the following XML data file to
+               create the database used above to demonstrate this recipe:
+               
+            </p>
+            <div class="itemizedlist">
+               <ul type="disc" compact>
+                  <li>
+                     <p>Database: 
+                             <code class="filename"><a href="../examples/DBManip_ShortcutLinks_DB.xml" target="_top">DBManip_ShortcutLinks_DB.xml</a></code>
+                          
+                     </p>
+                  </li>
+               </ul>
+            </div>
+            <p>
+               You may also want to examine the unit test file for this recipe at
+               <code class="filename">$PROX_HOME/test/java/kdl/prox/cookbook/CreateLinksTest.java</code>.
+               
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch02.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch02s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;2.&nbsp;Database Manipulation&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;2.2.&nbsp;Creating Attributes from Arbitrary Data</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

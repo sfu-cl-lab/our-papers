@@ -1,0 +1,328 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Tips and Reminders</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Querying the Database">
+      <link rel="prev" href="ch05s10.html" title="Querying Containers">
+      <link rel="next" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch05s10.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;5.&nbsp;Querying the Database</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="query_tips"></a>Tips and Reminders
+                  </h2>
+               </div>
+            </div>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>General query requirements</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>See the <em class="citetitle"><span class="phrase"><a href="../../qgraph/HTML/index.html" target="_top">Proximity QGraph Guide</a></span>
+                           
+                           
+                           </em> for
+                         a complete description of the QGraph language as implemented in
+                         Proximity.
+                  </p>
+               </li>
+               <li>
+                  <p>Queries run from the Query Editor are always executed
+                         against the entire database.
+                  </p>
+               </li>
+               <li>
+                  <p>Queries run from the Proximity Database Browser or from the command line can
+                         be optionally executed against the contents of a 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e234"><span class="glossterm">container</span></a>.
+                  </p>
+               </li>
+               <li>
+                  <p>The QGraph 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e304"><span class="glossterm">DTD</span></a>, 
+                         <code class="filename">graph-query.dtd</code>,
+                         <a class="indexterm" name="d0e9915"></a>
+                         <a class="indexterm" name="d0e9919"></a>
+                         must reside in the same directory as the query file. 
+                         Make sure that you copy the DTD file from
+                         <code class="filename">$PROX_HOME/resources</code> to the directory
+                         containing the query file before executing the query.
+                  </p>
+               </li>
+               <li>
+                  <p>Every query must have at least one
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e824"><span class="glossterm">vertex</span></a>.
+                  </p>
+               </li>
+               <li>
+                  <p>Every query <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e310"><span class="glossterm">edge</span></a> must have vertices
+                         at both ends.
+                  </p>
+               </li>
+               <li>
+                  <p>Queries must be connected.</p>
+               </li>
+               <li>
+                  <p>Queries must remain connected after
+                         any <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e573"><span class="glossterm">optional</span></a> or 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e534"><span class="glossterm">negated elements</span></a>
+                         are removed.
+                  </p>
+               </li>
+               <li>
+                  <p>Each vertex and edge in a query must have a unique label
+                         (<a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e528"><span class="glossterm">name</span></a>).
+                  </p>
+               </li>
+               <li>
+                  <p>Proximity ignores case when matching attribute names
+                         to those in the database.  Proximity obeys case when matching
+                         attribute values with those in the database.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Condition requirements</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e49"><span class="glossterm">Attribute value conditions</span></a>
+                         restrict query matches to objects or links that match the specified
+                         attribute value.
+                  </p>
+               </li>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e340"><span class="glossterm">Existence conditions</span></a>
+                         restrict query matches to objects or links that have any value for
+                         the specified attribute.
+                  </p>
+               </li>
+               <li>
+                  <p>Use <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e292"><span class="glossterm">disjunctive normal form</span></a> in 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e601"><span class="glossterm">prefix notation</span></a> to create
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e156"><span class="glossterm">complex
+                               conditions</span></a> from simple conditions.
+                  </p>
+               </li>
+               <li>
+                  <p>Surround values (i.e., vertex and edge labels or
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e35"><span class="glossterm">attribute</span></a> names and 
+                         values) containing spaces with single quotes.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Annotation requirements</b></p><a class="indexterm" name="d0e9995"></a><ul type="disc" compact>
+               <li>
+                  <p>An edge incident to an 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e555"><span class="glossterm">annotated</span></a>
+                         vertex must be annotated.
+                  </p>
+               </li>
+               <li>
+                  <p>The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e75"><span class="glossterm">boundary edge</span></a> of an annotated
+                         subquery must be annotated.
+                  </p>
+               </li>
+               <li>
+                  <p>At most, only one of two adjacent elements can be
+                         annotated; no edges are allowed between two annotated
+                         elements.
+                  </p>
+               </li>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e573"><span class="glossterm">Optional</span></a>
+                         and <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e534"><span class="glossterm">negated</span></a>
+                         edges are not permitted.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Constraint requirements</b></p><a class="indexterm" name="d0e10024"></a><ul type="disc" compact>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e385"><span class="glossterm">Identity constraints</span></a>
+                         compare <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e567"><span class="glossterm">IDs</span></a> 
+                         with each other.
+                  </p>
+               </li>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e41"><span class="glossterm">Attribute constraints</span></a>
+                         compare attribute values with each other.
+                  </p>
+               </li>
+               <li>
+                  <p>Mixing IDs and attribute values in a constraint is not
+                         permitted. (You may, however, 
+                         compare values for different attributes as long as they are of
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e129"><span class="glossterm">comparable types</span></a>.)
+                  </p>
+               </li>
+               <li>
+                  <p>Constraints are only allowed between two vertices or two 
+                         edges; mixing vertices and edges is not permitted.
+                  </p>
+               </li>
+               <li>
+                  <p>No constraints are allowed between two annotated
+                         elements.
+                  </p>
+               </li>
+               <li>
+                  <p>If one of two items in a constraint is annotated, the other
+                          cannot be part of an annotated subquery.
+                  </p>
+               </li>
+               <li>
+                  <p>With one exception, Proximity prohibits constraints between
+                          two edges when one of them is annotated. Proximity allows such
+                          constraints when the vertex adjacent to the annotated edge is itself
+                          annotated with <code class="token">[0..]</code> or
+                          <code class="token">[0..<em class="replaceable"><code>j</code></em>]</code>.
+                  </p>
+               </li>
+               <li>
+                  <p>Constraints can only be combined with AND;
+                     <a class="indexterm" name="d0e10070"></a>
+                     <a class="indexterm" name="d0e10074"></a>
+                     <a class="indexterm" name="d0e10078"></a>
+                          OR and NOT are not allowed.
+                  </p>
+               </li>
+               <li>
+                  <p>Constraints that cross subquery boundaries require that one
+                         of the items being compared be optional (have an annotation of 
+                         <code class="token">[0..]</code> or
+                         <code class="token">[0..<em class="replaceable"><code>j</code></em>]</code>).
+                  </p>
+               </li>
+               <li>
+                  <p>Surround values (i.e., vertex and edge labels or attribute
+                         names and values) containing spaces with single quotes.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Subquery requirements</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>A <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e755"><span class="glossterm">subquery</span></a> must be a 
+                         <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e848"><span class="glossterm">well-formed</span></a> query by
+                         itself.
+                  </p>
+               </li>
+               <li>
+                  <p>All subqueries must be annotated.</p>
+               </li>
+               <li>
+                  <p>The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e75"><span class="glossterm">boundary edge</span></a> of a subquery must be
+                         annotated.
+                         <a class="indexterm" name="d0e10120"></a>
+                         <a class="indexterm" name="d0e10126"></a>
+                     
+                  </p>
+               </li>
+               <li>
+                  <p>The <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e81"><span class="glossterm">boundary vertex</span></a> of a subquery
+                         cannot be annotated.
+                  </p>
+               </li>
+               <li>
+                  <p>The vertex outside the subquery connected to the boundary
+                         edge cannot be annotated.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Update requirements</b></p><a class="indexterm" name="d0e10144"></a><a class="indexterm" name="d0e10149"></a><a class="indexterm" name="d0e10154"></a><ul type="disc" compact>
+               <li>
+                  <p>The QGraph language provides full update functionality;
+                         however, Proximity currently implements only the ability to add
+                         links using queries.
+                  </p>
+               </li>
+               <li>
+                  <p>A query&#8217;s match phase is distinct from its update
+                         phase; new database elements added by a query do not change a
+                         query&#8217;s matches.
+                  </p>
+               </li>
+               <li>
+                  <p>New database elements added by a query are not included in the
+                         query&#8217;s results (subgraphs).
+                  </p>
+               </li>
+               <li>
+                  <p>You must specify an attribute value for all new links. The
+                         attribute value must be constant&#8212;the same for all new links
+                         added by the query.
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <div class="itemizedlist">
+            <p xmlns:exsl="http://exslt.org/common" class="title"><b>Additional Information</b></p>
+            <ul type="disc" compact>
+               <li>
+                  <p>See the <em class="citetitle"><span class="phrase"><a href="../../qgraph/HTML/index.html" target="_top">Proximity QGraph Guide</a></span>
+                           
+                           
+                           </em> for additional
+                         details on the QGraph 
+                         language and it&#8217;s implementation in Proximity.
+                  </p>
+               </li>
+               <li>
+                  <p>See <a href="ch07.html" title="Chapter&nbsp;7.&nbsp;Learning Models">Chapter&nbsp;7, <i>Learning Models</i></a> for more information on how
+                         query elements and labels are used by Proximity&#8217;s
+                         models.
+                  </p>
+               </li>
+               <li>
+                  <p>See <a href="apa.html" title="Appendix&nbsp;A.&nbsp;Proximity Quick Reference">Appendix&nbsp;A, <i>Proximity Quick Reference</i></a> for a summary of how to
+                         use the location bar to directly access Proximity database
+                         elements including containers and subgraphs.
+                  </p>
+               </li>
+            </ul>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch05s10.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Querying Containers&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;6.&nbsp;Using Scripts</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

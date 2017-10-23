@@ -1,0 +1,1294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<!--
+  Should be able to use below, but DTD is not yet available from a
+  stable location and catalog resolver doesn't seem to work with 
+  validation using sax.Counter class
+
+  <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+      "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+-->
+
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+    "/usr/local/sgml/docbook-xml-4.4/docbookx.dtd" [
+<!ENTITY version "4.0">
+<!ENTITY prox3 "Proximity&nbsp;&version;">
+<!ENTITY prox2 "Proximity&nbsp;2.0">
+<!ENTITY proxpath "$PROX_HOME">
+<!ENTITY licensefile '<ulink url="../../../LICENSE">LICENSE</ulink>'>
+]>
+
+<article>
+<articleinfo>
+<title>Proximity 2.0 XML Data Format</title>
+<pubdate><?dbtimestamp format="B d, Y"?></pubdate>
+<copyright>
+<year>2004</year>
+<holder>David Jensen for the Knowledge Discovery Laboratory</holder>
+</copyright>
+</articleinfo>
+
+<para>This document describes the &prox2; XML data format. This format
+has been replaced by the Proximity&nbsp;3 XML format, which provides
+additional representational capability, for use with
+Proximity&nbsp;3.1 and later versions.
+The DTD for the &prox2; XML format is located in
+<filename>&proxpath;/resources/prox2db.dtd</filename>.</para>
+
+<para>This XML format was used to import data into and export data out
+of &prox2; databases.  &prox3; supports importing data in this format
+via the <command>import-prox2-xml.sh</command> and
+<command>import-prox2-xml.bat</command> scripts.  You cannot export
+data to the &prox2; XML format in &prox3;.
+We provide this description for use by groups that may need to
+work with older versions of Proximity or Proximity databases.</para>
+
+<sidebar>
+<para>For compatibility with MonetDB, single quotes, double quotes,
+and newline characters in the XML data are automatically
+changed to underscores when imported into &prox3;.</para>
+</sidebar>
+
+
+<!-- ============================================================== -->
+<!--                         DECLARATIONS                           -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Declarations</title>
+
+<para></para>
+
+<!-- ===== XML DECLARATION ======================================== -->
+
+<sect2>
+<title>XML declaration</title>
+
+<para>The XML data file must start with the following XML
+declaration:
+
+<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>]]>
+</programlisting>
+</para>
+
+</sect2>
+
+<!-- ===== DOCUMENT TYPE DECLARATION ============================== -->
+
+<sect2>
+<title>Document type declaration</title>
+
+<para>The document type declaration immediately follows the XML
+declaration. The XML data file must include the following document
+type declaration: 
+
+<programlisting><![CDATA[<!DOCTYPE PROX2DB SYSTEM "prox2db.dtd">]]>
+</programlisting>
+</para>
+
+<para>Note that the document type declaration uses a system identifier
+for the DTD. Proximity expects to find the
+<filename>prox2db.dtd</filename> file in the same directory as the XML
+data file during import.</para>
+
+</sect2>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                    THE PROX2DB ROOT ELEMENT                    -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>The <code role="heading">&lt;PROX2DB&gt;</code> root
+element</title> 
+
+<para>The root element for the XML data file is <sgmltag
+class="element">PROX2DB</sgmltag>. The <sgmltag
+class="element">PROX2DB</sgmltag> element must appear immediately
+after the document type declaration.
+The XML data file ends with the closing 
+<sgmltag class="endtag">PROX2DB</sgmltag> tag.
+</para>
+
+
+<bridgehead renderas="sect1"><code role="heading">&lt;PROX2DB&gt;</code></bridgehead>
+
+<!-- ===== PROX2DB : Attributes ======================================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">NAME</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of the database to be imported</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== PROX2DB : Children ========================================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_p2xml_objs"><sgmltag class="element">OBJECTS</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>A list of the objects in the database</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_p2xml_links"><sgmltag class="element">LINKS</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>A list of the links in the database</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_p2xml_attrs"><sgmltag class="element">ATTRIBUTES</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>A list of object and link attributes</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_p2xml_colls"><sgmltag class="element">COLLECTIONS</sgmltag></link></entry>
+<entry>zero or one</entry>
+<entry>A list of containers and their subgraphs</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== PROX2DB : Content Model ==================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(OBJECTS?, LINKS?, ATTRIBUTES?, COLLECTIONS?)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== PROX2DB : Example ========================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<PROX2DB NAME="TestDB">
+    <OBJECTS>...</OBJECTS>
+    <LINKS>...</LINKS>
+    <ATTRIBUTES>...</ATTRIBUTES>
+    <COLLECTIONS>...</COLLECTIONS>
+</PROX2DB>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                            OBJECTS                             -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_p2xml_objs">
+<title>Objects</title>
+
+<para>Database objects are specified by 
+<sgmltag class="element">OBJECT</sgmltag> elements, all of which must
+be included in a single <sgmltag class="element">OBJECTS</sgmltag>
+element.  The <sgmltag class="element">OBJECT</sgmltag> element is
+empty and includes one required attribute, 
+<sgmltag class="attribute">ID</sgmltag>, which specifies the value for
+the object's identifier.  <sgmltag class="attribute">ID</sgmltag>
+values must be unique non-negative integers and are typically sequential
+numbers.</para>
+
+<!-- ====================== ELEMENT : OBJECTS ===================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;OBJECTS&gt;</code></bridgehead>
+
+<!-- ===== OBJECTS : Attributes =================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== OBJECTS : Children ===================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">OBJECT</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">OBJECT</sgmltag>
+element for each object in the database.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== OBJECTS : Content Model =============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(OBJECT*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ====================== ELEMENT : OBJECT ====================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;OBJECT&gt;</code></bridgehead>
+
+<!-- ===== OBJECT : Attributes ==================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">ID</sgmltag></entry>
+<entry>required</entry>
+<entry>ID values must be unique non-negative integers and are typically
+sequential numbers.</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== OBJECT : Children ====================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== OBJECT : Content Model ================================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>EMPTY</literal>
+</para></blockquote></para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== OBJECTS/OBJECT : Example =============================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<OBJECTS>
+   <OBJECT ID="1"/>
+   <OBJECT ID="2"/>
+   <OBJECT ID="3"/>
+   <OBJECT ID="4"/>
+   <OBJECT ID="5"/>
+</OBJECTS>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                             LINKS                              -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_p2xml_links">
+<title>Links</title>
+
+<para>All Proximity links are binary (they connect exactly two
+objects) and directional.  Database links are specified by 
+<sgmltag class="element">LINK</sgmltag> elements, all of which must be
+included in a single <sgmltag class="element">LINKS</sgmltag>
+element.  The <sgmltag class="element">LINK</sgmltag> element is
+empty; its data is included in three required attributes, described
+below.  Object IDs must correspond to ID numbers specified in the
+<sgmltag class="element">OBJECT</sgmltag> elements in the same data
+file.</para>
+
+<!-- ====================== ELEMENT : LINKS ======================= -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;LINKS&gt;</code></bridgehead>
+
+<!-- ===== LINKS : Attributes ===================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== LINKS : Children ======================================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">LINK</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">LINK</sgmltag>
+element for each link in the database.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== LINKS : Content Model ================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(LINK*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+
+<!-- ====================== ELEMENT : LINK ======================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;LINK&gt;</code></bridgehead>
+
+<!-- ===== LINK : Attributes ====================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">ID</sgmltag></entry>
+<entry>required</entry>
+<entry>ID values must be unique non-negative integers and are typically
+sequential numbers.</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">01-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the start object for this link</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">02-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the end object for this link</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== LINK : Children ======================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== LINK : Content Model =================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>EMPTY</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== LINKS/LINK : Example =================================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<LINKS>
+   <LINK ID="1" O1-ID="1" O2-ID="2"/>
+   <LINK ID="2" O1-ID="2" O2-ID="1"/>
+   <LINK ID="3" O1-ID="2" O2-ID="3"/>
+   <LINK ID="4" O1-ID="1" O2-ID="4"/>
+   <LINK ID="5" O1-ID="2" O2-ID="4"/>
+   <LINK ID="6" O1-ID="3" O2-ID="5"/>
+</LINKS>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<?pagebreak?>
+<!-- ============================================================== -->
+<!--                          ATTRIBUTES                            -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_p2xml_attrs">
+<title>Attributes</title>
+
+<para>Attributes on the objects and links in the database are
+specified by <sgmltag class="element">ATTRIBUTE</sgmltag> elements, all
+of which must be included in a single 
+<sgmltag class="element">ATTRIBUTES</sgmltag> element. The
+<sgmltag class="element">ATTRIBUTE</sgmltag> element has three
+required attributes, described below.
+Each <sgmltag class="element">ATTRIBUTE</sgmltag> element
+contains a list of <sgmltag class="element">ATTR-VALUE</sgmltag>
+elements, one for each instance of that attribute in the database. The
+<sgmltag class="element">ATTR-VALUE</sgmltag> element specifies the
+value of the object or link attribute.
+The <sgmltag class="element">ATTR-VALUE</sgmltag> has one required attribute,
+<sgmltag class="attribute">ITEM-ID</sgmltag>, which specifies the ID
+of the object or link to which this attribute applies.
+Include multiple <sgmltag class="element">ATTR-VALUE</sgmltag>
+elements when an object or link has multiple values for an attribute.
+You cannot specify subgraph or container attributes in a
+&prox2; XML data file.</para>
+
+<para>The &prox2; XML data format requires the use of &prox2; data
+types. The correspondence of these data types to &prox3; data types is
+shown in the table, below.
+
+If imported into &prox3;, proximity automatically converts these types
+to the corresponding Proximity&nbsp;3 data types.
+<informaltable id="tbl_p2xml_import_datatypes">
+	<tgroup cols="2" align="left">
+	  <thead>
+	    <row>
+	      <entry>&prox2; data type</entry>
+	      <entry>Proximity&nbsp;3 data type</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry>BIGINT</entry>
+	      <entry>LNG</entry>
+	    </row>
+	    <row>
+	      <entry>DATE</entry>
+	      <entry>DATE</entry>
+	    </row>
+	    <row>
+	      <entry>DATETIME</entry>
+	      <entry>TIMESTAMP</entry>
+	    </row>
+	    <row>
+	      <entry>DOUBLE</entry>
+	      <entry>DBL</entry>
+	    </row>
+	    <row>
+	      <entry>INTEGER</entry>
+	      <entry>INT</entry>
+	    </row>
+	    <row>
+	      <entry>VARCHAR</entry>
+	      <entry>STR</entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+</informaltable>
+</para>
+
+<!-- ===================== ELEMENT : ATTRIBUTES =================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;ATTRIBUTES&gt;</code></bridgehead>
+
+<!-- ===== ATTRIBUTES : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== ATTRIBUTES : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">ATTRIBUTE</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">ATTRIBUTE</sgmltag>
+element for each object or link attribute in the database.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ATTRIBUTES : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(ATTRIBUTE*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ==================== ELEMENT : ATTRIBUTE ===================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;ATTRIBUTE&gt;</code></bridgehead>
+
+<!-- ===== ATTRIBUTE : Attributes ================================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">NAME</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of the object or link attribute</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">ITEM-TYPE</sgmltag></entry>
+<entry>required</entry>
+<entry>Specifies whether this is an object (O) or link (L)
+       attribute</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">DATA-TYPE</sgmltag></entry>
+<entry>required</entry>
+<entry>The &prox2; data type of the attribute</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<?pagebreak?>
+<!-- ===== ATTRIBUTE : Children =================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">ATTR-VALUE</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">ATTR-VALUE</sgmltag>
+element for each instance of this attribute in the database, that is, one
+for each object or link that has a value for this attribute.  Each 
+<sgmltag class="element">ATTR-VALUE</sgmltag> specifies a single
+value. The file includes multiple 
+<sgmltag class="element">ATTR-VALUE</sgmltag> 
+elements when an object or link has multiple values for a
+specified attribute.
+</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ATTRIBUTE : Content Model ============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(ATTR-VALUE*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===================== ELEMENT : ATTR-VALUE =================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;ATTR-VALUE&gt;</code></bridgehead>
+
+<!-- ===== ATTR-VALUE : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">ITEM-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the object or link to which this attribute applies</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ATTR-VALUE : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== ATTR-VALUE : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(#PCDATA)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== ATTRIBUTES/ATTRIBUTE : Example ========================= -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<ATTRIBUTES>
+        <ATTRIBUTE NAME="obj-type" ITEM-TYPE="O" DATA-TYPE="VARCHAR">
+            <ATTR-VALUE ITEM-ID="1">person</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="2">person</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="3">person</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="4">company</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="5">company</ATTR-VALUE>
+        </ATTRIBUTE>
+        <ATTRIBUTE NAME="name" ITEM-TYPE="O" DATA-TYPE="VARCHAR">
+            <ATTR-VALUE ITEM-ID="1">Daryl</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="2">Lisa</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="3">Maria</ATTR-VALUE>
+        </ATTRIBUTE>
+        <ATTRIBUTE NAME="corp-name" ITEM-TYPE="O" DATA-TYPE="VARCHAR">
+            <ATTR-VALUE ITEM-ID="4">Acme</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="5">Megacorp</ATTR-VALUE>
+        </ATTRIBUTE>
+        <ATTRIBUTE NAME="link-type" ITEM-TYPE="L" DATA-TYPE="VARCHAR">
+            <ATTR-VALUE ITEM-ID="1">has-coworker</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="2">has-coworker</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="3">has-friend</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="4">works-for</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="5">works-for</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="6">works-for</ATTR-VALUE>
+        </ATTRIBUTE>
+        <ATTRIBUTE NAME="position" ITEM-TYPE="L" DATA-TYPE="VARCHAR">
+            <ATTR-VALUE ITEM-ID="4">engineer</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="5">project-manager</ATTR-VALUE>
+            <ATTR-VALUE ITEM-ID="5">senior-engineer</ATTR-VALUE>
+        </ATTRIBUTE>
+</ATTRIBUTES>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<?pagebreak?>
+<!-- ============================================================== -->
+<!--                           CONTAINERS                           -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_p2xml_colls">
+<title>Containers</title>
+
+<para>The &prox2; XML data format can represent containers and their
+subgraphs, but not container and subgraph attributes.  Nested
+containers are also not supported.
+</para>
+
+<para>&prox2; referred to containers as
+collections and therefore uses <sgmltag
+class="element">COLLECTION</sgmltag> elements instead 
+of <sgmltag class="element">CONTAINER</sgmltag> elements. Collections
+specified in a &prox2; XML data file are treated as containers if
+imported into &prox3;.</para>
+
+<para>The import XML file contains one <sgmltag
+class="element">COLLECTION</sgmltag> element for each container in
+the data. All the <sgmltag class="element">COLLECTION</sgmltag>
+elements must be contained in a single <sgmltag
+class="element">COLLECTIONS</sgmltag> element. The <sgmltag
+class="element">COLLECTIONS</sgmltag> element includes exactly one
+<link linkend="apx_p2xml_subgraphs"><sgmltag
+class="element">SUBGRAPHS</sgmltag></link> 
+element and exactly one 
+<link linkend="apx_p2xml_subitems"><sgmltag
+class="element">SUBGRAPH-ITEMS</sgmltag></link>
+element (described below).  The
+<sgmltag class="element">COLLECTION</sgmltag> element has one required
+attribute, <sgmltag class="attribute">NAME</sgmltag>, which specifies
+the name of the container.</para>
+
+<para>The &prox2; XML format does not support nested containers.
+The <sgmltag class="element">COLLECTION</sgmltag> element can be
+omitted if the database does not include any containers.</para>
+
+<!-- ===================== ELEMENT : COLLECTIONS ================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;COLLECTIONS&gt;</code></bridgehead>
+
+<!-- ===== COLLECTIONS : Attributes =============================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== COLLECTIONS : Children ================================= -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">COLLECTION</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The data file includes one <sgmltag class="element">COLLECTION</sgmltag>
+element for each container in the data.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== COLLECTIONS : Content Model ============================ -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(COLLECTION*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+
+<!-- ===================== ELEMENT : COLLECTION =================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;COLLECTION&gt;</code></bridgehead>
+
+<!-- ===== COLLECTION : Attributes ================================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">NAME</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of the container</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== COLLECTION : Children ================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><link linkend="apx_p2xml_subgraphs"><sgmltag class="element">SUBGRAPHS</sgmltag></link></entry>
+<entry>exactly one</entry>
+<entry>The list of the subgraphs (identified by ID) in this container.</entry>
+</row>
+
+<row>
+<entry><link linkend="apx_p2xml_subitems"><sgmltag class="element">SUBGRAPH-ITEMS</sgmltag></link></entry>
+<entry>exactly one</entry>
+<entry>The list of database elements (objects and links) that are included in
+the subgraphs in this container</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== COLLECTION : Content Model ============================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(SUBGRAPHS, SUBGRAPH-ITEMS)</literal>
+</para></blockquote></para>
+</formalpara>
+
+
+<!-- ===== COLLECTIONS/COLLECTION : Example ======================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting>&lt;COLLECTIONS&gt;
+  &lt;COLLECTION NAME="1d-companies-and-employees"&gt;
+    &lt;SUBGRAPHS&gt;
+      (see <link linkend="apx_p2xml_subgraphs">SUBGRAPHS</link> for details)
+    &lt;/SUBGRAPHS&gt;
+    &lt;SUBGRAPH-ITEMS&gt;
+      (see <link linkend="apx_p2xml_subitems">SUBGRAPH-ITEMS</link> for details)
+    &lt;/SUBGRAPH-ITEMS&gt;
+  &lt;/COLLECTION&gt;
+&lt;/COLLECTIONS&gt;
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                            SUBGRAPHS                           -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_p2xml_subgraphs">
+<title>Subgraphs</title>
+
+<para>Containers are collections of subgraphs, each represented by a
+<sgmltag class="element">SUBGRAPH</sgmltag> element.  All 
+<sgmltag class="element">SUBGRAPH</sgmltag> elements are included
+in a single <sgmltag class="element">SUBGRAPHS</sgmltag> element in
+the XML data file.  These elements identify the subgraphs that
+appear in the parent container 
+(<sgmltag class="element">COLLECTION</sgmltag> element). The member
+objects and links for each of these subgraphs is provided in the 
+<link linkend="apx_p2xml_subitems"><sgmltag class="element">SUBGRAPH-ITEMS</sgmltag></link> 
+element, described in the next section.</para>
+
+
+<!-- ===================== ELEMENT : SUBGRAPHS ==================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;SUBGRAPHS&gt;</code></bridgehead>
+
+<!-- ===== SUBGRAPHS : Attributes ================================= -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== SUBGRAPHS : Children =================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">SUBGRAPH</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The file includes one <sgmltag class="element">SUBGRAPH</sgmltag>
+element for each subgraph in this container.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== SUBGRAPHS : Content Model ============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(SUBGRAPH*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===================== ELEMENT : SUBGRAPH ===================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;SUBGRAPH&gt;</code></bridgehead>
+
+<!-- ===== SUBGRAPH : Attributes ================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+<row rowsep="0">
+<entry><sgmltag class="attribute">ID</sgmltag></entry>
+<entry>required</entry>
+<entry>ID values must be unique non-negative integers and are typically
+sequential numbers.</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== SUBGRAPH : Children ==================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== SUBGRAPH : Content Model =============================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>EMPTY</literal>
+</para></blockquote></para>
+</formalpara>
+
+
+<!-- ===== SUBGRAPHS/SUBGRAPH : Example =========================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<SUBGRAPHS>
+   <SUBGRAPH ID="1"/>
+   <SUBGRAPH ID="2"/>
+</SUBGRAPHS>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<!-- ============================================================== -->
+<!--                         SUBGRAPH-ITEMS                         -->
+<!-- ============================================================== -->
+
+<sect1 id="apx_p2xml_subitems">
+<title>Subgraph items</title>
+
+<para>The <sgmltag class="element">SUBGRAPHS</sgmltag> element is
+followed by the <sgmltag class="element">SUBGRAPH-ITEMS</sgmltag>
+element, which contains the list objects and links in each subgraph,
+represented by <sgmltag class="element">ITEM</sgmltag> elements. The
+<sgmltag class="element">SUBGRAPH-ITEMS</sgmltag> element has no
+attributes.</para>
+
+<para>Each <sgmltag class="element">ITEM</sgmltag> element specifies
+one object or link and indicates the subgraph to
+which it belongs. <sgmltag class="element">ITEM</sgmltag> elements are
+empty and have four required attributes, described below.
+</para>
+
+<!-- ================== ELEMENT : SUBGRAPH-ITEMS ================== -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;SUBGRAPH-ITEMS&gt;</code></bridgehead>
+
+<!-- ===== SUBGRAPH-ITEMS : Attributes ============================ -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== SUBGRAPH-ITEMS : Children ============================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" rowsep="0" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row>
+<entry><sgmltag class="element">ITEM</sgmltag></entry>
+<entry>zero or more</entry>
+<entry>The file includes one <sgmltag class="element">ITEM</sgmltag>
+element for each instance of an object or link occurring in a
+subgraph. If an object or link occurs in more than one subgraph, it
+is be represented by more than one 
+<sgmltag class="element">ITEM</sgmltag> element.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== SUBGRAPH-ITEMS : Content Model ========================= -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>(ITEM*)</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ======================= ELEMENT : ITEM ======================= -->
+
+<bridgehead renderas="sect1"><code role="heading">&lt;ITEM&gt;</code></bridgehead>
+
+<!-- ===== ITEM : Attributes ====================================== -->
+<formalpara>
+<title role="header">Attributes</title>
+
+<para>
+<informaltable frame="none">
+<tgroup cols="3" align="left" colsep="0">
+<?dbfo table-width="6in"?>
+<colspec colnum="1" colname="col1" colwidth="1.5*"/>
+<colspec colnum="2" colname="col2" colwidth="1*"/>
+<colspec colnum="3" colname="col3" colwidth="3.0*"/>
+<tbody valign="top">
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">SUBG-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the subgraph to which this object or link
+belongs. Objects and links can belong to multiple subgraphs and thus
+appear in multiple <sgmltag class="element">ITEM</sgmltag>
+elements.</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">ITEM-ID</sgmltag></entry>
+<entry>required</entry>
+<entry>The ID of the member object or link</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">ITEM-TYPE</sgmltag></entry>
+<entry>required</entry>
+<entry>Specifies whether this item is an object (O) or link (L)</entry>
+</row>
+
+<row rowsep="0">
+<entry><sgmltag class="attribute">NAME</sgmltag></entry>
+<entry>required</entry>
+<entry>The name of this item within the subgraph. Subgraphs are
+usually created as the result of running queries. Proximity queries
+assign labels to their vertices and edges (corresponding to the
+objects and links in the database); these labels are included in the
+resulting subgraphs.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</formalpara>
+
+<!-- ===== ITEM : Children ======================================== -->
+<formalpara>
+<title role="header">Children</title>
+
+<para>
+None.
+</para>
+</formalpara>
+
+<!-- ===== ITEM : Content Model =================================== -->
+<formalpara>
+<title role="header">Content Model</title>
+<para>
+<blockquote>
+<para>
+<literal>EMPTY</literal>
+</para></blockquote></para>
+</formalpara>
+
+<!-- ===== SUBGRAPH-ITEMS/ITEM : Example ========================== -->
+<formalpara>
+<title role="header">Example</title>
+<para>
+<programlisting><![CDATA[<SUBGRAPH-ITEMS>
+   <ITEM SUBG-ID="1" ITEM-ID="4" ITEM-TYPE="O" NAME="employer"/>
+   <ITEM SUBG-ID="1" ITEM-ID="1" ITEM-TYPE="O" NAME="employee"/>
+   <ITEM SUBG-ID="1" ITEM-ID="2" ITEM-TYPE="O" NAME="employee"/>
+   <ITEM SUBG-ID="1" ITEM-ID="4" ITEM-TYPE="L" NAME="employed-by"/>
+   <ITEM SUBG-ID="1" ITEM-ID="5" ITEM-TYPE="L" NAME="employed-by"/>
+   <ITEM SUBG-ID="2" ITEM-ID="5" ITEM-TYPE="O" NAME="employer"/>
+   <ITEM SUBG-ID="2" ITEM-ID="3" ITEM-TYPE="O" NAME="employee"/>
+   <ITEM SUBG-ID="2" ITEM-ID="6" ITEM-TYPE="L" NAME="employed-by"/>
+</SUBGRAPH-ITEMS>]]>
+</programlisting>
+</para>
+</formalpara>
+
+</sect1>
+
+<?pagebreak?>
+<!-- ============================================================== -->
+<!--                         LEGAL NOTICES                          -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Legal notices</title>
+
+<para>The Proximity Tutorial, including source files and examples, is
+part of the open-source Proximity system. See the &licensefile;
+file for copyright and license information.
+</para>
+
+<para>This effort is supported by DARPA and AFRL under contract
+numbers F30602-00-2-0597 and F30602-01-2-0566 and by NSF under
+contract number EIA9983215. The U.S. Government is
+authorized to reproduce and distribute reprints for governmental
+purposes notwithstanding any copyright notation hereon. The views and
+conclusions contained herein are those of the authors and should not
+be interpreted as necessarily representing the official policies or
+endorsements either expressed or implied, of DARPA, AFRL, NSF, the
+University of Massachusetts Amherst, or the U.S. Government.
+</para>
+
+</sect1>
+
+</article>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step: nil
+  sgml-always-quote-attributes: t
+  sgml-default-dtd-file:"../DocBook.ced"
+  End:
+-->

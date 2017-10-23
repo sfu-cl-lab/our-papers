@@ -1,0 +1,636 @@
+<?xml version='1.0'?>
+
+<!--
+$Id: build.xml 3781 2007-11-16 13:58:10Z schapira $
+
+This is the Proximity Ant build script. See targets for more information.
+
+
+Usage:
+
+1. install Apache Ant - http://ant.apache.org/ (version 1.6.2 is
+   current as of this writing). NB: Using an Ant version less than 1.6
+   will result in the input task in application targets being called
+   even if the specified property has already been set, such as on the
+   command line. Also, 1.6.2 or greater is required to run the unit
+   tests.
+
+2. set the JAVA_HOME and ANT_HOME environment variables, e.g.,
+     export ANT_HOME=/scratch1/apache-ant-1.6.0
+     export JAVA_HOME=/scratch1/JBuilder7/jdk1.3.1
+
+3. change to the directory containing this build file, e.g.,
+    cd ~/prox-work/proximity3/
+
+4. run the 'ant' binary on the target of your choice. use the
+   -projecthelp option to see all targets, for example:
+
+    $ANT_HOME/bin/ant -projecthelp
+
+
+Notes:
+
+* works only with JDK 1.5
+
+* IMPORTANT: to run the <run-tests> target you must put a copy of junit.jar (in
+  the lib/ directory) in ANT_HOME/lib
+
+* IMPORTANT: to run the nightly unit-tests, you must put a copy of xalan.jar
+  in ANT_HOME/lib. See http://xml.apache.org/xalan-j/
+
+* Ant version 1.6.2 or higher strongly recommended
+
+* to pass application args on the command line use the
+  '-Dprop.name=value' syntax . ex:
+
+    $ANT_HOME/bin/ant -Dapp.art.hostAndPort=xx -Dapp.scriptFile=yy script
+
+* These tests will not run on classes in proximity.jar; they only work from a
+  classes/ directory. The reason is due to JDOM's SAXBuilder.build(File) method
+  is broken in this case. (See javadocs for QueryGraph2CompOp.graphQueryEleForFile().)
+-->
+
+<project name="Proximity" default="compile" basedir=".">
+    <description>Ant build file for Proximity</description>
+
+    <property name="build.classes.dir" value="classes"/>
+    <property name="build.javadoc.dir" value="javadoc"/>
+    <property name="java.src.dir" value="src/java"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="nowarn" value="true"/>
+    <!-- for compile target's <javac> task -->
+    <property name="query.family.dir"
+              value="test/java/kdl/prox/qgraph2/family/data/families"/>
+    <property name="query.algebra.test.dir"
+              value="test/java/kdl/prox/qgraph2/algebra/testdata/"/>
+    <property name="query.algebra.testdata.processor.dir"
+              value="test/java/kdl/prox/qgraph2/algebra/testdata/processortest/"/>
+    <property name="test.out.dir" value="reports/junit"/>
+    <property name="test.src.dir" value="test/java"/>
+
+    <path id="lib.jar.path">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+
+    <!-- Removes generated and copied output. NB: entries here must be paired
+         with ones in 'copy-dtds'. -->
+    <target name="clean"
+            description="remove generated files, directories, and copied DTDs">
+
+        <delete file="${basedir}/proximity.jar"/>
+
+        <delete dir="${build.classes.dir}"/>
+        <delete dir="${build.javadoc.dir}"/>
+        <delete dir="${test.out.dir}"/>
+
+        <!-- see the copy-dtds target for where the following files came from -->
+        <delete file="${basedir}/example/text2xml/prox2db.dtd"/>
+
+        <delete file="${basedir}/src/java/kdl/prox/datagen/graph-query.dtd"/>
+
+        <delete file="${basedir}/resources/graph-query.dtd"/>
+        <delete file="${basedir}/resources/prox2db.dtd"/>
+        <delete file="${basedir}/resources/prox3db.dtd"/>
+        <delete file="${basedir}/resources/rbc.dtd"/>
+        <delete file="${basedir}/resources/rbc2.dtd"/>
+        <delete file="${basedir}/resources/rdn.dtd"/>
+
+        <delete file="${basedir}/test/java/kdl/prox/app/graph-query.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/app/prox2db.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/app/prox3db.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/cookbook/graph-query.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/datagen2/attributes/graph-query.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/experimental/model2/rpt/rpt2.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/model2/rbc/rbc2.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/model2/rpt/rpt2.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/model2/rpt/modules/pruning/rpt2.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/old/datagen/rpt.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/old/model/classifiers/rbc.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/old/model/classifiers/rpt.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/qged/graph-query.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/qgraph2/graph-query.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/rdnview/rpt2.dtd"/>
+        <delete file="${basedir}/test/java/kdl/prox/rdnview/rdn.dtd"/>
+
+        <delete file="${query.family.dir}/family_1/graph-query.dtd"/>
+        <delete file="${query.family.dir}/family_2/graph-query.dtd"/>
+        <delete file="${query.family.dir}/family_3/graph-query.dtd"/>
+        <delete file="${query.family.dir}/family_4/graph-query.dtd"/>
+        <delete file="${query.family.dir}/family_7/graph-query.dtd"/>
+        <delete file="${query.family.dir}/family_8/graph-query.dtd"/>
+
+        <delete file="${query.family.dir}/family_1/query-family.dtd"/>
+        <delete file="${query.family.dir}/family_2/query-family.dtd"/>
+        <delete file="${query.family.dir}/family_3/query-family.dtd"/>
+        <delete file="${query.family.dir}/family_4/query-family.dtd"/>
+        <delete file="${query.family.dir}/family_7/query-family.dtd"/>
+        <delete file="${query.family.dir}/family_8/query-family.dtd"/>
+
+        <delete file="${query.algebra.test.dir}/graph-query.dtd"/>
+        <delete file="${query.algebra.testdata.processor.dir}/graph-query.dtd"/>
+    </target>
+
+
+    <target name="compile" depends="init, copy-dtds"
+            description="compile java source (including unit tests) and copy resources">
+
+        <!-- compile -->
+        <javac srcdir="${java.src.dir}:${test.src.dir}"
+               source="1.5"
+               target="1.5"
+               destdir="${build.classes.dir}"
+               nowarn="${nowarn}"
+               classpathref="lib.jar.path"
+               debug="true" debuglevel="lines,vars,source"/>
+
+        <!-- copy resources -->
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${java.src.dir}"
+                     excludes="**/*.java"/>
+            <fileset dir="${test.src.dir}"
+                     excludes="**/*.java"/>
+        </copy>
+    </target>
+
+
+    <!-- This target is needed because our example xml files all expect their
+         DTDs to be located in the same directory as the xml files are.
+         NB: entries here must be paired with ones in 'clean'. -->
+    <target name="copy-dtds"
+            description="copies DTD files from their home location to places where they're used">
+
+        <property name="graph.query.dtd"
+                  value="${basedir}/src/xml/graph-query.dtd"/>
+        <property name="query.family.dtd"
+                  value="${query.family.dir}/../xml/query-family.dtd"/>
+
+        <!-- for text2xml example db -->
+        <copy file="${basedir}/src/xml/prox2db.dtd"
+              todir="${basedir}/example/text2xml/"/>
+
+        <!-- for queries in src -->
+        <copy file="${basedir}/src/xml/graph-query.dtd"
+              todir="${basedir}/src/java/kdl/prox/old/datagen/"/>
+
+        <!-- for resources -->
+        <copy file="${basedir}/src/xml/graph-query.dtd"
+              todir="${basedir}/resources/"/>
+        <copy file="${basedir}/src/xml/prox2db.dtd"
+              todir="${basedir}/resources/"/>
+        <copy file="${basedir}/src/xml/prox3db.dtd"
+              todir="${basedir}/resources/"/>
+        <copy file="${basedir}/src/xml/rbc.dtd"
+              todir="${basedir}/resources/"/>
+        <copy file="${basedir}/src/xml/rbc2.dtd"
+              todir="${basedir}/resources/"/>
+        <copy file="${basedir}/src/xml/rdn.dtd"
+              todir="${basedir}/resources/"/>
+        <copy file="${basedir}/src/xml/rpt2.dtd"
+              todir="${basedir}/resources/"/>
+
+        <!-- for unit tests -->
+        <copy file="${basedir}/src/xml/graph-query.dtd"
+              todir="${basedir}/test/java/kdl/prox/app/"/>
+        <copy file="${basedir}/src/xml/prox2db.dtd"
+              todir="${basedir}/test/java/kdl/prox/app/"/>
+        <copy file="${basedir}/src/xml/prox3db.dtd"
+              todir="${basedir}/test/java/kdl/prox/app/"/>
+        <copy file="${basedir}/src/xml/graph-query.dtd"
+              todir="${basedir}/test/java/kdl/prox/cookbook/"/>
+        <copy file="${basedir}/src/xml/rpt.dtd"
+              todir="${basedir}/test/java/kdl/prox/old/datagen/"/>
+        <copy file="${basedir}/src/xml/graph-query.dtd"
+              todir="${basedir}/test/java/kdl/prox/datagen2/attributes"/>
+        <copy file="${basedir}/src/xml/rpt.dtd"
+              todir="${basedir}/test/java/kdl/prox/old/model/classifiers/"/>
+        <copy file="${basedir}/src/xml/rbc.dtd"
+              todir="${basedir}/test/java/kdl/prox/old/model/classifiers/"/>
+        <copy file="${basedir}/src/xml/rbc2.dtd"
+              todir="${basedir}/test/java/kdl/prox/model2/rbc/"/>
+        <copy file="${basedir}/src/xml/rpt2.dtd"
+              todir="${basedir}/test/java/kdl/prox/experimental/model2/rpt/"/>
+        <copy file="${basedir}/src/xml/rpt2.dtd"
+              todir="${basedir}/test/java/kdl/prox/model2/rpt/"/>
+        <copy file="${basedir}/src/xml/rpt2.dtd"
+              todir="${basedir}/test/java/kdl/prox/model2/rpt/modules/pruning/"/>
+        <copy file="${basedir}/src/xml/graph-query.dtd"
+              todir="${basedir}/test/java/kdl/prox/qged/"/>
+        <copy file="${basedir}/src/xml/graph-query.dtd"
+              todir="${basedir}/test/java/kdl/prox/qgraph2/"/>
+        <copy file="${basedir}/src/xml/rpt2.dtd"
+              todir="${basedir}/test/java/kdl/prox/rdnview/"/>
+        <copy file="${basedir}/src/xml/rdn.dtd"
+              todir="${basedir}/test/java/kdl/prox/rdnview/"/>
+
+        <!-- for family queries, one per family -->
+        <copy file="${graph.query.dtd}" todir="${query.family.dir}/family_1/"/>
+        <copy file="${graph.query.dtd}" todir="${query.family.dir}/family_2/"/>
+        <copy file="${graph.query.dtd}" todir="${query.family.dir}/family_3/"/>
+        <copy file="${graph.query.dtd}" todir="${query.family.dir}/family_4/"/>
+        <copy file="${graph.query.dtd}" todir="${query.family.dir}/family_7/"/>
+        <copy file="${graph.query.dtd}" todir="${query.family.dir}/family_8/"/>
+
+        <!-- for query families, one per family -->
+        <copy file="${query.family.dtd}" todir="${query.family.dir}/family_1/"/>
+        <copy file="${query.family.dtd}" todir="${query.family.dir}/family_2/"/>
+        <copy file="${query.family.dtd}" todir="${query.family.dir}/family_3/"/>
+        <copy file="${query.family.dtd}" todir="${query.family.dir}/family_4/"/>
+        <copy file="${query.family.dtd}" todir="${query.family.dir}/family_7/"/>
+        <copy file="${query.family.dtd}" todir="${query.family.dir}/family_8/"/>
+
+        <!-- for QGraph algebra queries -->
+        <copy file="${graph.query.dtd}" todir="${query.algebra.test.dir}/"/>
+        <copy file="${graph.query.dtd}" todir="${query.algebra.testdata.processor.dir}/"/>
+    </target>
+
+
+    <target name="db-util" depends="compile"
+            description="run the DBUtil application. args: app.hostAndPort, app.command">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <input message="enter app.command"
+               addproperty="app.command"/>
+
+        <!-- run app -->
+        <java
+                classname="kdl.prox.app.DBUtil"
+                classpath="${build.classes.dir}">
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort command+ -->
+            <arg value="${app.hostAndPort}"/>
+            <arg value="${app.command}"/>
+        </java>
+    </target>
+
+
+    <!-- NB: ANT tar task excludes CVS (and other) directories - http://ant.apache.org/manual/dirtasks.html#defaultexcludes -->
+    <target name="deploy" depends="jar, javadoc"
+            description="create tarball for end-user download">
+
+        <tstamp>
+            <format property="build.datetime" pattern="yyyy-MM-dd HH:mm:ss"/>
+        </tstamp>
+
+        <!-- extract latest tutorial (NB: must download latest first) -->
+        <untar src="${basedir}/prox-docs.tar.gz" dest="${basedir}/doc/user/"
+               compression="gzip"/>
+
+        <echo message="Building Proximity TarBar."/>
+
+        <!-- create the archive -->
+        <tar destfile="${basedir}/proximity.tgz" compression="gzip">
+            <tarfileset dir="${basedir}" prefix="proximity">
+                <include name="doc/user/"/>
+                <include name="example/config/"/>
+                <include name="example/text2xml/"/>
+                <include name="${lib.dir}/"/>
+                <include name="${build.javadoc.dir}/"/>
+                <include name="bin/"/>
+                <include name="resources/"/>
+                <include name="src/"/>
+                <exclude name="src/java/kdl/prox/experimental/"/>
+                <exclude name="src/java/kdl/prox/old/"/>
+                <include name="test/"/>
+                <exclude name="test/java/kdl/prox/experimental/"/>
+                <exclude name="test/java/kdl/prox/old/"/>
+                <include name="build.xml"/>
+                <include name="HISTORY"/>
+                <include name="INSTALL"/>
+                <include name="LICENSE"/>
+                <include name="proximity.jar"/>
+                <include name="README"/>
+            </tarfileset>
+        </tar>
+
+    </target>
+
+
+    <target name="edit-query" depends="compile"
+            description="run the query editor. args: app.queryFile (pass empty string for new query)">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.queryFile"
+               addproperty="app.queryFile"/>
+        <java
+                classname="kdl.prox.app.QGraphEditorApp"
+                classpath="${build.classes.dir}"
+                fork="true">
+            <!--                        fork="false">-->
+            <classpath refid="lib.jar.path"/>
+            <!-- args: [queryFileName] -->
+            <arg value="${app.queryFile}"/>
+        </java>
+    </target>
+
+
+    <target name="export-xml" depends="compile"
+            description="run the ExportXMLApp application. args: app.hostAndPort
+        app.xmlFile [app.exportTypeEnum app.exportSpec]">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <input message="enter app.xmlFile relative to ${user.dir}"
+               addproperty="app.xmlFile"/>
+        <input message="enter app.exportTypeEnum"
+               addproperty="app.exportTypeEnum"/>
+        <input message="enter app.exportSpec"
+               addproperty="app.exportSpec"/>
+
+        <!-- run app -->
+        <java
+                classname="kdl.prox.app.ExportXMLApp"
+                classpath="${build.classes.dir}"
+                fork="true">    <!-- todo true?: fork needed to avoid this error: javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found -->
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort inputFile [isCalcStatsOnly] -->
+            <arg value="${app.hostAndPort}"/>
+            <arg value="${app.xmlFile}"/>
+            <arg value="${app.exportTypeEnum}"/>
+            <arg value="${app.exportSpec}"/>
+        </java>
+    </target>
+
+
+    <target name="gui2" depends="compile"
+            description="run the new GUI application. args: app.hostAndPort">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <java
+                classname="kdl.prox.app.GUI2App"
+                classpath="${build.classes.dir}"
+                fork="true">
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort -->
+            <arg value="${app.hostAndPort}"/>
+        </java>
+    </target>
+
+
+    <target name="import-ascii" depends="compile"
+            description="run the ImportAsciiGraph application. args: app.hostAndPort
+        app.asciiFile app.nameAttr">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <input message="enter app.asciiFile relative to ${user.dir}"
+               addproperty="app.asciiFile"/>
+        <input message="enter app.nameAttr"
+               addproperty="app.nameAttr"/>
+
+        <!-- run app -->
+        <java
+                classname="kdl.prox.app.ImportAsciiGraph"
+                classpath="${build.classes.dir}">
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort inputFile nameObjStrAttr -->
+            <arg value="${app.hostAndPort}"/>
+            <arg value="${app.asciiFile}"/>
+            <arg value="${app.nameAttr}"/>
+        </java>
+    </target>
+
+
+    <target name="import-prox2-xml" depends="compile"
+            description="run the ImportProx2XMLApp application. args: app.hostAndPort, app.xmlFile">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <input message="enter app.xmlFile relative to ${user.dir}"
+               addproperty="app.xmlFile"/>
+
+        <!-- run app -->
+        <java
+                classname="kdl.prox.app.ImportProx2XMLApp"
+                classpath="${build.classes.dir}"
+                fork="true">    <!-- fork needed to avoid this error: javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found -->
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort inputFile [isCalcStatsOnly] -->
+            <arg value="${app.hostAndPort}"/>
+            <arg value="${app.xmlFile}"/>
+        </java>
+    </target>
+
+
+    <target name="import-xml" depends="compile"
+            description="run the ImportXMLApp application. args: app.hostAndPort
+        app.xmlFile">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <input message="enter app.xmlFile relative to ${user.dir}"
+               addproperty="app.xmlFile"/>
+
+        <!-- run app -->
+        <java
+                classname="kdl.prox.app.ImportXMLApp"
+                classpath="${build.classes.dir}"
+                fork="true">    <!-- todo true?: fork needed to avoid this error: javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found -->
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort inputFile-->
+            <arg value="${app.hostAndPort}"/>
+            <arg value="${app.xmlFile}"/>
+        </java>
+    </target>
+
+
+    <target name="init"
+            description="create directories">
+        <mkdir dir="${build.classes.dir}"/>
+        <mkdir dir="${build.javadoc.dir}"/>
+        <mkdir dir="${test.out.dir}"/>
+    </target>
+
+
+    <target name="jar" depends="compile"
+            description="create proximity jar">
+        <jar basedir="${build.classes.dir}"
+             destfile="${basedir}/proximity.jar"/>
+    </target>
+
+
+    <target name="javadoc" depends="compile"
+            description="create javadocs">
+        <javadoc author="true"
+                 version="true"
+                 use="true"
+                 windowtitle="Proximity API"
+                 sourcepath="${java.src.dir}"
+                 destdir="${build.javadoc.dir}"
+                 packagenames="kdl.prox.*"
+                 classpathref="lib.jar.path"/>
+    </target>
+
+
+    <target name="nst-browser" depends="compile"
+            description="run the NST browser. args: app.hostAndPort">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <java
+                classname="kdl.prox.app.NSTBrowserApp"
+                classpath="${build.classes.dir}"
+                fork="true">
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort -->
+            <arg value="${app.hostAndPort}"/>
+        </java>
+    </target>
+
+
+    <target name="query" depends="compile"
+            description="run the qGraph query execution application. args: app.hostAndPort, app.queryFile, app.collectionName">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <input message="enter app.queryFile relative to ${user.dir}"
+               addproperty="app.queryFile"/>
+        <input message="enter app.collectionName relative to ${user.dir}"
+               addproperty="app.collectionName"/>
+        <input message="enter app.inputContainerPath (leave empty if entire db)"
+               addproperty="app.inputContainerPath"/>
+
+        <!-- run app -->
+        <java
+                classname="kdl.prox.app.Query"
+                classpath="${build.classes.dir}">
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort queryXMLFile collectionName inputContainerPath  -->
+            <arg value="${app.hostAndPort}"/>
+            <arg value="${app.queryFile}"/>
+            <arg value="${app.collectionName}"/>
+            <arg value="${app.inputContainerPath}"/>
+        </java>
+    </target>
+
+
+    <target name="run-single-test" depends="compile"
+            description="run a single Proximity unit test. args=test.file">
+        <input message="enter test class (e.g., app.DBUtilTest)"
+               addproperty="test.file"/>
+        <delete dir="${test.out.dir}"/>
+        <mkdir dir="${test.out.dir}"/>
+        <junit printsummary="on" fork="on" forkmode="once">
+            <classpath path="${build.classes.dir}"/>
+            <classpath refid="lib.jar.path"/>
+            <formatter type="plain"/>
+            <test name="kdl.prox.${test.file}" todir="${test.out.dir}"/>
+        </junit>
+
+    </target>
+
+
+    <target name="run-package-tests" depends="compile"
+            description="run all Proximity unit tests for a given package. args=test.package">
+        <input message="enter package (e.g., app)"
+               addproperty="test.package"/>
+        <delete dir="${test.out.dir}"/>
+        <mkdir dir="${test.out.dir}"/>
+        <junit printsummary="withOutAndErr" fork="on" forkmode="once">
+            <classpath path="${build.classes.dir}"/>
+            <classpath refid="lib.jar.path"/>
+            <formatter type="plain"/>
+            <batchtest todir="${test.out.dir}">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/${test.package}/**/*Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+
+    </target>
+
+
+    <target name="run-tests" depends="compile"
+            description="run all Proximity unit tests">
+        <delete dir="${test.out.dir}"/>
+        <mkdir dir="${test.out.dir}"/>
+        <junit printsummary="on" fork="on" forkmode="once">
+            <classpath path="${build.classes.dir}"/>
+            <classpath refid="lib.jar.path"/>
+            <formatter type="plain"/>
+            <batchtest todir="${test.out.dir}">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/*Test.java"/>
+                    <exclude name="**/MultiValEstimatorTest*"/>
+                    <!-- abstract class -->
+                    <exclude name="**/QueryCanvasTest*"/>
+                    <!-- to avoid "Can't connect to X11 window server" error on server -->
+                    <exclude name="**/RDNCanvasTest*"/>
+                    <!-- to avoid "Can't connect to X11 window server" error on server -->
+                    <exclude name="**/RDNLayoutTest*"/>
+                    <!-- to avoid "Can't connect to X11 window server" error on server -->
+                </fileset>
+            </batchtest>
+        </junit>
+
+        <!-- todo call <junitreport> (requires type=xml, and xalan.jar in ant's lib/ dir) -->
+
+    </target>
+
+
+    <!-- called by test/run_nightly_test.sh via cron job -->
+    <!-- note: we'd like to use xml format and junitreport, but that format
+         caused out of memory errors. instead we use printsummary 'off' and save
+         the output of the ant run to a text file -->
+    <!-- NB: printsummary=off is crucial - it's how the shell script knows
+         whether there were errors or not, and which errors there were -->
+    <target name="run-nightly-tests" depends="compile"
+            description="run all Proximity unit tests on testing machine">
+        <delete dir="${test.out.dir}"/>
+        <mkdir dir="${test.out.dir}"/>
+        <junit printsummary="off" fork="on" forkmode="once">
+            <classpath path="${build.classes.dir}"/>
+            <classpath refid="lib.jar.path"/>
+            <formatter type="brief"/>
+            <batchtest todir="${test.out.dir}">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/*Test.java"/>
+                    <exclude name="**/MultiValEstimatorTest*"/>
+                    <!-- abstract class -->
+                    <exclude name="**/QueryCanvasTest*"/>
+                    <!-- to avoid "Can't connect to X11 window server" error on server -->
+                    <exclude name="**/RDNCanvasTest*"/>
+                    <!-- to avoid "Can't connect to X11 window server" error on server -->
+                    <exclude name="**/RDNLayoutTest*"/>
+                    <!-- to avoid "Can't connect to X11 window server" error on server -->
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+
+    <target name="script" depends="compile"
+            description="run the Jython (Python) script interpreter application. args: app.hostAndPort, app.scriptFile">
+
+        <!-- get inputs if props not already set -->
+        <input message="enter app.hostAndPort"
+               addproperty="app.hostAndPort"/>
+        <input message="enter app.scriptFile relative to ${user.dir}"
+               addproperty="app.scriptFile"/>
+
+        <!-- run app -->
+        <java
+                classname="kdl.prox.app.PythonScript"
+                classpath="${build.classes.dir}"
+                fork="true">    <!-- fork needed to avoid this error: ImportError: no module named ... -->
+            <classpath refid="lib.jar.path"/>
+            <!-- args: hostAndPort scriptName -->
+            <arg value="${app.hostAndPort}"/>
+            <arg value="${app.scriptFile}"/>
+        </java>
+    </target>
+
+
+</project>

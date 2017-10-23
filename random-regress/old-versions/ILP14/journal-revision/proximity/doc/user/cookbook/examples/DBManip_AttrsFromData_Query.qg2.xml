@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE graph-query SYSTEM "graph-query.dtd">
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information). -->
+
+<graph-query name="studio-clusters">
+  <description>Finds, for each studio, its movies and associated actors and directors</description>
+  <query-body>
+    <vertex name="studio">
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>obj_type</attribute-name>
+          <value>Studio</value>
+        </test>
+      </condition>
+    </vertex>
+    <edge name="produced">
+      <vertex1>studio</vertex1>
+      <vertex2>movie</vertex2>
+      <directed>true</directed>
+      <condition>
+        <test>
+          <operator>eq</operator>
+          <attribute-name>link_type</attribute-name>
+          <value>Produced</value>
+        </test>
+      </condition>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </edge>
+    <subquery>
+      <vertex name="actor">
+        <condition>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>obj_type</attribute-name>
+            <value>Actor</value>
+          </test>
+        </condition>
+        <numeric-annotation>
+          <min>0</min>
+        </numeric-annotation>
+      </vertex>
+      <vertex name="movie">
+        <condition>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>obj_type</attribute-name>
+            <value>Movie</value>
+          </test>
+        </condition>
+      </vertex>
+      <vertex name="director">
+        <condition>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>obj_type</attribute-name>
+            <value>Director</value>
+          </test>
+        </condition>
+        <numeric-annotation>
+          <min>0</min>
+        </numeric-annotation>
+      </vertex>
+      <edge name="acted-in">
+        <vertex1>actor</vertex1>
+        <vertex2>movie</vertex2>
+        <directed>true</directed>
+        <condition>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>link_type</attribute-name>
+            <value>ActedIn</value>
+          </test>
+        </condition>
+        <numeric-annotation>
+          <min>1</min>
+        </numeric-annotation>
+      </edge>
+      <edge name="directed">
+        <vertex1>director</vertex1>
+        <vertex2>movie</vertex2>
+        <directed>true</directed>
+        <condition>
+          <test>
+            <operator>eq</operator>
+            <attribute-name>link_type</attribute-name>
+            <value>Directed</value>
+          </test>
+        </condition>
+        <numeric-annotation>
+          <min>1</min>
+        </numeric-annotation>
+      </edge>
+      <numeric-annotation>
+        <min>1</min>
+      </numeric-annotation>
+    </subquery>
+  </query-body>
+  <editor-data>
+    <vertex-location name="studio" x="82.0" y="167.0" />
+    <vertex-location name="actor" x="504.0" y="33.0" />
+    <vertex-location name="movie" x="290.0" y="111.0" />
+    <vertex-location name="director" x="502.0" y="223.0" />
+  </editor-data>
+</graph-query>
+

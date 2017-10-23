@@ -1,0 +1,190 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Subqueries and Constraints</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Subqueries">
+      <link rel="prev" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Subqueries">
+      <link rel="next" href="ch06s02s02.html" title="Constraints crossing the subquery boundary">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Subqueries</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s02s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="d0e6652"></a>Subqueries and Constraints
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_sub_const1"></a><a class="indexterm" name="idx_sub_const2"></a><p>In this section we examine the ways in which subquery
+            elements can be used in 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e228"><span class="glossterm">constraints</span></a>.  A
+            constraint may compare two 
+            elements within the same subquery, or it may compare elements that span the
+            subquery boundary. Constraints that involve elements inside a subquery 
+            must obey the same rules that apply to any QGraph constraint.
+            Proximity&#8217;s current implementation of QGraph imposes
+            additional restrictions for constraints that cross the subquery
+            boundary. See <a href="ch06s04.html" title="Implementation in Proximity">&#8220;Implementation in Proximity&#8221;</a> later in
+            this chapter for information on these restrictions.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e6675"></a>Constraints within a subquery
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>Let&#8217;s look first at a constraint that compares two items within
+               the same subquery.  Our example uses a database containing information
+               on student and faculty web pages and their
+               interconnecting links.  A fragment of such a database is shown in
+               <a href="ch06s02.html#fig_subq_db02" title="Figure&nbsp;6.10.&nbsp;Database fragment [SubQ_DB02.xml]">Figure&nbsp;6.10</a>.
+               
+            </p>
+            <div class="figure"><a name="fig_subq_db02"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/SubQ_DB02.png" align="middle" width="499.5" alt="Database fragment [SubQ_DB02.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.10.&nbsp;Database fragment [SubQ_DB02.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               It&#8217;s common for two web pages to link to each other and for
+               pages to link to themselves.  We see this reflected in our database
+               fragment where, for example, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page01.html</span> and 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page03.html</span> point to each other and where
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page06.html</span>
+               links to itself.
+               Our goal is to find all the student pages that we can reach by
+               following exactly two links (hops) from a faculty page.  
+               <a href="ch06s02.html#fig_subq_db02_q01" title="Figure&nbsp;6.11.&nbsp;Query [SubQ_DB02_Q01.qg2.xml]">Figure&nbsp;6.11</a> shows a first pass at
+               creating such a query.
+               
+            </p>
+            <div class="figure"><a name="fig_subq_db02_q01"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/SubQ_DB02.png" align="middle" width="490.5" alt="Query [SubQ_DB02_Q01.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.11.&nbsp;Query [SubQ_DB02_Q01.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               We want our results to include a single subgraph for each
+               faculty member, so the query uses a subquery to group the cluster of
+               pages linked from each <em class="token">linked-page</em>
+               vertex.
+            </p>
+            <p>Because the database contains objects that link to themselves,
+               this query will incorrectly identify some pages as being two hops away when the
+               second hop follows this self link.  We see this in the
+               results of executing the query on our database fragment:
+               
+            </p>
+            <div class="figure"><a name="fig_subq_db02_q01_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/SubQ_DB02_Q01_res.png" align="middle" width="630" alt="Query results"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.12.&nbsp;Query results</b></p>
+            </div>
+            <p><br class="figure-break">
+               Because <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page06.html</span> links to itself, the
+               top subgraph shows <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page06.html</span> as 
+               being both one and two hops away from
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page01.html</span>.  Similarly, because 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page05.html</span> links to itself, the bottom
+               subgraph shows that 
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page05.html</span> matches both the
+               <em class="token">linked-page</em> and 
+               <em class="token">student</em> vertices.
+               To eliminate these matches, we add an 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e385"><span class="glossterm">identity constraint</span></a> that requires that
+               the <em class="token">linked-page</em> and
+               <em class="token">student</em> vertices not match the same
+               object.
+               
+            </p>
+            <div class="figure"><a name="fig_subq_db02_q02"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/SubQ_DB02_Q02.png" align="middle" width="495" alt="Revised query with constraint [SubQ_DB02_Q02.qg2.xml]"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.13.&nbsp;Revised query with constraint [SubQ_DB02_Q02.qg2.xml]</b></p>
+            </div>
+            <p><br class="figure-break">
+               
+            </p>
+            <p>The results of executing this modified query on our database
+               fragment are shown below:
+               
+            </p>
+            <div class="figure"><a name="fig_subq_db02_q02_res"></a><div class="figure-contents">
+                  <div class="mediaobject" align="center">
+                     <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                        <tr>
+                           <td align="center" valign="bottom"><img src="images/SubQ_DB02_Q02_res.png" align="middle" width="630" alt="Revised query results"></td>
+                        </tr>
+                     </table>
+                  </div>
+               </div>
+               <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;6.14.&nbsp;Revised query results</b></p>
+            </div>
+            <p><br class="figure-break">
+               The two student pages, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page05.html</span> and
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">page06.html</span>, that were included as a result
+               of the self links are no longer included in the query results.
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s02s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Chapter&nbsp;6.&nbsp;Subqueries&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Constraints crossing the subquery boundary</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

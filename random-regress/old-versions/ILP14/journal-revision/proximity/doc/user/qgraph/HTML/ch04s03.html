@@ -1,0 +1,247 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Understanding Multiple Annotations</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 QGraph Guide">
+      <link rel="up" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Numeric Annotations">
+      <link rel="prev" href="ch04s02.html" title="Annotation Basics">
+      <link rel="next" href="ch04s04.html" title="Negated and Optional Elements">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch04s02.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;4.&nbsp;Numeric Annotations</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch04s04.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="qg_annot_multiple"></a>Understanding Multiple Annotations
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="d0e3570"></a><a class="indexterm" name="d0e3575"></a><a class="indexterm" name="d0e3578"></a><a class="indexterm" name="d0e3583"></a><p>It&#8217;s important to understand how vertex and
+            link annotations combine to create the desired query. This section examines
+            several specific examples to see how these annotations work
+            together.
+         </p>
+         <p>Recall that the annotation <code class="token">[1..]</code> means that
+            the query matches if the database contains one or more of the
+            annotated elements.   We&#8217;ve seen the common usage of annotating a
+            vertex and adjacent edge with this annotation to find simple clusters 
+            (<a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e733"><span class="glossterm">stars</span></a>)
+            around a central object in the database. But what happens if one or
+            both of these annotations has a different value?
+         </p>
+         <p>We consider such queries in the context of finding clusters of
+            actors and the movies they&#8217;ve appeared in.  We know that 
+            actors usually appear in more than one movie, and that actors
+            occasionally play multiple roles in a single movie.  The database
+            fragment in <a href="ch04s03.html#fig_annot_db03" title="Figure&nbsp;4.17.&nbsp;Database fragment [Annot_DB03.xml]">Figure&nbsp;4.17</a> illustrates the type of
+            data we might find in a target database for such queries.
+            As we can see from this fragment, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Peter
+               Sellers</span>, <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Alec Guinness</span>, and
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Dennis Price</span> have all played multiple
+            roles in a single movie.  <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Alec Guinness</span>
+            played three roles in <em class="citetitle">Kind Hearts and Coronets</em>,
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Dennis Price</span> played two roles
+            in <em class="citetitle">Kind Hearts and Coronets</em>, and 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Peter Sellers</span> played multiple roles in
+            two movies, <em class="citetitle">Dr.&nbsp;Strangelove</em> and
+            <em class="citetitle">The Mouse That Roared</em>.  Both 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Peter Sellers</span> and 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Alec Guinness</span> have also appeared in other
+            movies where they played only a single role, but this fragment
+            doesn&#8217;t tell us whether <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">Dennis
+               Price</span> ever did the same.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db03"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB03.png" align="middle" width="630" alt="Database fragment [Annot_DB03.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.17.&nbsp;Database fragment [Annot_DB03.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>As we&#8217;ve seen before, we can use a query like that shown in 
+            <a href="ch04s03.html#fig_annot_db03_q01" title="Figure&nbsp;4.18.&nbsp;Requiring multiple object matches [Annot_DB03_Q01.qg2.xml]">Figure&nbsp;4.18</a> to
+            find actors connected to at least two movies.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db03_q01"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB03_Q01.png" align="middle" width="328.50000000000006" alt="Requiring multiple object matches [Annot_DB03_Q01.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.18.&nbsp;Requiring multiple object matches [Annot_DB03_Q01.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            The vertex annotation of <code class="token">[2..]</code> tells the query to
+            match clusters with actors as 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d17e240"><span class="glossterm">core objects</span></a>,
+            where those 
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">actor</span> objects are linked to at least two movies.
+            Our use of the standard <code class="token">[1..]</code> edge
+            annotation groups multiple links
+            <a class="indexterm" name="d0e3673"></a>
+            connecting a particular actor and
+            movie in the same subgraph, as shown in
+            <a href="ch04s03.html#fig_annot_db03_q01_res" title="Figure&nbsp;4.19.&nbsp;Query results">Figure&nbsp;4.19</a>.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db03_q01_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB03_Q01_res.png" align="middle" width="630" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.19.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+         <p>Two subgraphs are returned, one with Peter Sellers as the core
+            <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">actor</span> object and one with
+            Alec Guinness as the core <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">actor</span>.
+            Both of these actors are linked to two or more movies.
+            The subgraphs surrounding the actors George&nbsp;C.&nbsp;Scott
+            and Dennis Price are not included in the query results because
+            the actor is only linked to a single movie in both of these
+            instances.
+         </p>
+         <p>In contrast, if we reverse these annotations to create
+            the query shown in <a href="ch04s03.html#fig_annot_db03_q02" title="Figure&nbsp;4.20.&nbsp;Requiring multiple link matches [Annot_DB03_Q02.qg2.xml]">Figure&nbsp;4.20</a>, we now
+            must find subgraphs where each movie is connected to an actor by at
+            least two role links.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db03_q02"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB03_Q02.png" align="middle" width="328.50000000000006" alt="Requiring multiple link matches [Annot_DB03_Q02.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.20.&nbsp;Requiring multiple link matches [Annot_DB03_Q02.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            This query identifies subgraphs containing an actor and any movies in
+            which that actor played at least two roles. Any movies in which the
+            actor played only a single role 
+            are not included in the query results, shown in
+            <a href="ch04s03.html#fig_annot_db03_q02_res" title="Figure&nbsp;4.21.&nbsp;Query results">Figure&nbsp;4.21</a>. The <code class="token">[1..]</code>
+            annotation on the <em class="token">movie</em> vertex groups the
+            matching movies for a specific actor into a single subgraph.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db03_q02_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB03_Q02_res.png" align="middle" width="549" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.21.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            The new annotation results in the elimination of the movie
+            <span class="emphasis"><em>The Pink Panther</em></span> and <span class="emphasis"><em>The
+                  Ladykillers</em></span> from the subgraph containing Peter Sellers, and
+            the elimination of <span class="emphasis"><em>The Ladykillers</em></span> from the subgraph
+            containing Alec Guinness.  The actors played only one role in these
+            movies. And because he played two roles in <span class="emphasis"><em>Kind Hearts and
+                  Coronets</em></span>, the subgraph containing Dennis Price is now
+            included in the results.  This subgraph was omitted from the first
+            query&#8217;s results because the first query required that each actor
+            be linked to two or more movies but this database only includes
+            information about one movie in which Dennis Price acted.
+         </p>
+         <p>If we change the query again to include a numeric annotation of
+            <code class="token">[2..]</code> for both the <em class="token">movie</em>
+            vertex and its adjacent edge, as shown in 
+            <a href="ch04s03.html#fig_annot_db03_q03" title="Figure&nbsp;4.22.&nbsp;Requiring multiple object and link matches [Annot_DB03_Q03.qg2.xml]">Figure&nbsp;4.22</a>, then matching subgraphs must
+            include at least two movie objects connected to an actor object, and
+            each of those movie objects must be connected to their
+            corresponding actor by at least two distinct role links.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db03_q03"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB03_Q03.png" align="middle" width="328.50000000000006" alt="Requiring multiple object and link matches [Annot_DB03_Q03.qg2.xml]"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.22.&nbsp;Requiring multiple object and link matches [Annot_DB03_Q03.qg2.xml]</b></p>
+         </div>
+         <p><br class="figure-break">
+            As we can see in <a href="ch04s03.html#fig_annot_db03_q03_res" title="Figure&nbsp;4.23.&nbsp;Query results">Figure&nbsp;4.23</a>, this query
+            finds only a single subgraph that satisfies the query&#8217;s
+            requirements. Only one actor in this database fragment is linked to at
+            least two movies in which he played two or more roles.
+            
+         </p>
+         <div class="figure"><a name="fig_annot_db03_q03_res"></a><div class="figure-contents">
+               <div class="mediaobject" align="center">
+                  <table border="0" summary="manufactured viewport for HTML img" cellspacing="0" cellpadding="0">
+                     <tr>
+                        <td align="center" valign="bottom"><img src="images/Annot_DB03_Q03_res.png" align="middle" width="364.5" alt="Query results"></td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <p xmlns:exsl="http://exslt.org/common" class="title" align="center"><b>Figure&nbsp;4.23.&nbsp;Query results</b></p>
+         </div>
+         <p><br class="figure-break">
+            
+         </p>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch04s02.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch04.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch04s04.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Annotation Basics&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Negated and Optional Elements</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

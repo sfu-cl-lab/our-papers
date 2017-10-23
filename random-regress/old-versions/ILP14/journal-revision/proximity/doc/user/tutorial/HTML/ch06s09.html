@@ -1,0 +1,178 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <!-- Part of the open-source Proximity system (see LICENSE for
+      copyright and license information). -->
+      <title>Synthetic Data Generation</title>
+      <link rel="stylesheet" href="prox.css" type="text/css">
+      <meta name="generator" content="DocBook XSL Stylesheets V1.71.1">
+      <link rel="start" href="index.html" title="Proximity 4.3 Tutorial">
+      <link rel="up" href="ch06.html" title="Chapter&nbsp;6.&nbsp;Using Scripts">
+      <link rel="prev" href="ch06s08.html" title="Working with Proximity Tables">
+      <link rel="next" href="ch06s09s02.html" title="Code example: generate-iid-data.py">
+   </head>
+   <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+      <div xmlns:exsl="http://exslt.org/common" class="navheader">
+         <table width="100%" summary="Navigation header">
+            <tr>
+               <td width="20%" align="left"><a accesskey="p" href="ch06s08.html">Prev</a>&nbsp;
+               </td>
+               <th width="60%" align="center">Chapter&nbsp;6.&nbsp;Using Scripts</th>
+               <td width="20%" align="right">&nbsp;<a accesskey="n" href="ch06s09s02.html">Next</a></td>
+            </tr>
+         </table>
+         <hr>
+      </div>
+      <div class="sect1" lang="en">
+         <div class="titlepage">
+            <div>
+               <div>
+                  <h2 class="title" style="clear: both"><a name="scripts_sdg"></a>Synthetic Data Generation
+                  </h2>
+               </div>
+            </div>
+         </div><a class="indexterm" name="idx_datagen1"></a><a class="indexterm" name="idx_datagen2"></a><a class="indexterm" name="idx_datagen3"></a><p>Researchers frequently need to explore the effects of certain data
+            characteristics on their models.  To help construct datasets
+            exhibiting specific properties, such as 
+            <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e57"><span class="glossterm">autocorrelation</span></a>
+            <a class="indexterm" name="d0e13341"></a>
+            or <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e267"><span class="glossterm">degree disparity</span></a>,
+            <a class="indexterm" name="d0e13350"></a>
+            Proximity can generate synthetic data
+            having one of several types of graph structure:
+            
+         </p>
+         <div class="itemizedlist">
+            <ul type="disc" compact>
+               <li>
+                  <p>random graphs</p>
+               </li>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e391"><span class="glossterm">independent and identically distributed</span></a>
+                       (i.i.d.) connected components
+                     <a class="indexterm" name="d0e13363"></a>
+                     <a class="indexterm" name="d0e13367"></a>
+                       
+                  </p>
+               </li>
+               <li>
+                  <p><a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e472"><span class="glossterm">lattice graphs</span></a>
+                       having a ring structure
+                  </p>
+               </li>
+               <li>
+                  <p>lattice graphs having a grid structure</p>
+               </li>
+               <li>
+                  <p>forest fire graphs</p>
+               </li>
+               <li>
+                  <p>cluster graphs with nodes arranged in separate clusters
+                       (cliques)
+                  </p>
+               </li>
+            </ul>
+         </div>
+         <p>
+            
+         </p>
+         <p>In all cases, the data generation process follows the same
+            process:
+            
+         </p>
+         <div class="orderedlist">
+            <ol type="1" compact>
+               <li>
+                  <p>Generate the empty graph structure.</p>
+               </li>
+               <li>
+                  <p>Generate attribute values based on user-supplied
+                         prior probabilities.
+                  </p>
+               </li>
+            </ol>
+         </div>
+         <p>
+            Because the attribute values of one object may depend on the
+            attribute values of related objects, the attribute generation process
+            assigns values collectively.
+         </p>
+         <p>Details for each of these steps are presented in the context of
+            a script that generates i.i.d. data, shown below.
+         </p>
+         <div class="sect2" lang="en">
+            <div class="titlepage">
+               <div>
+                  <div>
+                     <h3 class="title"><a name="d0e13403"></a>Generating i.i.d. data
+                     </h3>
+                  </div>
+               </div>
+            </div>
+            <p>The i.i.d. graph generation process creates a set of independent
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e222"><span class="glossterm">connected components</span></a>
+               <a class="indexterm" name="d0e13411"></a>
+               containing two object types: 
+               <em class="token">S</em>
+               and <em class="token">T</em>.  Each component contains a single
+               <em class="token">S</em> object that is linked to a variable
+               number (
+               <fo:inline xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:exsl="http://exslt.org/common" font-family="Symbol">&#8805;</fo:inline>&nbsp;0)
+               of <em class="token">T</em> objects.  The number
+               of linked <em class="token">T</em> objects (the degree of
+               <em class="token">S</em>) follows a normal distribution with
+               user-specified mean and standard deviation.
+               You can specify multiple normal distributions to create
+               <em class="token">S</em> objects having different degree
+               distributions.
+            </p>
+            <p>We typically consider the <em class="token">S</em> objects
+               to be the target objects to be classified, with the 
+               <em class="token">T</em> objects used as peripheral objects
+               during classification.  Each <em class="token">S</em> object is
+               assigned a single, discrete attribute
+               (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">s_class_label</span> in this example) that can be
+               used as a class label.  In order to generate datasets with 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e267"><span class="glossterm">degree disparity</span></a>, the
+               assignment of 
+               <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e111"><span class="glossterm">class labels</span></a> is
+               conditioned
+               <a class="indexterm" name="d0e13459"></a>
+               <a class="indexterm" name="d0e13463"></a>
+               on the <a xmlns:exsl="http://exslt.org/common" href="go01.html#d18e255"><span class="glossterm">degree</span></a> of the object
+               in the graph.  The generation process can also add additional
+               discrete attributes to the 
+               <em class="token">S</em> and <em class="token">T</em> 
+               objects, respectively.
+            </p>
+            <p>The following script creates four connected components using two
+               different degree distributions.  Both <em class="token">S</em> and
+               <em class="token">T</em> objects are given one additional
+               attribute each (<span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">s_attr0_label</span> and
+               <span xmlns:exsl="http://exslt.org/common" class="token" style="font-family: sans-serif">t_attr1_label</span>, respectively).   
+               These attribute values are conditioned by the models in
+               <code class="filename">s-attr-rpt.xml</code> and
+               <code class="filename">t-attr-rpt.xml</code>.
+               
+               
+            </p>
+         </div>
+      </div>
+      <div class="navfooter">
+         <hr>
+         <table width="100%" summary="Navigation footer">
+            <tr>
+               <td width="40%" align="left"><a accesskey="p" href="ch06s08.html">Prev</a>&nbsp;
+               </td>
+               <td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td>
+               <td width="40%" align="right">&nbsp;<a accesskey="n" href="ch06s09s02.html">Next</a></td>
+            </tr>
+            <tr>
+               <td width="40%" align="left" valign="top">Working with Proximity Tables&nbsp;</td>
+               <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+               <td width="40%" align="right" valign="top">&nbsp;Code example: generate-iid-data.py</td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>

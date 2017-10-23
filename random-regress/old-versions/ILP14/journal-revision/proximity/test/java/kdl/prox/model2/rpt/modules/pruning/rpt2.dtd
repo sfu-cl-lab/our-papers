@@ -1,0 +1,55 @@
+<!--
+
+  Proximity Relational Probability Tree (RPT) DTD
+  Version: 2.0
+
+  Part of the open-source Proximity system
+  (see LICENSE for copyright and license information).
+
+  -->
+
+<!-- rpt -->
+
+<!ELEMENT rpt2 (class-label, rpt-body)>
+
+
+<!-- class-label -->
+
+<!ELEMENT class-label (source) >
+<!ELEMENT source (source-class, data-type, is-continuous, is-single-value, source-elements) >
+<!ELEMENT source-class (#PCDATA)>
+<!ELEMENT data-type (#PCDATA)>
+<!ELEMENT is-continuous (#PCDATA)>
+<!ELEMENT is-single-value (#PCDATA)>
+<!ELEMENT source-elements ( (item-name)?, (attr-name)?, (temporal-col)? , (from)?, (to)?, (interval-min)?, (interval-max)?, (core-time-source)?, (related-time-source)?) >
+<!ELEMENT item-name (#PCDATA)>
+<!ELEMENT attr-name (#PCDATA)>
+<!ELEMENT interval-min (#PCDATA)>
+<!ELEMENT interval-max (#PCDATA)>
+<!ELEMENT temporal-col (#PCDATA)>
+<!ELEMENT from (#PCDATA)>
+<!ELEMENT to (#PCDATA)>
+<!ELEMENT core-time-source ( (item-name)?, (attr-name)?) >
+<!ELEMENT related-time-source ( (item-name)?, (attr-name)?) >
+
+<!-- rpt-body -->
+<!ELEMENT rpt-body (node) >
+<!ELEMENT yes-branch (node) >
+<!ELEMENT no-branch (node) >
+<!ELEMENT node (class-label-distr, (split)?, (yes-branch)?, (no-branch)?) >
+
+<!ELEMENT class-label-distr (distr-class, (class-label-info)*) >
+<!ELEMENT distr-class (#PCDATA)>
+<!ELEMENT class-label-info (#PCDATA) >
+<!ATTLIST class-label-info class CDATA #REQUIRED>
+<!ATTLIST class-label-info count CDATA #REQUIRED>
+
+<!ELEMENT split (feature-setting)>
+<!ELEMENT feature-setting (fs-class, source, aggregator, threshold, fs-elements) >
+<!ELEMENT fs-class (#PCDATA)>
+<!ELEMENT threshold (#PCDATA)>
+<!ELEMENT aggregator (aggregator-class) >
+<!ELEMENT aggregator-class (#PCDATA)>
+<!ELEMENT fs-elements (value?) >
+<!ELEMENT value (#PCDATA)>
+

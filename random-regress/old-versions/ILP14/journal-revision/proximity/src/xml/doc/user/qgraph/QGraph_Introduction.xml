@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Part of the open-source Proximity system (see LICENSE for
+     copyright and license information).
+-->
+
+<chapter id="qg_ch_intro">
+<title>Introduction</title>
+
+<para><glossterm>QGraph</glossterm> is a visual query language
+designed to support <glossterm>knowledge discovery</glossterm> in
+large graph databases.  Such databases are used to represent 
+<glossterm baseform="relational data"><emphasis>relational</emphasis> data</glossterm>,
+that is, data that explicitly represent both objects and the
+relationships among them.
+</para>
+
+<para>&qgraph; has some important differences from standard relational
+database query languages such as SQL.
+<indexterm><primary>SQL</primary></indexterm>
+Most obviously, &qgraph; is a visual query language. Queries are
+created by drawing the desired graph structure and adding restrictions
+in the form of <glossterm baseform="condition">conditions</glossterm>, 
+<glossterm baseform="constraint">constraints</glossterm>, and 
+<glossterm baseform="numeric annotation">numeric annotations</glossterm>.
+&qgraph; includes a grouping and counting mechanism that lets users
+move beyond specifying an exact database structure in a query. Queries
+can contain generalized structural descriptions, enabling a single
+query to match a variety of database structures.
+</para>
+
+<para>Unlike SQL, which returns individual records, &qgraph;
+queries return 
+<glossterm baseform="subgraph"><emphasis>subgraphs</emphasis></glossterm>,
+<indexterm><primary>subgraphs</primary></indexterm>
+<indexterm><primary>results of queries</primary>
+           <seealso>subgraphs</seealso></indexterm>
+<indexterm><primary>queries</primary>
+           <secondary>results</secondary>
+           <seealso>subgraphs</seealso></indexterm>
+complex objects that correspond to 
+connected sets of objects and relations in the queried database.
+These subgraphs retain the full 
+details of the database objects and links rather than just providing
+<glossterm baseform="aggregation">aggregations</glossterm> such as
+count or average. Subgraphs give users access to both 
+the content and structure of the matches when analyzing and exploring
+relational data.
+</para>
+
+<para>&qgraph; is used in Proximity,
+<indexterm><primary>Proximity</primary>
+           <secondary>system</secondary></indexterm>
+an open-source system for
+relational knowledge discovery. Although &qgraph; is a full-fledged
+query and update language for graph databases, Proximity currently
+only implements
+<indexterm><primary>Proximity</primary>
+           <secondary>QGraph implementation</secondary></indexterm>
+a large subset (but not all) of &qgraph;
+functionality. This document focuses on the features of &qgraph; that
+have been implemented in Proximity. See the technical report
+<citetitle>A Visual Language for Querying and Updating
+Graphs</citetitle> <xref linkend="blau02"/> 
+for a full description of &qgraph;&rsquo;s power, including
+functionality not yet available in the current Proximity
+implementation.<footnote><para>How &qgraph; evaluates conditions 
+and constraints on attributes
+with multiple values has changed since the publication of this
+technical report.  On this issue, the <citetitle>Proximity QGraph
+Guide</citetitle> is definitive.</para></footnote>
+</para>
+
+<para>&qgraph; is designed to work with graph databases such as those
+used by Proximity. Proximity databases
+<indexterm><primary>Proximity</primary>
+           <secondary>databases</secondary></indexterm>
+<indexterm><primary>databases</primary>
+           <secondary>Proximity</secondary></indexterm>
+are directed, attributed graphs where
+nodes correspond to 
+<glossterm baseform="object">objects</glossterm>
+<indexterm><primary>objects</primary></indexterm>
+(typically people, places, and things) and
+binary <glossterm baseform="link">links</glossterm>
+<indexterm><primary>links</primary></indexterm>
+represent the relationships among objects.  Both objects
+and links can have zero or more 
+<glossterm baseform="attribute">attributes</glossterm>
+<indexterm><primary>attributes</primary>
+           <secondary>multiple values</secondary></indexterm>
+and all attributes are set
+valued. For example, in a database containing information about
+movies, an object representing an actor might have a
+<token role="attr">name</token> attribute that has multiple values for the
+actor&rsquo;s given and stage names. Similarly, a link connecting an actor
+to a movie might have a <token role="attr">role</token> attribute that could
+contain multiple values when the actor plays multiple roles in a
+film.</para>
+
+<para>&qgraph; queries return a collection of subgraphs from the
+database that match the structure specified in the query. In
+Proximity, this result set is called a
+<glossterm baseform="container"><emphasis>container</emphasis></glossterm>.
+<indexterm><primary>containers</primary></indexterm>
+A container&rsquo;s subgraphs 
+include the matching objects and links as well as all associated
+attributes for these elements.</para>
+
+<para>To get a sense of &qgraph;&rsquo;s power and flexibility,
+consider a graph database containing information on the movie
+industry.  Such a database might represent movies, actors, directors,
+producers, studios, and awards as objects, with links representing the
+relationships among these entities.
+We might query such a database to identify simple subgraphs such as
+movies and their actors, or more complex subgraphs such as all the
+actors who have worked with a particular director, following links
+through the associated movies.
+The query in <xref linkend="fig_intro_db01_q01"/> finds
+just such subgraphs.
+<?pagebreak?>
+<figure id="fig_intro_db01_q01">
+<title>Example query [Intro_DB01_Q01.qg2.xml]</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_DB01_Q01.png"
+               width="4.5in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_DB01_Q01.png"
+               contentwidth="5.5in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+Without explaining the query&rsquo;s notation at this point, we observe
+that this query finds directors connected to one or more
+movies, which are in turn are connected to one or more actors.  When the
+query finds a match in the database, it returns the entire
+matching subgraph.
+</para>
+ 
+<para><xref linkend="fig_intro_db01_q01_res"/> shows the kind of
+subgraph that might get returned as a match for such a query.
+This subgraph shows the director Steven Spielberg and the links from
+him to the movies that he&rsquo;s directed. Those movies are in turn linked
+to the actors that appeared in those movies.  (Like other
+examples in this guide, data for this example is intended to be
+representative, but not necessarily complete.)
+<figure id="fig_intro_db01_q01_res">
+<title>Example query match</title>
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_DB01_Q01_res.png"
+               width="5.75in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_DB01_Q01_res.png"
+               contentwidth="7.0in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</figure>
+An important feature of this subgraph is that movies are linked to
+different numbers of actors.  We do not need to know, and the query
+does not have to specify, how many actors are linked to each movie.
+Similarly, we do not need to know how many movies Steven Spielberg has
+directed.  The matching subgraph for another director is likely to
+include a different number of movies, and those movies are also likely
+to be linked to varying numbers of actors.  &qgraph; lets us create a
+simple, easily understood query that matches varying graph
+structures.</para>
+
+<para>By returning complete subgraphs, &qgraph; provides 
+results particularly well suited for use in relational knowledge
+discovery.  Unlike query languages that require 
+<glossterm baseform="propositionalizing data">propositionalizing</glossterm>
+<indexterm><primary>attributes</primary>
+           <secondary>propositionalizing</secondary></indexterm>
+<indexterm><primary>propositionalizing attribute values</primary></indexterm>
+attribute data from related objects, &qgraph; preserves both the
+explicit relationships among objects and the specific attribute values
+for all objects and links in the subgraph.  Simplistic approaches to
+propositionalizing relational data can result in 
+<glossterm>bias</glossterm>
+<indexterm><primary>bias</primary></indexterm>
+due to hidden autocorrelation
+<indexterm><primary>autocorrelation</primary></indexterm>
+or degree disparity.
+<indexterm><primary>degree disparity</primary></indexterm>
+By preserving the full
+relationship and attribute value data, &qgraph; facilitates the
+development of models that can detect and adjust for such sources of
+bias.</para>
+
+<para>&qgraph; includes several mechanisms that together provide a
+powerful system for specifying the graph structures that
+match a &qgraph; query:
+These mechanisms are introduced in the following chapters:
+<itemizedlist spacing="compact">
+<listitem>
+<para><xref xrefstyle="pageref" linkend="qg_ch_basics"/>
+      describes the basic structure and results of
+      a &qgraph; query
+      </para>
+</listitem>
+<listitem>
+<para><xref xrefstyle="pageref" linkend="qg_ch_conditions"/>
+      introduces 
+      <glossterm baseform="condition">conditions</glossterm>, which place
+      restrictions on the attribute values of matching objects and links.
+      </para>
+</listitem>
+<listitem>
+<para><xref xrefstyle="pageref" linkend="qg_ch_annotations"/>
+      describes 
+      <glossterm baseform="numeric annotation">numeric annotations</glossterm>,
+      a powerful and elegant counting feature
+      that serves to limit and group query results.
+      </para>
+</listitem>
+<listitem>
+<para><xref xrefstyle="pageref" linkend="qg_ch_constraints"/>
+      describes 
+      <glossterm baseform="constraint">constraints,</glossterm>
+      a global mechanism that relates one object or link to another. 
+      </para>
+</listitem>
+<listitem>
+<para><xref xrefstyle="pageref" linkend="qg_ch_subqueries"/>
+      describes 
+      <glossterm baseform="subquery">subqueries</glossterm>, which
+      enable the treatment of connected subgraphs as a logical unit in
+      defining more complex queries.
+      </para>
+</listitem>
+  <listitem>
+  <para><xref xrefstyle="pageref" linkend="qg_ch_xml"/>
+        describes the Proximity XML representation for queries.</para>
+  </listitem>
+</itemizedlist>
+
+<!-- This is followed by chapters that describe how to create
+  &qgraph; queries in Proximity:
+  <itemizedlist spacing="compact">
+  <listitem>
+  <para><xref xrefstyle="pageref" linkend="qg_ch_queryeditor"/>
+        describes how
+        to create queries using Proximity&rsquo;s graphical Query
+        Editor.</para>
+  </listitem>
+  <listitem>
+  <para><xref xrefstyle="pageref" linkend="qg_ch_xml"/>
+        describes how to specify queries
+        using Proximity&rsquo;s XML representation for queries.</para>
+  </listitem>
+  </itemizedlist>
+-->
+
+</para>
+
+<!-- ============================================================== -->
+<!--                       USING THE QGRAPH GUIDE                   -->
+<!-- ============================================================== -->
+
+<sect1>
+<title>Using the &qgraph; Guide</title>
+
+<para>A &qgraph; query is a labeled graph designed to correspond to
+selected structures in the target database.  The vertices
+<indexterm><primary>vertices</primary>
+           <secondary sortas="objects">and objects</secondary></indexterm>
+<indexterm><primary>objects</primary></indexterm>
+in the query correspond to objects in the database and the edges
+<indexterm><primary>edges</primary>
+           <secondary sortas="links">and links</secondary></indexterm>
+<indexterm><primary>links</primary></indexterm>
+in the query
+correspond to database links.  This distinction in terminology is
+important and will be maintained throughout this guide&mdash;we use
+the terms <glossterm><emphasis>object</emphasis></glossterm> and 
+<glossterm><emphasis>link</emphasis></glossterm>
+when referring to database entities, and the terms
+<glossterm><emphasis>vertex</emphasis></glossterm> and 
+<glossterm><emphasis>edge</emphasis></glossterm> when
+referring to query elements.</para>
+
+<para>Because &qgraph; is currently only implemented in Proximity,
+this <emphasis>Guide</emphasis> includes a discussion of how that
+implementation
+<indexterm><primary>Proximity</primary>
+           <secondary>QGraph implementation</secondary></indexterm>
+may affect the use and interpretation of &qgraph;
+queries and results.  When applicable,
+each chapter includes a section that describes factors you should
+be aware of when using &qgraph; in Proximity, such as how query
+results are stored in the database, efficiency considerations, or
+implementation restrictions.  Information presented in these sections
+is not part of the &qgraph; specification, but can be useful when
+understanding how &qgraph; works in Proximity.</para>
+
+<para>An important characteristic of Proximity databases is the lack
+of an inherent sense of object or link 
+<glossterm baseform="type">types</glossterm>.
+Type information
+<indexterm><primary>type of an object or link</primary>
+           <seealso>data type</seealso></indexterm>
+<indexterm><primary>attributes</primary>
+           <secondary>type information</secondary></indexterm>
+<indexterm><primary>representation in Proximity</primary>
+           <secondary>type information</secondary></indexterm>
+<indexterm><primary>Proximity</primary>
+           <secondary>representation</secondary>
+           <tertiary>type information</tertiary></indexterm>
+is stored as an attribute value, just like any other attribute.  When we
+refer to an <token role="object">actor</token> object or
+<token role="link">role</token> link, we are using a convenient shorthand
+for &ldquo;an object whose &lsquo;type&rsquo; attribute 
+has a value of &lsquo;actor&rsquo;&thinsp;&rdquo; or &ldquo;a link
+whose &lsquo;kind-of&rsquo; attribute has a value of
+&lsquo;role.&rsquo;&thinsp;&rdquo;
+Users are free to include or not include type 
+information in a database&rsquo;s object and link attributes and to use
+whatever name they chose for an attribute that stores type
+information.  Descriptions in this document may refer to objects and
+links by type (e.g., an <token role="object">actor</token> object or
+<token role="link">role</token> link) or value (e.g., the
+<token role="object">Peter Sellers</token> object) with the
+understanding that this is a 
+shorthand for database objects and links containing attributes that
+represent this &ldquo;type&rdquo; information or that have the
+specified attribute value.</para>
+
+<para>Databases, &qgraph; queries, and matches identified by
+executing those queries are all graphs.
+To help distinguish these items, the <emphasis>Guide</emphasis>
+follows the following graphic conventions:</para>
+
+<para>Database fragments
+<indexterm><primary>databases</primary>
+           <secondary>graphical representation</secondary></indexterm>
+<indexterm><primary>graphical representation</primary>
+           <secondary>databases</secondary></indexterm>
+use shaded ovals to represent the objects in the
+database.  Attributes
+<indexterm><primary>attributes</primary>
+           <secondary>graphical representation</secondary></indexterm>
+are shown next to their corresponding object or link.
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_DatabaseExample.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_DatabaseExample.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</para>
+<?pagebreak?>
+<para>Queries
+<indexterm><primary>queries</primary>
+           <secondary>graphical representation</secondary></indexterm>
+<indexterm><primary>graphical representation</primary>
+           <secondary>queries</secondary></indexterm>
+use white circles for vertices. Query vertices and edges are labeled.
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_QueryExample.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_QueryExample.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</para>
+
+<para>Query results
+<indexterm><primary>subgraphs</primary>
+           <secondary>graphical representation</secondary></indexterm>
+<indexterm><primary>graphical representation</primary>
+           <secondary>subgraphs</secondary></indexterm>
+use shaded ovals to represent the objects in the resulting
+subgraphs. Subgraph objects and links are labeled with the
+corresponding query labels.  Because &qgraph; queries return complete
+subgraphs that include all attribute values for the component objects
+and links, we also show attribute values in our graphical
+representations of subgraphs.
+<mediaobject>
+<imageobject role="fo">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_ResultsExample.png"
+               width="3.0in"
+               format="PNG"/> 
+</imageobject>
+<imageobject role="html">
+    <imagedata align="center" valign="bottom"
+               fileref="&graphicspath;/Intro_ResultsExample.png"
+               contentwidth="3.65in"
+               format="PNG"/> 
+</imageobject>
+</mediaobject>
+</para>
+
+<para>The <emphasis>&qgraph; Guide</emphasis> is primarily intended for
+readers with little to no experience using &qgraph;.  The major
+chapters are heavily oriented around a series of examples, making the
+<emphasis>Guide</emphasis> a relatively quick read.  More experienced
+users may want to take advantage of the summary at the end of each
+chapter or return to the <emphasis>Guide</emphasis> to improve
+their understanding of specific issues.</para>
+
+<para>Most of the examples
+<indexterm><primary>examples</primary></indexterm>
+in the <emphasis>&qgraph; Guide</emphasis>,
+including both database fragments and queries, are available in the
+<filename>&examplespath;</filename> directory. When such files are
+available, the figure caption includes the appropriate file name.
+See the <emphasis>&tutorialhome;</emphasis> for complete instructions
+for importing databases and running queries.</para> 
+
+</sect1>
+</chapter>
+
+<!--
+  Local Variables:
+  mode: sgml
+  sgml-set-face: t
+  sgml-indent-step:nil
+  sgml-always-quote-attributes:t
+  sgml-parent-document:("QGraphGuide.xml" "book" "chapter")
+  sgml-default-dtd-file:"../../DocBook.ced"
+  End:
+-->
