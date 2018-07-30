@@ -1,0 +1,101 @@
+
+\documentclass[letterpaper]{article}
+\usepackage{aaai}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+%\documentclass{sig-alternate-05-2015}
+\input{preamble}
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+
+\usepackage{url}
+%\urldef{\mailsa}\path|{alfred.hofmann, ursula.barth, ingrid.haas, frank.holzwarth,|
+%\urldef{\mailsb}\path|anna.kramer, leonie.kunz, christine.reiss, nicole.sator,|
+%\urldef{\mailsc}\path|erika.siebert-cole, peter.strasser, lncs}@springer.com|    
+%\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+%\noindent\keywordname\enspace\ignorespaces#1}
+
+
+\usepackage{diagbox}
+%\usepackage{ltexpprt}
+% defines theorem environments etc.
+\frenchspacing
+\setlength{\pdfpagewidth}{8.5in}
+\setlength{\pdfpageheight}{11in}
+\pdfinfo{
+/Title Proof of Theorem 1
+/Author (Put All Your Authors Here, Separated by Commas)}
+\setcounter{secnumdepth}{0}  
+
+\begin{document}
+\title{Proof of Theorem 1}
+
+%\numberofauthors{2}
+\author{
+%\alignauthor
+%Sajjad Gholami\\
+%      \affaddr{School of Computing Science}\\ 
+%      \affaddr{Simon Fraser University, Canada}\\
+%       \email{sgholami@sfu.ca}
+%\alignauthor
+%Oliver Schulte\\
+%       \affaddr{School of Computing Science}\\ 
+%      \affaddr{Simon Fraser University, Canada}\\
+%       \email{oschulte@sfu.ca}
+}
+%\author{Sajjad Gholami \and Oliver Schulte \institute{Simon Fraser University,
+%Canada, email: sgholami@sfu.ca \and oschulte@sfu.ca} }
+
+\maketitle
+\bibliographystyle{aaai}
+%\bibliographystyle{abbrv}
+
+%\title{Outline for a Paper}
+%\author{Oliver Schulte\\
+%\\ School of Computing Science\\ Simon Fraser University\\Vancouver-Burnaby, Canada}
+%\date{\today}
+%\mainmatter  % start of an individual contribution
+
+% first the title is needed
+%\title{Upgrading Bayesian Network Scores for Multi-Relational Data}
+
+% a short form should be given in case it is too long for the running head
+%\titlerunning{Bayesian Network Scores for Multi-Relational Data}
+
+% the name(s) of the author(s) follow(s) next
+%
+% NB: Chinese authors should write their first names(s) in front of
+% their surnames. This ensures that the names appear correctly in
+% the running heads and the author index.
+%
+
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+%\toctitle{Lecture Notes in Computer Science}
+%\tocauthor{Authors' Instructions}
+
+
+
+We say that an edge \defterm{adds a population variable} if the parent contains a population variable that is not contained in the child.
+
+{\em Proof.} Case 1: The additional edge $\node_{+} \rightarrow \node_{i}$ adds no population variables. For such edges, the count-count upgrade score  has the same mathematical form as the original i.i.d. score. Therefore the arguments of~\cite{Chickering2003} apply, and the score is locally consistent. Since for such edges, the normalized gain is equivalent to the count-count upgrade score, 
+%simply scales the count-count score difference by the local sample size $\Fcount{+}{i}{\dstructure}$, 
+the normalized gain is locally consistent as well. 
+
+Case 2: The additional edge $\node_{+} \rightarrow \node_{i}$ adds a population variable. For concreteness, assume that the edge is of the form $g(\Avariable,\Bvariable) \rightarrow f(\Avariable)$, so the added sample size is $\varsize{\Bvariable}{\dstructure}$. Consider a transformed database $\dstructure'$ where $f(\Avariable)$ is replaced by $f'(\Avariable,\Bvariable)$, with an inert second argument: $f'(\aconstant,\bconstant) = f(\aconstant)$. Then in $\dstructure'$, each satisfying assignment in $\dstructure$ for the family of $f(\Avariable)$  is multiplied by $\varsize{\Bvariable}{\dstructure}$. Therefore the sufficient statistics are related as follows: 
+$$\Fcount{\graph}{ijk}{\dstructure'} = 
+\varsize{\Bvariable}{\dstructure} \times\Fcount{\graph}{ijk}{\dstructure}$$ and $$\Fcount{\graph_{+}}{ijk}{\dstructure'} = 
+\Fcount{\graph_{+}}{ijk}{\dstructure}.$$ These equalities imply that the normalized gain for $\dstructure$ is the same as that for $\dstructure'$. Now in $\dstructure'$, the new edge adds no population variables, and so by Case 1, the normalized gain is locally consistent for $\dstructure'$. Therefore it is locally consistent for $\dstructure$. Hence in either case, the normalized gain is locally consistent.
+
+\bibliographystyle{plain}
+\bibliography{master}
+
+\end{document}
