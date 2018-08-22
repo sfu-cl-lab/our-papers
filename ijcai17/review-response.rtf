@@ -1,0 +1,251 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red16\green73\blue188;\red56\green110\blue255;
+\red13\green98\blue18;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f0\fs36 \cf2 From: Oliver Schulte <oschulte@cs.sfu.ca>\
+Subject: Re: AAAI-17 Review Response Phase: (Submission #157)\
+Date: October 29, 2016 at 11:30:52 PDT\
+To: Sajjad Gholami <sgholami@sfu.ca>\
+Reply-To: oschulte@cs.sfu.ca\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\fs24 \cf2 \
+\pard\pardeftab720\sa360
+
+\fs36 \cf2 Hi Sajjad, I\'92m attaching a draft. It\'92s too long. I\'92ll see if I can find time to cut it down. You can let me know your thoughts in the meantime.\
+\
+Reviewer response AAAI 2017\
+\'a0\
+We\'92d like to thank the reviewers for their time and comments. We especially appreciate the constructive suggestions, which we find encouraging on the whole. Reviewer #3 asks how what our work adds to prior work in terms of techniques and general principles. The main new concept is using a gain function that depends on two models, rather than a single model selection score. We argue that this concept is necessary both for proving consistency in the long run and for getting adequate performance in the short run.\
+\'a0\
+Specific replies:\
+\'a0\
+Reviewer #1:\
+\'a0\
+\'93The KLD terms are not necessarily statistically significant\'94\
+\'a0\
+\pard\pardeftab720\sl400\sa320
+\cf2 The KLD differences between the count and the gain score are statistically significant. Note that they are plotted in powers of 10 in Fig.3. The KLD differences between the gain and the normalized score are not. This is because the normalized score learns strictly more edges than the gain score. It is a theorem in Bayes net theory that the KLD of a supergraph is never greater than the KLD of a subgraph. 
+\f1\fs34 The normalized gain score achieves the same KLD metrics with many fewer parameters (p.6), that difference is also statistically significant.
+\f0\fs36 \
+\pard\pardeftab720\sa360
+\cf2 \'a0\
+\'93There have been previous approaches in identifying that the penalty term can overly penalize the model and underfit the data and subsequently they have been scaled down - Guo and Griener 05, Jaeger 07, Natarajan et al 06 and De Raedt et al 06.\'94\
+\'a0\
+Thank you for the references. Guo and Griener is not about relational data, but propositional/i.i.d. BN learning. The Jaeger 2007 ICML paper is about parameter learning not model selection and has no consistency result. We referenced Xiang and Neville which is about consistent parameter learning. We could not find a reference for Sriraam Natarajan 2006. Natarajan et al. 2008 is also about parameter learning. deRaedt, Kersting et al. 2006 is about learning probabilistic prolog programs using maximum likelihood but does not consider penalty terms to obtain a model selection score.\
+\'a0\
+Review #2: Thank you for the positive feedback. We agree with the points you raise, it\'92s just that the page limit required some hard choices and we sacrificed some filling in of background in favour of references.\
+\'a0\
+\'93Theorem 1 only establishes the local consistency of the approach, not the global consistency (as suggested in the introduction).\'94 We have followed Chickering and Meek\'92s approach to consistent BN learning for propositional data. Their work establishes that local consistency implies global consistency. Basically, if a structure is not an I-map of the data generating distribution, d-separation theory shows that it must be missing an edge A-B s.t. B is dependent on A even given A\'92s current parents. Clause 1 of local consistency entails that such an edge receives a positive score. Clause 2 entails that a learned I-map is optimal in the sense that no subgraph is an I-map.\
+\'a0\
+\'93the authors repeatedly cite frameworks which follow a interpretation-based semantics \'85 while their approach adopts a domain-based semantics. \'85Domain-base semantics (or database frequencies) are _not_ the most usual semantics in SRL.\'94\
+\'a0\
+\pard\pardeftab720\sl400\sa320
+\cf2 Indeed one way in which ours differs from previous work is that we use the domain-based semantics. Focusing on the data frequency is analogous to the previous work on propositional data (see Chickering refs). Our approach follows De Raedt\'92s upgrade principle in seeking a general result for relational data where propositional results are a special case (see Laer and De Raedt reference). We reference many interpretation-based semantics because we agree that it is the most common semantics. As we note\'a0 under Related Work and in the Conclusion, there is potential for applying our gain function approach and our proof strategy to interpretation-based semantics.\
+Reviewer #3:\
+\'a0\
+\'93I am not sure about the KLD metric. Why not use test-set log likelihood score.\'94\
+It\'92s a good idea, test-set log-likelihood comes out like KLD: gain scores does much better than count score, and the same as the normalized score. Given the page limit we included KLD only because it directly related to our consistency result.\
+\'a0\
+\'a0\
+\pard\pardeftab720
+\cf3 On Oct 28, 2016, at 19:28, Sajjad Gholami <{\field{\*\fldinst{HYPERLINK "mailto:sgholami@sfu.ca"}}{\fldrslt \cf4 \ul \ulc4 sgholami@sfu.ca}}> wrote:\
+Hi Oliver,\
+\
+I'm doing well. Busy with trying to learn lots of new tools and frameworks; which needs a bit of time, though.\'a0\
+I don't know exactly how these are related to what we did!!\
+Guo and Greiner 05, De Raedt et al 06,\'a0and Natarajan et al 06 have been attached. (not sure exactly if he/she means this one from Natarajan!)\
+For Jaeger 07, I'm not sure if he/she means this one:\'a0{\field{\*\fldinst{HYPERLINK "https://scholar.google.ca/citations?view_op=view_citation&hl=en&user=0uztVbMAAAAJ&cstart=40&sortby=pubdate&citation_for_view=0uztVbMAAAAJ:lSLTfruPkqcC"}}{\fldrslt \cf4 \ul \ulc4 https://scholar.google.ca/citations?view_op=view_citation&hl=en&user=0uztVbMAAAAJ&cstart=40&sortby=pubdate&citation_for_view=0uztVbMAAAAJ:lSLTfruPkqcC}}\
+\
+Cheers,\
+Sajjad\
+\
+On Fri, Oct 28, 2016 at 3:56 PM, Oliver Schulte \uc0\u8234 <{\field{\*\fldinst{HYPERLINK "mailto:oschulte@cs.sfu.ca"}}{\fldrslt \cf4 \ul \ulc4 oschulte@cs.sfu.ca}}>\uc0\u8236  wrote:\
+Hi Sajjad,\
+\
+how are you - you're the one with big changes? The reviews were actually pretty positive and said encouraging things. But to be honest, the chances are low. The lowest scores are also by the person with the worst misunderstandings so there is some hope. I've started drafting a reply. The main thing that would help me is if you can find the papers that reviewer 1 is referring to \'a0(Guo and Griener 05, Jaeger 07, Natarajan et al 06 and De Raedt et al 06). We seem to have missed these?! Or maybe they're not relevant.\
+\
+Perhaps we can talk on the phone tomorrow morning, no time before then.\
+\
+Oliver\
+\
+-----------------------------------------------------------------------------------------------------\
+\
+Oliver Schulte					E-mail: {\field{\*\fldinst{HYPERLINK "mailto:oschulte@cs.sfu.ca"}}{\fldrslt \cf4 \ul \ulc4 oschulte@cs.sfu.ca}}\
+Simon Fraser University			Phone: {\field{\*\fldinst{HYPERLINK "tel:%28778%29%20782-3390"}}{\fldrslt \cf4 \ul \ulc4 (778) 782-3390}}\
+Professor						Fax:\'a0{\field{\*\fldinst{HYPERLINK "tel:%28778%29%20782-3045"}}{\fldrslt \cf4 \ul \ulc4 (778) 782-3045}}\
+School of Computing Science		Web: {\field{\*\fldinst{HYPERLINK "http://www.cs.sfu.ca/~oschulte"}}{\fldrslt \cf4 \ul \ulc4 http://www.cs.sfu.ca/~oschulte}}\
+TASC Building	9021			Work Schedule: see home page\
+Burnaby, B.C. V5A 1S6\
+Canada\
+\
+On Oct 27, 2016, at 16:22, Sajjad Gholami <{\field{\*\fldinst{HYPERLINK "mailto:sgholami@sfu.ca"}}{\fldrslt \cf4 \ul \ulc4 sgholami@sfu.ca}}> wrote:\
+\
+\pard\pardeftab720
+\cf5 Hi Oliver,\
+\
+Hope you doing well :)\
+\
+Didn't know if you already received\'a0this or not. It seems the first reviewer doesn't like us at all! He/she didn't get the novelty that we did. The other two looks good enough, we can convince them. But I'm not sure how we can convince the first one.\
+\
+How do you feel about the reviews?\
+\
+Best,\
+Sajjad\
+\
+---------- Forwarded message ----------\
+From: 
+\b AAAI-17
+\b0  \uc0\u8234 <{\field{\*\fldinst{HYPERLINK "mailto:aaai17@easychair.org"}}{\fldrslt \cf4 \ul \ulc4 aaai17@easychair.org}}>\uc0\u8236 \
+Date: Thu, Oct 27, 2016 at 3:27 PM\
+Subject: AAAI-17 Review Response Phase: (Submission #157)\
+To: Sajjad Gholami <{\field{\*\fldinst{HYPERLINK "mailto:sgholami@sfu.ca"}}{\fldrslt \cf4 \ul \ulc4 sgholami@sfu.ca}}>\
+\
+\
+Dear Sajjad Gholami,\
+\
+Thank you for your submission, Upgrading Bayesian Network Scores for Multi-Relational Data (#157), to AAAI-17. Author responses will be accepted between now (Thursday, October 27) and 11:59 PM PDT Saturday, October 29. No extensions will be granted. During this time, you will be able to read the current reviews for your paper and have the option to submit a response of up to 500 words.\
+\
+PLEASE READ THE FOLLOWING POINTS:\
+\
+* An effective response will identify any factual errors in the reviews and focus on any questions posed by the reviewers. It is normally ineffective to attempt to provide new research results, dispute matters of judgment, or reformulate the presentation. Try to be as concise and to the point as possible.\
+\
+* Submitting an author response is optional; it is not a requirement.\
+\
+* The reviews are provided as submitted by the PC members, without any coordination between them. Thus, there may be inconsistencies. Furthermore, these are not the final versions of the reviews, since they will be updated to take into account your feedback and any discussions among PC members.\'a0 It might also be necessary to solicit additional reviews after the author response period has closed.\
+\
+* The program committee will take author responses into account during the discussion period. We will strongly encourage reviewers to update their reviews to reflect the discussion and react to your response; however, we cannot guarantee that all reviews will be so updated.\
+\
+* No edits or deletion of comments are possible after the response has been submitted on EasyChair. We urge you to write your response offline and insert the text of your final version. Only a corresponding author is able to enter the response.\
+\
+* Only the corresponding author(s) receive this message.\
+\
+The reviews on your paper are attached to this letter.\'a0 To submit your response you should log on the EasyChair Web site {\field{\*\fldinst{HYPERLINK "https://easychair.org/conferences/?conf=aaai17"}}{\fldrslt \cf4 \ul \ulc4 https://easychair.org/conferences/?conf=aaai17}} and select your submission on the menu.\
+\
+Thank you,\
+\
+Satinder Singh and Shaul Markovitch\
+AAAI-17 Program Co-chairs\
+\
+===========================\
+Scales used in the reviews:\
+\
+Significance of the Contribution\
+Does the paper contribute a major breakthrough or an incremental advance?\
+3: substantial, novel contribution\
+2: modest or incremental contribution\
+1: minimal or no contribution\
+\
+Soundness\
+Is the technical development correct or does the paper exhibit inaccuracies?\
+3: correct\
+2: minor inconsistencies or small fixable errors\
+1: major errors\
+\
+Scholarship\
+Is the work well positioned with respect to the existing literature? If relevant references are missing, please provide examples in your comments to the authors.\
+3: excellent coverage of related work\
+2: relevant literature cited but could expand\
+1: important related work missing or mischaracterizes prior research\
+\
+Clarity\
+Assess the clarity of the presentation and reproducibility of the results.\
+3: crystal clear\
+2: more or less readable\
+1: hard to follow\
+\
+Breadth of Interest\
+Would the paper attract broad interest or is it targeted to a narrow audience?\
+4: broad interest across AAAI audience\
+3: some interest beyond specialty area\
+2: interest limited to specialty area\
+1: out of scope\
+\
+SUMMARY RATING\
+Scores from + to +++++ indicate that the submission could be accepted (with either a poster presentation or a talk). The stronger your feeling, the higher your score. Scores from - to ----- indicate that the submission should be rejected. The summary rating does not need to be an "average" of the other ratings.\
+Range: +++++ (= Best), ++++, +++, ++, +, -, --, ---, ----, ----- (= Worst)\
+\
+==============================================================\
+----------------------- REVIEW 1 ---------------------\
+PAPER: 157\
+TITLE: Upgrading Bayesian Network Scores for Multi-Relational Data\
+AUTHORS: Sajjad Gholami and Oliver Schulte\
+\
+Significance: 1 (minimal or no contribution)\
+Soundness: 2 (minor inconsistencies or small fixable errors)\
+Scholarship: 2 (relevant literature cited but could expand)\
+Clarity: 3 (crystal clear)\
+Breadth of Interest: 3 (some interest beyond specialty area)\
+SUMMARY RATING: -3 (---)\
+\
+----------- Summarize the Main Contribution of the Paper -----------\
+This paper presents a scoring metric based on normalized gain for directed relational probabilistic models. The scoring metric as with the regular BN scores has two components - a likelihood score (normalized for the different number of groundings of the different predicates) and a complexity penalty. The paper shows that this preserves local consistency in the relational setting if the consistency in the iid setting is preserved. The experiments show that this score seems to be reasonable compared to their baselines.\
+\
+----------- Comments for the Authors -----------\
+The paper is written well and motivated clearly. Most of the related work is presented well. The scoring function is intuitive and the experiments seem reasonable.\
+\
+However, the key issue with the paper is novelty. There have been previous approaches in identifying that the penalty term can overly penalize the model and underfit the data and subsequently they have been scaled down - Guo and Griener 05, Jaeger 07, Natarajan et al 06 and De Raedt et al 06. Similarly the normalized log-likelihood is also defined earlier by the authors that they have cited. Given that both the terms are defined previously, I am not sure what the contribution is. If the consistency is the key contribution, it is unclear to me if that is worth a AAAI paper.\
+\
+The empirical analysis while appears reasonable is still far from convincing. The KLD terms are not necessarily statistically significant So in most cases, it is not the fact that the gain is quite powerful.\
+\
+The biggest issue for me is trying to understand how this can be improved for acceptance and it is unclear because some of these contributions are not significant enough to be published in a top conference. More experiments can potentially help although I doubt that will improve the paper. May be considering different search and scores together can show improvement.\
+\
+The paper has a lot of typos and errors\'a0 - Page 6, above figure 4, the italicized conclusion is incorrect. Iti s not the count that is dense but the normalized score that is dense. Similarly, there are lot of typos that I do not bother to list. The paper seems to have been written in a hurry and needs careful proof-reading.\
+\
+In summary, while the paper is written well, the contributions do not seem significant.\
+\
+----------------------- REVIEW 2 ---------------------\
+PAPER: 157\
+TITLE: Upgrading Bayesian Network Scores for Multi-Relational Data\
+AUTHORS: Sajjad Gholami and Oliver Schulte\
+\
+Significance: 2 (modest or incremental contribution)\
+Soundness: 2 (minor inconsistencies or small fixable errors)\
+Scholarship: 1 (important related work missing or mischaracterizes prior research)\
+Clarity: 2 (more or less readable)\
+Breadth of Interest: 4 (broad interest across AAAI audience)\
+SUMMARY RATING: 1 (+ (weak accept))\
+\
+----------- Summarize the Main Contribution of the Paper -----------\
+The paper describes a meta-scoring rule for learning the structure of a type of relational bayesian networks (in the authors' word, a method for upgrading structure learning scores based on penalized likelihoods). The meta-score assesses the improvement of adding edges to a structure that represents a probability distribution over a relational database. A local consistency property is proved for the meta-score (using BIC's and AIC's penalization factors), and experiments are performed that show that the scoring-method can be used to indeed identify\'a0 the true model.\
+\
+----------- Comments for the Authors -----------\
+The paper is fairly well-written, and makes a small (but important) contribution. The authors however oversell the contributions in the paper both in the abstract and in the introduction.\'a0 Theorem 1 only establishes the local consistency of the approach, not the global consistency (as suggested in the introduction). I am not sure that the former is sufficient to establish the latter, especially since the result uses only edge additions (I am guessing that if local consistency was proved to edge removal then an exhaustive search algorithm would be consistent). I have not read the supplementary material (hence the proof), but the statement sounds reasoable. Since the proof of consistency is a major contribution of the paper and it is only a paragraph long, it should appear in the manuscript.\
+\
+It is very difficult to understand the semantics of the models proposed. The paper is often misleading, since the authors repeatedly cite frameworks which follow a interpretation-based semantics (Markov Logic, Poole's FOL BN, PRM), while their approach adopts a domain-based semantics --this was only clear to me when I read the definition of log likelihood, although they it is written that they use database frequency semantics early on. (The distinction between both semantics is made clear in Halpern's work, which is cited by the authors.) This point should be stressed, as domain-base semantics (or database frequencies) are _not_ the most usual semantics in SRL. In particular, Poole [2003] and Kimmig et al. [2014] define parametrized Bayesian networks using the interpretation semantics (but the authors cite their works when described their semantics). Note that the loglikelihood normalization problem that seems to harm structure learning of models under domain-based semantics!\
+\'a0 disappears when using interpretation-based semantics. On the other hand, directed models have to cope with aggregations and ensure acyclicity for interpretation-based semantics. So there might be advantages of using either semantics.\
+\
+----------------------- REVIEW 3 ---------------------\
+PAPER: 157\
+TITLE: Upgrading Bayesian Network Scores for Multi-Relational Data\
+AUTHORS: Sajjad Gholami and Oliver Schulte\
+\
+Significance: 2 (modest or incremental contribution)\
+Soundness: 3 (correct)\
+Scholarship: 3 (excellent coverage of related work)\
+Clarity: 2 (more or less readable)\
+Breadth of Interest: 4 (broad interest across AAAI audience)\
+SUMMARY RATING: 3 (+++)\
+\
+----------- Summarize the Main Contribution of the Paper -----------\
+The paper presents a new, upgraded consistent scoring function and then uses that function to learn the structure of relational Bayesian networks. The key idea in the scoring function is to define a novel relational function called normalized gain which measures the relative improvement of a new structure over the current structure. A key feature of the gain function is that it can be used with several standard scores such as AIC and BIC. The authors provide experimental results comparing normalized gain with two other upgrading but inconsistent functions: count gain and normalized score gain. The results show that normalized gain achieves the best balance between sparsity and accuracy (count gain yields the sparsest models while normalized score yields more accurate models).\
+\
+----------- Comments for the Authors -----------\
+Overall, I like the paper and would like to see it included in the proceedings.\
+\
+My three main concerns are:\
+(1) The work appears to be incremental in the light of work by Xiang and Neville, 2011, in which similar upgrading was accomplished for parameter learning, yielding novel consistent scores. May be the authors can expand on how their work adds to this prior work in terms of techniques and general principles.\
+(2) You should have performed and included sanity check results. For example, generate a random relational Bayes net, generate random samples from it and use the dataset to learn the structure of the network. Compare the original structure with the induced structure.\
+(3) I am not sure about the KLD metric. Why not use test-set log likelihood score.\
+\
+------------------------------------------------------\
+\
+\pard\pardeftab720
+\cf3 \
+\
+<De Raedt et al 06.pdf><Guo and Greiner 05.pdf><Natarajan et al 06.pdf>\
+\pard\pardeftab720
+\cf2 \
+}
