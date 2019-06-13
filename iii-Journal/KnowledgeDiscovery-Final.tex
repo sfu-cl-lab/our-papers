@@ -51,6 +51,7 @@ grestore
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage[round]{natbib}
 \usepackage{url}
 %\usepackage{subfigure}
 \usepackage{epstopdf}
@@ -424,13 +425,13 @@ Our method is validated on synthetic datasets and on real-world data sets about 
 
 \section{Introduction: Exception Mining for Relational Data}\label{intro}
 
-Exception mining and outlier detection are important data analysis tasks in many domains. For relational data, exception mining can be applied to support outlier detection, where statistical deviations are viewed as due to a node or entity being genuinely exceptional, rather than due to statistical noise in the data. Statistical approaches to unsupervised outlier detection leverage a generative model of the data~\cite{aggarwal2013}. The generative model represents normal behavior. An individual object is deemed an outlier if  the model assigns sufficiently low likelihood to generating it. 
-We describe a new method, based on the Exceptional Model Mining (EMM) framework \cite{Duivesteijn2016}, for extending statistical  outlier detection with generative models to the case of object-relational data. 
+Exception mining and outlier detection are important data analysis tasks in many domains. For relational data, exception mining can be applied to support outlier detection, where statistical deviations are viewed as due to a node or entity being genuinely exceptional, rather than due to statistical noise in the data. Statistical approaches to unsupervised outlier detection leverage a generative model of the data~\citep{aggarwal2013}. The generative model represents normal behavior. An individual object is deemed an outlier if  the model assigns sufficiently low likelihood to generating it. 
+We describe a new method, based on the Exceptional Model Mining (EMM) framework \citep{Duivesteijn2016}, for extending statistical  outlier detection with generative models to the case of object-relational data. 
 
 %\todo{add description of object data = role Rossi2015}
 
 
-\paragraph{Data Type.} The object-relational data model is one of the main data models for structured data~\cite{Koller1997}. The main 
+\paragraph{Data Type.} The object-relational data model is one of the main data models for structured data~\citep{Koller1997}. The main 
 characteristics of objects that we utilize in this paper are the following. 
 
 \begin{description}
@@ -441,7 +442,7 @@ characteristics of objects that we utilize in this paper are the following.
 
 
 A common type of object relationship is a component relationship between a complex object and its parts.
-For example, a match links two teams, and each team comprises a set of players for that match. A difference between relational and vectorial data is therefore that an individual object is characterized not only by a list of attributes, but also by its links and by attributes of the objects linked to it. We refer to the substructure comprising this information as the {\em object data}. Equivalent terms are ``egonet'' from network analysis \cite{Akoglu2015} and ``interpretation'' \cite{Maervoet2012}. The {\em relational outlier detection problem is to identify objects whose object data differ from the general population/class.} Our approach to this problem combines EMM with statistical-relational model discovery \cite{SRL2007}.
+For example, a match links two teams, and each team comprises a set of players for that match. A difference between relational and vectorial data is therefore that an individual object is characterized not only by a list of attributes, but also by its links and by attributes of the objects linked to it. We refer to the substructure comprising this information as the {\em object data}. Equivalent terms are ``egonet'' from network analysis \citep{Akoglu2015} and ``interpretation'' \citep{Maervoet2012}. The {\em relational outlier detection problem is to identify objects whose object data differ from the general population/class.} Our approach to this problem combines EMM with statistical-relational model discovery \citep{SRL2007}.
 
 \paragraph{Approach: Exceptional Model Mining + Statistical-Relational Learning.} In the EMM framework, a subgroup is exceptional to the extent that a model learned from data for the subgroup deviates from a model learned for the general population. Figure~\ref{fig:emm} illustrates an EMM blueprint. EMM therefore leverages the extensive work on model learning for exception mining. Relational EMM leverages the extensive work on statistical-relational model learning for relational exception mining. In the propositional setting with i.i.d. data (independent and identically distributed), each object is represented by a single data row, and it is meaningless to learn a model for a single object. Instead, EMM is applied to identify exceptional subgroups of objects. With relational data, each object is represented by its own dataset, and it is meaningful to apply EMM to identify single exceptional objects---a subgroup of size 1. Therefore {\em relational EMM can be utilized for relational outlier detection}; this paper evaluates relational EMM for this task.
 
@@ -453,12 +454,12 @@ For example, a match links two teams, and each team comprises a set of players f
 \label{fig:emm}}
 \end{figure}
 
-{\em Model Type.} EMM is an inclusive framework in that any model type of interest can be utilized. In this paper we focus on first-order Bayesian networks (BNs)~\cite{Wang2008,Poole2003,Kimmig2014}, but our definitions apply to other log-linear models such as Markov logic networks \cite{Domingos2007}. 
-A class-model Bayesian network (BN) structure is learned with data for the entire population. The nodes in the BN represent attributes for links, of multiple types, and attributes of objects, also of multiple types. To learn the BN model, we apply techniques from statistical-relational learning, a  recent field that applies and extends AI and machine learning to relational data~\cite{SRL2007,Schulte2012,Domingos2009}. For a learned BN structure, we compare two parameter vectors (see Figure~\ref{fig:flow} below): The {\em class model parameters} are estimated from the entire population data, and the {\em object model parameters} are estimated from the object data. 
+{\em Model Type.} EMM is an inclusive framework in that any model type of interest can be utilized. In this paper we focus on first-order Bayesian networks (BNs)~\citep{Wang2008,Poole2003,Kimmig2014}, but our definitions apply to other log-linear models such as Markov logic networks \citep{Domingos2007}. 
+A class-model Bayesian network (BN) structure is learned with data for the entire population. The nodes in the BN represent attributes for links, of multiple types, and attributes of objects, also of multiple types. To learn the BN model, we apply techniques from statistical-relational learning, a  recent field that applies and extends AI and machine learning to relational data~\citep{SRL2007,Schulte2012,Domingos2009}. For a learned BN structure, we compare two parameter vectors (see Figure~\ref{fig:flow} below): The {\em class model parameters} are estimated from the entire population data, and the {\em object model parameters} are estimated from the object data. 
 % TODO: we can think of the object model as representing the role of an entity
 %The BN provides dimensionality reduction, in the sense that it leverages independencies to represent the data distribution with exponentially fewer parameters than a non-factorized parametrization. 
 
-{\em Quality Measure = Outlierness Metric.} For a given model type, quantifying the extent to which an object model deviates from the population class model is the main research question in EMM~\cite{Duivesteijn2016}. A computational method for measuring this extent is called {\em a quality measure}; when we apply EMM to relational outlier detection, we also refer to it as an {\em outlierness metric}. We propose utilizing the relational log-linear likelihood function \cite{Kimmig2014,Schulte2011} that measures how well a parametrized statistical-relational model fits an input database. The {\em likelihood ratio} is the difference in log-likelihood between the class model and the object model, when applied to the object data. Assuming maximum likelihood estimates, it is equivalent to the Kullback-Leibler divergence (KLD) between class and object models. While our evaluation indicates that KLD is a good outlierness metric, we propose improving it further by applying two transformations: (1) a mutual information decomposition, and (2) replacing log-likelihood differences by log-likelihood distances. We refer to the resulting novel score as the {\em expected log-likelihood distance}. A Taylor series analysis shows that this score  is approximated by the L1-norm (total variation distance) between the object and class data distributions.
+{\em Quality Measure = Outlierness Metric.} For a given model type, quantifying the extent to which an object model deviates from the population class model is the main research question in EMM~\citep{Duivesteijn2016}. A computational method for measuring this extent is called {\em a quality measure}; when we apply EMM to relational outlier detection, we also refer to it as an {\em outlierness metric}. We propose utilizing the relational log-linear likelihood function \citep{Kimmig2014,Schulte2011} that measures how well a parametrized statistical-relational model fits an input database. The {\em likelihood ratio} is the difference in log-likelihood between the class model and the object model, when applied to the object data. Assuming maximum likelihood estimates, it is equivalent to the Kullback-Leibler divergence (KLD) between class and object models. While our evaluation indicates that KLD is a good outlierness metric, we propose improving it further by applying two transformations: (1) a mutual information decomposition, and (2) replacing log-likelihood differences by log-likelihood distances. We refer to the resulting novel score as the {\em expected log-likelihood distance}. A Taylor series analysis shows that this score  is approximated by the L1-norm (total variation distance) between the object and class data distributions.
 
 
 %
@@ -470,7 +471,7 @@ A class-model Bayesian network (BN) structure is learned with data for the entir
 %While the 
 %likelihood ratio discriminates relational outliers better than the class model likelihood alone, it can be improved further by applying two transformations: (1) a mutual information decomposition, and (2) replacing log-likelihood differences by log-likelihood distances. We refer to the resulting novel score as the {\em log-likelihood distance}.
 %
-%This paper considers outlier detection for object-oriented data. Object-orientation is one of the main data models for representing structured data~\cite{Ramakrishnan2003,Koller1997}. It is a natural data model for the widely used XML format, where nodes in the XML document tree are viewed as objects.\footnote{\url{http://www.w3.org/DOM/}} 
+%This paper considers outlier detection for object-oriented data. Object-orientation is one of the main data models for representing structured data~\citep{Ramakrishnan2003,Koller1997}. It is a natural data model for the widely used XML format, where nodes in the XML document tree are viewed as objects.\footnote{\url{http://www.w3.org/DOM/}} 
 %%
 %%The object-oriented data model was inspired by object-oriented programming. 
 %%There are different formulations of the object-oriented data model
@@ -494,18 +495,18 @@ A class-model Bayesian network (BN) structure is learned with data for the entir
 %%
 %This approach allows us to apply ideas from the well-researched topic of probability divergences to the problem of object outlier detection. A baseline divergence concept is the standard Kullback-Leibler divergence (KLD). KLD computes the expected log-{\em difference} between two joint distributions. Our argument in this paper is that for outlier detection, we ought to use instead the expected log-{\em distance} between two joint distributions. The reason is that averaging distribution differences loses information when two distribution differences point in opposite directions, and cancel each other out. We refer to our novel divergence as the expected log-distance divergence (ELD).
 %%\vspace{-5mm}
-\paragraph{Evaluation.} Our code and datasets are available on-line at \cite{url}. We evaluate relational EMM outlierness metrics in three ways.
+\paragraph{Evaluation.} Our code and datasets are available on-line at \citep{url}. We evaluate relational EMM outlierness metrics in three ways.
 
-{\em Detection Accuracy.} Our performance evaluation follows the design of previous outlier detection studies~\cite{Gao2010,aggarwal2013},
-%~\cite{Cansado2008, Muller2012},
+{\em Detection Accuracy.} Our performance evaluation follows the design of previous outlier detection studies~\citep{Gao2010,aggarwal2013},
+%~\citep{Cansado2008, Muller2012},
 %\footnote{review} 
 where the methods are scored against a test set of known outliers.  
 %and case studies assess their output on specific cases. 
 %
 We use three synthetic and four real-world datasets, from the UK Premier Soccer League, the Internet Movie Database (IMDb), the National Hockey League, and Mutagenesis. On the synthetic data we have known ground truth. For the real-world datasets, we use a one-class design, where one object class is designated as normal and objects from outside the class are the outliers. For example, we compare goalies as outliers against the class of strikers as normal objects. 
-%Given ground truth, an outlier detection method can be scored in terms of true positives and negatives, summarized using AUC~\cite{Muller2012}.\footnote{review} 
+%Given ground truth, an outlier detection method can be scored in terms of true positives and negatives, summarized using AUC~\citep{Muller2012}.\footnote{review} 
 %Comparisons outlier scores include the class model likelihood, our novel log-likelihood distance, and likelihood-based scores intermediate to these two. 
-%Previous outlier analysis for similar structured data  \cite{Breunig2000} used a preprocessing step where the structured data are converted to vectorial data that represent atomic objects. This conversion is usually done by aggregation, which tends to lose information.
+%Previous outlier analysis for similar structured data  \citep{Breunig2000} used a preprocessing step where the structured data are converted to vectorial data that represent atomic objects. This conversion is usually done by aggregation, which tends to lose information.
 %, for instance using counts as attributes in an attribute vector. After aggregation, we evaluate 
 %After aggregation, standard outlier detection methods for independent data points can be applied; we use three as baseline methods for our evaluation ($\outrank$, $\lof$, and $\knn$).
 Compared to six baseline methods, the EMM-based scores (likelihood ratio and expected log-likelihood distance) achieve the top detection accuracy on all three synthetic datasets, and on 4 out of 5 real-world datasets.
@@ -526,7 +527,7 @@ evaluate outliers.% suggested by the method.
 %
 %We compare the detection accuracy of our novel mutual information divergence with the Kullback-Leibler convergence.
 %basing a distribution divergence on the expected distance to basing it on the expected difference. 
-%As regards to previous methods, to our knowledge ours is the first outlier detection method tailored for object-oriented data. Previous outlier analysis for structured data similar to ours (e.g., sports data) \cite{Breunig2000} used a preprocessing step where the structured data are converted to a matrix of attribute vectors that represent atomic objects. 
+%As regards to previous methods, to our knowledge ours is the first outlier detection method tailored for object-oriented data. Previous outlier analysis for structured data similar to ours (e.g., sports data) \citep{Breunig2000} used a preprocessing step where the structured data are converted to a matrix of attribute vectors that represent atomic objects. 
 %  outlier detection methods for the atomic objects data model---based  on a single data matrix---have been applied to datasets similar to those that we examine  
 % previously analyzed with 
 %Standard outlier detection methods require as input a data matrix, that represents attributes of atomic objects from the same class. It is therefore not possible to provide structured data as input directly to such methods. In previous outlier detection work, data matrix methods were applied by 
@@ -546,7 +547,7 @@ summarized as follows.
 \end{enumerate}
 % \vspace{-0.5cm} 
 				
-%				\paragraph{Previous Conference Publication.} A preliminary version of this paper appeared in the Proceedings of the IEEE SSCI series \cite{Riahi2015} (Best Student Paper). The new material in this submission comprises the following:
+%				\paragraph{Previous Conference Publication.} A preliminary version of this paper appeared in the Proceedings of the IEEE SSCI series \citep{Riahi2015} (Best Student Paper). The new material in this submission comprises the following:
 %				
 %				\begin{enumerate} 
 %				\item We expanded and clarified the relationship to previous work in EMM.
@@ -562,11 +563,11 @@ summarized as follows.
 Empirical evaluation compares EMM and aggregation-based approaches to relational outlier detection, with respect to three synthetic and four real-world datasets.
 
 				\section{Related Work}
-				Outlier detection is a densely researched field, for a survey please see~\cite{aggarwal2013,Akoglu2015}.
+				Outlier detection is a densely researched field, for a survey please see~\citep{aggarwal2013,Akoglu2015}.
 				Figure~\ref{fig:novelty} provides a tree picture of where our method is situated with respect to other outlier detection methods and other data models. 
-				%For an outlier detection survey please see~\cite{aggarwal2013}.
-				%\cite{Hodge2004,aggarwal2013}. 
-				Our method falls in the category of {\em unsupervised} statistical model-based approaches. To our knowledge, ours is the first model-based method tailored for object-relational data. Like EMM and other model-based approaches, it detects {\em global outliers.} Aggarwal \cite{aggarwal2013} defines a global outlier to be a data point that notably deviates from the rest of the population. We review relevant approaches from two different data models, the most common atomic object model---where data is represented by vectors---and structured data models. A preliminary version of this paper appeared in the Proceedings of the IEEE SSCI series \cite{Riahi2015}. \\
+				%For an outlier detection survey please see~\citep{aggarwal2013}.
+				%\citep{Hodge2004,aggarwal2013}. 
+				Our method falls in the category of {\em unsupervised} statistical model-based approaches. To our knowledge, ours is the first model-based method tailored for object-relational data. Like EMM and other model-based approaches, it detects {\em global outliers.} Aggarwal \citep{aggarwal2013} defines a global outlier to be a data point that notably deviates from the rest of the population. We review relevant approaches from two different data models, the most common atomic object model---where data is represented by vectors---and structured data models. A preliminary version of this paper appeared in the Proceedings of the IEEE SSCI series \citep{Riahi2015}. \\
 				
 				% using the XML, SQL, and OLAP formats.
 				%\vspace{-5mm}
@@ -579,13 +580,13 @@ Empirical evaluation compares EMM and aggregation-based approaches to relational
 				%
 				It is possible to ``flatten'' structured data by converting it to unstructured feature vectors, for instance by using aggregate functions. 
 				%Flattening incurs some loss of information but allows us to apply the many feature vector methods.
-				%\cite{Elke2013}. 
+				%\citep{Elke2013}. 
 				We evaluated the aggregation approach in this paper by applying three standard methods for outlier detection.
 				%for three major approaches to outlier detection: distance-based, density-based, and subspace clustering. 
 				%
-				%Subspace clustering methods (e.g., \cite{Muller2012,Kriegel2009}) are similar to our work in the sense that they aim to decompose a complex data space. They find complex deviations that are noticeable only in a data subspace. A common approach is to discover datapoints that show unexpected deviations in similar subspaces. Our approach instead develops a joint measure of how dissimilar the target object profile distribution is to the class distribution over the entire data space. Given that object and class distributions are represented by an object-oriented Bayesian network \cite{Koller1997}, the network structure defines subspaces. The joint divergence measure {\em mathematically decomposes} into subspace measures that quantify how dissimilar the target object profile distribution is in the subspaces defined by the network, compared to the class distribution in the same subspace.
+				%Subspace clustering methods (e.g., \citep{Muller2012,Kriegel2009}) are similar to our work in the sense that they aim to decompose a complex data space. They find complex deviations that are noticeable only in a data subspace. A common approach is to discover datapoints that show unexpected deviations in similar subspaces. Our approach instead develops a joint measure of how dissimilar the target object profile distribution is to the class distribution over the entire data space. Given that object and class distributions are represented by an object-oriented Bayesian network \citep{Koller1997}, the network structure defines subspaces. The joint divergence measure {\em mathematically decomposes} into subspace measures that quantify how dissimilar the target object profile distribution is in the subspaces defined by the network, compared to the class distribution in the same subspace.
 				
-				Work on atomic contextual  outliers \cite{Tang2013} is like ours in that it considers the distinctness of a target individual from a reference class. A reference class is not specified for each object,
+				Work on atomic contextual  outliers \citep{Tang2013} is like ours in that it considers the distinctness of a target individual from a reference class. A reference class is not specified for each object,
 				%as a property of the object, 
 				but is constructed as part of outlier detection. 
 				Our work could be combined with a class discovery approach by providing a score of how informative the inferred classes are. 
@@ -599,25 +600,25 @@ Empirical evaluation compares EMM and aggregation-based approaches to relational
 				
 				\textit{b) Structured Data Models:} We discuss related techniques in three types of structured data models: SQL (relational), XML (hierarchical), and OLAP (multi-dimensional). 
 				
-				For relational data, many outlier detection approaches aim to discover rules that represent the presence of anomalous associations for an individual or the absence of normal associations \cite{Maervoet2012,Gao2010}.    In these approaches what we call the object data is usually referred to as an interpretation, so the problem is to score outlier interpretations~\cite{Maervoet2012}. The survey by \cite{Novak2009} unifies within a general rule search framework three important related tasks: i) exception mining, which looks for associations that characterize unusual cases, ii) subgroup mining, which looks for associations  characterizing important subgroups, and iii) contrast space mining, which looks for differences between classes. Another rule-based approach uses Inductive Logic Programming techniques \cite{Angiulli2007}.
+				For relational data, many outlier detection approaches aim to discover rules that represent the presence of anomalous associations for an individual or the absence of normal associations \citep{Maervoet2012,Gao2010}.    In these approaches what we call the object data is usually referred to as an interpretation, so the problem is to score outlier interpretations~\citep{Maervoet2012}. The survey by \citep{Novak2009} unifies within a general rule search framework three important related tasks: i) exception mining, which looks for associations that characterize unusual cases, ii) subgroup mining, which looks for associations  characterizing important subgroups, and iii) contrast space mining, which looks for differences between classes. Another rule-based approach uses Inductive Logic Programming techniques \citep{Angiulli2007}.
 				%,Angiulli2009}.
 				While local rules are informative, they are not based on a global statistical model and do not provide a single outlier score for each individual. As we show in our case studies (Section~\ref{sec:CaseStudy}), the conditional probability parameters in a Bayesian network can be used to extract rules  from the BN model (of the form $\it{parent\_values} \rightarrow \it{child\_value}$).
-				The distance-based algorithms designed for outlier detection can be applied to the relational case.  Horvath {\em et al.} introduced a similarity measure for the first-order instance-based learner RIBL that uses the edit distance to compute the distance between lists and terms~\cite{Horvath2001}. This distance has been used for the clustering task in~\cite{Kirsten2001}. To the best of our knowledge, distance-based relational learning has not been used for outlier detection. One-class classification can be viewed as a special case of outlier detection.  Khot {\em et al.} introduced a non-parametric relational one-class classification based on first-order trees. They proposed a tree-based distance metric to discover new relational features and to differentiate relational examples~\cite{Khot2014}. Khot {\em et al.} emphasize that their method is not appropriate for outlier detection because outlier detection makes different assumptions about the data than they do (e.g. outliers are far from other points and isolated).  
+				The distance-based algorithms designed for outlier detection can be applied to the relational case.  Horvath {\em et al.} introduced a similarity measure for the first-order instance-based learner RIBL that uses the edit distance to compute the distance between lists and terms~\citep{Horvath2001}. This distance has been used for the clustering task in~\citep{Kirsten2001}. To the best of our knowledge, distance-based relational learning has not been used for outlier detection. One-class classification can be viewed as a special case of outlier detection.  Khot {\em et al.} introduced a non-parametric relational one-class classification based on first-order trees. They proposed a tree-based distance metric to discover new relational features and to differentiate relational examples~\citep{Khot2014}. Khot {\em et al.} emphasize that their method is not appropriate for outlier detection because outlier detection makes different assumptions about the data than they do (e.g. outliers are far from other points and isolated).  
 				
-				 Propositionalization summarizes the multi-relational data into a single data table and can be used for outlier detection and classification tasks~\cite{Kramer2000,Lavrac13,kuzelka2008,Riahi2016,AndersonP08}. 
+				 Propositionalization summarizes the multi-relational data into a single data table and can be used for outlier detection and classification tasks~\citep{Kramer2000,Lavrac13,kuzelka2008,Riahi2016,AndersonP08}. 
 				
-				A latent variable approach in information networks ranks potential outliers in reference to the latent communities inferred by network analysis \cite{Gao2010}. Our model also aggregates information from entities and links of different types, but does not assume that different communities have been identified. 
+				A latent variable approach in information networks ranks potential outliers in reference to the latent communities inferred by network analysis \citep{Gao2010}. Our model also aggregates information from entities and links of different types, but does not assume that different communities have been identified. 
 				
 				
-				Koh {\em et al.}~\cite{Koh2008} propose a method for hierarchical structures represented in XML document trees. Their aim is to identify feature outliers, not class outliers as in our work. Also, they use aggregate functions to convert the object hierarchy into feature vectors. Their outlier score is based on local correlations, and they do not construct a model.
+				Koh {\em et al.}~\citep{Koh2008} propose a method for hierarchical structures represented in XML document trees. Their aim is to identify feature outliers, not class outliers as in our work. Also, they use aggregate functions to convert the object hierarchy into feature vectors. Their outlier score is based on local correlations, and they do not construct a model.
 				
 				
 				The multi-dimensional data model defines numeric measures for a set of dimensions. 
-				%A seminal approach to exploring a multi-dimensional datacube was presented by Sarawagi {\em et al.}~\cite{Sarawagi1998}. 
+				%A seminal approach to exploring a multi-dimensional datacube was presented by Sarawagi {\em et al.}~\citep{Sarawagi1998}. 
 				%The object and the multi-dimensional data models are similar in the respect that both objects and dimensions are ordered in a hierarchy. However, 
-				The differences in the two data models mean that multi-dimensional outlier detection models~\cite{Sarawagi1998} do not carry over to object-relational outlier detection. (1) The object data model allows but does not require any numeric measures. In our datasets, all features are discrete. Nor do we assume that it is possible to aggregate numeric measures to summarize lower-level data at higher levels.  
+				The differences in the two data models mean that multi-dimensional outlier detection models~\citep{Sarawagi1998} do not carry over to object-relational outlier detection. (1) The object data model allows but does not require any numeric measures. In our datasets, all features are discrete. Nor do we assume that it is possible to aggregate numeric measures to summarize lower-level data at higher levels.  
 				(2) In scoring a potential outlier object, our method considers other objects {\em both} below and above the target object in the component hierarchy. OLAP exploration methods consider only cells below or at the same level as the target cell. For example, in scoring a player, our method would consider features of the player's team.  
-				Also, the log-likelihood distance outlier score of an object is not determined by the outlier scores of its components, in contrast to approaches derived from Sarawagi {\em et al.}~\cite{Sarawagi1998}. They use values such as the most unusual cell that is below a target cell.
+				Also, the log-likelihood distance outlier score of an object is not determined by the outlier scores of its components, in contrast to approaches derived from Sarawagi {\em et al.}~\citep{Sarawagi1998}. They use values such as the most unusual cell that is below a target cell.
 				(3) Our approach models a joint distribution over features, exploiting correlations among features. Most of the OLAP-based methods consider only a single numeric measure at a time, not a joint model.  
 
 
@@ -625,7 +626,7 @@ Empirical evaluation compares EMM and aggregation-based approaches to relational
 
 \section{Background: Bayesian Networks for Relational Data}
 We adopt  
-the Parametrized Bayesian network (PBN) formalism \cite{Poole2003} that combines Bayesian networks with logical syntax for expressing relational concepts. 
+the Parametrized Bayesian network (PBN) formalism \citep{Poole2003} that combines Bayesian networks with logical syntax for expressing relational concepts. 
 
 
 \subsection{Relational Data}
@@ -633,15 +634,15 @@ the Parametrized Bayesian network (PBN) formalism \cite{Poole2003} that combines
 
 
 
-%We apply the learn-and-join algorithm (LAJ), which is the state-of-the-art Bayes net learning method for relational data. The LAJ algorithm takes as input a relational database and outputs a Bayes net using the functor notation due to Poole \cite{Poole2003}. We briefly review this notation.
+%We apply the learn-and-join algorithm (LAJ), which is the state-of-the-art Bayes net learning method for relational data. The LAJ algorithm takes as input a relational database and outputs a Bayes net using the functor notation due to Poole \citep{Poole2003}. We briefly review this notation.
 
 %\paragraph{Functor Terms} 
-We adopt a term-based notation for combining logical and statistical concepts~\cite{Poole2003,Kimmig2014}. {Table~\ref{table:notation} summarizes our notation.
+We adopt a term-based notation for combining logical and statistical concepts~\citep{Poole2003,Kimmig2014}. {Table~\ref{table:notation} summarizes our notation.
 A functor is a function or predicate symbol. Each functor has a set of values (constants) called the \textbf{domain} of the functor. The range of a \textbf{predicate} is $\{\true,\false\}$. Predicates are usually written with uppercase Roman letters, other terms with lowercase letters.
 A predicate of arity at least two is a \textbf{relationship} functor. Relationship functors specify which objects are linked. Other functors represent \textbf{features} or \textbf{attributes} of an object or a tuple of objects (i.e., of a relationship).
 A \textbf{population} is a set of objects. 
 A \textbf{term} is of the form $f(\term_{1},\ldots,\term_{k})$ where $\functor$ is a functor %(either a function symbol or a predicate symbol) 
-and each $\term_{i}$ is a first-order variable or a constant denoting an object. A term is \textbf{ground} if it contains no first-order variables; otherwise it is a first-order term. In the context of a statistical model, we refer to first-order terms as \textbf{Parametrized Random Variables} (PRVs) \cite{Kimmig2014}. 
+and each $\term_{i}$ is a first-order variable or a constant denoting an object. A term is \textbf{ground} if it contains no first-order variables; otherwise it is a first-order term. In the context of a statistical model, we refer to first-order terms as \textbf{Parametrized Random Variables} (PRVs) \citep{Kimmig2014}. 
 %A term whose range are the truth values $\{\true,\false\}$ is a \textbf{predicate}. 
 %Predicates are usually written with uppercase Roman letters, other term with lowercase letters.
 %The grounding concept represents moving from the population-level  to the object level. 
@@ -687,12 +688,12 @@ $P(\Features = \set{\nodevalue})$ of values to a set of PRVs $\Features$. The {\
  	 	      	\end{table}\\
 \emph{Example.} \label{sec:example}
 %
-The Opta dataset represents information about Premier League data %\cite{opta-original} 
+The Opta dataset represents information about Premier League data %\citep{opta-original} 
 (Sec.~\ref{sec:real}). 
 %Using the functor notation, the data
 %format can be represented as follows. 
 The basic populations are teams, players, matches, with 
-corresponding first-order variables $\team, \player, \match$. As shown in Table~\ref{table:data}, the groundings count can be visualized in terms of a groundings table ~\cite{Schulte2012}, also called a universal schema~\cite{Riedel2013}. 
+corresponding first-order variables $\team, \player, \match$. As shown in Table~\ref{table:data}, the groundings count can be visualized in terms of a groundings table ~\citep{Schulte2012}, also called a universal schema~\citep{Riedel2013}. 
 %Table~\ref{table:data} specifies values for some ground terms. 
 The first three column headers show first-order variables ranging over different populations. The remaining columns represent terms. Each row represents a single grounding and the values of the ground terms defined by the grounding.
 %Table~\ref{table:counts} illustrates grounding counts. 
@@ -816,7 +817,7 @@ In terms of the grounding table, the grounding count of a joint assignment is th
 
 \subsection{Bayesian Networks}
 
-A Bayesian network (BN) structure $\model$ is a Directed Acyclic Graph (DAG)  whose nodes comprise a set of random variables \cite{Pearl1988}. Depending on context, we interchangeably refer to the nodes  and variables of a BN, collectively denoted by $\Features = \{\feature_{1},\ldots,\feature_{n}\}$. 
+A Bayesian network (BN) structure $\model$ is a Directed Acyclic Graph (DAG)  whose nodes comprise a set of random variables \citep{Pearl1988}. Depending on context, we interchangeably refer to the nodes  and variables of a BN, collectively denoted by $\Features = \{\feature_{1},\ldots,\feature_{n}\}$. 
 %These are attributes of objects, which can and typically do belong to different classes. In statistical terms, each attribute defines a random variable. 
 The possible values of $\feature_{i}$ are enumerated as $\{\nodevalue_{i1},\ldots,\nodevalue_{i\states_{i}}\}$. The notation $P(\feature_{i} = \nodevalue)\equiv P(\nodevalue)$ denotes the probability of variable $\feature_{i}$ taking on value $\nodevalue$. We also use the vector notation $P(\Features = \set{\nodevalue}) \equiv P(\set{\nodevalue})$ to denote the joint probability that each variable $\feature_{i}$ takes on value $\set{\nodevalue}_{i}$. 
 
@@ -889,17 +890,17 @@ To avoid difficulties with $\ln(0)$, here and below we assume that joint distrib
 			
 			A \textbf{Parametrized Bayesian Network Structure} (PBN) 
 			%also called a first-order Bayesian network, 
-			is a Bayesian network structure  whose nodes are PRVs~\cite{Poole2003}. 
+			is a Bayesian network structure  whose nodes are PRVs~\citep{Poole2003}. 
 			%For most of the paper we refer to PBNs simply as Bayesian networks, and to PRVs simply as random variables. 
-			%The learn-and-join algorithm is the state-of-the-art Bayes net learning method for relational data, based on model search in the lattice of relationship joins \cite{Schulte2012}. The LAJ algorithm takes as input a relational database and outputs a Parametrized Bayes net structure.
-			%We review the algorithm very briefly; for further details please see \cite{Schulte2012}. 
+			%The learn-and-join algorithm is the state-of-the-art Bayes net learning method for relational data, based on model search in the lattice of relationship joins \citep{Schulte2012}. The LAJ algorithm takes as input a relational database and outputs a Parametrized Bayes net structure.
+			%We review the algorithm very briefly; for further details please see \citep{Schulte2012}. 
 			%The algorithm builds a Bayes net for an entire database by level-wise search through the {\em lattice of relationship chains.} This is the lattice of relationship sets that are connected by shared first-order variables.
 			%%; see Figure~\ref{fig:lattice}.  
-			%%We describe the fundamental ideas of the algorithm; for further details please see \cite{Schulte2012}. 
+			%%We describe the fundamental ideas of the algorithm; for further details please see \citep{Schulte2012}. 
 			%The user chooses a single-table Bayes net learner. The learner is applied to base population data tables. Then the learner is applied to data tables for relationship chains of size $s,s+1,\ldots$, with the constraint that the models for larger join tables inherit the absence or presence of learned edges from smaller join tables. 
 			%
 			The relationships and features in an object database define a set of nodes for a Parametrized Bayesian network. I.i.d. data represented in a single table
-can be viewed as a special limiting case of multi-relational data with no relationships \cite{Nickel2016}. Synatically, this means that columns in an i.i.d. data table represent unary functors, where the relevant population is assumed to be clear from the context rather than explicitly specified as a first-order variable. Figure~\ref{fig:bn-imdb2} illustrates how the usual syntax for i.i.d. Bayesian networks is a special case of the PBN syntax.
+can be viewed as a special limiting case of multi-relational data with no relationships \citep{Nickel2016}. Synatically, this means that columns in an i.i.d. data table represent unary functors, where the relevant population is assumed to be clear from the context rather than explicitly specified as a first-order variable. Figure~\ref{fig:bn-imdb2} illustrates how the usual syntax for i.i.d. Bayesian networks is a special case of the PBN syntax.
 
 \begin{figure}[t]
  		\centering
@@ -911,7 +912,7 @@ can be viewed as a special limiting case of multi-relational data with no relati
  	\end{figure}
 
 
-Figure~\ref{fig:bns} shows a Parametrized Bayesian network for the Premier League domain that is truly relational in that the functors depend on more than one population variable. For example, shot efficiency does not depend on a match only, but also depends on specifying a team. The BN product formula~\eqref{eq:bn} can be applied to any PBN to compute (estimated) frequencies. In the case of a truly relational PBN, as in Figure~\ref{fig:bns}, the PBN can be viewed as representing database frequencies (rather than data table frequencies as in Figure~\ref{fig:bn-imdb2}). Using Getoor's terminology, the PBN can be viewed as a Statistical-Relational Model (SRM)~\cite{Getoor2001a,Schulte2014,Schulte2017a}.
+Figure~\ref{fig:bns} shows a Parametrized Bayesian network for the Premier League domain that is truly relational in that the functors depend on more than one population variable. For example, shot efficiency does not depend on a match only, but also depends on specifying a team. The BN product formula~\eqref{eq:bn} can be applied to any PBN to compute (estimated) frequencies. In the case of a truly relational PBN, as in Figure~\ref{fig:bns}, the PBN can be viewed as representing database frequencies (rather than data table frequencies as in Figure~\ref{fig:bn-imdb2}). Using Getoor's terminology, the PBN can be viewed as a Statistical-Relational Model (SRM)~\citep{Getoor2001a,Schulte2014,Schulte2017a}.
 
 
 %\footnote{\textbf{Sarah}: add marginal probability P(res=win) for object parameters}
@@ -928,13 +929,13 @@ Figure~\ref{fig:bns} shows a Parametrized Bayesian network for the Premier Leagu
 
 	\subsection{Likelihood Score for Parametrized Bayesian Networks.}\label{sec:log}
 	
-	A standard method for applying a generative model assumes that the generative model represents normal behavior since it was learned from the entire population. An object is deemed an outlier if the model assigns sufficiently low likelihood to generating its features \cite{Cansado2008}. This likelihood method is an important baseline for our investigation.
+	A standard method for applying a generative model assumes that the generative model represents normal behavior since it was learned from the entire population. An object is deemed an outlier if the model assigns sufficiently low likelihood to generating its features \citep{Cansado2008}. This likelihood method is an important baseline for our investigation.
 	%so we define the likelihood function formally in this section. 
 The other outlier scores we consider can be viewed as improved variants of the likelihood approach. 
 	Defining a likelihood for relational data is more complicated than for i.i.d. data, because an object is characterized not only by a feature vector, but by an object  database.
 	% that lists the object's links and the attributes of linked entities. 
 	%For the model likelihood function $\lnlikelihood(\model,\D)$, where $\model$ denotes a Bayesian network, 
-	We employ the previously defined normalized relational log-likelihood  score \cite{Schulte2011,Xiang2011}, which can be computed as follows for a given Bayesian network  and database.
+	We employ the previously defined normalized relational log-likelihood  score \citep{Schulte2011,Xiang2011}, which can be computed as follows for a given Bayesian network  and database.
 	
 	%\begin{eqnarray}
 	%\lnlikelihood(\model,\D) =   \sum_{i=1}^{n}\sum_{j=1}^{\states_{i}} \sum_{\parents_{i}}\\ P_{\D}(\feature_{i} = \nodevalue_{ij},\parents_{i})\ln \parameter_{\model}(\feature_{i} = \nodevalue_{ij}|\parents_{i})  \nonumber
@@ -945,7 +946,7 @@ The other outlier scores we consider can be viewed as improved variants of the l
 	\end{equation}
 	
 	
-	Equation~\eqref{eq:likelihood} has the same form of the standard BN log-likelihood function for vectorial i.i.d. data~\cite{Campos2006}}, except that parent-child instantiation counts are standardized to be proportions \cite{Schulte2011}. For the notations please refer to Table~\ref{table:notation}. The condition under which the score of Equation~\eqref{eq:likelihood} sums to 1 over all relational datasets are discussed in \cite{Schulte2011}.\footnote{Briefly, if the Parametrized Bayesian Network is viewed as a template for an unrolled ground network, then (1) the ground network cannot contain cycles, and (2) each ground network cannot have multiple parent instantiations; see also \cite{Heckerman+al:SRL07}.}  The equation can be read as follows.
+	Equation~\eqref{eq:likelihood} has the same form of the standard BN log-likelihood function for vectorial i.i.d. data~\citep{Campos2006}}, except that parent-child instantiation counts are standardized to be proportions \citep{Schulte2011}. For the notations please refer to Table~\ref{table:notation}. The condition under which the score of Equation~\eqref{eq:likelihood} sums to 1 over all relational datasets are discussed in \citep{Schulte2011}.\footnote{Briefly, if the Parametrized Bayesian Network is viewed as a template for an unrolled ground network, then (1) the ground network cannot contain cycles, and (2) each ground network cannot have multiple parent instantiations; see also \citep{Heckerman+al:SRL07}.}  The equation can be read as follows.
 	
 	\begin{enumerate}
 		\item For each parent-child configuration, 
@@ -993,7 +994,7 @@ Figure~\ref{fig:flow} illustrates these concepts and the system flow for computi
 %
 %\subsection{Definition of Log-Likelihood Distance Outlier Metric} 
 %
-For a given model type, quantifying the extent to which an object model deviates from the population class model is the main research question in EMM~\cite{Duivesteijn2016}. In this paper we examine several outlierness metrics that are based on the likelihood ratio between the object model and the class model. 
+For a given model type, quantifying the extent to which an object model deviates from the population class model is the main research question in EMM~\citep{Duivesteijn2016}. In this paper we examine several outlierness metrics that are based on the likelihood ratio between the object model and the class model. 
 A novel metric that we propose is the \textbf{expected log-likelihood distance} ($\mid$). It is defined as follows for each feature $i$; the total score is the sum of feature-wise scores. Section~\ref{sec:divergence-examples}  provides example computations.
 
 
@@ -1028,7 +1029,7 @@ Intuitively, the first sum measures how the models differ if we treat each featu
 \subsection{Motivation} 
 
 The motivation for the mutual information decomposition is two-fold. 
-(1) {\em Interpretability.} This is very important for outlier detection. The single-feature components are easy to interpret since they involve no feature interactions. Each parent-child local factor is based on the average relevance of parent values for predicting the value of the child node, where relevance is measured by $$\ln \frac{\parameter(\nodevalue_{ij}|\parents_{i})}{\parameter(\nodevalue_{ij})}.$$ This relevance term  is basically the same as the widely used lift measure \cite{Tuffery2011}, hence is an intuitively meaningful quantity. The $\mid$ score compares how relevant a given parent condition is in the object data with how relevant it is in the general class. 
+(1) {\em Interpretability.} This is very important for outlier detection. The single-feature components are easy to interpret since they involve no feature interactions. Each parent-child local factor is based on the average relevance of parent values for predicting the value of the child node, where relevance is measured by $$\ln \frac{\parameter(\nodevalue_{ij}|\parents_{i})}{\parameter(\nodevalue_{ij})}.$$ This relevance term  is basically the same as the widely used lift measure \citep{Tuffery2011}, hence is an intuitively meaningful quantity. The $\mid$ score compares how relevant a given parent condition is in the object data with how relevant it is in the general class. 
 
 
 (2) {\em Avoiding cancellations.} 
@@ -1064,7 +1065,7 @@ the likelihood ratio, or {\bf log-likelihood difference}:
 \lr(\D_{\object},\model_{\Class},\parameters_{\object}) \equiv \loglikelihood(\D_{\object},\model_{\Class},\parameters_{\object}) - \loglikelihood(\D_{\object},\model_{\Class},\parameters_{\Class}).
 \end{equation}
 
-Assuming maximum likelihood parameter estimation, $\lr$ is equivalent to the Kullback-Leibler divergence between the class-level and object-level parameters~\cite{Campos2006}. The log-likelihood difference compares  how well the class-level parameters fit the object data with respect to a particular object, vs. how well the object parameters fit the object data. In terms of the conditional probability parameters, it measures how much the log-conditional probabilities in the class distribution differ from those in the object distribution. 
+Assuming maximum likelihood parameter estimation, $\lr$ is equivalent to the Kullback-Leibler divergence between the class-level and object-level parameters~\citep{Campos2006}. The log-likelihood difference compares  how well the class-level parameters fit the object data with respect to a particular object, vs. how well the object parameters fit the object data. In terms of the conditional probability parameters, it measures how much the log-conditional probabilities in the class distribution differ from those in the object distribution. 
 %Note that this definition applies only for relational data where an individual is characterized by a substructure rather than a ``flat'' feature vector. 
 %
 \paragraph{The Feature Divergence Score.}
@@ -1076,7 +1077,7 @@ The feature divergence outlier score $\fd$ uses only part~\eqref{eq:fd} of the $
 
 \paragraph{Log-Likelihood Score.} 
 
-In previous work on applying Bayesian networks to outlier detection for i.i.d. (independent and identically-distributed) non-relational data, the outlier metric used was the log-likelihood of a data point \cite{Cansado2008}. This means that an object was deemed an outlier if the model assigns sufficiently low likelihood to generating its features. For relational data, we use the relational log-likelihood \eqref{eq:likelihood} of the target {\em database}:
+In previous work on applying Bayesian networks to outlier detection for i.i.d. (independent and identically-distributed) non-relational data, the outlier metric used was the log-likelihood of a data point \citep{Cansado2008}. This means that an object was deemed an outlier if the model assigns sufficiently low likelihood to generating its features. For relational data, we use the relational log-likelihood \eqref{eq:likelihood} of the target {\em database}:
 
 \begin{equation} \label{eq:loglikelihood-score}
 \loglikelihood(\D_{\object},\model_{\Class},\parameters_{\Class}) =   \sum_{i=1}^{n}\sum_{j=1}^{\states_{i}} \sum_{\parents_{i}}\P_{\D}(\nodevalue_{ij},\parents_{i})\ln \parameter(\nodevalue_{ij}|\parents_{i}).
@@ -1232,7 +1233,7 @@ Conversely, if there is a correlation among the attributes of individuals, the f
 
 \section{Theoretical Analysis and Comparison}
 %\todo{introduce $|LR|$ as well?}
-The mathematical analysis of this section relates the $KLD$ and $\mid$ divergences defined in the above sections to other well-known scores. Readers who wish to proceed to the empirical evaluation can omit this section without loss of generality. A well-known Taylor series argument shows that KLD can be approximated by Pearson's $\chi^{2}$ statistic \cite{Nielsen2014}. We use a similar Taylor series approximation to show that our ELD divergence can be approximated by the total variation distance (TVD), also known as the L1-norm, whose statistical properties are well understood~\cite{Beirlant2001,Beirlant1994}. 
+The mathematical analysis of this section relates the $KLD$ and $\mid$ divergences defined in the above sections to other well-known scores. Readers who wish to proceed to the empirical evaluation can omit this section without loss of generality. A well-known Taylor series argument shows that KLD can be approximated by Pearson's $\chi^{2}$ statistic \citep{Nielsen2014}. We use a similar Taylor series approximation to show that our ELD divergence can be approximated by the total variation distance (TVD), also known as the L1-norm, whose statistical properties are well understood~\citep{Beirlant2001,Beirlant1994}. 
 %The Taylor series approximation provides a clear explanation of the cancellation phenomenon: For KLD and $\chi^{2}$, the first-order term in the Taylor series vanishes, whereas for ELD and TVD it does not. 
 Our analysis uses the $f$-divergence framework, which unifies all the standard divergence definitions for probability distributions. The $f$-divergence analysis shows the generality of the cancellation phenomenon: the first-order Taylor series term vanishes for all $f$-divergences whose generator $f$ is differentiable at $\lambda = 1$, which includes all standard $f$-divergences (including KLD), except for those that use absolute values. 
 
@@ -1245,9 +1246,9 @@ I_{f}(P_{1}||P_{2}) \equiv \sum_{i=1}^{m} P_{1}(\nodevalue_{1}) f\left(\frac{P_{
 \end{equation}
 %
 where the \textbf{generator} $f:R \rightarrow R$ is a convex function such that $f(1)=0$. 
-The generator transforms the ratio of the two compared probabilities for each possible value; the $f$-divergence is the weighted average of the transformed ratios. Common divergences can be represented by choosing a suitable generator. For example, KLD is generated by $f(u) = -\ln(u)$, the $\chi^{2}$ statistic by $f(u) = (1-u)^{2}/u$, and the TVD by $f(u) = |u-1|$ \cite{Nielsen2014}. 
+The generator transforms the ratio of the two compared probabilities for each possible value; the $f$-divergence is the weighted average of the transformed ratios. Common divergences can be represented by choosing a suitable generator. For example, KLD is generated by $f(u) = -\ln(u)$, the $\chi^{2}$ statistic by $f(u) = (1-u)^{2}/u$, and the TVD by $f(u) = |u-1|$ \citep{Nielsen2014}. 
 
-An $f$-divergence $I_{f}$ can be approximated by  by replacing $f$ with its Taylor series expansion around the point $u=1$. Assuming that the derivatives $f^{(i)(1)}$ of any order exist, the Taylor series for $f$ takes the form $f(u) = \sum_{i=0}^{\infty} f^{(i)}(1)/i! [u-1]^{i},$ where the $i=0$ term is 0 because $f(1) = 0$. If the generator $f$ is twice differentiable, the first-order term with $i=1$ vanishes, and the remaining second-order term with $i=2$ is a scaled $\chi^{2}$ statistic \cite{Nielsen2014}:
+An $f$-divergence $I_{f}$ can be approximated by  by replacing $f$ with its Taylor series expansion around the point $u=1$. Assuming that the derivatives $f^{(i)(1)}$ of any order exist, the Taylor series for $f$ takes the form $f(u) = \sum_{i=0}^{\infty} f^{(i)}(1)/i! [u-1]^{i},$ where the $i=0$ term is 0 because $f(1) = 0$. If the generator $f$ is twice differentiable, the first-order term with $i=1$ vanishes, and the remaining second-order term with $i=2$ is a scaled $\chi^{2}$ statistic \citep{Nielsen2014}:
 
 \begin{proposition}[Nielsen and Nock 2014] \label{prop:xi-square}
 Assume that the generator $f$ for $I_{f}$ is twice differentiable.   
@@ -1352,7 +1353,7 @@ $$\mid(P_{1}||P_{2}) \approx  \TVD =  \sum_{i} |P_{2}(\nodevalue_{i})-P_{1}(\nod
 				%\end{equation*}
 				
 				%The intuition behind this metric is that the class distribution Bayesian network represents normal behavior\cite%{riahi2013}. An object is deemed an outlier if  the class BN assigns sufficiently low likelihood to generating %its features. Using low model likelihood to identify outliers is a common application of Bayesian networks \cite%{Cansado2008a}.  The equation above represents the standard BN log-likelihood function for the object data, %except that parent-child instantiation counts are standardized to be proportions. 
-				%This avoids giving exponentially more influence to features with more groundings \cite{Schulte2011}. 
+				%This avoids giving exponentially more influence to features with more groundings \citep{Schulte2011}. 
 				
 				
 				%\item[\mid] The outlier metric is the Mutual Information Distance defined in Equation \eqref{eq:mid}. 
@@ -1369,12 +1370,12 @@ $$\mid(P_{1}||P_{2}) \approx  \TVD =  \sum_{i} |P_{2}(\nodevalue_{i})-P_{1}(\nod
 				
 				%\paragraph{Local Outlier Factor.}
 				
-				%The local outlier factor is a popular density-based outlier metric that has been used as a baseline in previous %studies \cite{Breunig2000}. The metric requires specifying the number of nearest neighbors $k$. The authors of %the $\lof$ method recommend choosing a value between 10 and 20; we use 10 and 20.
+				%The local outlier factor is a popular density-based outlier metric that has been used as a baseline in previous %studies \citep{Breunig2000}. The metric requires specifying the number of nearest neighbors $k$. The authors of %the $\lof$ method recommend choosing a value between 10 and 20; we use 10 and 20.
 				%\end{description}
 				
-				%$\lof$ requires as input a flat data matrix where each individual is represented by a single feature vector. To %aggregate features of individuals across complex objects such as matches or ratings, we use the total feature %count. This is the approach of the inventors of $\lof$ for sports data \cite{Breunig2000}. For example, they %counted the total number of goals scored by a player in a season as a feature for outlier analysis. We used the %implementation of $\lof$ in $\it{Data mining with R(DMwR)}$ package in R.
+				%$\lof$ requires as input a flat data matrix where each individual is represented by a single feature vector. To %aggregate features of individuals across complex objects such as matches or ratings, we use the total feature %count. This is the approach of the inventors of $\lof$ for sports data \citep{Breunig2000}. For example, they %counted the total number of goals scored by a player in a season as a feature for outlier analysis. We used the %implementation of $\lof$ in $\it{Data mining with R(DMwR)}$ package in R.
 				
-				%\subsection{Performance Metric} To score each outlier metric against ground truth instances, we follow the %%%approach of \cite{Gao2010,Cansado2008a}: Given the ground truth that $r\%$ of instances are outliers, we sort the outlier scores in descending order, and take the top $r\%$ as the outliers indicated by the method. We then report the true positive rate (recall), or \textbf{true outlier rate} (TOR), and the true negative rate, or \textbf{true normal rate} (TNR). The TNR is thus the percentage of normal individuals with rank below the top $r\%$. In anomaly detection the true outlier rate is the most important metric \cite{Gao2010,Cansado2008a}.
+				%\subsection{Performance Metric} To score each outlier metric against ground truth instances, we follow the %%%approach of \citep{Gao2010,Cansado2008a}: Given the ground truth that $r\%$ of instances are outliers, we sort the outlier scores in descending order, and take the top $r\%$ as the outliers indicated by the method. We then report the true positive rate (recall), or \textbf{true outlier rate} (TOR), and the true negative rate, or \textbf{true normal rate} (TNR). The TNR is thus the percentage of normal individuals with rank below the top $r\%$. In anomaly detection the true outlier rate is the most important metric \citep{Gao2010,Cansado2008a}.
 				
 
 				\section{Experimental Evaluation and Comparison}~\label{sec:Experiments}
@@ -1407,7 +1408,7 @@ $$\mid(P_{1}||P_{2}) \approx  \TVD =  \sum_{i} |P_{2}(\nodevalue_{i})-P_{1}(\nod
 	%	\textcolor{red}{maybe this example is too early}
 		
 
-\subsection{Real-world Datasets}\label{sec:real}  Our datasets and code are available on-line~\cite{url}. The following is the list of the real-world datasets we used in this work:
+\subsection{Real-world Datasets}\label{sec:real}  Our datasets and code are available on-line~\citep{url}. The following is the list of the real-world datasets we used in this work:
 				\paragraph{Premier League Data} 
 				The Opta data were released by Manchester City. 
 				It lists box scores, that is, counts of all the ball actions within each game by each player, for the 2011-2012 season. 
@@ -1475,7 +1476,7 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 				\paragraph{IMDb Data} 
 				The Internet Movie Database (IMDb) is an on-line database of information related to films, television programs, and video games.
 				The IMDb website offers a dataset containing information on cast, crew, titles, technical details and biographies into a set of compressed text files. 
-				We preprocessed the data like \cite{Peralta2007} to obtain a database with seven tables: one for each population and one for the three relationships $\it{Rated}(\user,\movie)$, $\it{Directs}(\director,\movie)$, and $\it{ActsIn}(\actor,\movie)$.
+				We preprocessed the data like \citep{Peralta2007} to obtain a database with seven tables: one for each population and one for the three relationships $\it{Rated}(\user,\movie)$, $\it{Directs}(\director,\movie)$, and $\it{ActsIn}(\actor,\movie)$.
 				
 				%				Table~\ref{table:Features} lists relationships and the number of features. 
 				%				\begin{table}[htbp]
@@ -1505,12 +1506,12 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 				%						It lists all the ball actions within each game by each player, for the 2011-2012 season.
 				%						\item[IMDb Data]
 				%						The Internet Movie Database (IMDb) is an online database of information related to films, television programs, and video games.
-				%						The IMDb website offers a dataset containing information on cast, crew, titles, technical details and biographies in a set of compressed text files \cite{Peralta2007}.
+				%						The IMDb website offers a dataset containing information on cast, crew, titles, technical details and biographies in a set of compressed text files \citep{Peralta2007}.
 				%					\end{LaTeXdescription}
 				
 				%\subsection{Outlier and Contrast Classes.}
 				\paragraph{National Hockey League Data} 
-				The NHL provides information about the sequences of play-by-play events. We used the data crawled by~\cite{schulte2014aggregating} that consists of the player game statistics for the seasons 2009-2013. The box scores summarize player statistics for each match, a total of 13 features. \\
+				The NHL provides information about the sequences of play-by-play events. We used the data crawled by~\citep{schulte2014aggregating} that consists of the player game statistics for the seasons 2009-2013. The box scores summarize player statistics for each match, a total of 13 features. \\
 				
 				\paragraph{Mutagenesis Data}
 				This dataset contains mutagenic activity of 188 compounds. 125 of these compounds have positive levels of log mutagenicity that are labelled ``active''.  The remaining compounds are labelled ``inactive'' and constitute the source of negative examples. In this dataset we considered examples of active compounds as the normal population and the inactive ones as the outlier. 
@@ -1521,15 +1522,15 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 				%In this section, we first discuss how outlier detection methods in the literature have tackled this problem, then we describe how we deal with it in our research.\\ 
 				Several techniques have been employed in the literature to evaluate the performance of outlier detection methods:
 				\begin{enumerate}
-					\item Intuitive evaluation: case studies have been extensively used in the literature to evaluate outliers~\cite{aggarwal2013}. In Section~\ref{sec:CaseStudy} we use this method of evaluation for the top $n$ ranked detected outliers and we try to explain and make sense of the detected outliers. 	
-					\item Synthetic data generation: another approach to evaluate anomaly detection methods is generating synthetic data and injecting synthetic outliers into the data~\cite{aggarwal2013}. We have designed and developed three synthetic datasets as discussed in section~\ref{sec:visual}.
-					\item Anomaly injection: anomalies are injected into real-world datasets. Outlier detection methods are expected to detect the injected data points as outliers~\cite{Akoglu2015}. We employ this approach in our real-world datasets.
+					\item Intuitive evaluation: case studies have been extensively used in the literature to evaluate outliers~\citep{aggarwal2013}. In Section~\ref{sec:CaseStudy} we use this method of evaluation for the top $n$ ranked detected outliers and we try to explain and make sense of the detected outliers. 	
+					\item Synthetic data generation: another approach to evaluate anomaly detection methods is generating synthetic data and injecting synthetic outliers into the data~\citep{aggarwal2013}. We have designed and developed three synthetic datasets as discussed in section~\ref{sec:visual}.
+					\item Anomaly injection: anomalies are injected into real-world datasets. Outlier detection methods are expected to detect the injected data points as outliers~\citep{Akoglu2015}. We employ this approach in our real-world datasets.
 						In real-world data, there is no ground truth about which objects are outliers. To address this issue, we employ a one-class design: we learn a model for the class distribution, with data from that class only. 
 						Then we rank all individuals from the normal class together with all objects from a contrast class treated as outliers, to test whether an outlier score recognizes objects from the contrast class as outliers.
 						%		distinguishes objects from the normal class from objects in the contrast class. 
 						Table~\ref{MetricComputation} shows the normal and contrast classes for three different datasets.  In-class outliers are possible, e.g. unusual strikers are still members of the striker class. Our case studies describe a few in-class outliers. In the soccer data, we considered only individuals who played more than 5 matches out of a maximum 38. For the three synthetic datasets, the scores are used to rank all 280 synthetic  players, 240 of which are normal and 40 are outliers.
 					The disadvantage of this evaluation metric is that the real-world data may also contain anomalies, known as in-class outliers. However, this metric treats only the injected data points as true positives and will score anything other than those as false positives.
-					%\item Internal Evaluation: in this type of evaluation outlier score has been used to quantify the extremity of data points~\cite{Pickands1975}.% We do not use this method of evaluation in our work.
+					%\item Internal Evaluation: in this type of evaluation outlier score has been used to quantify the extremity of data points~\citep{Pickands1975}.% We do not use this method of evaluation in our work.
 				\end{enumerate}
 			
 	%			
@@ -1569,10 +1570,10 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 					%						\subsection{Performance Score}
 					%					 Our experiments provide empirical evidence that $\mid$ works better than other scores for object outlier detection.
 					%						Our performance score for outlier rankings is the area under curve ($\auc$) of the well-established receiver operating characteristic $\roc$ curve.
-					%						~\cite{Fawcett2006}. 
-					%						This has been widely used to measure the performance of outlier ranking methods~\cite{Cansado2008, Muller2012}. The relationship between false positive rate (1- Specificity) and true positive rate (Sensitivity) is captured by the $\roc$ curve. Ideally, the best performance is achieved when we have the highest sensitivity and the highest specificity. 
+					%						~\citep{Fawcett2006}. 
+					%						This has been widely used to measure the performance of outlier ranking methods~\citep{Cansado2008, Muller2012}. The relationship between false positive rate (1- Specificity) and true positive rate (Sensitivity) is captured by the $\roc$ curve. Ideally, the best performance is achieved when we have the highest sensitivity and the highest specificity. 
 					%					
-					%						The maximum values for $\auc$ is 1.0 indicating a perfect ranking with 100\% sensitivity and 100\% specificity. In order to compute the $\auc$ value, we used the \textit{R} package \textit{ROCR}~\cite{RROCR2012}. Given a set of outlier scores, one for each object, this package returns an $\auc$ value. 
+					%						The maximum values for $\auc$ is 1.0 indicating a perfect ranking with 100\% sensitivity and 100\% specificity. In order to compute the $\auc$ value, we used the \textit{R} package \textit{ROCR}~\citep{RROCR2012}. Given a set of outlier scores, one for each object, this package returns an $\auc$ value. 
 					%					
 					
 					\subsection{Methods Compared}
@@ -1580,27 +1581,27 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 					We compare three types of approaches, based on relational model likelihood, aggregation, and distance. 
 					
 \paragraph{Likelihood-based Outlier Scores.} The first approach evaluates the likelihood-based outlier scores described in Section~\ref{sec:metrics}. For relational Bayesian network structure learning we utilize the previous learn-and-join algorithm (LAJ), which is
-					a state-of-the-art BN structure learning method for relational data \cite{Schulte2012}. The LAJ algorithm employs an iterative deepening strategy, which can be described as as search through a lattice of table joins. For each table join, different BNs are learned and the learned edges are propagated from smaller to larger table joins. 	For a full description, complexity analysis, and learning time measurements, please see \cite{Schulte2012}. 	We used the implementation of the LAJ algorithm due to its creators \cite{bib:jbnsite}. Of the likelihood-based scores, the likelihood ratio $\lr$ and our $\mid$ score fit in the EMM framework as they compare an object model with a population model. 
+					a state-of-the-art BN structure learning method for relational data \citep{Schulte2012}. The LAJ algorithm employs an iterative deepening strategy, which can be described as as search through a lattice of table joins. For each table join, different BNs are learned and the learned edges are propagated from smaller to larger table joins. 	For a full description, complexity analysis, and learning time measurements, please see \citep{Schulte2012}. 	We used the implementation of the LAJ algorithm due to its creators \citep{bib:jbnsite}. Of the likelihood-based scores, the likelihood ratio $\lr$ and our $\mid$ score fit in the EMM framework as they compare an object model with a population model. 
 					
 					%						probabilistic scores applied directly to the  data structured as an object tree. 
 					\paragraph{Aggregation-based Methods.}
 					The second approach first ``flattens" the structured data into a matrix of feature vectors, then applies standard matrix-based outlier detection methods. We refer to such methods as \textbf{aggregation-based}
 					%Flattening the object data allows applying the rich set of matrix-based outlier detection methods ``as is" 
-					(cf. Figures~\ref{fig:novelty}). For example, this was the approach taken by Breunig {\em et al.} for identifying anomalous players in sports data \cite{Breunig2000}. Following their paper, for each continuous feature in the object data, we use the average over its values, and for each discrete feature, we use the occurrence count of each feature value in the object data. Aggregation 
+					(cf. Figures~\ref{fig:novelty}). For example, this was the approach taken by Breunig {\em et al.} for identifying anomalous players in sports data \citep{Breunig2000}. Following their paper, for each continuous feature in the object data, we use the average over its values, and for each discrete feature, we use the occurrence count of each feature value in the object data. Aggregation 
 					tends to lose information about correlations.
-					%\cite{DavidJensen2002}. 
+					%\citep{DavidJensen2002}. 
 					Our experiments address the empirical question of whether this loss of information affects outlier detection. 
 					%The advantage to the aggregation approach is that after aggregating to preprocess the data, any matrix-based outlier detection method can be applied; see Figure~\ref{fig:flow}. 
-					We evaluated three standard matrix-based outlier detection methods: Density-based $\lof$~\cite{Breunig2000}, distance-based $\knn$~\cite{Ramaswamy2000} and subspace analysis $\outrank$~\cite{Muller2012}.
+					We evaluated three standard matrix-based outlier detection methods: Density-based $\lof$~\citep{Breunig2000}, distance-based $\knn$~\citep{Ramaswamy2000} and subspace analysis $\outrank$~\citep{Muller2012}.
 					%\footnote{commented descriptions of these methods }. 
 					These represent common, fundamental  approaches for vectorial data. 
 					%	Subspace analysis is especially relevant to our study because 
 					Like $\mid$, subspace analysis is sensitive to correlations among features. 
-					% Our experiments applied $\outrank$ with two subspace clustering models, \textit{PRO-CLUS} \cite{Muller2012} and \textit{DISH} \cite{Kriegel2007}.  
-					We used the available implementation of all three data matrix methods from the state of the art data mining software \textit{ELKI} \cite{Elke2013}. We used \textit{PRO-CLUS} as the clustering function for $\outrank$ as recommended by~\cite{Muller2012}.
+					% Our experiments applied $\outrank$ with two subspace clustering models, \textit{PRO-CLUS} \citep{Muller2012} and \textit{DISH} \citep{Kriegel2007}.  
+					We used the available implementation of all three data matrix methods from the state of the art data mining software \textit{ELKI} \citep{Elke2013}. We used \textit{PRO-CLUS} as the clustering function for $\outrank$ as recommended by~\citep{Muller2012}.
 					
 						\paragraph{Relational Distance-based Method.}
-						The third approach is based on a first-order distance measure that was developed and first used for the instance-based learning system RIBL2~\cite{Horvath2001}. This measure has proven  successful in several applications~\cite{Kirsten2001,Horvath1999}. We employ this metric and compute the distance between any two individuals in our population domain. Then, we rank the individuals based on their mean distance to the normal population.
+						The third approach is based on a first-order distance measure that was developed and first used for the instance-based learning system RIBL2~\citep{Horvath2001}. This measure has proven  successful in several applications~\citep{Kirsten2001,Horvath1999}. We employ this metric and compute the distance between any two individuals in our population domain. Then, we rank the individuals based on their mean distance to the normal population.
 					%	\subsubsection{Structured Data Methods}
 					
 					%						These include the $\mid$ and $\lr$ scores 
@@ -1609,12 +1610,12 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 					%						
 					%						
 					%						 Including it as a baseline provides a lesion study for how important it is to consider the mutual information among attributes.
-					%						Low model likelihood is a common score for using Bayesian networks to identify outliers \cite{Cansado2008}. The intuition behind the $\lnlikelihood$ score is that the class distribution Bayesian network represents normal behavior~\cite{riahi2013}. Low model likelihood therefore indicates anomalous objects. This is a common score for using Bayesian networks to identify outliers \cite{Cansado2008}.
+					%						Low model likelihood is a common score for using Bayesian networks to identify outliers \citep{Cansado2008}. The intuition behind the $\lnlikelihood$ score is that the class distribution Bayesian network represents normal behavior~\citep{riahi2013}. Low model likelihood therefore indicates anomalous objects. This is a common score for using Bayesian networks to identify outliers \citep{Cansado2008}.
 					%An object is deemed an outlier if  the class BN assigns sufficiently low likelihood to generating its attributes.  
-					%						The equation above represents the standard BN log-likelihood function for the object profile data, except that parent-child instantiation counts are standardized to be proportions \cite{Schulte2012}. 						
+					%						The equation above represents the standard BN log-likelihood function for the object profile data, except that parent-child instantiation counts are standardized to be proportions \citep{Schulte2012}. 						
 					%\subsubsection{Aggregation-based Matrix Methods}
 					
-					%%Standard outlier detection methods  require as input a flat data matrix where each individual is represented by a single attributes vector. To aggregate attributes of individuals across complex objects such as matches and ratings, we use the total attribute count. This is the approach that the inventors of $\lof$ \cite{Breunig2000} applied to sports data. For example they counted the total number of goals scored by a player in a season as a attribute for outlier analysis. 
+					%%Standard outlier detection methods  require as input a flat data matrix where each individual is represented by a single attributes vector. To aggregate attributes of individuals across complex objects such as matches and ratings, we use the total attribute count. This is the approach that the inventors of $\lof$ \citep{Breunig2000} applied to sports data. For example they counted the total number of goals scored by a player in a season as a attribute for outlier analysis. 
 					%						
 					%For example, in the soccer dataset there is a correlation between ``shot efficiency" and ``dribble efficiency" of a striker and that correlation is a key feature to identify strikers from other class. However when we use the averages of these attributes,
 					%%, by averaging over all the values of continuous attributes and counting the number of occurrences of different states of discrete attributes in all the player's matches, 
@@ -1624,19 +1625,19 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 					%
 					%Then, we study performance of \textit{MID} metric in comparison with:
 					%\begin{description}
-					%\item[$\lof$] is a density-based method originally presented in~\cite{Breunig2000} as a measure to quantify the outlier-ness of the data points relative to regions of different densities. Therefore, the score is defined based on local density instead of the nearest neighbor distance. In the simple words, $\lof$ compares the density of area around an object to the densities of the areas of the surrounding objects. However, $\lof$ defines density as the inverse of the average of the smoothed reachability distances in a neighborhood and this definition is not the precise definition of density in terms of number of data points within a specific region. $\lof$ is only sensitive to the density of the area and  ignore the orientation and the shape of the area.
-					%\item[$\outrank$] is a subspace outlier ranking technique that employs the subspace analysis to identify the degree of outlierness. It compares clustered regions in different subspace and derive the outlierness score for each object. In this work we used $\outrank$ with two subspace clustering models \textit{PRO-CLUS} \cite{Muller2009} and \textit{DISH} \cite{Kriegel2007} (as suggested in~\cite{Muller2012} \textit{PRO-CLUS} is the best clustering function for their approach).
-					%\item[$\knn$] is a well-known distanced-based outlier ranking method that is based on the distance of a point from its $k^{th}$ nearest neighbor and rank each object on the basis of its $k^{th}$ nearest neighbor. \cite{Ramaswamy2000}.
+					%\item[$\lof$] is a density-based method originally presented in~\citep{Breunig2000} as a measure to quantify the outlier-ness of the data points relative to regions of different densities. Therefore, the score is defined based on local density instead of the nearest neighbor distance. In the simple words, $\lof$ compares the density of area around an object to the densities of the areas of the surrounding objects. However, $\lof$ defines density as the inverse of the average of the smoothed reachability distances in a neighborhood and this definition is not the precise definition of density in terms of number of data points within a specific region. $\lof$ is only sensitive to the density of the area and  ignore the orientation and the shape of the area.
+					%\item[$\outrank$] is a subspace outlier ranking technique that employs the subspace analysis to identify the degree of outlierness. It compares clustered regions in different subspace and derive the outlierness score for each object. In this work we used $\outrank$ with two subspace clustering models \textit{PRO-CLUS} \citep{Muller2009} and \textit{DISH} \citep{Kriegel2007} (as suggested in~\citep{Muller2012} \textit{PRO-CLUS} is the best clustering function for their approach).
+					%\item[$\knn$] is a well-known distanced-based outlier ranking method that is based on the distance of a point from its $k^{th}$ nearest neighbor and rank each object on the basis of its $k^{th}$ nearest neighbor. \citep{Ramaswamy2000}.
 					%\end{description}
 					
 					%						\begin{LaTeXdescription}
-					%							\item[$\lof$] is a standard density-based method~\cite{Breunig2000}.
+					%							\item[$\lof$] is a standard density-based method~\citep{Breunig2000}.
 					%							%It quantify the outlier-ness of the data points relative to regions of different densities. Therefore, the score is defined based on local density instead of the nearest neighbor distance. In the simple words, 
 					%							$\lof$ compares the density of area around an object to the densities of the areas of the surrounding objects. 
 					%							%However, $\lof$ defines density as the inverse of the average of the smoothed reachability distances in a neighborhood and this definition is not the precise definition of density in terms of number of data points within a specific region. $\lof$ is only sensitive to the density of the area and  ignore the orientation and the shape of the area.
-					%							\item[$\knn$] is a well-known distanced-based outlier ranking method that assigns a score to each data point on the basis of distance of the point from its $k^{th}$ nearest neighbor ($D^k$) and  declare the top $n$ points as outliers~\cite{Ramaswamy2000}. 
+					%							\item[$\knn$] is a well-known distanced-based outlier ranking method that assigns a score to each data point on the basis of distance of the point from its $k^{th}$ nearest neighbor ($D^k$) and  declare the top $n$ points as outliers~\citep{Ramaswamy2000}. 
 					%							%They introduce a {\em partition-based} algorithm to set a upper bound and lower bound on $D^k$ to identify the partitions that cannot contain the top $n$ outliers and prune them in order to limit the search space. % \textbf{Sarah:more precise please}
-					%							\item[$\outrank$] employs subspace analysis to measure the degree of outlierness. It compares clusters in different subspace to derive an outlier score for each object \cite{Muller2012}. \end{LaTeXdescription}
+					%							\item[$\outrank$] employs subspace analysis to measure the degree of outlierness. It compares clusters in different subspace to derive an outlier score for each object \citep{Muller2012}. \end{LaTeXdescription}
 					
 					%						Density and distance based methods are two fundamental approaches to outlier detection represented in our study by $\lof$ and $\knn$. Subspace analysis is a popular approach too, and relevant to our study because $\mid$ is sensitive to correlations among features as well. 
 					
@@ -1715,11 +1716,11 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 					\end{table}
 
 
-\subsection{Detection Accuracy} \label{sec:detection} Several accuracy scores have been developed to measure the performance of outlier ranking methods~\cite{aggarwal2013}. Arguably the most widely used score is the {\em area under curve} ($\auc$) of the receiver operating characteristic $\roc$ curve~\cite{Fawcett2006,Cansado2008,Muller2012}. 
-%		This has been widely used to measure the performance of outlier ranking methods~\cite{Cansado2008,Muller2012}. 
+\subsection{Detection Accuracy} \label{sec:detection} Several accuracy scores have been developed to measure the performance of outlier ranking methods~\citep{aggarwal2013}. Arguably the most widely used score is the {\em area under curve} ($\auc$) of the receiver operating characteristic $\roc$ curve~\citep{Fawcett2006,Cansado2008,Muller2012}. 
+%		This has been widely used to measure the performance of outlier ranking methods~\citep{Cansado2008,Muller2012}. 
 		The relationship between false positive rate (1- Specificity) and true positive rate (Sensitivity) is captured by the $\roc$ curve. Ideally, the best performance is achieved when we have the highest sensitivity and the highest specificity. 
 		%The area under the \textit{ROC} curve shows the overall performance and it is a measure to compare the curves numerically. 
-		The maximum values for $\auc$ is, 1.0 indicating a perfect ranking with 100\% sensitivity and 100\% specificity. In order to compute the $\auc$ value, we used the \textit{R} package \textit{ROCR}~\cite{RROCR2012}. Given a set of outlier scores, one for each object, this package returns an $\auc$ value. 
+		The maximum values for $\auc$ is, 1.0 indicating a perfect ranking with 100\% sensitivity and 100\% specificity. In order to compute the $\auc$ value, we used the \textit{R} package \textit{ROCR}~\citep{RROCR2012}. Given a set of outlier scores, one for each object, this package returns an $\auc$ value. 
 %	Our experiments provide empirical evidence that in practice $\mid$ generally works better than other methods in all the Synthetic datasets and three out five real-world datasets.
 
 
@@ -1734,7 +1735,7 @@ Table~\ref{table:proposMethod Comparison} shows the $\auc$ values
 
 Comparing the two EMM methods $\mid$ and $\lr$, using distance rather than expectation allows $\mid$ to achieve a substantially higher AUC than $\lr$ on all datasets except for the NHL. On the NHL dataset, the $\lr$ metric outperforms both $\it{RIBL}$ and $\mid$, which is an example of how taking absolute values does not alway result in better detection performance.   
 
-On the synthetic data, we compare the two EMM methods further  with precision@r\% another metric used in a previous study on relational outlier detection~\cite{Gao2010}, which is computed as follows: 1) Sort the outlier scores obtained by an outlier ranking method in descending order. 2) Return the fraction of the top $r$ percent that are in fact outliers. Precision@r\% focuses on the ability to detect clear outliers. As Table~\ref{table:Percision Comparison} shows, the $\mid$ score is the best for this metric.
+On the synthetic data, we compare the two EMM methods further  with precision@r\% another metric used in a previous study on relational outlier detection~\citep{Gao2010}, which is computed as follows: 1) Sort the outlier scores obtained by an outlier ranking method in descending order. 2) Return the fraction of the top $r$ percent that are in fact outliers. Precision@r\% focuses on the ability to detect clear outliers. As Table~\ref{table:Percision Comparison} shows, the $\mid$ score is the best for this metric.
 	%We evaluate the performance of $\mid$ compared to other outlier different metrics.
 
 	\begin{table}
@@ -1813,10 +1814,10 @@ IMDb: Drama vs. Comedy & 	\textbf{0.70} &0.66&0.66&0.64&\textbf{0.70}&0.51&0.68&
 %					
 
 
-%					\subsection{Detection Accuracy} \label{sec:detection} We follow the evaluation design of~\cite{Gao2010} and 
+%					\subsection{Detection Accuracy} \label{sec:detection} We follow the evaluation design of~\citep{Gao2010} and 
 %					make each baseline methods detect the same percentage of  objects as outliers:
 %					% as that of the ground-truths. To achieve this, we 
-%					Sort the outlier scores obtained by the three baseline methods in descending order, and take the top $r$ percent as outliers. Then we use \textbf{precision}, a.k.a. \textbf{true positive rate} as the evaluation metric which is the percentage of correct ones in the set of outliers identified by the algorithm. As in~\cite{Gao2010}, we set the percentages of outlier to be 1\% and 5\%. In the one-class design, precision measures how many members of the outlier class were correctly recognized. We also report some AUC measurements \cite{aggarwal2013}, which aggregate precision values at different percentage cutoffs.\footnote{Our $\mid$ score performs the best also with other metrics such as recall, to a similar degree.} %\textbf{Sarah: I'd love to have the plots of all points here.}
+%					Sort the outlier scores obtained by the three baseline methods in descending order, and take the top $r$ percent as outliers. Then we use \textbf{precision}, a.k.a. \textbf{true positive rate} as the evaluation metric which is the percentage of correct ones in the set of outliers identified by the algorithm. As in~\citep{Gao2010}, we set the percentages of outlier to be 1\% and 5\%. In the one-class design, precision measures how many members of the outlier class were correctly recognized. We also report some AUC measurements \citep{aggarwal2013}, which aggregate precision values at different percentage cutoffs.\footnote{Our $\mid$ score performs the best also with other metrics such as recall, to a similar degree.} %\textbf{Sarah: I'd love to have the plots of all points here.}
 %					
 %					
 %					\paragraph{Likelihood-Based Methods} 
@@ -1970,7 +1971,7 @@ IMDb: Drama vs. Comedy & 	\textbf{0.70} &0.66&0.66&0.64&\textbf{0.70}&0.51&0.68&
 %							%								Comparing tables~\ref{table:Metric Comparison} and~\ref{table:Method Comparison} shows that t
 %							The performances of aggregation-based methods are most like that of the probabilistic score $\fd$, which does not consider the
 %							correlation among the features. This finding reflects the fact that aggregation tends to lose information about correlations.
-%							% \cite{DavidJensen2002}. 
+%							% \citep{DavidJensen2002}. 
 %							The aggregation-based methods achieve their highest performance on the Strikers vs. Goalies dataset. In this dataset action count features such as ShotsOnTarget, ShotEfficiency point to strikers and the feature SavesMade points to goalies. Therefore, outliers in this dataset are easy to find by considering features in isolation.
 							%\\
 							%\\
@@ -2148,7 +2149,7 @@ The main limitations of the work presented in this paper are the following:
 	In this work, to simplify the outlier detection task, we used only part of the full information available in our rich datasets. The model-based outlier detection can be extended in future work to take advantage of the full information, in the following manner. 
 	\begin{enumerate}
 		\item In the Premier League dataset, players are naturally related to one another and modeling the interaction between players can be another way to detect anomalous players.
-		The graph-based features, such as detecting near-clique nodes and star nodes, proved to be efficient in discovering patterns for anomaly detection task as shown in ODDBALL~\cite{Akoglu2010}.
+		The graph-based features, such as detecting near-clique nodes and star nodes, proved to be efficient in discovering patterns for anomaly detection task as shown in ODDBALL~\citep{Akoglu2010}.
 		\item In this paper we did not use the temporal information available in the data. In the learning process we do not give a higher weight (importance) to the more recent action (performance) of an individual. This point is especially important when applying the methods to dynamic data or the data that are collected over long periods of time. 
 		\item In the datasets that we used for the experiments, we did not have the missing value problem. Therefore, we did not incorporate ways to estimate missing values in our modeling. However, real-world datasets may involve arbitrary pattens of missing data. Maximum likelihood density estimation is a way to estimate such values. We leave this feature for future work.
 		%cite boosting in the presence of boosted statistical relational learning
@@ -2165,9 +2166,13 @@ The main limitations of the work presented in this paper are the following:
 
 The aim of this section is to compare the $\mid$ metric with other meaningful metrics for comparing individuals. Our reference metrics are success rankings of individuals selected for a specific domain, shown in Table~\ref{table:metrics}. We use the same data as in our other experiments, described in Section~\ref{sec:Experiments} except Mutagenesis as there was no meaningful success metrics we could find in that dataset. 
 
-Success rankings are one of the most interesting features to users. Strong correlations between the $\mid$ metric and meaningful success metrics provide evidence that the $\mid$ metric is meaningful as well. We measure correlation strength by the standard Pearson correlation coefficient $\rho$. The coefficient ranges from -1 to 1, where 0 means no correlation and 1 or -1 indicates maximum strength~\cite{Fisher1921}.
+Success rankings are one of the most interesting features to users. Strong correlations between the $\mid$ metric and meaningful success metrics provide evidence that the $\mid$ metric is meaningful as well. We measure correlation strength by the standard Pearson correlation coefficient $\rho$. The coefficient ranges from -1 to 1, where 0 means no correlation and 1 or -1 indicates maximum strength~\citep{Fisher1921}.
 
-The observed correlations are remarkable in at least two respects. 1) the strength of the correlation between the $\mid$ metric and salary is high as shown in Table~\ref{table:ELDwithPlayer} : coefficients range from 0.45 to 0.82. 2) We observe this phenomenon across different domains, different types of individuals and different success metrics.
+The observed correlations are remarkable in at least two respects. 
+\begin{enumerate}
+\item The strength of the correlations are high. For example, between the $\mid$ metric and salary  : coefficients range from 0.45 to 0.82, as shown in Table~\ref{table:ELDwithPlayer}.
+\item We observe high correlations across different domains, different types of individuals, and different success metrics. 
+\end{enumerate}
 
 
 \begin{table}[htbp]
@@ -2196,10 +2201,19 @@ For a population with a diverse set of skills and resources,
 being different from the generic class can be interpreted as both exceptionally better or worse than normal population. In the domains we study in this data, we found that higher $\mid$ scores indicate exceptionally good individuals but not exceptionally bad individuals. Our interpretation of the correlation between $\mid$ and success, rather than failure, is that our domains featured skilled individuals, such that the average is quite successful already. 
 For example, in Premier League we expect most players to be in the range of good players. Therefore, deviating from the rest of the population is a signal for detecting exceptionally good players. Our $\mid$-success scatterplots below provide empirical evidence for this interpretation: we typically see a large cluster of individuals around the origin, meaning that their success level is normal and their $\mid$ score is low, see Figure~\ref{fig:strikersELD}. %\textcolor{red}{maybe refer to the specific plots}. 
 
+\paragraph{Discussion of Success Metrics.}
+Sum of ratings for movies and league standing for teams are immediate measures of success. Measures like time played and shot efficiency are proxies for success that are widely used in sports analytics. While sufficient to validate our outlierness metrics, recent work in sports analytics has introduced sophisticated new performance metrics with several advantages. For example, time played is sensitive to factors beyond a player's control, such as injuries and coaching tactics.  By contrast, the goal impact metric based on reinforcement learning focuses on the value of the individual actions a player performs. \textbf{[cite UAI, IJCAI]}
+
+Our outlierness metrics are computed from instantiation counts (e.g. total passes in a match) their definition does not entail that they are proportional to such counts, for two reasons: 
+1) The metrics are computed in terms of frequencies (e.g. passes per match, not total passes over all matches) 2) The metrics measure not directly the frequencies, but the {\em difference in frequencies} between a random and a specific individual.  The correlation between our outlierness metrics and count-based success measures can therefore not be explained by their definition.
+
+
+
+
 \subsection{Methodology}
 
 We report the correlations between the $\mid$ metric and metrics of success for a specific domain. We also focus on some unusually successful individuals as case studies. 
-In considering the correlation between $\mid$ and success, it is useful to investigate subgroups of individuals to ensure an apples-to-apples comparison~\cite{Sun2009}. For instance, the attributes that lead to success are different for strikers and goalies.  Accordingly, we report correlations for subgroups as well as entire classes of individuals. We found that $\mid$ shows the strongest correlation with success for all metrics and subgroups, except for the log-likelihood metric; the details are given below in Section~\ref{sec:corr-others}. 
+In considering the correlation between $\mid$ and success, it is useful to investigate subgroups of individuals to ensure an apples-to-apples comparison~\citep{Sun2009}. For instance, the attributes that lead to success are different for strikers and goalies.  Accordingly, we report correlations for subgroups as well as entire classes of individuals. We found that $\mid$ shows the strongest correlation with success for all metrics and subgroups, except for the log-likelihood metric; the details are given below in Section~\ref{sec:corr-others}. 
 	
 %	Another point to consider is that, in BN generalization, similar to statistical generalization, population size and the structure of the  individuals is important. For example, in the Premier League, when the goal is to predict the success of  teams, there is no strong correlation between the ELD metric and standing of the teams as we expected it to be similar to the other domain/individuals ($\rho(Standing, ELD)=-0.21$). This could be due to the diverse and yet very small population (20 teams in total). But when we decrease diversity by evaluation only top 10 teams in the Premier League standing, correlation becomes a lot more stronger ($\rho(Standing, ELD)=-0.71$).
 
@@ -2320,7 +2334,7 @@ The next three tables summarize the observed correlations between success and $\
 
 \subsubsection{Soccer Players}
 
-	\paragraph{Players Time Played} is the total time that a player played over all matches in the season. This metric was shown to correlate strongly with other success metrics, such as salary, in soccer data~\cite{schwartz}. 
+	\paragraph{Players Time Played} is the total time that a player played over all matches in the season. This metric was shown to correlate strongly with other success metrics, such as salary, in soccer data~\citep{schwartz}. 
 %	Tables ~\ref{table:goalie} and \ref{table:players} 
 %	
 %	and Figures \ref{fig:GoalieTime} and \ref{fig:StrikerTime} 
@@ -2331,7 +2345,7 @@ The next three tables summarize the observed correlations between success and $\
 	%The results are mixed; they show that pay cannot be adequately explained by past performance
 %	alone, nor are pay levels justified by future performance. The bids for players in the initial
 %	auction appear to have been based on intangibles that are hard to quantify%
-	\paragraph{Salary} is probably the most obvious, and at the same time often the most misleading way to measure success of the players. Previous studies suggest that salary of the players does not  always follow their performance in many sports such as Baseball and Soccer~\cite{Hall2002,Barrio2004}. They show that pay cannot be explained only by past performance and there are other factors that are hard to quantify and have great effects on the salaries. 
+	\paragraph{Salary} is probably the most obvious, and at the same time often the most misleading way to measure success of the players. Previous studies suggest that salary of the players does not  always follow their performance in many sports such as Baseball and Soccer~\citep{Hall2002,Barrio2004}. They show that pay cannot be explained only by past performance and there are other factors that are hard to quantify and have great effects on the salaries. 
 	
 	 We manually collected salaries of 120 players that we could find on-line. Table \ref{table:ELDwithPlayer}  and Figures~\ref{fig:strikersELD} and \ref{fig:goaliesELD} show the correlation between $\mid$ and this success metric. The correlation is high, especially for Strikers. We found salary data for only 5 goalies. We discuss the relatively weaker salary correlation for midfielders in more detail below.
 	 
@@ -2647,7 +2661,7 @@ Equation~\eqref{eq:f-specific} holds for $f = -\ln$ because then $f(\frac{P_{2}(
 %		\end{minipage}
 %	\end{figure}
 %	
-\bibliographystyle{abbrv}
+\bibliographystyle{plainnat}
 \begin{filecontents*}{jobname.bib}
 	% This file was created with JabRef 2.7.
 	% Encoding: ISO8859_1
@@ -6304,7 +6318,7 @@ Equation~\eqref{eq:f-specific} holds for $f = -\ln$ because then $f(\frac{P_{2}(
 			%	\item We define a novel distribution divergence that measures how much the target object's distribution differs from the average distribution of objects in the same class. This divergence is our outlier score.
 			%\end{enumerate}
 			%
-			%In database terminology, an object profile is like a view centered on the object. For example, a query for computing the object profile for Arsenal would include the selection condition $\it{TeamID} = \it{Arsenal}$. Note that an object profile features both parts of the object as well as more complex objects of which it is a part. The object profile is individual-centered in the sense of \cite{Flach1999a}.
+			%In database terminology, an object profile is like a view centered on the object. For example, a query for computing the object profile for Arsenal would include the selection condition $\it{TeamID} = \it{Arsenal}$. Note that an object profile features both parts of the object as well as more complex objects of which it is a part. The object profile is individual-centered in the sense of \citep{Flach1999a}.
 			%
 			%\begin{figure}[htbp]
 			%	\centering
@@ -6372,7 +6386,7 @@ Equation~\eqref{eq:f-specific} holds for $f = -\ln$ because then $f(\frac{P_{2}(
 The motivation for the mutual information decomposition is two-fold. 
 
 \noindent
-(1) {\em Interpretability.} This is very important for outlier detection. The single-feature components are easy to interpret since they involve no feature interactions. Each parent-child local factor is based on the average relevance of parent values for predicting the value of the child node, where relevance is measured by $$\ln \frac{\parameter(\nodevalue_{ij}|\parents_{i})}{\parameter(\nodevalue_{ij})}.$$ This relevance term  is basically the same as the widely used lift measure \cite{Tuffery2011}, and therefore is an intuitively meaningful quantity. The $\mid$ score compares how relevant a given parent condition is in the object data with how relevant it is in the general class. 
+(1) {\em Interpretability.} This is very important for outlier detection. The single-feature components are easy to interpret since they involve no feature interactions. Each parent-child local factor is based on the average relevance of parent values for predicting the value of the child node, where relevance is measured by $$\ln \frac{\parameter(\nodevalue_{ij}|\parents_{i})}{\parameter(\nodevalue_{ij})}.$$ This relevance term  is basically the same as the widely used lift measure \citep{Tuffery2011}, and therefore is an intuitively meaningful quantity. The $\mid$ score compares how relevant a given parent condition is in the object data with how relevant it is in the general class. 
 
 \noindent
 (2) {\em Avoiding cancellations.} The \textbf{mutual information decomposition} shows that each term in the log-likelihood difference \eqref{eq:log-diff} decomposes into a relevance difference and a marginal difference: 
@@ -6493,7 +6507,7 @@ These differences can have different signs for different child-parent configurat
 %
 %(Part \ref{clause:nonnegative}) The claim is immediate for $\fd_{i}$. We show that $\lr_{i}$ is nonnegative and 0 only if the object and class parameters associated with node $i$ are the same. 
 %%We apply the well-known fact that the KL-divergence of two distributions is nonnegative and 0 only if the two distributions are the same. 
-%Consider a simple Bayes net structure $\model'$ comprising the parents of node $i$, node $i$, and no other nodes or links. Then $\lr_{i}$ is the log-likelihood difference $$ \lr_{i} =\loglikelihood(\D_{\object},\model',\parameters_{\object}) - \loglikelihood(\D_{\object},\model',\parameters_{\Class}).$$ The empirical frequency parameters $\parameters_{\object}$ uniquely maximize the function $\loglikelihood(\D_{\object},\model',\cdot)$ \cite{Schulte2012}, so the difference $\lr_{i}$ is nonnegative, and equals 0 if and only if $\theta_{\Class} = \theta_{\parameters}$.
+%Consider a simple Bayes net structure $\model'$ comprising the parents of node $i$, node $i$, and no other nodes or links. Then $\lr_{i}$ is the log-likelihood difference $$ \lr_{i} =\loglikelihood(\D_{\object},\model',\parameters_{\object}) - \loglikelihood(\D_{\object},\model',\parameters_{\Class}).$$ The empirical frequency parameters $\parameters_{\object}$ uniquely maximize the function $\loglikelihood(\D_{\object},\model',\cdot)$ \citep{Schulte2012}, so the difference $\lr_{i}$ is nonnegative, and equals 0 if and only if $\theta_{\Class} = \theta_{\parameters}$.
 %\end{proof}
 
 %Let $P_{\Class'}$ be a distribution that agrees with $P_{\object}$ on the marginal probabilities over the parent nodes, and agrees with $P_{\Class}$ on the conditional probabilities of the child node given parent values (i.e. $\parameters_{\Class'} = \parameters_{\Class}$). Then $\lr_{i}$ is the KL-divergence between the two distributions $P(\cdot;\model',\parameters_{\Class'})$ and $P(\cdot;\model',\parameters_{\object})$. Therefore $\lr_{i}$ is nonnegative and 0 only if $\parameters_{\object} = \parameters_{\Class'} = \parameters_{\Class}$. The nonnegativity of the other divergences now follows from the equality and inequalities established in part \ref{clause:inequalities}.
