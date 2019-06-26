@@ -64,6 +64,7 @@ grestore
   \colorbox{gray!50}{$\displaystyle#1$}}
 %\usepackage{subcaption}
 \usepackage{fancyhdr}
+\usepackage{todonotes}
 \graphicspath{{../}{figures/}}
 %\usepackage{todonotes}
  
@@ -1276,6 +1277,7 @@ Our ELD metric is an example of transforming an $f$-divergence with absolute val
 I_{|f|}(P_{1}||P_{2}) \equiv \sum_{i:f(\frac{P_{2}(\nodevalue_{i})}{P_{1}(\nodevalue_{i})})>0} P_{1}(\nodevalue_{1}) f\left(\frac{P_{2}(\nodevalue_{i})}{P_{1}(\nodevalue_{i})}\right) - \sum_{i:f(\frac{P_{2}(\nodevalue_{i})}{P_{1}(\nodevalue_{i})})<0} P_{1}(\nodevalue_{1}) f\left(\frac{P_{2}(\nodevalue_{i})}{P_{1}(\nodevalue_{i})}\right)
 \end{equation*}
 
+\todo{maybe merge with the previous proposition}
 In the Taylor series approximation for $\mid$ (using $f=-\ln(u)$ in Equation~\eqref{eq:f-absolute}), cancellation is avoided, so the first-order term does {\em not} vanish, and is in fact equivalent to the Total Variation Distance:
 
 \begin{proposition} The $i=1$ term in the Taylor series approximation for  $\mid$ around $u=1$ is total variation distance. Therefore 
@@ -1726,7 +1728,8 @@ Table~\ref{table:Features} lists the populations and features. Table~\ref{table:
 
 
 	\paragraph{AUC Accuracy in Synthetic Datasets.}
-	Table~\ref{table:Metric Comparison} shows the $\auc$ values for probabilistic methods and the outlier detection methods. On the synthetic data, it ought to be easy to distinguish the outliers and most methods detect most outliers well.  However, the EMM methods $\lr$ and $\mid$ are the only scores that achieves perfect or near perfect detection across all three synthetic datasets. $\it{RIBL}$ is the only method that fails in detecting outliers. $\it{RIBL}$ computes the distance between individuals by computing the distance of each instance of an individual to its nearest instance from other instances of the other individual. When comparing two individuals with only two binary features, $\it{RIBL}$ results in the same distance from the center of normal community for each individual.
+	Table~\ref{table:Metric Comparison} shows the $\auc$ values for probabilistic methods and the outlier detection methods. On the synthetic data, it ought to be easy to distinguish the outliers and most methods detect most outliers well.  However, the EMM methods $\lr$ and $\mid$ are the only scores that achieves perfect or near perfect detection across all three synthetic datasets. $\it{RIBL}$ is the only method that fails in detecting outliers. $\it{RIBL}$ computes the distance between individuals by computing the distance of each instance of an individual to its nearest instance from other instances of the other individual. When comparing two individuals with only two binary features, $\it{RIBL}$ assigns to each individual, the same distance for the center of a normal population.
+%results in the same distance from the center of normal community for each individual.
 	
 	\paragraph{AUC Accuracy in Real-world Datasets.}
 Table~\ref{table:proposMethod Comparison} shows the $\auc$ values
@@ -2030,10 +2033,9 @@ IMDb: Drama vs. Comedy & 	\textbf{0.70} &0.66&0.66&0.64&\textbf{0.70}&0.51&0.68&
 							%
 							In real-world data, a rare object may be a {\em within-class outlier}, i.e., highly anomalous even within its class. In an unsupervised setting without class labels, we do not expect an outlier score to distinguish such an in-class outlier from outliers outside the class. 
 							%								This is the reason why in real-world data, we do not expect an outlier detection score to distinguish the normal class objects perfectly from objects outside the class. 
-							An example is the striker Edin Dzeko. He is a highly anomalous striker who obtains 
-							the top $\mid$ divergence score among both strikers and goalies. His $\mid$ score is highest for the Dribble Efficiency feature. The highest $\mid$ score for that feature occurs when Dribble Efficiency is low, and its parents have the following values: Shot Efficiency high, Tackle Efficiency medium. Looking at the single feature divergence, 
+							An example is the striker Edin Dzeko. He is a highly anomalous striker who obtains the top $\mid$ divergence score among both strikers and goalies. His $\mid$ score is highest for the Dribble Efficiency feature. The highest $\mid$ score for that feature occurs when Dribble Efficiency is low, and its parents have the following values: Shot Efficiency high, Tackle Efficiency medium. Looking at the single feature divergence, 
 							%Decomposing this $\mid$ score into feature divergence and joint information divergence, 
-							we see that Edin Dzeko is indeed an outlier in the Dribble Efficiency subspace: His dribble efficiency is low in 16\% of his matches, whereas a randomly selected striker has low dribble efficiency in 50\% of their matches. Thus, Edin Dzeko is an unusually good dribbler. Looking at the mutual information component of $\mid$, i.e., the parent-child correlations, for Edin Dzeko the confidence of the rule 
+							we see that Edin Dzeko is indeed an outlier in the Dribble Efficiency subspace: His dribble efficiency is low in 16\% of his matches, whereas a randomly selected striker has low dribble efficiency in 50\% of their matches. Thus, Edin Dzeko is an unusually good dribbler. \todo{find external source validating this claim} Looking at the mutual information component of $\mid$, i.e., the parent-child correlations, for Edin Dzeko the confidence of the rule 
 							$$\it{ShotEff} = \it{high}, \it{TackleEff} = \it{medium}\rightarrow \it{DribbleEff} = \it{low}$$ is 50\%, whereas in the general striker class it is $38\%$.
 							%The $\eld$ divergence also ranks Edin Dzeko as unusual. But because it allows feature and joint information divergence to cancel, his rank is somewhat lower. The likelihood metric does not recognize him as unusual at all. 
 							
@@ -2198,11 +2200,11 @@ The observed correlations are remarkable in at least two respects.
 
 For a population with a diverse set of skills and resources,
 %apart from a serious decline in quality of generalization, 
-being different from the generic class can be interpreted as both exceptionally better or worse than normal population. In the domains we study in this data, we found that higher $\mid$ scores indicate exceptionally good individuals but not exceptionally bad individuals. Our interpretation of the correlation between $\mid$ and success, rather than failure, is that our domains featured skilled individuals, such that the average is quite successful already. 
-For example, in Premier League we expect most players to be in the range of good players. Therefore, deviating from the rest of the population is a signal for detecting exceptionally good players. Our $\mid$-success scatterplots below provide empirical evidence for this interpretation: we typically see a large cluster of individuals around the origin, meaning that their success level is normal and their $\mid$ score is low, see Figure~\ref{fig:strikersELD}. %\textcolor{red}{maybe refer to the specific plots}. 
+being different from the generic class can be interpreted as both exceptionally better or worse than the normal population. In the domains we study in this data, we found that higher $\mid$ scores indicate exceptionally good individuals but not exceptionally bad individuals. Our interpretation of the correlation between $\mid$ and success, rather than failure, is that our domains featured skilled individuals, such that the average is quite successful already. 
+For example, in the Premier League we expect most players to be in the range of good players. Therefore, deviating from the rest of the population is a signal for detecting exceptionally good players. Our $\mid$-success scatterplots below provide empirical evidence for this interpretation: we typically see a large cluster of individuals around the origin, meaning that their success level is normal and their $\mid$ score is low, see Figure~\ref{fig:strikersELD}. %\textcolor{red}{maybe refer to the specific plots}. 
 
 \paragraph{Discussion of Success Metrics.}
-Sum of ratings for movies and league standing for teams are immediate measures of success. Measures like time played and shot efficiency are proxies for success that are widely used in sports analytics. While sufficient to validate our outlierness metrics, recent work in sports analytics has introduced sophisticated new performance metrics with several advantages. For example, time played is sensitive to factors beyond a player's control, such as injuries and coaching tactics.  By contrast, the goal impact metric based on reinforcement learning focuses on the value of the individual actions a player performs. \textbf{[cite UAI, IJCAI]}
+Sum of ratings for movies and league standing for teams are immediate measures of success. Measures like time played and shot efficiency are proxies for success that are widely used in sports analytics. While sufficient to validate our outlierness metrics, recent work in sports analytics has introduced sophisticated new performance metrics with several advantages. For example, time played is sensitive to factors beyond a player's control, such as injuries and coaching tactics.  By contrast, the recent goal impact metric based on reinforcement learning focuses on the value of the individual actions a player performs~\citep{Routley2015a,Liu2018}.
 
 Our outlierness metrics are computed from instantiation counts (e.g. total passes in a match) their definition does not entail that they are proportional to such counts, for two reasons: 
 1) The metrics are computed in terms of frequencies (e.g. passes per match, not total passes over all matches) 2) The metrics measure not directly the frequencies, but the {\em difference in frequencies} between a random and a specific individual.  The correlation between our outlierness metrics and count-based success measures can therefore not be explained by their definition.
@@ -2351,7 +2353,7 @@ The next three tables summarize the observed correlations between success and $\
 	 
 	 \paragraph{Shots on Target} applies to strikers only. This is defined as any shot attempt that would or does enter the goal if left unblocked. We record the total number of these shots over all matches of the strikers only. This metric was shown to correlate strongly with $\mid$ (see Table \ref{table:ELDwithPlayer}, Figure~\ref{fig:StrikerShot}).
 	 
-	 Figure~\ref{fig:strikersELD} plots $\mid$ against striker success metrics. We observe a large cluster around the origin, which points to a large base of normal strikers with both salaries and low $\mid$ scores. %The striker with the greatest $\mid$ score is Robin van Persie. He stands out in terms of Shots on Target, Time Played, and Salary. 
+	 Figure~\ref{fig:strikersELD} plots $\mid$ against striker success metrics. We observe a large cluster around the origin, which points to a large base of normal strikers with both salaries and low $\mid$ scores.\todo{what is the scale of salary? E.g. annual} The striker with the greatest $\mid$ score is Robin van Persie. He stands out in terms of Shots on Target, Time Played, and Salary. 
 	 
 	 %should probably label the points with individual names
 
@@ -2361,14 +2363,14 @@ The next three tables summarize the observed correlations between success and $\
 		\subfigure[Strikers: Salary vs $\mid$. ]{\label{fig:StrikerSalary}\includegraphics[width=0.65\textwidth]{1d-sumStrikerSalary.pdf}}
 		\subfigure[Strikers: Shots On Target vs $\mid$]{\label{fig:StrikerShot}\includegraphics[width=0.65\textwidth]{1d-ShotsonTarget-sumStrikerStatistics.pdf}}
 		\subfigure[Strikers: Time played vs $\mid$.]{\label{fig:StrikerTime}\includegraphics[width=0.65\textwidth]{1d-sumStrikerStatistics.pdf}}
-		\caption{Correlations in Strikers population\label{fig:strikersELD}}
+		\caption{Correlations with Success Metrics for Strikers \label{fig:strikersELD}}
 	\end{figure}
 
 
 	 
 	\paragraph{Saves Made} applies to Goalies only. It is defined as the total number of saves that goalies had made over all the matches. This metric shows a strong correlation with $\mid$ as well (see Table~\ref{table:ELDwithPlayer}, Figure\ref{fig:GoalieSaves}).  
 	
-	Figure~\ref{fig:goaliesELD} shows the correlation of $\mid$ with Goalie success metrics in a scatter plot. Goalies do not vary much in terms of the time they play. Wayne Hennessey has the highest number of Saves Made and also an unusually high $\mid$ score, although not the highest. 
+	Figure~\ref{fig:goaliesELD} shows the correlation of $\mid$ with Goalie success metrics in a scatter plot. Goalies do not vary much in terms of the time they play. Wayne Hennessey has the highest number of Saves Made and also an unusually high $\mid$ score, although not the highest.\todo{what is the time scale? Total over Season?}
 
 
 	
@@ -2377,7 +2379,7 @@ The next three tables summarize the observed correlations between success and $\
 		\subfigure[Goalies: sum of time played vs $\mid$. ]{\label{fig:GoalieTime}\includegraphics[width=0.7\textwidth]{sumGoalieStatistics.pdf}}
 		\subfigure[Goalies: sum of saves made vs $\mid$]{\label{fig:GoalieSaves}\includegraphics[width=0.7\textwidth]{sumGoalieStatisticsSavesMade.pdf}}
 	%	\subfigure[Teams: Team Standing vs. $\mid$ for the top teams in Premier League. \textbf{separate figure please}]{\label{fig:TeamStanding}\includegraphics[width=0.5\textwidth]{topTeamStats.pdf}}
-		\caption{\label{fig:goaliesELD}}
+		\caption{Correlations with Success Metrics for Goalies.\label{fig:goaliesELD}}
 	\end{figure}
 
 
@@ -2386,7 +2388,7 @@ The next three tables summarize the observed correlations between success and $\
 We omit a scatterplot for midfielder salary vs. $\mid$ because it is less informative due to the weaker  correlation (0.45).
 %
 %While there is a strong correlation between salary of the Strikers and ELD score (0.79), this correlation becomes weaker in the Goalie population and even less apparent in Midfielder group. 
-To investigate the reason for the weaker correlation, we picked two midfielders: 1) Stephane Sessegnon  who has been ranked second in the $\mid$ ranking but does not draw a large salary. 2) Steven Gerrard who is a very well known player and ranked second in the Salary ranking but according to the $\mid$ score, he has been ranked 21. Based on domain knowledge, we picked some of the features that are relevant to midfield performance from the raw data and compared the feature statistics for these two players. Table~\ref{table:MidfielderComparison} shows the details of their appearances in different matches. Sessegnon scored higher than Gerrard in three out of the four categories (passes and Time Played). However, his salary was much lower than Gerrard's. Indeed his next contract with West Bromwich Albion netted him a club record fee. This is an example of how our $\mid$ metric can identify players who are underpaid relative to their potential.
+To investigate the reason for the weaker correlation, we picked two midfielders: 1) Stephane Sessegnon  who has been ranked second in the $\mid$ ranking but does not draw a large salary. 2) Steven Gerrard who is a very well known player and ranked second in the Salary ranking but by the $\mid$ score, ranks at place 21. Based on domain knowledge, we picked some of the features that are relevant to midfield performance from the raw data and compared the feature statistics for these two players. Table~\ref{table:MidfielderComparison} shows the details of their appearances in different matches. Sessegnon scored higher than Gerrard in three out of the four categories (passes and Time Played). However, his salary was much lower than Gerrard's. Indeed his next contract with West Bromwich Albion netted him a club record fee. This is an example of how our $\mid$ metric can identify players who are underpaid relative to their potential.
 %This is an example of how weak the correlation is between salary and the observed box scores, which are the basis for the $\mid$ metric. 
 %to show how unfair and unreliable the salary is in this domain.
 %	 Unsuccessful Passes&Successful Long Passes
@@ -2426,7 +2428,7 @@ To investigate the reason for the weaker correlation, we picked two midfielders:
 							\end{table}
 	\subsubsection{Hockey Players}
 	For the hockey players the features that we have selected as success metrics are as follows: $\it{Time on Ice}$, that can be defined as the total amount of time a player has played over the course of a season. $\it{Power Play Time}$ which is the total amount of power player time for a given player in a season. $\it{Assists}$ is the total number of any actions that led to a goal. And finally total number of $\it{Goals}$ that a given player has scored.
-The correlation between these features and $\mid$ is shown in Table~\ref{table:ELDwithHockey}. ELD has high correlations in features of both categories, however, it is stronger in Forwarder subgroup.
+The correlation between these features and $\mid$ is shown in Table~\ref{table:ELDwithHockey}. ELD has high correlations in features of both categories, however, it is stronger in the Forwarder subgroup.
 		\paragraph{Movie Sum of Ratings}
 	\subsubsection{Movies} 
 	
@@ -2487,10 +2489,12 @@ There are several avenues for future work.  (i) A limitation of our current appr
 								
 In sum, outlier metrics based on model likelihoods are a new type of structured outlier score for object-relational data.  Our evaluation indicates that  model-based scores provide informative, interpretable, and accurate rankings of objects as potential outliers. 
 								
-\section*{Acknowledgements} This work was supported by a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada. We are indebted for helpful discussions to the participants at the 2018 Workshop on Statistical Relational AI. The action editor and reviewers for the Data Mining and Knowledge Discovery Journal provided extensive helpful comments. We thank Peter Flach for clarifying the connection with Exceptional Model Mining.
+\section*{Acknowledgements} This work was supported by a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada. We are indebted for helpful discussions to the participants at the 2018 Workshop on Statistical Relational AI. The action editor and reviewers for the Data Mining and Knowledge Discovery Journal provided extensive helpful comments. We thank Peter Flach for clarifying the connection with Exceptional Model Mining. \todo{fix Swartz and Arce citation from the Sports Journal}
 
 \section{Appendix: Proofs} \label{sec:proofs}
 %For the ELD generator $f=-ln(u)$, we have $f'(1)=1$, so the first-order approximation to ELD is exactly TVD. 
+
+The appendix contains the proofs for the results about $f$-divergences (Proposition~\ref{prop:xi-square}). We show that if the generator $f$ is twice differentiable at $u=1$, the resulting $f$-divergence is approximately a scaled $\chi^{2}$ divergence. This result does not apply to the ELD divergence whose generator is $f(u) = |ln(u)|$ \todo{check the generator}. The ELD divergence instead approximates the total variation distance. \todo{maybe state Jensen's inequality} 
 
 {\em 
 Assume that the generator $f$ is twice differentiable for $f$-divergence $I_{f}$. Then $I_{f}(P_{1}||P_{2}) \approx \frac{f''(1)}{2} \chi^{2}(P_{1}||P_{2}) = \frac{f''(1)}{2} 
@@ -2666,6 +2670,20 @@ Equation~\eqref{eq:f-specific} holds for $f = -\ln$ because then $f(\frac{P_{2}(
 	% This file was created with JabRef 2.7.
 	% Encoding: ISO8859_1
 	
+	@INPROCEEDINGS{Liu2018,
+  author = {Guiliang Liu and Oliver Schulte},
+  title = {Deep Reinforcement Learning in Ice Hockey for Context-Aware Player
+	Evaluation},
+  booktitle = {Proceedings of the Twenty-Seventh International Joint Conference
+	on Artificial Intelligence, {IJCAI-18}},
+  year = {2018},
+  pages = {3442--3448},
+  month = {7},
+  publisher = {International Joint Conferences on Artificial Intelligence Organization},
+  doi = {10.24963/ijcai.2018/478},
+  url = {https://doi.org/10.24963/ijcai.2018/478}
+}
+
 	@INPROCEEDINGS{Riedel2013,
 		author = {Sebastian Riedel and Limin Yao and Andrew McCallum and Benjamin M.
 			Marlin},
