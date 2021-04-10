@@ -1,0 +1,692 @@
+\documentclass{article}
+% The file ijcai13.sty is the style file for IJCAI-13 (same as ijcai07.sty).
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{ijcai13}
+\usepackage{times}
+
+\input{preamble-stuff}
+%\newcommand{\outdomain}{V}
+\newcommand{\MLNA}{\textsc{MSL}}
+\newcommand{\MLNConst}{\textsc{MSLc}}
+\newcommand{\LHL}{\textsc{LHL}}
+\newcommand{\LHLConst}{\textsc{LHLc}}
+
+
+\begin{document}
+\title{Learning Bayes Nets with Link Uncertainty for Relational Data Sets}
+\author{Oliver Schulte and Zhensong Qian
+\thanks{
+This research was supported by a Discovery Grant to Oliver Schulte from the Canadian Natural Sciences and Engineering Council. 
+And Zhensong Qian was also supported by a grant from the China Scholarship Council.
+This is a preliminary version of a paper that will appear in the post proceedings of the IJCAI 2013 GKR workshop.
+}\\
+\\ School of Computing Science\\ Simon Fraser University\\Vancouver-Burnaby, Canada
+}
+\date{\today}
+
+\maketitle
+
+\begin{abstract} Many if not most big data sets are maintained in relational databases. We describe Bayes net learning methods that can discover knowledge about correlations among both link types and node attributes in big relational data. 
+%A key scalability challenge for relational learning is to compute event counts in a relational database (sufficient statistics), especially when these involve negated relationships. We provide empirical evidence that the fast M\"obius transform provides a scalable solution for this problem.
+%We provide a lattice-based implementation of the fast M�bius transform that efficiently computes sufficient statistics across multiple tables. The lattice M�\"obius transform leads to efficient multi-relational Bayes net structure learning algorithms.
+\end{abstract}
+
+
+\section{Introduction: Link Correlations} Scalable link analysis for relational data with multiple link types is a challenging problem in network science. We describe a method for learning a Bayes net that captures simultaneously correlations between link types, link features, and attributes of nodes. 
+
+Building a Bayes net model is useful for big data analysis because such models provide a compact summary of the statistical relationships in the data. The model supports both descriptive and predictive analytics. Correlations are presented to the user in a graphical way, and queries about probabilistic relationships can be answered quickly using Bayes net inference rather than via database queries run against a large dataset. 
+
+%Applications supported by Bayes net learning include the following:
+%
+%\begin{description}
+%\item[Knowledge Discovery] Dependencies provide valuable insights. For instance, a web search manager may wish to know whether if user searches for a video in Youtube for a product, they are also likely to search for it on the web. 
+%\item[Probabilistic queries] Once the model has been built, well-researched Bayes net methods can be used for probabilistic inference and ``what-if'' queries. For instance, a university administrator what wish to know how raising the average SAT test score of applicants would affect the attrition rate of students.
+%\item[Database Query Optimization] The Bayes net model can also be used to estimate relational statistics, the frequency with which statistical patterns occur in the database \cite{Schulte2012b}. This kind of statistical model can be applied for database query optimization \cite{Getoor2001}.
+%\end{description}
+
+Previous work on learning Bayes nets for relational data was restricted to correlations among attributes given the existence of links \cite{Schulte2012}. The larger class of correlations examined in our new algorithms includes two additional kinds:
+
+\begin{enumerate}
+\item Dependencies between two different types of links.
+\item Dependencies among node attributes given the {\em absence} of a link between the node.
+\end{enumerate}
+
+%
+%\paragraph{Approach}
+%
+%We consider three approaches to multiple link analysis with Bayes nets. 
+%
+%\begin{description}
+%\item[Flat Search] Apply a standard Bayes net learner to a single large join table. This table is formed as follows: (1) take the cross product of entity tables. (An entity tables lists the set of nodes of a given type.) (2) For each tuple of entities, add a relationship indicator whose value ``true'' or ``false'' indicates whether a certain relationship holds among the entities. 
+%\item[Hierarchical Search] Conducts bottom-up  search
+% through the lattice of table joins hierarchically. Dependencies (Bayes net edges) discovered on smaller joins are propagated to larger joins. 
+%The different table joins include information about the presence of absence of relationships as in the flat search above. 
+%This is an extension of the current state of the art Bayes net learning algorithm for relational data \cite{Schulte2012}.
+%\end{description}
+
+%(1) Baseline: The learn-and-join algorithm is the state of the art method for learning Bayes nets that capture correlations among attributes of entities or nodes. It conducts a hierarchical search
+% through the lattice of table joins. Dependencies discovered on smaller joins are propagated to larger joins.  The current version of the learn-and-join method considers only correlations between attributes and link types, not correlations between link types. (2) {\em Hierarchical Search With Link Types.} We extend the learn-and-join algorithm to consider correlations among link types. This is done by adding a new feature for each relationship table that indicates for each tuples of entities, whether they are related or not. 
+%(3) {\em Flat search}: Form a single big join table that combines different relationships with the new relationship indicator feature. Then apply a standard Bayes net learner on the join table. 
+
+%\paragraph{Evaluation.} We compare the learned models using standard scores (e.g., Bayes Information Criterion, log-likelihood). 
+%These results indicate that both flat search and hierarchical search are effective at finding correlations among link types. 
+%Flat search can on some datasets achieve a higher score by exploiting attribute correlations that depend on the absence of relationships. 
+%Structure learning time results indicate that hierarchical search is substantially more scaleable.
+
+Contributions include the following:
+
+\begin{enumerate}
+\item To our knowledge this is the first implementation of Bayes net learning for modelling correlations among different types of links.
+\item A comparison of a hierarchical vs. a single-table model search strategy.
+%\item Using the M\"obius transform to make the computation of sufficient statistics for negated relationships tractable \cite{Schulte2012}. 
+\end{enumerate}
+
+%\paragraph{Paper Organization} We describe Bayes net models for relational data (Poole's Parametrized Bayes Nets). 
+%Then we present the learning algorithms, first flat search then hierarchical search. 
+%We compare different model search strategies on four databases from different domains. The last part of this paper turns from statistical to computation issues. We propose the M\"obius transform to efficiently compute sufficient database statistics involving any number of negated relationships.
+%
+%\section{Related Work} 
+%To our knowledge, there are no implementations of structure learning algorithms for directed graphical models that consider correlations among different link types, 
+%let alone together with node attributes. 
+%Such implementations exist, however, for other types of graphical models, specifically Markov random fields (undirected models) \cite{Domingos2009} and dependency networks (directed edges with cycles allowed) \cite{Natarajan2012}. 
+%Structure learning programs for Markov random fields are provided by Alchemy \cite{Domingos2009} and Khot et al \cite{Khot2013}. Khot et al. use boosting to provide a state-of-the-art dependency network learner. 
+%None of these programs are able to return a result on half of our datasets because they are too large. For space reasons we restrict the scope of this paper to directed graphical models and do not go further into undirected model. For an extensive comparison of the learn-and-join Bayes net learning algorithm with Alchemy please see \cite{Schulte2012}.
+%
+\section{Background and Notation} 
+Poole introduced the Parametrized Bayes net (PBN) formalism that combines Bayes nets with logical-relational syntax \cite{Poole2003}. 
+A \textbf{population} is a set of individuals.  A \textbf{population variable} is capitalized. A \textbf{functor} represents a function or a Boolean predicate. A predicate with more than one argument is called a \textbf{relationship}; other functors are called \textbf{attributes}. A \textbf{Parametrized random variable} (PRV) is of the form $\functor(\X_{1},\ldots,\X_{a})$, where the populations associated with the variables are of the appropriate type for the functor.
+A {\bf Parametrized Bayes Net (PBN)} structure is a directed acyclic graph  whose nodes are PRVs. 
+
+We assume that data are represented in a standard \textbf{relational schema} containing a set of tables, each with key fields, %typically
+descriptive attributes, and possibly foreign key pointers. 
+%In our university example, there are two entity tables: a $\student$ table and a $\it{Course}$ table.  There are three relationship tables Registered for which students register in which courses, Teaches for which professors teach which courses, and RA for which students work as RAs for which professors.
+%Table \ref{table:university-schema} shows a relational schema for a database related to a university.
+ %(cf.\cite{prms}). 
+%To keep the schema simple, we introduce only a limited number of attributes for each entity class. 
+%\begin{table}[tbp] \centering
+%\begin{tabular}
+%[c]{|l|}\hline
+%$\student$(\underline{$student\_id$}, $\intelligence$, $ranking$)\\
+%$\it{Course}$(\underline{$course\_id$}, $\diff$, $rating$)\\ 
+%$\prof$ (\underline{$professor\_id$}, $teaching\_ability$, $popularity$)\\
+%$\reg$ (\underline{$student\_id$, $\course\_id$}, $grade$, $satisfaction$)\\
+%%$\ra$ (\underline{$student\_id$, $prof\_id$}, $salary$, $capability$)
+%$\it{Teaches}(\underline{\it{professor\_id, course\_id}})$
+%\\
+%\hline
+%\end{tabular}
+%\caption{A relational schema for a university domain. Key fields are underlined. An instance for this schema is given in Figure \ref{fig:university-tables}.
+%\label{table:university-schema}} 
+%\end{table}
+ %
+%
+% The \textbf{join} of two or more tables contains the rows in the Cartesian products of the tables whose values match on common fields. 
+The powerset of relationship tables can be ordered as a lattice (e.g., $\{\it{Reg}(\S,\C)\} \sqsubseteq \{\it{Reg}(\S,\C),\it{Teaches}(C,P)\}$. For each relationship set, there is a \textbf{data table} whose columns consist of: (1) the attributes of all entities/relationships involved in the set, and (2) {\em  a Boolean relationship node} for each relationship, that records whether the relationship holds between two entities. For an illustration of these concepts see Figure~\ref{fig:university-tables}.
+ 
+ \begin{figure*}[htbp] %  figure placement: here, top, bottom, or page
+   \centering
+   \includegraphics[width=7in]{figures/university-tables3.png} 
+  \caption{Database Table Instances: (a) $\student$, (b) $\reg$ (c) $\it{Course}$. To simplify, we added the information about professors to the courses that they teach.  (d) The data table for $\reg(\S,\C)$, which lists for each pair of entities their descriptive attributes, whether they are linked by $\reg$, and the attributes of a link if it exists. $\bot$ means ``not applicable.'' (e) A Parametrized Bayes Net for the university schema.}
+   \label{fig:university-tables}
+\end{figure*}
+
+ 
+% For a relationship table $R$, we define the \textbf{full relationship table} $R^{+}$ as follows. Suppose that $R$ is a relationship between the two entity types (populations) $X$ and $Y$. The rows of $R^{+}$ correspond to pairs $(x,y)\in (X \times Y)$, that is, all members of the Cartesian product. Also, $R^{+}$ contains an indicator column $R_{\it{ind}}$ such that a row for $(x,y)$ contains the value $\true$ if and only if the original relationship table contains the pair $(x,y)$. Also, $R^{+}$ contains one column for each descriptive attribute of the relationship $R$. For pairs $(x,y)$ that are not linked by $R$, each attribute column contains the value $\bot$ for ``don't care''. Join $R^{+}$ with the entity tables related by $R$ has the effect of extending $R^{+}$ with the entity information. We refer to this join table as the \textbf{attribute-relation table}.
+
+
+
+%
+% \begin{figure}[h]
+%\begin{center}
+%\resizebox{0.5\textwidth}{!}{
+%\includegraphics[width=1\textwidth]{figures/database.png}
+%%includegraphics[width=1\textwidth]{database.png}
+%}
+%\caption{Left: A simple relational database instance. Right: The ground atoms for the database, and their values as specified by the database, using functor notation.
+%%that are true in the database. 
+%\label{fig:db-tables}}
+%\end{center}
+%\end{figure}
+
+
+%We assume that a database instance (interpretation) assigns a constant value to each gnode $\f(\set{a})$, which we denote by $
+%[f(\set{a})]_{\D}$.
+%%Thus a DB instance defines a truth value for each ground atom depending on whether the atom assigns the right function value to the ground functor term.
+%The value of descriptive relationship attributes is well defined only for tuples that are linked by the relationship. For example, the value of $\it{grade}(\it{jack},\it{101})$ is not well defined in a university database if $\it{Registered}(\it{jack},\it{101})$  is false. In this case, we follow the approach of Schulte {\em et al.} \cite{Schulte2009c} and assign the descriptive attribute the special value $\bot$ for ``undefined''. Thus the atom $\it{grade}(\it{jack},\it{101}) = \bot$ is equivalent to the atom $\it{Registered}(\it{jack},\it{101}) = \false$. Fierens {\em et al.} \cite{Fierens2005} discuss other approaches to this issue. 
+
+%\begin{figure}[h]
+%\begin{center}
+%\resizebox{0.5\textwidth}{!}{
+%\includegraphics[width=0.8\textwidth]{figures/big-lattice}
+%}
+%\caption{A lattice of relationship sets for the University database of Figure~\ref{fig:university-tables}. Links from entity tables to relationship tables correspond to foreign key pointers. 
+%%The list representation of the sets is determined by the functor ordering $\it{Registered} < \it{TA} < \it{Teaches}$. 
+%\label{fig:big-lattice}}
+%\end{center}
+%\end{figure}
+
+\paragraph{Methods Compared}
+
+We compared the following methods.
+
+\begin{description}
+\item[Flat] Applies a single-table Bayes net learner to the maximal data table comprising all relationship sets in the database.  The results of \cite{Schulte2011} provide a theoretical justification for this procedure.
+\item[LAJ] The previous hierarchical learn-and-join method \cite{Schulte2012} without relationship nodes in the data table and hence without link correlations. Conducts bottom-up  search
+through the lattice of relationship sets. Dependencies (Bayes net edges) discovered for smaller sets are propagated to larger sets. 
+\item[LAJ+] The new LAJ method with relationship data that has the potential to find link correlations.
+
+\end{description}
+\section{Evaluation} 
+For the details of the system setup, the datasets, and the fast M\"obius transform please see \cite{Schulte2012}. We report learning time, log-likelihood, Bayes Information Criterion (BIC), and the Akaike Information Criterion (AIC) \cite{Chickering2003}. 
+%
+%\begin{table}[btp] \centering
+%%\scalebox{0.7in}{
+%%\resizebox{0.5\textwidth}{!}{
+%\begin{tabular}[c]
+%{|l|l|l|}\hline
+%    \textbf{Dataset} & \textbf{\#tuples} \\\hline
+%    University&662\\\hline
+%    Movielens &1585385\\\hline
+%    Mutagenesis &1815488\\\hline
+%    Hepatitis &2965919\\\hline
+%    %Mondial &59520\\
+%    %UW-CSE &2099\\
+%    Small-Hepatitis & 19827 \\\hline
+%\end{tabular}
+%%}
+% % end scalebox
+%\caption{Size of datasets in total number of table tuples and ground atoms. Each descriptive attribute is represented as a separate function, so the number of ground atoms is larger than that of tuples.
+%% \textbf{Zhensong: needs fixing}
+% \label{table:datasetsize}}
+%\end{table}
+
+
+%\begin{table}[btp] \centering
+%%\scalebox{0.7in}{
+%\resizebox{0.5\textwidth}{!}{
+%\begin{tabular}[c]
+%{|l|l|l|}\hline
+% \textbf{Dataset} & \textbf{\#tuples} & \textbf{\#Ground atoms} \\\hline
+%University&662&513\\\hline
+%Movielens &1585385&170143\\\hline
+%Mutagenesis &1815488& 35973 \\\hline
+%Hepatitis &2965919&71597 \\\hline
+%%Mondial &59520&3366 \\ \hline
+%%UW-CSE &2099&3380 \\ \hline
+%Small-Hepatitis & 19827 & (not strictly necessary)\\
+%\hline
+%\end{tabular}
+%}
+% % end scalebox
+%\caption{Size of datasets in total number of table tuples and ground atoms. Each descriptive attribute is represented as a separate function, so the number of ground atoms is larger than that of tuples.
+%% \textbf{Zhensong: needs fixing}
+% \label{table:datasetsize}}
+%\end{table}
+
+
+\begin{table} \centering
+%\scalebox{0.7in}{
+%\resizebox{0.5\textwidth}{!}{
+\begin{tabular}[c]
+{|l|l|l|l|}\hline
+ \textbf{Dataset} & \textbf{Flat} & \textbf{LAJ+} & \textbf{LAJ}\\\hline
+University&1.916&1.183&0.291 \\\hline
+Movielens &38.767& 18.204& 1.769\\\hline
+Mutagenesis &3.231& 3.448& 0.982\\\hline
+Small-Hepatitis &9429.884&8.949&10.617 \\\hline
+%Mondial &59520&3366 \\ \hline
+%UW-CSE &2099&3380 \\ \hline
+\end{tabular}
+%}
+ % end scalebox
+\caption{Model Structure Learning Time  in seconds. 
+%The first number refers to a simple SQL query implementation, the second to an implementation with database indexes and the fast M\"obius transform.
+% \textbf{Zhensong: needs fixing}
+ \label{table:runtimes}}
+\end{table}
+
+%
+%\subsection{Hypotheses} [consider hypotheses as formulated in the introduction [guesses at results]]
+%
+%Our results investigate the following issues.
+%
+%\begin{enumerate}
+%\item Which methods provide the fastest model selection? We expect that because propagating results  along the table join lattice constraints the model search, both types of hierarchical search are faster than flat search.
+%\item Which methods provide the best data fit? We expect that the models with link type analysis are statistically more powerful than the attribute-only analysis.
+%\end{enumerate}
+
+%
+%[also consider copying, e.g. from Journal/laj]
+%
+%We used one synthetic and 5 benchmark real-world databases.The databases and their main characteristics are as follows. For more details please see the references in \cite{Schulte2012} and on-line sources such as \cite{bib:jbnsite}.
+%
+%{\em University Database.} We manually created a small dataset, based on the schema given in Table~\ref{table:university-schema}. 
+%The dataset is small and is used as a purpose of proofing the correctness of our algorithms. 
+%The entity tables contain 38 students, 10 courses, and 6  Professors. The $\reg$ table has 92 rows and the $\it{RA}$ table has 25 rows. %This dataset is translated into 513 ground atoms. 
+%
+%We assume that tables in the relational schema can be divided into {\em entity tables} and {\em relationship tables.} This is the case whenever a relational schema is derived from an entity-relationship model (ER model) \cite[Ch.2.2]{Ullman1982}. The symbol $\E$ and related symbols like $\E_1,\E_i,\E'$ refer to entity tables, and the symbol $\R$ and related symbols like $\R_1,\R_i,\R'$ refer to relationship table. We use a running example, a small database related to a university,  through the paper to further clarify the introduced concept. The university database has three entity tables:  $\student$ table,  $\course$ table, and $\prof$ table.  There are two relationship tables: $\reg$ with foreign key pointers to the $\student$ and $\course$ tables whose tuples indicate which students have registered in which courses and $\ra$ with foreign key pointers to the $\student$ and $\prof$ tables whose tuples indicate the RAship of students for professors.
+%
+%
+%{\em MovieLens Database.} The second dataset is the MovieLens dataset from the UC Irvine machine learning repository. %The schema for the dataset is shown in Table \ref{}. 
+%It contains two entity tables: $\it{User}$ with 941 tuples and $\it{Item}$ with 1,682 tuples, and one relationship table $\it{Rated}$ with 80,000 ratings. The $\it{User}$ table has %key field $\it{user\_id}$ and 
+%3 descriptive attributes $\age, \it{gender}, \it{occupation}$. We discretized the attribute age into three bins with equal frequency. The table $\it{Item}$ represents information about the movies. It has 17 Boolean attributes that indicate the genres of a given movie. We performed a preliminary data analysis and omitted genres that have only weak correlations with the rating or user attributes, leaving a total of three genres.
+%
+%% The full dataset contains 170143 ground atoms and is too big for MLN to do structure learning or parameter learning on. We made small subsamples to make the experiments feasible. Sub sampling 100 Users and 100 Items transforms to a db file with 2505 number of groundings. takes around 30 min to run. Sub sampling 300 Users and 300 Items transforms to a db file with 18040 number of groundings takes around 2 days to run. 
+%%The full table with 100,000 ratings exceeded the memory limits of Tetrad, so we randomly picked 40\% of the ratings of the relationship table as input data. 
+%
+%{\em Mutagenesis Database.} This dataset is widely used in ILP research \cite{Srinivasan1996}. %It contains 4 tables total to 15218 tuples. 
+%Mutagenesis has two entity tables, $\it{Atom}$ with 3 descriptive attributes, and $\it{Mole}$, with %188 entries and 
+%5 descriptive attributes, including two attributes that are discretized into ten values each (logp and lumo). It features two relationships $\it{MoleAtom}$ indicating which atoms are parts of which molecules, and $\it{Bond}$ which relates two atoms and has 1 descriptive attribute. %The full dataset, with 35973 ground atoms, crashed while doing either parameter learning or structure learning. A subsample with 5017 ground atoms is used was running for 5 days and did not terminate. weight learning was feasible. another subsample with 
+%Representing a relationship between entities from the same table in a parametrized BN requires using two or more variables associated with the same population (e.g., $\it{Bond}(\A_{1},\A_{2}))$.  
+%
+%{\em Hepatitis Database.} This data is a modified version of the PKDD�02 Discovery Challenge database, we adopted the modifications of Frank {\em et al.} \cite{Frank2007}, which includes removing tests with null values. It contains data on the laboratory examinations
+%of hepatitis B and C infected patients. The examinations were realized between 1982 and 2001 on 771 patients. The data are organized in 7 tables (4 entity tables,  3 relationship tables and 16 descriptive attributes). They contain basic information about the patients, results of biopsy, information on interferon therapy, results of out-hospital examinations, results of in-hospital examinations. 
+%%The data were prepared in cooperation with the Shimane Medical University, School of Medicine and Chiba University Hospital, Japan.
+%
+%\emph{UW-CSE database.} This dataset lists facts about the Department of Computer Science and Engineering at the University of Washington (UW-CSE), such as entities (e.g., Student, Professor) and their relationships (i.e. AdvisedBy, Publication)\cite{Domingos2007}. 
+%%The total number of ground atoms is 4,106,841. The database contained a total of 3380 ground atoms. 
+%The dataset was obtained  by crawling pages in the department's Web site (www.cs.washington.edu). Publications and AuthorOf relations were extracted from the BibServ database (www.bibserv.org). 
+%
+%{\em Mondial Database.} 
+%%
+%%\textbf{Hassan: which version did you use? The full one from http://www.dbis.informatik.uni-goettingen.de/Mondial/mondial-ER.pdf or Bahareh's?} 
+%%
+%This dataset contains data from multiple geographical web data sources. We followed the modification of \cite{wangMondial}.
+%Our dataset contains 4 entity tables, $\it{Country},\it{Continent},\it{Economy},\it{Government}$, where the latter three are related to Country by many-one relationships, and one relationship table $\it{Borders}$ that relates two countries.
+%
+
+%
+%\begin{enumerate}
+%\item  
+%The $X^{2}$ score of a model, which is the ratio of the model's log-likelihood over the log-likelihood of a null hypothesis model. 
+%For Bayes nets, the null hypothesis model is the disconnected graph.
+%
+%Recall that the $X^{2}$ is calculated simply as 
+%\[
+%\mathit{X^{2}}\equiv \sum \frac{(O_{i}-E_{i})}{E_{i}}
+%\]
+%where $O_{i}$ and $E_{i}$ are the observered and expected log-likelihood, respectively. 
+%Here the observered model stands for the disconnected graph and expected model is learned from data.
+%The larger $X^{2}$ has a higher probability lies in the right tail with a given significant level. 
+%\item 
+%The Bayes Information Criterion (BIC), which is defined as follows. 
+%Compared to the $X^{2}$ score, the BIC adds a penalty term for parameters to the model likelihood.
+% A single-table model selection score has the form $\score(\G,\datatable)$ where $\G$ is a graphical model and $\datatable$ a data table. 
+% We consider scores that trade off data fit against model complexity, and that can be computed given the following quantities.
+% We also assume that the score is {\em decomposable}, i.e. can be written as the sum of local scores for each node in the BN.
+
+
+
+
+\paragraph{Learning Times} Table~\ref{table:runtimes}
+ provides the model search time for each of the link analysis methods. This does not include the time for computing table joins since this is essentially the same for all methods (the cost of the full table join). On the smaller and simpler datasets, all search strategies are fast, 
+but on the medium-size and more complex datasets (Hepatitis, MovieLens), hierarchical search is much faster due to its use of constraints.
+% The combination of indexing and the M\"obius transform provides substantial speedups. On the medium-size and more complex datasets (Hepatitis, MovieLens), hierarchical search is much faster due to its use of constraints.
+
+\begin{table}[h]
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c| }
+		\hline \textbf{University} &{BIC}& {AIC} &{log-likelihood} &{\# Parameter}\\
+			\hline Flat &-17638.27&-12496.72 & -10702.72& 1767\\
+			\hline LAJ+ & -13495.34& -11540.75& -10858.75& 655\\
+		        \hline LAJ &-13043.17 & -11469.75&-10920.75 & 522\\
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c| }
+		\hline \textbf{MovieLens} &{BIC}& {AIC} &{log-likelihood} &{\# Parameter}\\
+			\hline Flat &-4912286.87&-4911176.01 & -4910995.01& 169\\
+			\hline LAJ+ & -4911339.74& -4910320.94& -4910154.94& 154\\
+		        \hline LAJ &-4911339.74 & -4910320.94&-4910154.94 & 154\\
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c| }
+		\hline \textbf{Mutagenesis} &{BIC}& {AIC} &{log-likelihood} &{\# Parameter}\\
+			\hline Flat &-21844.67&-17481.03 & -16155.03& 1289\\
+			\hline LAJ+ & -47185.43& -28480.33& -22796.33& 5647\\
+		        \hline LAJ & -30534.26 & -25890.89&-24479.89 & 1374\\
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c| }
+		\hline \textbf{Hepatitis} &{BIC}& {AIC} &{log-likelihood} &{\# Parameter}\\
+			\hline Flat &-7334391.72&-1667015.81 & -301600.81& 1365357\\
+			\hline LAJ+ & -457594.18& -447740.51& -445366.51& 2316\\
+		        \hline LAJ &-461802.76& -452306.05&-450018.05 	 & 2230\\ % updated on April 28th
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+
+\caption{Performance of different Model Search Algorithms by dataset.  }
+\label{table:result_scores}
+\end{table}
+\paragraph{Statistical Scores}
+
+ On the medium-sized dataset MovieLens, which has a simple structure, all three methods score similarly. LAJ and LAJ+ return the same model. 
+The most complex dataset, Hepatitis, is a challenge for flat search, which overfits severely. Because of the complex structure of the Hepatitis schema, the hierarchical constraints are effective in combating overfitting.
+The situation is reversed on the Mutagenesis dataset where flat search does much better than hierarchical search. The reason for that is that,  unusually, links in Mutagenesis are dense.
+As a result, we find strong correlations between attributes conditional on {\em the absence of relationships}. Our current version of the LAJ+ algorithm cannot detect such correlations; we leave an appropriate extension for future work.
+%
+%Between the link analysis methods, flat search often scores higher than hierarchical search (LAJ+). 
+%This confirms that it is a statistically sound method. 
+%On most datasets flat search and LAJ+ are close, which indicates that LAJ+ offers an attractive trade-off between statistical power and computational tractability. 
+
+
+%The situation is reversed on the Mutagenesis dataset where 
+%The reason is that flat search misses relationships between attributes from related entities. This happens because the join table contains many more rows with absent relationships than with present relationships. Thus a score-based Bayes net learner assigns by far the most weight to the cases where there is no relationship between different entities. In those cases, there is no correlation between their attributes. The LAJ+ system starts with edges learned among attributes and fixes these during link analysis. In probabilistic terms, we can think of the LAJ+ system as first analysing attribute dependencies {\em conditional on the given link structure}, and then analyzing dependencies among link types.
+
+\section{Conclusion} We described different methods for extending relational Bayes net learning to correlations involving links. 
+Statistical measures indicate that Bayes net methods succeed in finding relevant correlations. 
+There is a trade-off between statistical power and computational feasibility (full table search vs constrained search). 
+Hierarchical search often does well on both dimensions, but needs to be extended to handle correlations conditional on the absence of relationships. 
+
+To improve scalability, computing sufficient statistics needs to be feasible for cross product sizes in the millions or more. A promising solution is to utilize virtual join methods that precompute sufficient statistics without materializing table joins such as the Fast M\"obius Transform \cite{Schulte2012} and tuple ID propagation \cite{Yin2004}.
+
+\bibliography{master}
+\bibliographystyle{plain}
+\end{document}
+
+
+\section{Evaluation} 
+All experiments were done on a QUAD CPU Q6700 with a 2.66GHz CPU and 8GB of RAM. Our code and datasets are available on the world-wide web \cite{bib:jbnsite}. We made use of the following single table Bayes Net search implementation:  GES search \cite{Chickering2003} with the BDeu score as implemented in version 4.3.9-0 of CMU's Tetrad package (structure prior uniform, ESS=10; \cite{2008a}).
+
+\paragraph{Methods Compared}
+
+We compared the following methods.
+
+\begin{description}
+\item[LAJ] The previous LAJ method without link correlations (Algorithm~\ref{alg:structure}).
+\item[LAJ+] The new LAJ method that has the potential to find link correlations (Algorithm~\ref{alg:structure} with the full join instead of natural join).
+\item[Flat] Applies the single-table Bayes net learner to the full table join (extended join with all relationship sets in the database).
+\end{description}
+
+\paragraph{Performance Metrics} We report learning time, log-likelihood, Bayes Information Criterion (BIC), and the Akaike Information Criterion (AIC). We write 
+$$L(\hat{G},\d)$$ for the log-likelihood score, where
+where $\hat{G}$ is the BN $\G$ with its parameters instantiated to be the maximum likelihood estimates given the dataset $\d$, and the quantity $L(\hat{G},\d)$ is the log-likelihood of $\hat{G}$ on $\d$. 
+
+The BIC score is defined as follows \cite{Chickering2003,Schulte2011}
+
+$$\mathit{BIC}(\G,\d) = L(\hat{G},\d) - \mathit{par}(\G)/2 \times ln(m)$$
+
+where the data table size is denoted by $m$, and $\mathit{par}(\G)$ is the number of free parameters in the structure $\G$. The AIC score is given by 
+
+$$\mathit{AIC}(\G,\d) = L(\hat{G},\d) - \mathit{par}(\G). $$
+
+BIC and AIC are standard scores for Bayes nets \cite{Chickering2003}. AIC is asympotically equivalent to selection by cross-validation, so we may view it as a closed-form approximation to cross-validation,  which is computationally demanding for relational datasets. 
+
+
+\begin{table}[btp] \centering
+%\scalebox{0.7in}{
+\resizebox{0.5\textwidth}{!}{
+\begin{tabular}[c]
+{|l|l|l|}\hline
+ \textbf{Dataset} & \textbf{\#tuples} & \textbf{\#Ground atoms} \\\hline
+University&662&513\\\hline
+Movielens &1585385&170143\\\hline
+Mutagenesis &1815488& 35973 \\\hline
+Hepatitis &2965919&71597 \\\hline
+%Mondial &59520&3366 \\ \hline
+%UW-CSE &2099&3380 \\ \hline
+\end{tabular}
+}
+ % end scalebox
+\caption{Size of datasets in total number of table tuples and ground atoms. Each descriptive attribute is represented as a separate function, so the number of ground atoms is larger than that of tuples.
+% \textbf{Zhensong: needs fixing}
+ \label{table:datasetsize}}
+\end{table}
+
+\paragraph{Datasets}
+
+
+We used one synthetic and 
+three benchmark real-world databases, with the modifications described by Schulte and Khosravi~\cite{Schulte2012}. See that article for more
+details.
+
+% \noindent\textbf{Mondial Database.} A geography database, featuring
+% one self-relationship, $\it{Borders}$, that indicates which countries border each other. The data are organized in 4 tables (2 entity tables, 2 relationship tables, 10 descriptive attributes).
+\noindent\textbf{University Database.} We manually created a small dataset, based on the schema given in Table~\ref{table:university-schema}. 
+The dataset is small and is used as a purpose of proofing the correctness of our algorithms.
+
+\noindent\textbf{MovieLens Database.} A dataset from the UC Irvine machine learning repository. The data are organized in 3 tables (2 entity tables, 1 relationship table, and 7 descriptive attributes). 
+
+\noindent\textbf{Mutagenesis Database.} A dataset widely used in ILP research. % \cite{Srinivasan1996}.  
+It contains two entity tables and two relationships.
+
+\noindent\textbf{Hepatitis Database.} A modified version of the PKDD'02 Discovery Challenge database. The data are organized in 7 tables (4 entity tables, 3 relationship tables and 16 descriptive attributes).
+%, following %we adopted the modifications of 
+%Frank {\em et al.} \citeyearpar{Frank2007}. %, which includes removing tests with null values. 
+
+%\noindent\textbf{Financial} A dataset from the PKDD 1999 cup. The data are organized in 4 tables (2 entity tables, 2 relationship tables, 13 descriptive attributes).
+
+
+
+\begin{table} \centering
+%\scalebox{0.7in}{
+\resizebox{0.5\textwidth}{!}{
+\begin{tabular}[c]
+{|l|l|l|l|}\hline
+ \textbf{Dataset} & \textbf{Flat} & \textbf{LAJ+} & \textbf{LAJ}\\\hline
+University&1.916&1.183&0.291 \\\hline
+Movielens &38.767& 18.204& 1.769\\\hline
+Mutagenesis &3.231& 3.448& 0.982\\\hline
+Hepatitis &9429.884&8.949&10.617 \\\hline
+%Mondial &59520&3366 \\ \hline
+%UW-CSE &2099&3380 \\ \hline
+\end{tabular}
+}
+ % end scalebox
+\caption{Structure Learning Time  in second.
+In order to make the learning feasible, we under sampled Hepatitis database to keep the ratio of positive and negative link indicator equals to one.
+% \textbf{Zhensong: needs fixing}
+ \label{table:runtimes}}
+\end{table}
+
+%
+%\subsection{Hypotheses} [consider hypotheses as formulated in the introduction [guesses at results]]
+%
+%Our results investigate the following issues.
+%
+%\begin{enumerate}
+%\item Which methods provide the fastest model selection? We expect that because propagating results  along the table join lattice constraints the model search, both types of hierarchical search are faster than flat search.
+%\item Which methods provide the best data fit? We expect that the models with link type analysis are statistically more powerful than the attribute-only analysis.
+%\end{enumerate}
+
+%
+%[also consider copying, e.g. from Journal/laj]
+%
+%We used one synthetic and 5 benchmark real-world databases.The databases and their main characteristics are as follows. For more details please see the references in \cite{Schulte2012} and on-line sources such as \cite{bib:jbnsite}.
+%
+%{\em University Database.} We manually created a small dataset, based on the schema given in Table~\ref{table:university-schema}. 
+%The dataset is small and is used as a purpose of proofing the correctness of our algorithms. 
+%The entity tables contain 38 students, 10 courses, and 6  Professors. The $\reg$ table has 92 rows and the $\it{RA}$ table has 25 rows. %This dataset is translated into 513 ground atoms. 
+%
+%We assume that tables in the relational schema can be divided into {\em entity tables} and {\em relationship tables.} This is the case whenever a relational schema is derived from an entity-relationship model (ER model) \cite[Ch.2.2]{Ullman1982}. The symbol $\E$ and related symbols like $\E_1,\E_i,\E'$ refer to entity tables, and the symbol $\R$ and related symbols like $\R_1,\R_i,\R'$ refer to relationship table. We use a running example, a small database related to a university,  through the paper to further clarify the introduced concept. The university database has three entity tables:  $\student$ table,  $\course$ table, and $\prof$ table.  There are two relationship tables: $\reg$ with foreign key pointers to the $\student$ and $\course$ tables whose tuples indicate which students have registered in which courses and $\ra$ with foreign key pointers to the $\student$ and $\prof$ tables whose tuples indicate the RAship of students for professors.
+%
+%
+%{\em MovieLens Database.} The second dataset is the MovieLens dataset from the UC Irvine machine learning repository. %The schema for the dataset is shown in Table \ref{}. 
+%It contains two entity tables: $\it{User}$ with 941 tuples and $\it{Item}$ with 1,682 tuples, and one relationship table $\it{Rated}$ with 80,000 ratings. The $\it{User}$ table has %key field $\it{user\_id}$ and 
+%3 descriptive attributes $\age, \it{gender}, \it{occupation}$. We discretized the attribute age into three bins with equal frequency. The table $\it{Item}$ represents information about the movies. It has 17 Boolean attributes that indicate the genres of a given movie. We performed a preliminary data analysis and omitted genres that have only weak correlations with the rating or user attributes, leaving a total of three genres.
+%
+%% The full dataset contains 170143 ground atoms and is too big for MLN to do structure learning or parameter learning on. We made small subsamples to make the experiments feasible. Sub sampling 100 Users and 100 Items transforms to a db file with 2505 number of groundings. takes around 30 min to run. Sub sampling 300 Users and 300 Items transforms to a db file with 18040 number of groundings takes around 2 days to run. 
+%%The full table with 100,000 ratings exceeded the memory limits of Tetrad, so we randomly picked 40\% of the ratings of the relationship table as input data. 
+%
+%{\em Mutagenesis Database.} This dataset is widely used in ILP research \cite{Srinivasan1996}. %It contains 4 tables total to 15218 tuples. 
+%Mutagenesis has two entity tables, $\it{Atom}$ with 3 descriptive attributes, and $\it{Mole}$, with %188 entries and 
+%5 descriptive attributes, including two attributes that are discretized into ten values each (logp and lumo). It features two relationships $\it{MoleAtom}$ indicating which atoms are parts of which molecules, and $\it{Bond}$ which relates two atoms and has 1 descriptive attribute. %The full dataset, with 35973 ground atoms, crashed while doing either parameter learning or structure learning. A subsample with 5017 ground atoms is used was running for 5 days and did not terminate. weight learning was feasible. another subsample with 
+%Representing a relationship between entities from the same table in a parametrized BN requires using two or more variables associated with the same population (e.g., $\it{Bond}(\A_{1},\A_{2}))$.  
+%
+%{\em Hepatitis Database.} This data is a modified version of the PKDD�02 Discovery Challenge database, we adopted the modifications of Frank {\em et al.} \cite{Frank2007}, which includes removing tests with null values. It contains data on the laboratory examinations
+%of hepatitis B and C infected patients. The examinations were realized between 1982 and 2001 on 771 patients. The data are organized in 7 tables (4 entity tables,  3 relationship tables and 16 descriptive attributes). They contain basic information about the patients, results of biopsy, information on interferon therapy, results of out-hospital examinations, results of in-hospital examinations. 
+%%The data were prepared in cooperation with the Shimane Medical University, School of Medicine and Chiba University Hospital, Japan.
+%
+%\emph{UW-CSE database.} This dataset lists facts about the Department of Computer Science and Engineering at the University of Washington (UW-CSE), such as entities (e.g., Student, Professor) and their relationships (i.e. AdvisedBy, Publication)\cite{Domingos2007}. 
+%%The total number of ground atoms is 4,106,841. The database contained a total of 3380 ground atoms. 
+%The dataset was obtained  by crawling pages in the department's Web site (www.cs.washington.edu). Publications and AuthorOf relations were extracted from the BibServ database (www.bibserv.org). 
+%
+%{\em Mondial Database.} 
+%%
+%%\textbf{Hassan: which version did you use? The full one from http://www.dbis.informatik.uni-goettingen.de/Mondial/mondial-ER.pdf or Bahareh's?} 
+%%
+%This dataset contains data from multiple geographical web data sources. We followed the modification of \cite{wangMondial}.
+%Our dataset contains 4 entity tables, $\it{Country},\it{Continent},\it{Economy},\it{Government}$, where the latter three are related to Country by many-one relationships, and one relationship table $\it{Borders}$ that relates two countries.
+%
+
+%
+%\begin{enumerate}
+%\item  
+%The $X^{2}$ score of a model, which is the ratio of the model's log-likelihood over the log-likelihood of a null hypothesis model. 
+%For Bayes nets, the null hypothesis model is the disconnected graph.
+%
+%Recall that the $X^{2}$ is calculated simply as 
+%\[
+%\mathit{X^{2}}\equiv \sum \frac{(O_{i}-E_{i})}{E_{i}}
+%\]
+%where $O_{i}$ and $E_{i}$ are the observered and expected log-likelihood, respectively. 
+%Here the observered model stands for the disconnected graph and expected model is learned from data.
+%The larger $X^{2}$ has a higher probability lies in the right tail with a given significant level. 
+%\item 
+%The Bayes Information Criterion (BIC), which is defined as follows. 
+%Compared to the $X^{2}$ score, the BIC adds a penalty term for parameters to the model likelihood.
+% A single-table model selection score has the form $\score(\G,\datatable)$ where $\G$ is a graphical model and $\datatable$ a data table. 
+% We consider scores that trade off data fit against model complexity, and that can be computed given the following quantities.
+% We also assume that the score is {\em decomposable}, i.e. can be written as the sum of local scores for each node in the BN.
+
+% \textbf{Zhensong: let's just use flat search with the schema edges}
+
+\paragraph{Learning Times} Table~\ref{table:runtimes}
+ provides the model search time for each of the link analysis methods. 
+This does not include the time for computing table joins since this is essentially the same for all methods (the cost of the full table join). 
+On the smaller and simpler datasets, all search strategies are fast, 
+but on the medium-size and more complex datasets (Hepatitis, MovieLens), hierarchical search is much faster due to its use of constraints.
+Adding prior knowledge as constraints could speed the structure learning substantially.
+
+%The reason for the speed-up is that LAJ+ starts with the previous LAJ method as the first phase. The edges among attributes that are discovered in the first phase are treated as fixed background knowledge in the second phase. 
+
+\begin{table}[h]
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c| }
+		\hline \textbf{University} &{BIC}& {AIC} &{log-likelihood} &{\# Parameter}\\
+			\hline Flat &-17638.27&-12496.72 & -10702.72& 1767\\
+			\hline LAJ+ & -13495.34& -11540.75& -10858.75& 655\\
+		        \hline LAJ &-13043.17 & -11469.75&-10920.75 & 522\\
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c| }
+		\hline \textbf{MovieLens} &{BIC}& {AIC} &{log-likelihood} &{\# Parameter}\\
+			\hline Flat &-4912286.87&-4911176.01 & -4910995.01& 169\\
+			\hline LAJ+ & -4911339.74& -4910320.94& -4910154.94& 154\\
+		        \hline LAJ &-4911339.74 & -4910320.94&-4910154.94 & 154\\
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c| }
+		\hline \textbf{Mutagenesis} &{BIC}& {AIC} &{log-likelihood} &{\# Parameter}\\
+			\hline Flat &-21844.67&-17481.03 & -16155.03& 1289\\
+			\hline LAJ+ & -47185.43& -28480.33& -22796.33& 5647\\
+		        \hline LAJ & -30534.26 & -25890.89&-24479.89 & 1374\\
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c| }
+		\hline \textbf{Hepatitis} &{BIC}& {AIC} &{log-likelihood} &{\# Parameter}\\
+			\hline Flat &-7334391.72&-1667015.81 & -301600.81& 2037\\
+			\hline LAJ+ & -457594.18& -447740.51& -445366.51& 2316\\
+		        \hline LAJ &-563439.17 & -472065.07& -470260.07 & 1805\\ %guessed, since the program n/t
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+
+\caption{Performance of different Searching Algorithms by dataset.  }
+\label{table:result_scores}
+\end{table}
+\paragraph{Statistical Scores}
+
+As expected, adding edges between link nodes improves the statistical data fit: 
+the link analysis methods LAJ+ and Flat performe better than the learn-and-join baseline in terms of log-likelehood on all datasets shown in table~\ref{table:result_scores}.
+For samller data sete these three models achieved very similar results on both the BIC and AIC scores.
+But for the complicated dataset (i.e. Hepatitis subsampled), the hierarchical search approach does better.
+
+Between the link analysis methods, flat search often scores higher than hierarchical search (LAJ+). 
+This confirms that it is a statistically sound method. 
+On most datasets flat search and LAJ+ are close, which indicates that LAJ+ offers an attractive trade-off between statistical power and computational tractability. 
+Hepatitis (subsampled) is a challenging dataset for flat search, where hierarchical search does much better. 
+The situation is reversed on the Mutagenesis dataset where LAJ+ performs very poorly compared to flat search 
+(lower likelihood yet many more parameters in the model). 
+Investigation of the models shows that the reason for this phenomenon is a special property of the Mutagenesis dataset: 
+whereas generally relationships are sparse---very few pairs of entities are actually linked---in Mutagenesis most entities whose type allows a link are linked. 
+As a result, we find strong correlations between attributes conditional on {\em the absence of relationships}. 
+The LAJ+ algorithm is constrained so that it cannot add Bayes net edges between attribute nodes at its second stage, when absent relationships are considered. 
+As a result, it can represent attribute correlations conditional on the absence of relationships only indirectly through edges that involve link indicators. 
+A solution to this problem would be to add a phase to  the search so that we first learn edges between attributes first conditional on both the existence of relationships, 
+then conditional on their nonexistence. The last phase then would consider edges that involve relationship nodes.
+
+%The reason is that flat search misses relationships between attributes from related entities. This happens because the join table contains many more rows with absent relationships than with present relationships. Thus a score-based Bayes net learner assigns by far the most weight to the cases where there is no relationship between different entities. In those cases, there is no correlation between their attributes. The LAJ+ system starts with edges learned among attributes and fixes these during link analysis. In probabilistic terms, we can think of the LAJ+ system as first analysing attribute dependencies {\em conditional on the given link structure}, and then analyzing dependencies among link types.
+
+\section{Conclusion} We described different methods for extending relational Bayes net learning to correlations involving links. 
+Statistical measures indicate that Bayes net methods succeed in finding relevant correlations. 
+There is a trade-off between statistical power and computational feasibility (full table search vs constrained search). 
+Hierarchical search often does well on both dimensions, but needs to be extended to handle correlations conditional on the absence of relationships.
+
+Most of the learning time is taken up by forming table joins, whose size is the cross product of entity tabes. 
+The table joins provide the sufficient statistics required in model selection. 
+To improve scalability, computing sufficient statistics needs to be feasible for cross product sizes in the millions or more. 
+The proposed LMT algorithm could compute the sufficient statistics across multiple tables efficiently with high scalability in terms of multi-relational Bayes net structure learning for big data.
+A promising solution is to utilize virtual join methods that precompute sufficient statistics without materializing table joins such as the Fast M\"obius Transform and tuple ID propagation \cite{Yin2004}.
+
+\bibliography{master}
+\bibliographystyle{plain}
+\end{document}
+
+
+\section{undersample notes}
+From our current experiments  we observed that after adding the relationship indicator in the relation tables, the learned BN contain more knowledge. 
+In other words it has more edges showing the dependency relationship between different link types.
+(maybe give an example to show these edges are meaningful and helpfull for understanding the dataset)
+
+However due to the natural of BIC score, which is prefer the simpler model, so laj+ model can not beat the model using flat search.
+And also this is casued by the skew distribution problem (citation?) (some datasets the negative and positive ratio is more than 1000).
+There is still no general solution people could emply. 
+We follow the undersample approach (citation) to keep the ratio as 1:1 and found some very intereting results.
+
+

@@ -1,0 +1,367 @@
+%Preamble File for Random Regression Paper
+
+%\usepackage{times}
+
+%Theorems and such
+
+%\usepackage{amsthm}
+
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{observation}{Observation}
+%\newtheorem{proposition}{Proposition}
+%\newtheorem{definition}{Definition}
+
+%\newtheorem{theorem}{Theorem}[section]
+%\newtheorem{observation}{Observation}[section]
+%\newtheorem{proposition}{Proposition}[section]
+%\newtheorem{definition}{Definition}[section]
+
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{algorithmic}
+%\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{subfigure}
+\usepackage{epstopdf}
+%\setcounter{MaxMatrixCols}{30}
+%\usepackage[ruled,vlined]{algorithm2e}
+%\usepackage{algorithmic}
+\usepackage{multirow}
+\usepackage{subfigure}
+\usepackage{ifthen}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+%\DeclareMathOperator{\pattern}{\pi}
+\DeclareMathOperator{\Poly}{\mathbf{\mathrm{P}}}
+\DeclareMathOperator{\RP}{\mathbf{\mathrm{RP}}}
+%\DeclareMathOperator{\FP}{\mathbf{\mathrm{FP}}}
+\DeclareMathOperator{\NP}{\mathbf{\mathrm{NP}}}
+%\DeclareMathOperator{\E}{\mathbb{E}}
+
+\newcommand{\defterm}{\textbf}
+
+\renewcommand{\d}{\mathbf{d}}
+
+\newcommand{\ZZ}{\mathbf{Z}}
+
+\newcommand{\indep}{\ensuremath{\perp{}\!\!\!\!\!\!\!\perp{}}}
+\newcommand{\dep}{\ensuremath{{\perp{}\!\!\!\!\!\!\!\not  \perp{}}}}
+%\renewcommand{\L}{\mathcal{L}}
+
+% variables denoting sets of nodes
+\newcommand{\BN}{B} % Bayes net
+\newcommand{\V}{V} 
+\newcommand{\partC}{\mathcal{C}}
+\newcommand{\pattern}{\pi}
+% for population variables
+\newcommand{\A}{\mathbb{A}}
+\newcommand{\B}{\mathbb{B}}
+\newcommand{\C}{\mathbb{C}}
+%maybe use P, R as well??
+\renewcommand{\P}{P}
+\newcommand{\R}{R}
+% values of Pop variables = constants
+\renewcommand{\a}{a}
+\renewcommand{\b}{b}
+\renewcommand{\c}{c}
+
+%%%
+% for terms = nodes in Functor Bayes Net.
+\newcommand{\X}{X}
+\newcommand{\Y}{Y}
+\newcommand{\Z}{Z}
+% Next three are currently only ones eligible for \Mrange and \Prange
+\newcommand{\TT}{T}
+\newcommand{\TI}{\mathsf{T}}
+\newcommand{\UT}{U}
+\newcommand{\UI}{\mathsf{U}}
+\newcommand{\VT}{V}
+\newcommand{\VI}{\mathsf{V}}
+\newcommand{\W}{W}
+%syntax for values
+\newcommand{\z}{z}
+\renewcommand{\v}{v}
+\newcommand{\x}{x}
+\newcommand{\y}{y}
+\newcommand{\p}{p}
+\newcommand{\s}{s}
+% Values tied to terms
+\newcommand{\TV}{t}
+\newcommand{\TTuple}[1][0.0ex]{\vec{t}\hspace{#1}}
+\newcommand{\UV}{u}
+\newcommand{\UTuple}[1][0.0ex]{\vec{u}\hspace{#1}}
+\newcommand{\VV}{v}
+\newcommand{\VTuple}{\vec{v}}
+%%%
+\newcommand{\weight}{w} % weights
+% Formulas
+\newcommand{\TF}{\vec{T}}
+\newcommand{\UF}{\vec{U}}
+\newcommand{\VF}{\vec{V}}
+%\newcommand{\TF}{\phi}
+%\newcommand{\UF}{\psi}
+%\newcommand{\VF}{\omega}
+% Database (which is always fully-grounded)
+\newcommand{\DB}{\FG{\Lambda}}
+\newcommand{\QC}{\FG{\Delta}}
+\newcommand{\QCtarget}{\FG{\Delta_{-\TI}}}
+% to define a query conjunction of literals
+\newcommand{\Qconj}{\Appendterm{\FG{\Ground{\TT}} = \TV} {\QC}}
+
+% Annotations marking degree of grounding
+\newcommand{\UG}[2][0.0ex]{#2^{-}\hspace{#1}}
+\newcommand{\PG}[2][0.0ex]{#2^{\prime}\hspace{#1}}
+\newcommand{\FG}[2][0.0ex]{#2^{*}\hspace{#1}}
+
+% Functions returning related terms
+\newcommand{\MB}[1]{\mathrm{MB}(#1)}
+\newcommand{\Pa}[1]{\mathrm{Pa}(#1)}
+\newcommand{\Ch}[1]{\mathrm{Ch}(#1)}
+
+% Grounding
+\newcommand{\Ground}[1]{#1_\gamma}
+\newcommand{\gndlink}{\backslash}
+
+% Values in ranges of example functors
+\newcommand{\Man}{\mathrm{M}}
+\newcommand{\Woman}{\mathrm{W}}
+
+% Adding a term to a formula
+\newcommand{\sepcup}[1][0.5ex]{\hspace{#1}\cup\hspace{#1}}
+\newcommand{\Setaddterm}[2]{#1 \sepcup #2}
+\newcommand{\Appendterm}[2]{#1, #2}
+
+% Values in the range of related terms
+\newcommand{\Mrange}[1]{\ifthenelse{\equal{#1}{T}}{\TTuple_m}{\ifthenelse{\equal{#1}{U}}{\UTuple_m}{\ifthenelse{\equal{#1}{V}}{\VTuple_m}{\mbox{UNKNOWN
+TERM ID}}}}}
+\newcommand{\Prange}[1]{\ifthenelse{\equal{#1}{T}}{\vec{t}_{pa}}{\ifthenelse{\equal{#1}{U}}{\vec{u}_{pa}}{\ifthenelse{\equal{#1}{V}}{\vec{v}_{pa}}{\mbox{UNKNOWN
+TERM ID}}}}}
+
+\newcommand{\GroundPrange}[1]{\ifthenelse{\equal{#1}{T}}{\vec{t}_{pa,\grounding'}}{\ifthenelse{\equal{#1}{U}}{\vec{u}_{pa,\grounding'}}{\ifthenelse{\equal{#1}{V}}{\vec{v}_{pa,\grounding'}}{\mbox{UNKNOWN
+TERM ID}}}}}
+
+
+% Key functions
+\newcommand{\jprob}[1]{\theta(#1)}
+\newcommand{\cprob}[2]{\theta(#1|#2)}
+\newcommand{\estcprob}[3]{\widehat{\theta}(#1|#2;#3)}
+%\newcommand{\Gpvar}{\tilde{P}}
+\newcommand{\Gpvar}{P}
+\newcommand{\Gprob}[2]{\Gpvar(#1 | #2)}
+\newcommand{\QFC}{QFC} % query family configuration
+\newcommand{\Cvar}{\mathrm{n}}
+\newcommand{\Fvar}{\mathrm{p}}
+\newcommand{\Count}[2]{\Cvar\left[#1;#2\right]}
+\newcommand{\CountC}[3]{\Cvar_{#3}\left[#1;#2\right]}
+\newcommand{\Freq}[2]{\Fvar\left[#1;#2\right]}
+\newcommand{\Relevant}[1]{#1^{\mathrm{r}}}
+\newcommand{\Relcount}[2]{\Relevant{\Cvar}\left[#1;#2\right]}
+\newcommand{\RelcountC}[3]{\Relevant{\Cvar_{#3}}\left[#1;#2\right]}
+\newcommand{\Relfreq}[2]{\Relevant{\Fvar}\left[#1;#2\right]}
+\newcommand{\RelfreqC}[3]{\Relevant{\Fvar_{#3}}\left[#1;#2\right]}
+\newcommand{\Range}[1]{\mathrm{Ra}(#1)}
+\newcommand{\Vars}[1]{\mathrm{Va}(#1)}
+% no longer needed
+%\newcommand{\Crossprod}[1]{\mathcal{X}}
+
+%variables for sets of values
+\newcommand{\setx}{\set{x}}
+\newcommand{\sety}{\set{y}}
+\newcommand{\setz}{\set{z}}
+
+
+%statistics
+\newcommand{\score}{S}
+\newcommand{\parameters}{\mathit{par}}
+\newcommand{\bic}{\mathit{BIC}}
+%random variables and graphical models
+% number of values in the domain of a random variable
+% variables for BNs
+\newcommand{\domvals}{k}
+\newcommand{\nodevalue}{\x}
+\newcommand{\parvalue}{\mathbf{\pi}} % a single assignment of values to a set of 
+%parents
+\newcommand{\parvals}{l} % number of values of parent state.
+\renewcommand{\r}{r} % CP-table row
+\newcommand{\nbhd}{{\mathsf {nbdh}}}
+\newcommand{\child}{\mathit{child}}
+\newcommand{\parent}{\mathit{pa}}
+\newcommand{\parents}{\mathbf{pa}}
+\newcommand{\Parents}{\mathbf{PA}}
+\newcommand{\family}{F} % families, family formulas
+\newcommand{\Target}{Y_{\target}}
+\newcommand{\MBtarget}{\set{X}_{\target}} % Markov blanket of a target node.
+\newcommand{\mbtarget}{\set{x}} % values for the markov blanket of a variable, vector-valued
+\newcommand{\mbstates}{m} % number of states in Markov blanket
+\newcommand{\vpi}{\mathbf{pa}} % for vectors of variable assignments
+\renewcommand{\l}{\ell} % class label
+\newcommand{\states}{r} % number of states of a variable
+\newcommand{\ssize}{N} % number of rows in join table; size of sample
+\newcommand{\frequency}{fr}
+\newcommand{\pseudo}{\ast}
+\newcommand{\counts}{+}
+\newcommand{\weighted}{\ast}
+\newcommand{\halpern}{H}
+\newcommand{\instance}{I}
+
+%logic notation
+\newcommand{\functor}{f}
+\newcommand{\fvalue}{v}
+\newcommand{\variable}{X} % first-order variable
+\newcommand{\population}{\mathcal{P}}
+\newcommand{\entity}{x}
+\newcommand{\formula}{\phi}
+\newcommand{\formulas}{\mathcal{\phi}}
+\newcommand{\conjunction}{\set{C}} % 
+\newcommand{\outdomain}{V}
+\newcommand{\literal}{\ell}
+%conjunction of literals
+\newcommand{\fterm}{\f} % open function term
+\newcommand{\fterms}{F} % set of function terms, also nodes in JBN
+\newcommand{\term}{\tau}
+\newcommand{\terms}{\bs{\tau}}
+\newcommand{\constant}{a}
+\newcommand{\constants}{\bs{\constant}}
+\newcommand{\gterm}{g} % ground term
+\newcommand{\gterms}{\bs{\gterm}} %list of ground terms
+\newcommand{\vterm}{x} % variable term
+\newcommand{\vterms}{\bs{\vterm}} % list of variable terms
+\newcommand{\assign}{A} % assignment of values to Bayes net
+\newcommand{\grounds}{\#}
+\newcommand{\grounding}{\gamma}
+\newcommand{\groundall}{\Gamma}
+\newcommand{\vars}{\mathit{Var}} % variables in a conjunction
+\newcommand{\igraph}{I} % instance-level dependency graph.
+\newcommand{\assignment}{\set{a}}
+\newcommand{\atom}{\functor}
+\newcommand{\gnode}{\alpha}
+\newcommand{\gfamily}{\ground{f}}
+\newcommand{\numformulas}{m}
+% logic programs
+\newcommand{\program}{\mathcal{B}}
+\newcommand{\clause}{\mathcal{c}}
+\newcommand{\head}{\mathit{head}}
+\newcommand{\body}{\mathit{body}}
+\newcommand{\crule}{\mathit{cr}} % combining rule
+\newcommand{\level}{\mathit{level}} % rank of function symbols in LP
+
+%datbase schema
+\newcommand{\rcolumns}{R}
+\newcommand{\ecolumns}{E}
+\newcommand{\dtable}{T} % can't use \table. Generic database table
+\newcommand{\datatable}{D} % generic data table, not necessarily part of database.
+\newcommand{\jtable}{J} % join table
+\newcommand{\Ejoin}{$J^{+}$}
+\newcommand{\jtables}{m}
+\newcommand{\rtable}{R} % relationship table
+\newcommand{\etable}{E} % entity table.
+\newcommand{\ttable}{X} % target table
+\newcommand{\nextended}{n}
+\newcommand{\row}{r}
+\newcommand{\rows}{\mathit{rows}}
+\newcommand{\col}{j}
+\newcommand{\cols}{\mathit{cols}}
+\newcommand{\unary}{\f} % to denote a unary or attribute function
+\newcommand{\numatts}{u} % to denote the number of unary or attribute functions.
+\newcommand{\g}{g} % alternative for function
+\newcommand{\relational}{\mathbf{r}} % denotes a generic relational functors, can be both relationship or descriptive attribute of relationship
+\newcommand{\Relation}{R} % denotes a generic boolean relation
+% a special type of literal conjunction that assigns a value %to each variable
+\newcommand{\class}{c} % the class attribute
+\newcommand{\classifier}{\mathcal{C}}
+\newcommand{\target}{t} % target object
+\newcommand{\feature}{f} % feature or desc attribute of object or link
+\newcommand{\features}{\bs{f}} % features 
+\newcommand{\attribute}{a} % nonclass attribute of target object
+\newcommand{\attributes}{\bs{a}}
+\newcommand{\rels}{\bs{R}} % chain of relationships.
+\newcommand{\maxpath}{\rho}
+
+%special functions
+\newcommand{\AVG}{\it{AVG}}
+\newcommand{\instances}{n} % counts number of occurrences in DB
+\newcommand{\prob}{p} % frequency of formula true in in DB
+
+%variables denoting graphs or models
+\newcommand{\mln}{M}
+\newcommand{\G}{G}
+\newcommand{\node}{X}
+\newcommand{\nodes}{V}
+\newcommand{\edges}{E}
+\newcommand{\clique}{C}
+\newcommand{\cliques}{\mathcal{\clique}}
+\newcommand{\cliquevalue}{c}
+\newcommand{\graph}{G}
+\newcommand{\M}{M}
+\newcommand{\J}{J}
+\renewcommand{\H}{H}
+\newcommand{\K}{K} % component
+\renewcommand{\O}{O} % oracle
+\renewcommand{\path}{\rho} % path, also foreignkey path
+% Markov nets
+\newcommand{\potential}{\Psi}
+% database schema
+\newcommand{\type}{\tau} % to denote a generic type
+\newcommand{\E}{E} % for entity tables
+\newcommand{\e}{e} % for specific entities
+\newcommand{\f}{f}
+\newcommand{\new}{\it{new}}
+\renewcommand{\c}{c}
+\renewcommand{\R}{R} % for relationship tables
+%\newcommand{\A}{A} % for attributes
+\newcommand{\T}{T} % for tables generically
+\newcommand{\New}{N}
+\newcommand{\D}{\mathcal{D}} % for database instance
+\renewcommand{\S}{\mathcal{S}} % for relational structure as conjunction of literals
+\newcommand{\databases}{\set{D}} % the number of databases
+\newcommand{\vocab}{\mathcal{\L}} % for logical vocabulary associated with database
+\newcommand{\name}{\mathit{name}} % generic attribute
+\newcommand{\dom}{\mathit{dom}} % domain of attributes
+\newcommand{\etables}{\alpha} % entity tables
+\newcommand{\rtables}{\beta} % relationship table number
+% specific constructs for examples
+\newcommand{\student}{\mathit{Student}}
+\newcommand{\I}{\mathit{I}}
+\newcommand{\course}{C}
+\newcommand{\prof}{\mathit{Professor}}
+\newcommand{\person}{\mathit{Person}}
+\newcommand{\TA}{\mathit{TA}}
+\newcommand{\actor}{\mathit{Actor}}
+\newcommand{\age}{\mathit{age}}
+\newcommand{\intelligence}{\mathit{intelligence}}
+\newcommand{\diff}{\mathit{difficulty}}
+\newcommand{\reg}{\mathit{Registered}}
+\newcommand{\ra}{\mathit{RA}}
+\newcommand{\bt}{\mathit{blood type}}
+\newcommand{\grade}{\mathit{grade}}
+\newcommand{\gpa}{\mathit{gpa}}
+\newcommand{\jack}{\mathit{Jack}}
+\newcommand{\jill}{\mathit{Jill}}
+\newcommand{\smith}{\mathit{Smith}}
+\newcommand{\cmpt}{\mathit{CMPT120}}
+\newcommand{\hi}{\mathit{Hi}}
+% various constants
+\newcommand{\true}{\mathrm{T}}
+\newcommand{\false}{\mathrm{F}}
+\newcommand{\normalconstant}{Z} % the normalization constant
+
+% orderings
+\newcommand{\pred}{\mathit{pred}}
+%procedure names and such
+\newcommand{\join}{\textsc{Join-Frequencies}}
+\newcommand{\linus}{\textsc{Linus }}
+\newcommand{\foil}{\textsc{Foil }}
+\newcommand{\MLN}{\textsc{MLN}}
+\newcommand{\treetilde}{\textsc{TILDE }}
+
+%%%
+%undirected models
+\newcommand{\pot}{\phi} % potential function
+%\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\newcommand{\test}{test}
+\def\set#1{\mathbf{#1}}
+\def\bs#1{\boldsymbol{#1}}
+\def\ground#1{\overline{#1}}

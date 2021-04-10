@@ -1,0 +1,1001 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{ijcai13}
+\input{preamble-stuff}
+\newcommand{\ct}{\mathit{ct}}
+
+%Updates on reviewers:
+%Perhaps use term ``Mobius join''
+% Main thing: show usefulness of having negated relationships.
+%potential application: small contingency tables.
+%complexity bounds: parametric complexity, measure operations over and above data accesses.
+
+\begin{document}
+
+\title{BayesBase: Managing Relational Database Schemata for Learning Graphical Models}
+\author{Zhensong Qian and Oliver Schulte \\
+\\ School of Computing Science\\ Simon Fraser University\\Vancouver-Burnaby, Canada}
+
+
+\maketitle
+
+\begin{abstract} 
+We present an algorithm for learning correlations among link types and node attributes in relational data that represent complex networks. 
+The link correlations are represented in a Bayes net structure. This provides a succinct graphical way to display relational statistical patterns and support powerful probabilistic inferences. The current state of the art algorithm for learning relational Bayes nets captures only correlations among entity attributes {\em given} the existence of links among entities. The models described in this paper capture a wider class of correlations that involve uncertainty about the link structure. Our base line method learns a Bayes net from join tables directly. This is  a statistically powerful procedure that finds many correlations, but does not scale well to larger datasets. We compare join table search with a hierarchical search strategy.
+\end{abstract}
+
+
+\section{Introduction} 
+Scalable link analysis for relational data with multiple link types is a challenging problem in network science.
+ We describe a method for learning a Bayes net that captures simultaneously correlations between link types, link features, and attributes of nodes. Such a Bayes net provides a succinct graphical representation of complex statistical-relational patterns. A  Bayes net model supports powerful probabilistic reasoning for answering ``what-if'' queries about the probabilities of uncertain outcomes conditional on observed events.
+Previous work on learning Bayes nets for relational data was restricted to correlations among attributes given the existence of links \cite{Schulte2012}. The larger class of correlations examined in our new algorithms includes two additional kinds:
+\footnote{
+This research was supported by a Discovery Grant to Oliver Schulte from the Canadian Natural Sciences and Engineering Council. 
+And Zhensong Qian was also supported by a grant from the China Scholarship Council.
+
+}
+\begin{enumerate}
+\item Dependencies between  different types of links.
+\item Dependencies among node attributes given the {\em absence} of a link between the nodes.
+\end{enumerate}
+
+Discovering such dependencies is useful for several applications. 
+
+\begin{description}
+\item[Knowledge Discovery] Dependencies provide valuable insights in themselves. For instance, a web search manager may wish to know whether if a user searches for a video in Youtube for a product, they are also likely to search for it on the web. 
+\item[Relevance Determination] Once dependencies have been established, they can be used as a relevance filter for focusing further network analysis only on statistically significant associations. For example, the classification and clustering methods of Sun and Han \cite{Sun2012} for heterogeneous networks assume that a set of ``metapaths'' have been found that connect link types that are associated with each other. 
+\item[Query Optimization] The Bayes net model can also be used to estimate relational statistics, the frequency with which statistical patterns occur in the database \cite{Schulte2012b}. This kind of statistical model can be applied for database query optimization \cite{Getoor2001}.
+\end{description}
+
+\paragraph{Approach}
+
+We consider three approaches to multiple link analysis with Bayes nets. 
+
+\begin{description}
+\item[Flat Search] Applies a standard Bayes net learner to a single large join table. This table is formed as follows: (1) take the cross product of entity tables. (An entity table lists the set of nodes of a given type.) (2) For each tuple of entities, add a relationship indicator whose value ``true'' or ``false'' indicates whether the relationship holds among the entities. 
+\item[Hierarchical Search] Conducts bottom-up  search
+ through the lattice of table joins hierarchically. Dependencies (Bayes net edges) discovered on smaller joins are propagated to larger joins. 
+The different table joins include information about the presence or absence of relationships as in the flat search above. 
+This is an extension of the current state of the art Bayes net learning algorithm for relational data \cite{Schulte2012}.
+\end{description}
+
+
+%(1) Baseline: The learn-and-join algorithm is the state of the art method for learning Bayes nets that capture correlations among attributes of entities or nodes. It conducts a hierarchical search
+% through the lattice of table joins. Dependencies discovered on smaller joins are propagated to larger joins.  The current version of the learn-and-join method considers only correlations between attributes and link types, not correlations between link types. (2) {\em Hierarchical Search With Link Types.} We extend the learn-and-join algorithm to consider correlations among link types. This is done by adding a new feature for each relationship table that indicates for each tuples of entities, whether they are related or not. 
+%(3) {\em Flat search}: Form a single big join table that combines different relationships with the new relationship indicator feature. Then apply a standard Bayes net learner on the join table. 
+
+\paragraph{Evaluation.} We compare the learned models using standard scores (e.g., Bayes Information Criterion, log-likelihood). 
+These results indicate that both flat search and hierarchical search are effective at finding correlations among link types. 
+Flat search can on some datasets achieve a higher score by exploiting attribute correlations that depend on the absence of relationships. 
+Structure learning time results indicate that hierarchical search is substantially more scalable.
+
+The main contribution of this paper is extending the current state-of-the-art  
+Bayes net learner to model correlations among different types of links, with a comparison of a flat 
+and a hierarchical search strategy.
+
+% \paragraph{Contributions} 
+% 
+% \begin{enumerate}
+% \item To our knowledge this is the first application of Bayes net learning to modelling correlations among different types of links.
+% \item Extension of a lattice search strategy for link type modelling, with a comparison to a flat search join approach.
+% \end{enumerate}
+
+\paragraph{Paper Organization} We describe Bayes net models for relational data (Poole's Parametrized Bayes Nets). Then we present the learning algorithms, first flat search then hierarchical search. We compare the models on four databases from different domains.
+
+\section{Related Work} \label{sec:related} Approaches to structure learning for directed graphical models with link uncertainty have been previously described, such as \cite{Getoor2007c}. However
+to our knowledge, no implementations of such structure learning algorithms for directed graphical models are available. Our system builds on the state-of-the-art Bayes net learner for relational data, whose code is available at \cite{bib:jbnsite}.
+Implementations exist  for other types of graphical models, specifically Markov random fields (undirected models) \cite{Domingos2009} 
+and dependency networks (directed edges with cycles allowed) \cite{Natarajan2012}. 
+Structure learning programs for Markov random fields are provided by Alchemy \cite{Domingos2009} and Khot et al \cite{Khot2013}. Khot et al. use boosting to provide a state-of-the-art dependency network learner. None of these programs are able to return a result on half of our datasets because they are too large. For space reasons we restrict the scope of this paper to directed graphical models and do not go further into undirected model. For an extensive comparison of the learn-and-join Bayes net learning algorithm with Alchemy please see \cite{Schulte2012}.
+
+\section{Background and Notation} 
+Poole introduced the Parametrized Bayes net (PBN) formalism that combines Bayes nets with logical syntax for expressing relational concepts \cite{Poole2003}. We adopt the PBN formalism, following Poole's presentation.
+
+
+\subsection{Bayes Nets for Relational Data}
+A \textbf{population} is a set of individuals. Individuals are denoted by lower case expressions (e.g., $\it{bob}$). A \textbf{population variable} is capitalized. A \textbf{functor} represents a mapping
+$
+\functor: \population_{1},\ldots,\population_{a} \rightarrow \outdomain_{\functor}
+$
+where $\functor$ is the name of the functor, each $\population_{i}$ is a population, and $\outdomain_{\functor}$ is the output type or \textbf{range} of the functor. In this paper we consider only functors with a finite range, disjoint from all populations.  If $\outdomain_{\functor} = \{\true,\false\}$, the functor $\functor$ is a (Boolean) \textbf{predicate}. A predicate with more than one argument is called a \textbf{relationship}; other functors are called \textbf{attributes}. We use uppercase for predicates and lowercase for other functors.
+
+A {\bf Bayes Net (BN)} is a directed acyclic graph (DAG) whose nodes comprise a set of random variables and conditional probability parameters.
+For each assignment of values to the nodes, the joint probability 
+is specified by the product of the conditional probabilities, $P(\it{child}|\it{parent\_values}$).
+A \textbf{Parametrized random variable} is of the form $\functor(\X_{1},\ldots,\X_{a})$, where the populations associated with the variables are of the appropriate type for the functor. A \textbf{Parametrized Bayes Net} (PBN) is a Bayes net whose nodes are Parametrized random variables \cite{Poole2003}. If a Parametrized random variable appears in a Bayes net, we often refer to it simply as a node. 
+
+\subsection{Databases and Table Joins}
+ 
+ We begin with a standard \textbf{relational schema} containing a set of tables, each with key fields, %typically
+descriptive attributes, and possibly foreign key pointers. A \textbf{database instance} specifies the tuples contained in the tables of a given database schema. We assume that tables in the relational schema can be divided into {\em entity tables} and {\em relationship tables.} This is the case whenever a relational schema is derived from an entity-relationship model (ER model) \cite[Ch.2.2]{Ullman1982}. The functor formalism is rich enough to represent the constraints of an ER schema by the following translation: Entity sets correspond to types, descriptive attributes to functions, relationship tables to predicates, and foreign key constraints to type constraints on the arguments of relationship predicates.  Assuming an ER design, a relational structure can be visualized as a complex network \cite[Ch.8.2.1]{Russell2010}: individuals are nodes, attributes of individuals are node labels, relationships correspond to (hyper)edges, and attributes of relationships are edge labels. Conversely, a complex  network can be represented using a relational database schema.
+
+Table \ref{table:university-schema} shows a relational schema for a database related to a university.
+In this example, there are two entity tables: a $\student$ table and a $\course$ table.  There is one relationship table $\reg$ with foreign key pointers to the $\student$ and $\course$ tables whose tuples indicate which students have registered in which courses. 
+ Figure \ref{fig:university-tables} displays a small database instance for this schema together with a Parametrized Bayes Net (omitting the $\it{Teaches}$ relationship for simplicity.) 
+%To keep the schema simple, we introduce only a limited number of attributes for each entity class. 
+\begin{table}[tbp] \centering
+\begin{tabular}
+[c]{|l|}\hline
+$\student$(\underline{$student\_id$}, $\intelligence$, $ranking$)\\
+$\course$(\underline{$course\_id$}, $\diff$, $rating$)\\ 
+$\prof$ (\underline{$professor\_id$}, $teaching\_ability$, $popularity$)\\
+$\reg$ (\underline{$student\_id$, $\course\_id$}, $grade$, $satisfaction$)\\
+%$\ra$ (\underline{$student\_id$, $prof\_id$}, $salary$, $capability$)
+$\it{Teaches}(\underline{\it{professor\_id, course\_id}})$
+\\
+\hline
+\end{tabular}
+\caption{A relational schema for a university domain. Key fields are underlined. An instance for this schema is given in Figure \ref{fig:university-tables}.
+\label{table:university-schema}} 
+\end{table}
+ 
+\begin{figure*}[htbp] %  figure placement: here, top, bottom, or page
+   \centering
+   \includegraphics[width=7in]{figures/university-tables3.png} 
+  \caption{Database Table Instances: (a) $\student$ (b) $\reg$ (c) $\course$. To simplify, we added the information about professors to the courses that they teach.  (d) The attribute-relation table $\reg^{+}$ derived from $\reg$, which lists for each pair of entities their descriptive attributes, whether they are linked by $\reg$, and the attributes of a link if it exists. (e) A Parametrized Bayes Net for the university schema.}
+   \label{fig:university-tables}
+\end{figure*}
+
+
+ The \textbf{natural table join}, or simply join, of two or more tables contains the rows in the Cartesian products of the tables whose values match on common fields. In logical terms, a join corresponds to a conjunction \cite{Ullman1982}. 
+ 
+ 
+% For a relationship table $R$, we define the \textbf{full relationship table} $R^{+}$ as follows. Suppose that $R$ is a relationship between the two entity types (populations) $X$ and $Y$. The rows of $R^{+}$ correspond to pairs $(x,y)\in (X \times Y)$, that is, all members of the Cartesian product. Also, $R^{+}$ contains an indicator column $R_{\it{ind}}$ such that a row for $(x,y)$ contains the value $\true$ if and only if the original relationship table contains the pair $(x,y)$. Also, $R^{+}$ contains one column for each descriptive attribute of the relationship $R$. For pairs $(x,y)$ that are not linked by $R$, each attribute column contains the value $\bot$ for ``don't care''. Join $R^{+}$ with the entity tables related by $R$ has the effect of extending $R^{+}$ with the entity information. We refer to this join table as the \textbf{attribute-relation table}.
+
+
+
+%
+% \begin{figure}[h]
+%\begin{center}
+%\resizebox{0.5\textwidth}{!}{
+%\includegraphics[width=1\textwidth]{figures/database.png}
+%%includegraphics[width=1\textwidth]{database.png}
+%}
+%\caption{Left: A simple relational database instance. Right: The ground atoms for the database, and their values as specified by the database, using functor notation.
+%%that are true in the database. 
+%\label{fig:db-tables}}
+%\end{center}
+%\end{figure}
+
+
+%We assume that a database instance (interpretation) assigns a constant value to each gnode $\f(\set{a})$, which we denote by $
+%[f(\set{a})]_{\D}$.
+%%Thus a DB instance defines a truth value for each ground atom depending on whether the atom assigns the right function value to the ground functor term.
+%The value of descriptive relationship attributes is well defined only for tuples that are linked by the relationship. For example, the value of $\it{grade}(\it{jack},\it{101})$ is not well defined in a university database if $\it{Registered}(\it{jack},\it{101})$  is false. In this case, we follow the approach of Schulte {\em et al.} \cite{Schulte2009c} and assign the descriptive attribute the special value $\bot$ for ``undefined''. Thus the atom $\it{grade}(\it{jack},\it{101}) = \bot$ is equivalent to the atom $\it{Registered}(\it{jack},\it{101}) = \false$. Fierens {\em et al.} \cite{Fierens2005} discuss other approaches to this issue. 
+
+\section{Bayes Net Learning With Link Correlation Analysis}
+
+We outline the two methods we compare in this paper, flat search and hierarchical search. 
+
+\subsection{Flat Search}
+The basic idea for flat search is to apply a standard propositional or single-table Bayes net learner to a single large join table. 
+To learn correlations between link types, we need to provide the Bayes net with data about when links are present {\em and} when they are absent. To accomplish this, we add to each relationship table a \textbf{link indicator column}. This columns contains T if the link is present between two entities, and F if the link is absent. (The entities are specified in the primary key fields.) We add rows for all pairs of entities of the right type for the link, and enter T or F in the link indicator column depending on whether a link exists or not. We refer to relationship tables with a link indicator column as \textbf{extended} tables. Extended tables are readily computed using SQL queries. If we omit the entity Ids from an extended table, we obtain the \textbf{attribute-relation} table that lists (1) all attributes for the entities involved, (2) whether a relationship exists and (3) the attributes of the relationship if it exists. If the attribute-relation table is derived from a relationship $R$, we refer to it as $R^{+}$. 
+
+The attribute-relation table is readily defined for a set of relationships: take the cross-product of all populations involved, and add a link indicator column for each relationship in the set.
+For instance, if we wanted to examine correlations that involve both the $\reg$ and the $\it{Teaches}$ relationships, we would form the cross-product of the entity types $\it{Student},\it{Course},\it{Professor}$ and build an attribute-relation table that contains two link indicator columns $\reg(\S,\C)$ and $\it{Teaches}(\P,\C)$. 
+The \textbf{full join table} is the attribute-relation table for all relationships in the database.
+ 
+The \textbf{flat search Bayes net learner} takes a standard Bayes net learner and applies it to the full join table to obtain a single Parametrized Bayes net.
+ The results of \cite{Schulte2011} can be used to provide a theoretical justification for this procedure;
+ we outline two key points. \begin{enumerate} \item The full join table correctly represents the {\em sufficient statistics}\cite{Heckerman1995,Schulte2011} of the database: 
+using the full join table to compute the frequency of a joint value assignment for Parametrized Random Variables is equivalent to the frequency with which this assignment holds in the database. 
+\item Maximizing a standard single-table likelihood score from the full join table is equivalent to maximizing the {\em random selection pseudo likelihood.} 
+The random selection pseudo log-likelihood is the expected log-likelihood assigned by a Parametrized Bayes net when we randomly select individuals from each population and instantiate the Bayes net with attribute values and relationships associated with the selected individuals. 
+\end{enumerate}
+
+\subsection{Hierarchical Search}
+Khosravi {\em et al.} \cite{Schulte2012} present the learn-and-join  structure learning algorithm. 
+The algorithm upgrades a single-table Bayes net learner for relational learning. 
+We describe the fundamental ideas of the algorithm; for further details please see \cite{Schulte2012}. 
+%The key idea of the algorithm can be explained in terms of the {\em table join lattice.} 
+%Recall that the (natural) join of two or more tables
+%%, written $\dtable_{1} \Join \dtable_{2} \cdots \Join \dtable_{k}$ 
+%is a new table that contains the rows in the Cartesian products of the tables whose values match on common fields. 
+The key idea is to build a Bayes net for the entire database by level-wise search through the {\em table join lattice.} The user chooses a single-table Bayes net learner. The learner is applied to table joins of size 1, that is, regular data tables. Then the learner is applied to table joins of size $s,s+1,\ldots$, with the constraint that larger join tables inherit the absence or presence of learned edges from smaller join tables. These edge constraints are implemented by keeping a global cache of forbidden and required edges.  Algorithm~\ref{alg:structure} provides pseudocode for the previous learn-and-join algorithm (LAJ) \cite{Schulte2012c}. 
+
+
+\begin{figure}[h]
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+\includegraphics[width=0.8\textwidth]{figures/big-lattice}
+}
+\caption{A lattice of relationship sets for the university schema of Table~\ref{table:university-schema}.
+ Links from entity tables to relationship tables correspond to foreign key pointers. 
+%The list representation of the sets is determined by the functor ordering $\it{Registered} < \it{TA} < \it{Teaches}$. 
+\label{fig:big-lattice}}
+\end{center}
+\end{figure}
+
+
+
+To extend the learn-and-join algorithm for multiple link analysis, we replace the natural join in line 7 by the extended join (more precisely, by the attribute-relation tables derived from the extended join). 
+The natural join contains only tuples that appear in all relationship tables. 
+Compared to the extended join, this corresponds to considering only rows where the link indicator columns have the value $\true$. 
+When the propositional Bayes net learner is applied to such a table, the link indicator variable appears like a constant. 
+Therefore the BN learner cannot find any correlations between the link indicator variable and other nodes, 
+nor can it find correlations among attributes conditional on the link indicator variable being $\false$. 
+Thus the previous LAJ algorithm finds only correlations between entity attributes conditional on the existence of a relationship. 
+In sum, hierarchical search with link correlations can be described as follows.
+
+\begin{enumerate}
+\item Run the previous LAJ algorithm (Algorithm~\ref{alg:structure}) using natural joins.
+\item Starting with the constraints from step 1, run the LAJ algorithm where extended joins replace natural joins. That is, for each relationship set shown in the lattice of Figure~\ref{fig:big-lattice}, apply the single-table Bayes net learner to the extended join for the relationship set.
+\end{enumerate}
+
+
+\begin{algorithm}[htb]
+\begin{algorithmic}
+{\footnotesize
+\STATE {\em Input}: Database $\D$ with $E_1,..E_e$ entity tables, $R_1,... R_r$ Relationship tables, %ER Model ,
+\STATE {\em Output}: Bayes Net for $\D$ 
+\STATE {\em Calls}: PBN: Any propositional Bayes net learner that accepts edge constraints and a single table of cases as input. 
+\STATE {\em Notation}: PBN$(\T,\mbox{Econstraints})$ denotes the output DAG of PBN. Get-Constraints$(\G)$ specifies a new set of edge constraints, namely that all edges in $\G$ are required, and edges missing between variables in $\G$ are forbidden.
+} %fnsize
+\end{algorithmic}
+\begin{algorithmic}[1]
+{\footnotesize
+	\STATE Add descriptive attributes of all entity and relationship tables as variables to  $G$. Add a boolean indicator for each relationship table to $G$.
+	\STATE Econstraints = $\emptyset$ {[Required and Forbidden edges]} %in the G]}
+\FOR {m=1 to e}
+	\STATE Econstraints += Get-Constraints(PBN($E_m$ , $\emptyset$)) 
+	\ENDFOR	
+%\FOR {m=1 to r}
+%	\STATE Econstraints += Get-Constraints(PBN($R_m$, Econstraints))
+%\ENDFOR
+\FOR {m=1 to r}
+	\STATE $N_m$ :=  natural 
+	join of $R_m$ and entity tables linked to $R_m$ 
+	\STATE Econstraints += Get-Constraints(PBN($N_m$, Econstraints))
+\ENDFOR
+\FORALL{$N_i$ and $N_j$ with a foreign key in common}
+	\STATE $K_{ij}$ :=  %natural 
+	join of $N_i$ and $N_j$ 
+	\STATE Econstraints += Get-Constraints(PBN($K_{ij}$, Econstraints))
+\ENDFOR
+\RETURN Bayes Net defined by Econstraints.
+%\FORALL{possible combination of values of a node and its parents} 
+%\STATE Add a clause with predicates to MLN input file
+%\ENDFOR
+%\STATE Run WL on the MLN file
+%\FORALL [A relationship node is a parent of a Entity node]{dependencies of kind $X(R_m) \rightarrow Y(E_i)$}
+%	%\IF {dependency is of kind $X(R_m) \rightarrow Y(E_i)$ } 
+%	\STATE add $R_m \rightarrow Y(E_i)$ to $G$
+%	\ENDFOR	
+		%\STATE Run dynamic programing algorithm
+		} %footnotesize
+\end{algorithmic}
+%\label{alg:cpt}
+\caption{Pseudocode for previous Learn-and-Join Structure Learning for Lattice Search. \label{alg:structure}}
+\end{algorithm}
+
+
+
+\section{Evaluation} 
+All experiments were done on a QUAD CPU Q6700 with a 2.66GHz CPU and 8GB of RAM. The LAJ code and datasets are available on the world-wide web \cite{bib:jbnsite}. We made use of the following single-table Bayes Net search implementation:  GES search \cite{Chickering2003} with the BDeu score as implemented in version 4.3.9-0 of CMU's Tetrad package (structure prior uniform, ESS=10; \cite{2008a}).
+
+\paragraph{Methods Compared}
+
+We compared the following methods.
+
+\begin{description}
+\item[Bayes Base Hierarchical Search (B.B.H.) ] The previous LAJ method without link correlations (Algorithm~\ref{alg:structure}).
+\item[Flat Search] The new LAJ method that has the potential to find link correlations (Algorithm~\ref{alg:structure} with the extended join tables instead of natural join tables).
+\item[Complete Graph] Applies the single-table Bayes net learner to the full join table.
+\item[Disconnected Graph] Applies the single-table Bayes net learner to the full join table.
+\end{description}
+
+To implement Flat Search and the LAJ+ algorithm efficiently, we apply the Fast M\"obius Transform to compute tables of sufficient statistics that involve negated relationships. We discuss the details further in Section~\ref{sec:mobius}.
+
+\paragraph{Performance Metrics }
+
+\textbf{Pseudo Relation Model Selection Scores  \cite{Schulte2011} ?}
+
+ We report learning time, log-likelihood, Bayes Information Criterion (BIC), and the Akaike Information Criterion (AIC). BIC and AIC are standard scores for Bayes nets \cite{Chickering2003}, defined as follows. We write 
+$$L(\hat{G},\d)$$ for the log-likelihood score,
+where $\hat{G}$ is the BN $\G$ with its parameters instantiated to be the maximum likelihood estimates given the dataset $\d$, and the quantity $L(\hat{G},\d)$ is the log-likelihood of $\hat{G}$ on $\d$. 
+
+The BIC score is defined as follows \cite{Chickering2003,Schulte2011}
+
+$$\mathit{BIC}(\G,\d) = L(\hat{G},\d) - \mathit{par}(\G)/2 \times ln(m)$$
+
+where the data table size is denoted by $m$, and $\mathit{par}(\G)$ is the number of free parameters in the structure $\G$. The AIC score is given by 
+
+$$\mathit{AIC}(\G,\d) = L(\hat{G},\d) - \mathit{par}(\G). $$
+
+ AIC is asympotically equivalent to selection by cross-validation, so we may view it as a closed-form approximation to cross-validation,  which is computationally demanding for relational datasets. 
+
+%
+%\subsection{Hypotheses} [consider hypotheses as formulated in the introduction [guesses at results]]
+%
+%Our results investigate the following issues.
+%
+%\begin{enumerate}
+%\item Which methods provide the fastest model selection? We expect that because propagating results  along the table join lattice constraints the model search, both types of hierarchical search are faster than flat search.
+%\item Which methods provide the best data fit? We expect that the models with link type analysis are statistically more powerful than the attribute-only analysis.
+%\end{enumerate}
+
+%
+%[also consider copying, e.g. from Journal/laj]
+%
+%We used one synthetic and 5 benchmark real-world databases.The databases and their main characteristics are as follows. For more details please see the references in \cite{Schulte2012} and on-line sources such as \cite{bib:jbnsite}.
+%
+%{\em University Database.} We manually created a small dataset, based on the schema given in Table~\ref{table:university-schema}. 
+%The dataset is small and is used as a purpose of proofing the correctness of our algorithms. 
+%The entity tables contain 38 students, 10 courses, and 6  Professors. The $\reg$ table has 92 rows and the $\it{RA}$ table has 25 rows. %This dataset is translated into 513 ground atoms. 
+%
+%We assume that tables in the relational schema can be divided into {\em entity tables} and {\em relationship tables.} This is the case whenever a relational schema is derived from an entity-relationship model (ER model) \cite[Ch.2.2]{Ullman1982}. The symbol $\E$ and related symbols like $\E_1,\E_i,\E'$ refer to entity tables, and the symbol $\R$ and related symbols like $\R_1,\R_i,\R'$ refer to relationship table. We use a running example, a small database related to a university,  through the paper to further clarify the introduced concept. The university database has three entity tables:  $\student$ table,  $\course$ table, and $\prof$ table.  There are two relationship tables: $\reg$ with foreign key pointers to the $\student$ and $\course$ tables whose tuples indicate which students have registered in which courses and $\ra$ with foreign key pointers to the $\student$ and $\prof$ tables whose tuples indicate the RAship of students for professors.
+%
+%
+%{\em MovieLens Database.} The second dataset is the MovieLens dataset from the UC Irvine machine learning repository. %The schema for the dataset is shown in Table \ref{}. 
+%It contains two entity tables: $\it{User}$ with 941 tuples and $\it{Item}$ with 1,682 tuples, and one relationship table $\it{Rated}$ with 80,000 ratings. The $\it{User}$ table has %key field $\it{user\_id}$ and 
+%3 descriptive attributes $\age, \it{gender}, \it{occupation}$. We discretized the attribute age into three bins with equal frequency. The table $\it{Item}$ represents information about the movies. It has 17 Boolean attributes that indicate the genres of a given movie. We performed a preliminary data analysis and omitted genres that have only weak correlations with the rating or user attributes, leaving a total of three genres.
+%
+%% The full dataset contains 170143 ground atoms and is too big for MLN to do structure learning or parameter learning on. We made small subsamples to make the experiments feasible. Sub sampling 100 Users and 100 Items transforms to a db file with 2505 number of groundings. takes around 30 min to run. Sub sampling 300 Users and 300 Items transforms to a db file with 18040 number of groundings takes around 2 days to run. 
+%%The full table with 100,000 ratings exceeded the memory limits of Tetrad, so we randomly picked 40\% of the ratings of the relationship table as input data. 
+%
+%{\em Mutagenesis Database.} This dataset is widely used in ILP research \cite{Srinivasan1996}. %It contains 4 tables total to 15218 tuples. 
+%Mutagenesis has two entity tables, $\it{Atom}$ with 3 descriptive attributes, and $\it{Mole}$, with %188 entries and 
+%5 descriptive attributes, including two attributes that are discretized into ten values each (logp and lumo). It features two relationships $\it{MoleAtom}$ indicating which atoms are parts of which molecules, and $\it{Bond}$ which relates two atoms and has 1 descriptive attribute. %The full dataset, with 35973 ground atoms, crashed while doing either parameter learning or structure learning. A subsample with 5017 ground atoms is used was running for 5 days and did not terminate. weight learning was feasible. another subsample with 
+%Representing a relationship between entities from the same table in a parametrized BN requires using two or more variables associated with the same population (e.g., $\it{Bond}(\A_{1},\A_{2}))$.  
+%
+%{\em Hepatitis Database.} This data is a modified version of the PKDD�02 Discovery Challenge database, we adopted the modifications of Frank {\em et al.} \cite{Frank2007}, which includes removing tests with null values. It contains data on the laboratory examinations
+%of hepatitis B and C infected patients. The examinations were realized between 1982 and 2001 on 771 patients. The data are organized in 7 tables (4 entity tables,  3 relationship tables and 16 descriptive attributes). They contain basic information about the patients, results of biopsy, information on interferon therapy, results of out-hospital examinations, results of in-hospital examinations. 
+%%The data were prepared in cooperation with the Shimane Medical University, School of Medicine and Chiba University Hospital, Japan.
+%
+%\emph{UW-CSE database.} This dataset lists facts about the Department of Computer Science and Engineering at the University of Washington (UW-CSE), such as entities (e.g., Student, Professor) and their relationships (i.e. AdvisedBy, Publication)\cite{Domingos2007}. 
+%%The total number of ground atoms is 4,106,841. The database contained a total of 3380 ground atoms. 
+%The dataset was obtained  by crawling pages in the department's Web site (www.cs.washington.edu). Publications and AuthorOf relations were extracted from the BibServ database (www.bibserv.org). 
+%
+%{\em Mondial Database.} 
+%%
+%%\textbf{Hassan: which version did you use? The full one from http://www.dbis.informatik.uni-goettingen.de/Mondial/mondial-ER.pdf or Bahareh's?} 
+%%
+%This dataset contains data from multiple geographical web data sources. We followed the modification of \cite{wangMondial}.
+%Our dataset contains 4 entity tables, $\it{Country},\it{Continent},\it{Economy},\it{Government}$, where the latter three are related to Country by many-one relationships, and one relationship table $\it{Borders}$ that relates two countries.
+%
+
+%
+%\begin{enumerate}
+%\item  
+%The $X^{2}$ score of a model, which is the ratio of the model's log-likelihood over the log-likelihood of a null hypothesis model. 
+%For Bayes nets, the null hypothesis model is the disconnected graph.
+%
+%Recall that the $X^{2}$ is calculated simply as 
+%\[
+%\mathit{X^{2}}\equiv \sum \frac{(O_{i}-E_{i})}{E_{i}}
+%\]
+%where $O_{i}$ and $E_{i}$ are the observered and expected log-likelihood, respectively. 
+%Here the observered model stands for the disconnected graph and expected model is learned from data.
+%The larger $X^{2}$ has a higher probability lies in the right tail with a given significant level. 
+%\item 
+%The Bayes Information Criterion (BIC), which is defined as follows. 
+%Compared to the $X^{2}$ score, the BIC adds a penalty term for parameters to the model likelihood.
+% A single-table model selection score has the form $\score(\G,\datatable)$ where $\G$ is a graphical model and $\datatable$ a data table. 
+% We consider scores that trade off data fit against model complexity, and that can be computed given the following quantities.
+% We also assume that the score is {\em decomposable}, i.e. can be written as the sum of local scores for each node in the BN.
+
+
+\subsection{Empirical Evaluation: Learning Times} 
+All experiments were done on with 8GB of RAM and a single Intel Core 2 QUAD Processor Q6700 with a clock speed of 2.66GHz (there is no hyper-threading on this chip). The operating system was Linux Centos 2.6.32. Code was written in Java, JRE 1.7.0. All code and datasets are available~\cite{bib:jbnsite}. 
+\subsection{Datasets}
+We describe the datasets in terms of their representation as databases with tables. The databases follow an Entity-Relationship (E-R) design \cite{Ullman1982}. An E-R schema can be translated into our function-based logical notation as follows: Entity sets correspond to populations, descriptive attributes to functions, relationship tables to predicates, and foreign key constraints to type constraints on the arguments of relationship predicates.
+%
+We used one synthetic and 
+8 benchmark real-world databases from prior work~\cite{Schulte2012}. 
+%The databases are fairly complex, so the experiments are computationally demanding, especially the Alchemy inference component, which needs to be applied to all groundings of all descriptive attributes to compute average predictive performance. The databases and their main characteristics are as follows. 
+% and on-line sources such as \cite{bib:jbnsite}.
+%In this paper we report the average result over all subdatabases in this paper and leave the evaluation of how models should evolve based on the size of data to an extension of the work in a journal paper. 
+
+\textbf{need to be filled in}
+Also, we may emphasize the difference of such datasets in terms of self-relationships and same type relationships.
+
+\noindent\textbf{University Database.} We manually created a small dataset, based on the schema given in Table~\ref{table:university-schema}. 
+The dataset is small and is used as a testbed for the correctness of our algorithms.
+
+\noindent\textbf{MovieLens Database. only use the 1M version?} 
+%A dataset from the UC Irvine machine learning repository. The data are organized in 3 tables (2 entity tables, 1 relationship table, and 7 descriptive attributes). 
+
+This is a standard dataset from the UC Irvine machine learning repository.  \textbf{really? I can NOT find it online.}
+user:6039; Movie: 3883; rating: 1000129
+age, 7 bins based on the original MovieLens design
+
+% \cite{Schulte2012}.
+%The schema for the dataset is shown in Table \ref{}.
+It contains two tables representing entity sets: User with 941 tuples and Item (Movies) with 1,682 tuples.
+The User table has 2 descriptive attributes, $\age$ and $\it{gender}$. We discretized the attribute $\age$ into three equal-frequency bins. The table Item represents information about the movies. It has 17 Boolean attributes that indicate the genres of a given movie. There is one relationship table Rated corresponding to a Boolean predicate. The Rated contains Rating as descriptive attribute; 80,000 ratings are recorded.  We performed a preliminary data analysis and omitted genres that have only weak correlations with the rating or user attributes, leaving a total of three genres (Drama, Horror, Action).
+%
+%The full dataset contains 170,143 ground atoms and is too big for Alchemy to perform learning. We made small subsamples to make the experiments feasible. Subsampling 100 Users and 100 Items transforms to an Alchemy input file with 3,485 ground atoms. Structure learning with Alchemy takes around 30 min.
+%Subsampling 300 Users and 300 Items transforms to an Alchemy input file with 27,134 ground atoms. Structure learning with Alchemy takes about 2 days to run.
+%The full table with 100,000 ratings exceeded the memory limits of Tetrad, so we randomly picked 40\% of the ratings of the relationship table as input data.
+
+\noindent\textbf{Mutagenesis Database.}  This dataset is widely used in Inductive Logic Programming research \cite{Srinivasan1996}. %It contains 4 tables total to 15218 tuples. 
+We used a previous discretization \cite{Schulte2012}.
+Mutagenesis has two entity tables, Atom with 3 descriptive attributes, and Mole (decribing molecules), with 5 descriptive attributes. 
+%including two attributes that are discretized into ten values each (logp and lumo).
+There are two relationship tables, MoleAtom, indicating which atoms are parts of which molecules, and Bond, which relates two atoms and has 1 descriptive attribute. 
+%The full dataset, with 35,973 ground atoms, crashed Alchemy with both structure  and parameter learning. A subsample with 5,017 ground atoms did not terminate for structure learning, but weight learning was feasible. The computational difficulties of Alchemy compared to the MovieLens dataset are  due to the high number of descriptive attributes.
+%%another subsample with
+%Representing a relationship between entities from the same table in a parametrized Bayes net requires using two or more variables associated with the same population (e.g., $\it{Bond}(\A_{1},\A_{2}))$.
+%(Techreport 2009) describes a straightforward extension of Algorithm~\ref{alg:structure} for this case, which we applied to the Mutagenesis dataset.\footnote{Reference omitted for blind review.}
+%We also tested our method on the Financial dataset with similar results, but omit a discussion due to space constraints.
+
+\noindent\textbf{Financial} 
+This dataset is a modified version of the financial dataset from the PKDD 1999 cup. We adapted the database design to fit the ER model by following the
+modification from CrossMine~\cite{Yin2004} and Graph-NB~\cite{han2009}.
+ The data are organized in 6 tables (3 entity tables, 3 relationship tables, 15 descriptive attributes).
+
+need to be filled in more details
+
+\noindent\textbf{Hepatitis Database.} This data is a modified version of the PKDD02 Discovery Challenge database \cite{Frank2007}. %, which includes removing tests with null values. 
+The database contains information on laboratory examinations of 771 hepatitis B- and C-infected patients, taken
+between 1982 and 2001. The data are organized in 7 tables (4 entity tables,  3 relationship tables) with 16 descriptive attributes. They contain basic information about the patients, results of biopsy, information on interferon therapy, results of out-hospital examinations, and results of in-hospital examinations. 
+
+\noindent\textbf{IMDB Database, combination?.}
+
+we based on the MovieLens 1M dataset which is a commonly-used rating dataset (www.grouplens.org), and adding more related attribute information about the actors, directors and movies from the Internet Movie Database (IMDB) (www.imdb.com, July 2013).
+
+4 entity tables : actors (gender 2, quality 6: 98690 ),directors(quality 6,avg\_revenue 5:2201),movies(year 4,country 4,runningtime 4:3832),users(age 7,gender 2,occuption 5 :6039)
+and 3 relation tables: u2base(rating 5: 996159), movies2actors(cast\_num 4:138349), movies2directos(genre 9:4141)
+
+need to be filled in
+
+
+\noindent\textbf{Mondial Database.} A geography database, featuring
+one self-relationship, $\it{Borders}$, that indicates which countries border each other. 
+This dataset contains data from multiple geographical web data sources. 
+We follow the modification of She\cite{wangMondial}, and use a subset of the tables and disretized features: 2 entity tables, $\it{Country},\it{Economy}$. The descriptive attributes of Country are continent, government, percentage, majority religion, population size. The descriptive attributes of Economy are inflation, gdp, service, agriculture, industry. A relationship table Economy\_Country specifies which country has what type of economy. A self-relationship table Borders relates two countries.
+  %$\it{Country},\it{Continent},\it{Economy},\it{Government}$, where the latter three are related to Country by many-one relationships, and one relationship table $\it{Borders}$ that relates two countries. Our dataset includes a self-relationship table Borders that relates two countries.
+
+
+\noindent\textbf{UW-CSE Database.}
+This dataset lists facts about the Department of Computer Science and Engineering at the University of Washington, such as entities (e.g., $Person$, $Course$) and the relationships (i.e. $AdvisedBy$, $TaughtBy$).
+% \cite{Domingos2007}. 
+%The total number of ground atoms is 4,106,841. The database contained a total of 3380 ground atoms. 
+
+
+\begin{table}[btp] \centering
+%\scalebox{0.7in}{
+\resizebox{0.5\textwidth}{!}{
+\begin{tabular}[c]
+{|l|r|r|r|r|r|}\hline
+    \textbf{Dataset} & \textbf{Relationships} & \textbf{Self Relationships} & \textbf{Same Type Relationships}& \textbf{\#Tuples} & \textbf{\#Attribute Columns} \\\hline
+    University&2 & N & N & 336 & 12\\\hline
+    Movielens(1M) &1 & N & N & 1,010,051 & 7\\\hline
+    Movielens(0.1M) &1 & N & N &  83,402 & 7\\\hline
+    Mutagenesis &2 & N & Y & 24,326 & 11\\\hline
+    Financial &3 & N & N &  225,932& 15\\\hline
+   Hepatitis &3 & N & N &11,316  & 19\\\hline
+   IMDB &3 & N &N &1,251,038  & 17\\\hline
+    Mondial &2 & Y & N &  870& 18\\\hline
+    UW-CSE &2 & Y & N & 612 & 14\\\hline
+   
+\end{tabular}
+}
+ % end scalebox
+\caption{Real datasets characteristics, including size of datasets in total number of table tuples. 
+%Each descriptive attribute is represented as a separate function, so the number of ground atoms is larger than that of tuples.
+% \textbf{Zhensong: needs fixing}
+ \label{table:datasetsize}}
+\end{table}
+
+
+
+\subsection{Learning Times} Table~\ref{table:cttimes} shows the data preprocessing time that the different methods require for table joins. This is the same for all methods, namely the cost of computing the full join table using the fast M\"obius transform described in Section~\ref{sec:mobius}. 
+\begin{table} \centering
+%\scalebox{0.7in}{
+\resizebox{0.5\textwidth}{!}{
+\begin{tabular}
+{|l|r|r|r|r|}\hline 
+ \textbf{Dataset} & \textbf{Building Time} & \textbf{Sum(counts)}  & \textbf{Tuples} & \textbf{Compress Ratio} \\\hline
+University&1.68 & 2,280 & 351 &6.5 \\\hline
+Movielens(1M) &2.70 &23,449,437 &252 &93,053.32\\\hline
+Movielens(0.1M) &0.62 & 1,582,762 &239 &6,622.44 \\\hline
+Mutagenesis &1.67 & 905,205 &1,631 &555.00  \\\hline
+Financial &  1421.87 &149,046,585,349,303 &3,013,011 &49,467,653.90   \\\hline
+Hepatitis &3536.76 &17,846,976,000 & 12,374,892 &1,442.19 \\\hline
+IMDB &7467.85&5,030,412,758,502,710&15,538,430 & 323,740,092.05 \\\hline
+Mondial &1112.84&4,655,957&1,746,870&2.67  \\\hline
+UW-CSE &3.84& 10,201,488&2,828 & 3,607.32\\\hline
+
+\end{tabular}
+}
+ % end scalebox
+\caption{Contengency Table (C.T.) Description : Building Time  in seconds. %The Learn-and-Join methods do the same 
+%\textbf{Zhensong: needs fixing}
+ \label{table:cttimes}}
+\end{table}
+
+
+[fill in discussion] 
+
+
+Table~\ref{table:runtimes}
+ provides the model search time for each of the link analysis methods. 
+%This does not include the time for computing table joins since this is essentially the same for all methods (the cost of the full join table). 
+On the smaller and simpler datasets, all search strategies are fast, 
+but on the medium-size and more complex datasets (Hepatitis, MovieLens), hierarchical search is much faster due to its use of constraints.
+%Adding prior knowledge as constraints could speed the structure learning substantially.
+%The reason for w LAJ+ starts with the previous LAJ method as the first phase. The edges among attributes that are discovered in the first phase are treated as fixed background knowledge in the second phase. 
+
+
+\begin{table} \centering
+%\scalebox{0.7in}{
+\resizebox{0.5\textwidth}{!}{
+\begin{tabular}[c]
+{|l|r|r|r|r|r|}\hline
+ \textbf{Dataset}  & \textbf{BBH3} & \textbf{Flat} & \textbf{Compl.} & \textbf{Discon.}\\\hline
+University&1.523&1.486& 0.186 &0.135 \\\hline
+Movielens(1M) & 1.528&0.968& 0.101&0.066 \\\hline
+Movielens(0.1M) &1.178& 0.986& 0.083&0.065 \\\hline
+Mutagenesis & 1.780&1.869& 0.115&0.096 \\\hline
+Financial  &96.308& 1,241.077& 0.203&0.080 \\\hline
+Hepatitis   & 416.704& N.T.& 0.272&0.134 \\\hline
+IMDB   & 551.643 & N.T.&0.286 &0.220 \\\hline
+Mondial & 190.162&1,289.534&0.280 &0.093 \\\hline
+UW-CSE & 2.896&2.367&0.181 &0.100 \\\hline
+\end{tabular}
+}
+ % end scalebox
+\caption{Model Structure Learning Time  in seconds.
+% \textbf{Zhensong: may show some realy SQL queries?}
+ \label{table:runtimes}}
+\end{table}
+
+
+
+\section{Empirical Evaluation: Statistical Scores}
+
+
+
+
+\begin{table}
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+		\hline \textbf{University} &{Pseudo\_BIC}& {Pseudo\_AIC} &{Norm\_log-likelihood} &{\# Para.}\\
+			\hline BBH3 &-554.01 & -99.50 & -5.50& 94\\
+			\hline Flat  & -3731.88 & -668.20 & -5.20& 663\\
+			 \hline Complete &-386566.28  & -50000.10& -5.10& 49995 \\
+		        \hline Disconnected &-121.44 &-31.89 &-8.89 &23 \\
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+\hline \textbf{Movielens(1M) } &{Pseudo\_BIC}& {Pseudo\_AIC} &{Norm\_log-likelihood} &{\# Para.}\\
+
+			\hline BBH3 &-4927.84& -295.44& -3.44&292\\
+			\hline Flat &-5168.08&-315.44 &-3.44& 312\\
+		      \hline Complete &-11461.86  &-678.44 &-3.44 &675 \\
+		        \hline Disconnected &-179.20 &-19.31 &-4.31 &15 \\
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+		\hline \textbf{Movielens(0.1M) } &{Pseudo\_BIC}& {Pseudo\_AIC} &{Norm\_log-likelihood} &{\# Para.}\\
+			\hline BBH3 &-1198.42&-87.10& -3.10&84\\
+			\hline Flat &-1691.20&-123.10 &-3.10& 120\\
+			 \hline Complete &-4160.11  &-294.09 &-3.09 &291 \\
+		        \hline Disconnected &-120.88 &-14.34 & -3.34&11 \\
+			
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+		\hline \textbf{Mutagenesis  } &{Pseudo\_BIC}& {Pseudo\_AIC} &{Norm\_log-likelihood} &{\# Para.}\\
+			\hline BBH3 &-9083.88 &-726.96 &-5.96& 721\\
+			\hline Flat & -9224.25 & -1120.59& -5.59& 1115\\
+			 \hline Complete &-5806905.08  &-423374.59 &-5.59 &423369 \\
+		        \hline Disconnected &-292.7 &-43.91 &-7.91 &36 \\
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+		\hline \textbf{Financial  } &{Pseudo\_BIC}& {Pseudo\_AIC}&{Norm\_log-likelihood} &{\# Para.}\\
+			\hline BBH3 &-68562.16 &-2443.74 &-10.74& 2433\\
+			\hline Flat &-188908818.94 &-7206670.64 & -10.66& 7206660\\
+			 \hline Complete &-12218648361.31  &-374400009.12 & -10.67&374399999 \\
+		        \hline Disconnected &-469.21 &-61.79 &-12.79 & 49\\
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+		\hline \textbf{Hepatitis  } &{Pseudo\_BIC}& {Pseudo\_AIC} &{Norm\_log-likelihood} &{\# Para.}\\
+			\hline BBH3 &-10364.93 & -585.58& -16.58& 569\\
+			\hline Flat &N.T. &N.T. &N.T.  &N.T. \\
+			 \hline Complete & N.T.  &N.T. &N.T. &N.T. \\
+		        \hline Disconnected &-473.81 &-76.30 &-18.30 &58 \\
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+		\hline \textbf{IMDB  } &{Pseudo\_BIC}& {Pseudo\_AIC}&{Norm\_log-likelihood} &{\# Para.}\\
+			\hline BBH3 &-2072673.77 & -60070.39&-11.39&60059\\
+			\hline Flat & N.T.&N.T.  &N.T.  &N.T.  \\
+			 \hline Complete &N.T.  &N.T. &N.T. &N.T. \\
+		        \hline Disconnected &-647.90 &-66.01 &-12.01 &54 \\
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+		\hline \textbf{Mondial  } &{Pseudo\_BIC}& {Pseudo\_AIC} &{Norm\_log-likelihood} &{\# Para.}\\
+			\hline BBH3 &-3980.41&-357.20&-18.20& 339\\
+			\hline Flat &-8886625.98 &-865255.07 &-14.07  &865241 \\
+			 \hline Complete &N.T.  &N.T. &N.T. &N.T. \\
+		        \hline Disconnected &-336.50 &-74.98 &-19.98 &55 \\
+			\hline
+		\end{tabular}
+}
+\end{center}
+
+\begin{center}
+\resizebox{0.5 \textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r| }
+		\hline \textbf{UW-CSE  } &{Pseudo\_BIC}& {Pseudo\_AIC} &{Norm\_log-likelihood} &{\# Para.}\\
+			\hline BBH3 & -3187.86& -248.1 & -8.10 & 240\\
+			\hline Flat &-42038.65& -3939.01 & -6.01& 3933 \\
+			 \hline Complete &-356947710.61  &-22118404.95 &-6.02 &22118399 \\
+		        \hline Disconnected &-287.63 &-55.24 &-10.24 &45 \\
+			\hline
+		\end{tabular}
+}
+\end{center}
+\caption{Statistical Performance of different Searching Algorithms by dataset.}
+\textbf{Zhensong: paramete learning  not terminated, mysql, may show some realy SQL queries?}
+\label{table:result_scores}
+\end{table}
+
+
+As expected, adding edges between link nodes improves the statistical data fit: 
+the link analysis methods LAJ+ and Flat perform better than the learn-and-join baseline in terms of log-likelihood on all datasets shown in table~\ref{table:result_scores}, except for MovieLens where the Flat search has a lower likelihood. On the small synthetic dataset University, flat search appears to overfit whereas the hierarchical search methods are very close. On the medium-sized dataset MovieLens, which has a simple structure, all three methods score similarly. Hierarchical search finds no new edges involving the single link indicator node (i.e., LAJ and LAJ+ return the same model). 
+
+The most complex dataset, Hepatitis, is a challenge for flat search, which seems to overfit severely with a huge number of parameters that result in a model selection score that is an order of magnitude worse than for hierarchical search. Because of the complex structure of the Hepatitis schema, the hierarchy constraints appear to be effective in combating overfitting.
+
+%
+%\begin{figure*}[htbp] %  figure placement: here, top, bottom, or page
+%   \centering
+%
+%\includegraphics[width=7in,height=0.3\textheight]{unielwin.png}
+%\includegraphics[width=7in,height=0.3\textheight]{movielens.png}
+%\includegraphics[width=7in,height=0.3\textheight]{muta.png}
+%
+%  \caption{Real Bayes Net Examples:.}
+%   \label{fig:BN_Examplse}
+%\end{figure*}
+
+
+ The situation is reversed on the Mutagenesis dataset where flat search does well: compared to previous LAJ algorithm, %attribute-only search,
+it manages to fit the data better with a less complex model. 
+Hiearchical search performs very poorly compared to flat search (lower likelihood yet many more parameters in the model). Investigation of the models shows that the reason for this phenomenon is a special property of the Mutagenesis dataset: The two relationships in the dataset, Bond and MoleAtm, involve the same descriptive attributes. The hierarchical search learns two separate Bayes nets for each relationship, then propagates both sets to the final result. However, the union of the two graphs may not be a compact model of the associations that hold in the entire database. A solution to this problem would be to add a final pruning phase where redundant edges can be eliminated. We expect that with this change, hierarchical search would be competitive with flat search on the Mutagenesis dataset as well.
+%
+%whereas in most datasets, relationships are sparse---very few pairs of entities are actually linked---in Mutagenesis most entities whose type allows a link are in fact linked. Thus the absence of a relationship carries information, and
+%as a result, we find strong correlations between attributes conditional on {\em the absence of relationships}. 
+%The LAJ+ algorithm is constrained so that it cannot add Bayes net edges between attribute nodes at its second stage, when absent relationships are considered. 
+%As a result, it can represent attribute correlations conditional on the absence of relationships only indirectly through edges that involve link indicators. 
+%A solution to this problem would be to add a phase to  the search so that we first learn edges between attributes conditional on the existence of relationships, 
+%then conditional on their nonexistence. The last phase then would consider edges that involve relationship nodes. We expect that with this change, hierarchical search would be competitive with flat search on the Mutagenesis dataset as well.
+
+%Investigation of the models shows that the reason for this phenomenon is a special property of the Mutagenesis dataset: 
+%whereas in most datasets, relationships are sparse---very few pairs of entities are actually linked---in Mutagenesis most entities whose type allows a link are in fact linked. Thus the absence of a relationship carries information, and
+%as a result, we find strong correlations between attributes conditional on {\em the absence of relationships}. 
+%The LAJ+ algorithm is constrained so that it cannot add Bayes net edges between attribute nodes at its second stage, when absent relationships are considered. 
+%As a result, it can represent attribute correlations conditional on the absence of relationships only indirectly through edges that involve link indicators. 
+%A solution to this problem would be to add a phase to  the search so that we first learn edges between attributes conditional on the existence of relationships, 
+%then conditional on their nonexistence. The last phase then would consider edges that involve relationship nodes. We expect that with this change, hierarchical search would be competitive with flat search on the Mutagenesis dataset as well.
+
+%
+%
+%Between the link analysis methods, flat search often scores higher than hierarchical search (LAJ+). 
+%This confirms that it is a statistically sound method. 
+%On most datasets flat search and LAJ+ are close, which indicates that LAJ+ offers an attractive trade-off between statistical power and computational tractability. 
+
+
+%The situation is reversed on the Mutagenesis dataset where 
+%The reason is that flat search misses relationships between attributes from related entities. This happens because the join table contains many more rows with absent relationships than with present relationships. Thus a score-based Bayes net learner assigns by far the most weight to the cases where there is no relationship between different entities. In those cases, there is no correlation between their attributes. The LAJ+ system starts with edges learned among attributes and fixes these during link analysis. In probabilistic terms, we can think of the LAJ+ system as first analysing attribute dependencies {\em conditional on the given link structure}, and then analyzing dependencies among link types.
+
+%\section{Computing Data Join Tables} \label{sec:mobius}
+%
+% \textbf{replace this section with big-data.pdf section 6 ?}
+%
+%The learning algorithms described in this paper rely on the  availability of the extended relational tables $R^{+}$ (see Figure~\ref{fig:university-tables}). A naive implementation constructs this tables using standard joins. However, the cross-products grow exponentially with the number of relations joined, and therefore do not scale to large datasets. In this section we describe a ``virtual join'' algorithm that computes the required data tables without the quadratic cost of materializing a cross-product. 
+%
+%Our first observation is that Bayes net learners do not require the entire extended table, but  only the {\em sufficient statistics}, namely the counts of how many times each combination of values occurs in the data \cite{Neapolitan2004}. For instance, the attribute-relationship table of Figure~\ref{fig:university-tables}, each combination is observed exactly once. Our second observation is that to compute the sufficient statistics, it suffices to compute the {\em frequencies} of value combinations rather than the counts, because counts can be obtained from frequencies by multiplying with the appropriate domain sizes. An efficient virtual join algorithm for computing frequencies in relational data was recently published by Schulte {\em et al.} \cite{Schulte2013}. Their algorithm is based on the fast M\"obius transform (FMT). We outline it briefly. 
+%
+%
+%Consider a set of relationship indicator nodes $\R_{1} = \cdot, R_{2} = \cdot,\ldots, R_{m}$ and attribute nodes $\functor_{1},\ldots,\functor_{j}$. The sufficient statistics correspond to a joint distribution over these random variables.
+%
+%$m$ Boolean relationship random variables:
+%
+%$$P(\R_{1} = \cdot, R_{2} = \cdot,\ldots, R_{m} = \cdot; \functor_{1} = \cdot,\ldots,\functor_{j} = \cdot).$$
+%
+%Our goal is to compute sufficient statistics of this form for relational data. The FMT allows us to efficiently find sufficient statistics for binary random variables. We apply it with a fixed set of values for the attribute nodes, which corresponds to a joint distribution over the $m$ Boolean relationship random variables:
+%
+%$$P(\R_{1} = \cdot, R_{2} = \cdot,\ldots, R_{m} = \cdot; \functor_{1} = v_{1},\ldots,\functor_{j} = v_{j}).$$
+%
+%The FMT uses the local update operation
+%
+%\begin{equation}
+%P(\R = \false, \set{R}) =
+%P(\set{R}) - P(\R = \true, \set{R})
+%\label{eq:dynamic}
+%\end{equation}
+%where $\set{R}$ is a conjunction of relationship specifications, possibly with both positive and negative relationships. The equation continues to hold if we extend relationship specifications with  any fixed set of value assignments $\functor_{1} = v_{1},\ldots,\functor_{j} = v_{j}$ to attribute functor nodes $\functor_{1},\ldots,\functor_{j}$. Using the convention that $\R = \ast$ means that the value of relationship $\R$ is unspecified, the equation~\eqref{eq:dynamic} can be rewritten as
+%
+%\begin{equation}
+%P(\R = \false, \set{R}) =
+%P(\R=*, \set{R}) - P(\R = \true, \set{R}).
+%\label{eq:dynamic2}
+%\end{equation}
+%
+%\begin{figure}[tb]
+%\begin{center}
+%\resizebox{0.5\textwidth}{!}{
+%%%!%\includegraphics[width=1\textwidth]{pbn}
+%\includegraphics{figures/mobius-v2.pdf}
+%}
+%\caption{(a) A Bayes net with two relationship nodes. (b) An illustrative trace of the fast M\"obius transform. 
+%\label{fig:example}}
+%\end{center}
+%\end{figure}
+%
+%The FMT begins with an initial table of sufficient statistics where all relationship nodes have the value $\true$ or $*$ but not $\false$. Since these sufficient statistics do not involve false relationships, they can be computed efficiently from a relational database using table joins. The procedure then goes through the relationship nodes $\R_{1},\ldots,\R_{m}$ in order, at stage $i$ replacing all occurrences of $\R_{i} = *$ with $\R_{i} = \false$, and applying the local update equation to obtain the probability value for the modified row.
+%%using Equation~\eqref{eq:dynamic}. 
+%At termination, all $*$ values have been replaced by $\false$ and the table specifies all joint frequencies as required. Algorithm~\ref{alg:fmt} gives pseudo code and Figure~\ref{fig:example} presents an example of the transform step. For example, the probability entry for the second row of the middle table is computed by applying the equation
+%%\begin{footnotesize}
+%\begin{eqnarray*}
+%P(\R_{1} = \false, \R_{2} = \true; g(\X) = W) & = & \\
+% P(\R_{1} = *, \R_{2} = \true; g(\X) = W) &- & \\
+% P(\R_{1} = \true, \R_{2} = \true; g(\X) = W) & = &\\
+%0.15 - 0.1 = 0.05  
+%\end{eqnarray*}
+%%\end{footnotesize}
+%which is an instance of Equation~\eqref{eq:dynamic2}.
+%\begin{algorithm}[t]
+%\begin{algorithmic}
+%%{\footnotesize
+%%\STATE \underline{Notation}: $\r$ = Assignment for Functor Nodes; \\$\f_{\r}$= the value of 
+%%$f(t_{1},\ldots,t_{k})$ in row $\r$; \\ $\tau(\r)$ =  probability $\r$ stored in JP-table $\tau$. 
+%\STATE \underline{Input}: database $\D$; a set of %functor 
+%nodes divided into attribute nodes $\functor_{1},\ldots,\functor_{j}$ and relationship nodes $\R_{1},\ldots,\R_{m}$.  
+%%and parent variables divided into a set $\set{\R_{1},\ldots,\R_{m}}$ of relationship predicates and a set $\set{C}$ of function terms that are not relationship predicates.
+%% \STATE \underline{Calls}: $\join(\set{\C}, \R_1,\cdots,  \R_k)$. Computes join frequencies conditional on relationships $\R_{1},\ldots,\R_{k}$ being true.
+%\STATE \underline{Output}: joint probability table specifying the data frequencies for each joint assignment to the input 
+%%functor 
+%nodes. 
+%%$\tau$ %such that the entry $\tau(\r)$ for row $\r \equiv
+%%(\set{\C} = \set{\C}_{\r}, \set{\R} = \set{\R}_{\r})$ is the frequencies $P_{\D}(\set{\C} = \set{\C}_{\r}, \set{\R} = \set{\R}_{\r})$ in the database distribution $\D$.
+%%}
+%\end{algorithmic}
+%\begin{algorithmic}[1]
+%%{\small
+%%\STATE \COMMENT{fill in rows with no false relationships using table joins}\label{line:start-join}
+%\FORALL{attribute value assignments $\functor_{1} := v_{1}, \ldots, \functor_{j} := v_{j}$}
+%\STATE initialize the table: set all relationship nodes to either $\true$ or $*$; find joint frequencies with data queries.
+%%\COMMENT{fill in rows with no false relationships using table joins}\label{line:start-join}
+%\FOR{$i=1$ to $m$}
+%%\IF[$r$ has $m-i$ unspecified relationships]{$r$ has exactly $i$ true relationships$\R^1,..,\R^i$}
+%%\STATE find $P_{\D}(\set{\C} =\set{\C}_{\r}, \set{\R} = \set{\R}_{\r})$ using $\join(\set{\C} =\set{\C}_{\r}, \set{\R} = \set{\R}_{\r})$. Store the result in $\tau(\r)$. \label{line:join}
+%\STATE Change all occurrences of $R_{i} = *$ to $R_{i} = \false$.
+%\STATE Update the joint frequencies using %Equation
+%\eqref{eq:dynamic}.
+%\ENDFOR
+%\ENDFOR 
+%%}
+%\end{algorithmic}
+% \caption{The inverse M\"obius transform for parameter estimation in a Parametrized Bayes Net. 
+%% The algorithm transforms observed frequencies that involve existing (positive) relationships only into a complete set of joint frequencies that involve any combination of positive and negative relationships. 
+% %For simplicity we omit nonrelational conditions. 
+% \label{alg:fmt}}
+%\end{algorithm}
+
+
+
+\section{Computing Relational Contingency Tables} \label{sec:mobius}
+
+The learning algorithms described in this paper rely on the  availability of the extended relational tables $R^{+}$ (see Figure~\ref{fig:university-tables}). Our first naive implementation constructs this tables using standard joins. While this was sufficient for our experiments, the cross-products carry a quadratic costs for binary relations, and therefore do not scale to large datasets. Moreover, the hierarchical search requires joins of the extended tables. In this section we describe a ``virtual join'' algorithm that computes the required data tables without the quadratic cost of materializing a cross-product. 
+
+Our starting point is the observation that a statistical learning algorithm like a Bayes net learner does not require an enumeration of individuals tuples, but only {\em sufficient statistics} \cite{Heckerman1995,Schulte2011}. These can be represented in {\em contingency tables} as follows \cite{Moore1998}. Consider a fixed list of relationship nodes $\R_{1}, R_{2},\ldots,R_{m}$, and attribute nodes $\functor_{1},\ldots,\functor_{j}$. A \textbf{query} is a set of $(node = value)$ pairs where each value is of a valid type for the node. The \textbf{result set} of a query in a database $\D$ is the set of instantiations of the population variables such that the query evaluates as true in $\D$. For example, in the database of Figure~\ref{fig:university-tables} the result set for the query\\ $\it{intelligence}(\S) = 2$, $\it{rank}(\S) = 1$, $\it{rating}(\C) = 3$, $\it{Diff}(C) = 1$, $\it{Registered}(\S,\C) = F$\\ is the singleton $\{\langle \it{kim}, \it{101}\rangle\}$. The \textbf{count} of a query is the cardinality of its result set. Each subset of nodes $\set{V} = v_{1},\ldots,v_{n}$ has an associated \textbf{contingency table} denotes by $CT(\set{V})$. This is a table with a row for each of the possible assignments of values to the nodes in $\set{V}$. The row corresponding to $V_{1} = v_{1},\ldots,V_{n} = v_{n}$ records the count of the corresponding query. 
+Figure~{fig:ct} shows a contingency table.
+
+\begin{figure}[tb]
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+%%!%\includegraphics[width=1\textwidth]{pbn}
+\includegraphics{figures/ct-table.pdf}
+}
+\caption{An example contingency table for the attribute-relation table of Figure~\ref{fig:university-tables}, where for illustration we have added counts for another student like Jack and another course like 103.
+\label{fig:ct}}
+\end{center}
+\end{figure}
+
+A \textbf{conditional contingency table}, written $\ct(V_{1},\ldots,V_{k}|V_{k+1} = v_{k+1},\ldots, V_{k+m} = v_{k+m})$
+is the contingency table whose column headers are $V_{1},\ldots,V_{k}$ and whose counts are  defined by subset of instantiations that match the conditions to the right of the | symbol. 
+
+Our flat search algorithm can be implemented by computing the contingency table for all functor nodes, then presenting it to a Bayes net learner. The hierarchical search algorithms can be implemented by computing the contingency tables for each relationship chain in the lattice (cf. Figure~\ref{fig:big-lattice}). For a relationship set, the nodes in the contingency table comprise (1) the descriptive attributes of the entities involved in the relationship set, (2) the descriptive attributes of the relationships, and (3) a Boolean relationship node for each member of the set. This section describes a method for computing these contingency tables level-wise.
+
+
+ 
+%For example, in Figure~\ref{fig:example} we have $m=2,j=1$ and $\functor_{1} = \it{gender}(\X)$. The sufficient statistics for this set of random variables are the database probabilities
+%
+%
+%\begin{equation} \label{eq:joint-prob}
+%P_{\D}(\R_{1} = b_{1}, R_{2} = b_{2},\ldots, R_{m} = b_{m}; \functor_{1} = v_{1},\ldots,\functor_{j} = v_{j})
+%\end{equation}
+%
+%where the $b_{i}$ values are Boolean and each $v_{j}$ is from the domain of $\functor_{j}$. 
+%Bayes net algorithms can construct a Bayes net when provided with a table as input that lists these sufficient statistics. In what follows, we suppose that there are $r$ possible assignments of the form~\ref{eq:joint-prob} and therefore $r$ sufficient statistics to be specified.
+
+%In this section we describe algorithms for computing  probability estimates for the parameters $P_{\D}(\it{child}\_value,\it{parent}\_\it{values})$ in a functor Bayes net. The parameters can be estimated independently for each child node. We refer to a joint specification of values $(\it{child}\_value,\it{parent}\_\it{values})$ as a \textbf{family state}. Consider a child node specifying a relationship $\R_{1}$ whose parents comprise relationship nodes $R_{2},\ldots,R_{m}$, and attribute nodes $\functor_{1},\ldots,\functor_{j}$. The algorithms below can be applied in the same way in the case where the child node is an attribute node. The number of family states $r$ is the cardinality of the Cartesian product of the ranges for every node in the family.
+% The Bayes net parameters are $r$ conditional probabilities of the form (we separate relationships from attributes by a semicolon)
+%\begin{equation} \label{eq:cond-prob}
+%P(\R_{1} = b_{1}| R_{2} = b_{2},\ldots, R_{m} = b_{m}; \functor_{1} = v_{1},\ldots,\functor_{j} = v_{j}),
+%\end{equation}
+%where the $b_{i}$ values are Boolean and each $v_{j}$ is from the domain of $\functor_{j}$. 
+%Figure~\ref{fig:example}~(Top) provides an example with $\R_{1} = \it{Friend}(\X,\Y)$, $\R_{2} = \it{Follows}(\X,\Y)$, and $\functor_{1} = \it{gender}(\X)$. In this example, all nodes are binary, so the CP-table requires the specification of $r= 2 \times 2 \times 2 = 8$ values.\footnote{Although only 4 of these values are independent, we take the number of parameters to be $r = 8$ for simplicity of exposition of the lattice Moebius transform in the next section.}
+
+
+
+So long as a database probability involves only positive relationships,
+%formula only contains positive relationships, 
+%the computation is straightforward. 
+%For example, in 
+%$P_{\D}(\it{gender}(\X) = M, \it{Friend}(\X,\Y) = \true)$, the value  $\grounds_{\D}(\it{gender}(\X) = M, \it{Friend}(\X,\Y) = \true)$, the count of friendship pairs $(x,y)$ where $x$ is male and the
+%{\em Friend} relationship is true, 
+and can be carried out by regular table joins or optimized virtual joins~\cite{Yin2004}. 
+%
+Computing joint probabilities for a family containing one or more negative relationships is harder. A naive approach would explicitly construct new data tables that enumerate tuples of objects that are {\em not} related (see Figure~\ref{fig:university-tables}).
+%and then apply existing counting methods to the new tables. 
+However, the number of unrelated tuples is too large to make this scalable (think about the number of user pairs who are {\em not} friends on Facebook). 
+%A numerical example will illustrate why this is not feasible. Consider a university database with 20,000 Students, 1,000 Courses and 2,000 TAs. If each student is registered in 10 courses, the size of a $\it{Registered}$ table is 200,000. So the number of complementary student-course pairs is $2 \times 10^{7}-2 \times 10^{5}$, which is too big for most database systems. 
+%If we consider joins, complemented tables are even more difficult to deal with: suppose that each course has at most 3 TAs. Then  the number of satisfying instantiations of a positive relationship only formula such as $\it{Registered}(\S,\C) = \true,\it{TA}(\T,\C) = \true)$ is less than $6 \times 10^{5}$, whereas with negations the number of instantiations of the expression $\it{Registered}(\S,\it{course}) = \false, \it{TA}(\T,\it{course}) = \false)$ is on the order of $4 \times 10^{10}$. 
+%\subsection{The M\"obius parametrization.} 
+%To compute frequencies involving negated relationships, we would like to use the optimized algorithms for table join frequencies as an oracle/black box. 
+%Can we instead reduce the computation of sufficient statistics that involve negated relationships to the computation of sufficient statistics that involve existing (positive) relationships only? 
+In their work on learning Probabilistic Relational Models with existence  uncertainty, Getoor et al. provided a subtraction method for the special case of estimating counts with only a single negated relationship \cite[Sec.5.8.4.2]{Getoor2007c}. They did not treat contigency tables with multiple negated relationships, which we consider next.
+%this method does not extend to multiple negated relationships.
+
+\subsection{Level-Wise Computation of Contingency Tables: The Subtraction Method} 
+
+We first introduce some notation. Let $R$ be a relationship node and let $\set{R}$ be a set of relationship nodes.
+
+\begin{itemize}
+\item $\eatts(R)$ denotes the set of entity attribute nodes for the population variables involved in the relationship $R$. 
+\item $\eatts(\set{R})$ is the union of the entity attributes for each relationship $R \in \set{R}$.
+\item $\ratts(R)$ denotes the set of relationship attribute nodes for the population variables involved in the relationship $R$.
+\item $\ratts(\set{R})$ is the union of the relationship attributes for each relationship $R \in \set{R}$.
+\item $\atts(R)$ is the set of both entity and relationship attributes for relationship $R$, similarly for $\atts({\set{R}})$.
+\end{itemize}
+
+We next define some basic operations on CT-tables. These are analogues to relational algebra operations on simple tables.
+
+\begin{enumerate}
+\item Let $\ct_{1}(\set{V}),\ct_{2}(\set{V})$ be two union-compatible contingency tables with the same column headers, and (hence) with the same rows, except for the count entries. The \textbf{table difference} $\ct_{1} - \ct_{2}$ is a table with the same column headers, such that $$\#_{[\ct_{1} - \ct_{2}]}(\set{V}=\set{v})= \#_{[\ct_{1}]}(\set{V}=\set{v}) - \#_{[\ct_{1}]}(\set{V}=\set{v}).$$
+\item Let $\ct_{1}(\set{V}),\ct_{2}(\set{V'})$ be two disjoint contingency tables, i.e., $V \cap V' = \emptyset$. Then the \textbf{cross-product} $\ct_{1}(\set{V}) x \ct_{2}(\set{V'})$ is a table with the column headers $\set{V} \cup \set{V'}$ whose rows form the cross-product of the rows in $\ct_{1}$ and in $\ct_{2}$, and whose count satisfy $$\#_{[\ct_{1} \times  \ct_{2}]}(\set{V}=\set{v},\set{V'}=\set{v'})= \#_{[\ct_{1}]}(\set{V}=\set{v}) x \#_{[\ct_{1}]}(\set{V}=\set{v}).$$
+\item Let $\set{V'}$ be a proper subset of columns $\set{V}$ for a contingency table $\ct(\set{V})$. Then the \textbf{marginal} table $\marginalize(\ct,\set{V'})$ is a table whose headers are $\set{V}-\set{V'}$, such that the count $\#_{\marginalize(\ct,\set{V'})}(\set{V}-\set{V'}=\set{v^{*}}$ is the sum of the counts in $\ct(\set{V})$ that satisfy $(\set{V}-\set{V'})=\set{v^{*}}$.
+\end{enumerate}
+
+We are now ready to state some contingency algebra equivalences that allows us to compute counts for rows with negative relations from rows with positive relations.
+
+%\begin{proposition}
+Let $R$ be a relationship node and $\set{R}$ be a set of relationship nodes not containing $R$. Then the following equations hold.
+%
+%%\begin{eqnarray}
+%\begin{align*}
+%\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = F) 
+%\\&=& \ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = *) - \ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = T)\\
+%\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = *) \\& = &\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}) \times_{V \in \eatts(R) - \eatts(\set{R})} \ct{V}\\
+%\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = T) \\& = & \marginalize(\ct(\set{R},\eatts(\set{R}),\ratts(\set{R},\eatts(R),\ratts(R)| R = T),\ratts(R))
+%%\end{eqnarray}
+%\end{align*} 
+%%\end{proposition}
+
+\begin{flalign*}
+&\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = F) = &\\
+&  \ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = *) &\\
+ &-\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = T) &
+\end{flalign*}
+\begin{flalign*}
+&\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = *)  = &
+\\
+&\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}) \times_{V \in \eatts(R) - \eatts(\set{R})} \ct{V})&
+\end{flalign*}
+
+\begin{flalign*}
+&\ct(\set{R},\eatts(\set{R}),\ratts(\set{R}),\eatts(R)| R = T) = &\\
+&\marginalize(\ct(\set{R},\eatts(\set{R}),&\\
+& \ratts(\set{R},\eatts(R),\ratts(R)| R = T),\ratts(R))  \biggr)&
+\end{flalign*}
+
+
+
+The first equation is important because it shows how counts with a false relationship can be computed from counts with the relationship unspecified, and with the relationship value true. The second equation is important because it shows that counts with the relationship unspecified can be computed from ct tables that omit the relationship, multiplied by tables for entity attributes that are involved in the relationship (and that do not already appear in other relationships). The third equation is important because it shows how a table without the descriptive attributes of R can be computed from a complete CT table with R by marginalizing out the descriptive attributes of R.
+
+%Figure~\ref{fig:table-equation} illustrates the equations. 
+Figure~\ref{fig:flow} illustrates the equations. 
+
+\begin{figure}[tb]
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+%%!%\includegraphics[width=1\textwidth]{pbn}
+\includegraphics{figures/subtraction-flow.pdf}
+}
+\caption{Examples of the table algebra operations and equations.
+\label{fig:flow}}
+\end{center}
+\end{figure}
+
+
+\marginpar{could these be done probabilistically instead? With one single equation? Maybe do it that way for AI vs. VLDB?}
+
+For a given chain of relationship nodes $\set{R} = R_{1},\ldots,R_{m}$, the equations can be applied as follows. 
+
+\marginpar{make this pseudocode}
+
+\begin{enumerate}
+\item Find the CT table for $R_{1}=\true,\ldots,R_{m}=\true$.
+\item For $j=1,\ldots,m-1$, apply the proposition to find $\ct(\atts(\set{R}),R_{j+1},\ldots,R_{m}|R_{1} = \true,\ldots,R_{j} = \true$.
+\item Apply the proposition one last time to find $\ct(\atts(\set{R}),\set{R}$.
+\end{enumerate}
+
+
+
+\section{Conclusion} We described different methods for extending relational Bayes net learning to correlations involving links. 
+Statistical measures indicate that Bayes net methods succeed in finding relevant correlations. 
+There is a trade-off between statistical power and computational feasibility (full table search vs constrained search). 
+Hierarchical search often does well on both dimensions, but needs to be extended with a pruning step to eliminate redundant edges.
+
+A key issue for scalability is that most of the learning time is taken up by forming table joins, whose size is the cross product of entity tables. 
+These table joins provide the sufficient statistics required in model selection. 
+To improve scalability, computing sufficient statistics needs to be feasible for cross product sizes in the millions or more. 
+A possible solution may be the virtual join methods that compute sufficient statistics without materializing table joins, such as the Fast M\"obius Transform~\cite{Schulte2012b,Yin2004}.
+
+A valuable direction for future work is to compare learning link correlations with directed and undirected models, such as Markov Logic Networks \cite{Domingos2009}. As we explained in Section~\ref{sec:related}, current relational learners for undirected models do not scale to most of our datasets. One option is to subsample the datasets so that we can compare the statistical power of directed and undirect learning methods
+independently of scalability issues. Khosravi {\em et al.} were able to obtain structure learning results for Alchemy~\cite{Khosravi2010}, but did not evaluate the models with respect to link correlations. For the MLN-Boost system, we were able to obtain preliminary results on several benchmark databases  (including Mutagenesis and Hepatitis), by selecting the right subset of target predicates. MLN-Boost is the current state-of-the-art learner for Markov Logic Networks \cite{Khot2011}. The Bayes net models were competitive with the MLN-Boost models on a standard cross-validation measure of predictive accuracy.
+
+\bibliography{master}
+\bibliographystyle{plain}
+\end{document}
+
+
+\section{undersample notes}
+From our current experiments  we observed that after adding the relationship indicator in the relation tables, the learned BN contain more knowledge. 
+In other words it has more edges showing the dependency relationship between different link types.
+(maybe give an example to show these edges are meaningful and helpfull for understanding the dataset)
+
+However due to the natural of BIC score, which is prefer the simpler model, so laj+ model can not beat the model using flat search.
+And also this is casued by the skew distribution problem (citation?) (some datasets the negative and positive ratio is more than 1000).
+There is still no general solution people could emply. 
+We follow the undersample approach (citation) to keep the ratio as 1:1 and found some very intereting results.
+
+

@@ -1,0 +1,605 @@
+%todo: l% comments: theoretically, learning with the join tables is like 1) normalizing all clique potentials to be probabilities, and 2) ignoring the partition constant. In case of link independence, partition constant is 1, so this is correct.
+% other idea for efficient learning from large tables: make artificial table where frequencies are given out of 1000 cases, this is like having frequency exact up to 3 decimal places. would that work for Hassan?
+% for pruning: can we do it at class level? E.g. use decisoin tree, where you split on nodes like (R=T,S=a) and (R=F,S=b)? Or maybe using logistic regression on original table? interesting issue: 1) pruning at class level, need to get rid of entries where conditional distribution is almost uniform. One way to do that may be to run BN learner with just binary nodes from each parent condition, see which ones get pruned away. Maybe use decision tree idea plus BN pruning to avoid the problem of splits adding irrelevant information. Or maybe use backward pruning. 2) prune at individual level, maybe use logistic regression a la Getoor. This is inefficient if you use packages of parents repeatedly. 3) Can also use simple frequencies as a starting point for further work.
+\documentclass[letterpaper]{article}
+\input{preamble-stuff}
+\usepackage{aaai}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+%\usepackage[normalleading,normalmargins,normalsections,normalindent,normallooseness,normaltitle]{savetrees}
+%\def\BibTeX{Bib\TeX}
+%\parindent=0pt
+%\parskip=\baselineskip
+\begin{document}
+\date{}
+\title{Structure Learning for Markov Logic Networks with Many Descriptive Attributes}
+\author{Hassan Khosravi \and Oliver Schulte\thanks{Supported by a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada.} \and Tong Man \and Xiaoyuan Xu  \and Bahareh Bina  \\ \texttt{hkhosrav@cs.sfu.ca, oschulte@cs.sfu.ca, mantong01@gmail.com,} \\ \texttt{xiaoyuanxu08@gmail.com, bba18@cs.sfu.ca} \\ School of Computing Science\\ Simon Fraser University\\Vancouver-Burnaby, Canada} 
+%\date{April 8, 1999 (Revised in  2009 by the AAAI Staff)}
+\maketitle
+\begin{abstract}
+Many machine learning applications that involve relational databases incorporate first-order logic and probability. Markov Logic Networks (MLNs) are a prominent statistical relational model that consist of weighted first order clauses. Many of the current state-of-the-art algorithms for learning MLNs 
+%outperform an impressive array of benchmarks, but they 
+have focused on relatively small datasets with few descriptive attributes, where predicates are mostly binary and the main task is usually prediction of links between entities.
+% and links between entities. 
+%the main task is to predict binary predicates links between entities. 
+This paper addresses what is in a sense a complementary problem: learning the structure of an MLN that models the distribution of discrete descriptive attributes on medium to large datasets, given the links between entities in a relational database. 
+%however most of the datasets used for structure learning in MLNs have been relatively small or lack descriptive attributes. 
+Descriptive attributes are usually nonbinary and can be very informative, but they increase the search space of possible candidate clauses. 
+We present an efficient new algorithm for learning a directed relational model (parametrized Bayes net), which produces an MLN structure via a standard moralization procedure for converting directed models to undirected models. 
+Learning MLN structure in this way is 200-1000 times faster and scores substantially higher in predictive accuracy than benchmark algorithms
+%. than a standard MLN learning algorithm (from the Alchemy package). Using standard MLN parameter estimation algorithms 
+on three relational databases. 
+\end{abstract}
+
+\section{Introduction}
+%Many databases store data in relational format, with different types of entities and information about links between the entities. 
+The field of statistical-relational learning (SRL) has developed a number of new statistical models for relational databases \cite{SRL2007}. Markov Logic Networks (MLNs) form one of the most prominent SRL model classes; they generalize both first-order logic and Markov network models \cite{Domingos2007}. MLNs have achieved impressive performance on a variety of SRL tasks. Because they are based on undirected graphical models, they avoid the difficulties with cycles that arise in directed SRL models \cite{bib:jensen-chapter,Domingos2007,Taskar2002}.
+%\cite{Domingos2007,Taskar2002}.
+An open-source benchmark system for MLNs is the Alchemy package \cite{Kok2009a}.
+%\marginpar{take this to MLN section} Essentially, an MLN is a set of weighted first-order formulas that compactly defines a Markov network comprising ground instances of logical predicates. The formulas are the structure or qualitative component of the Markov network; they represent associations between ground facts. The weights are the parameters or quantative component; they assign a likelihood to a given relational database (interpretation) by using the log-linear formalism of Markov networks. 
+This paper addresses structure learning for MLNs in relational schemas that feature a significant number of descriptive attributes, compared to the number of relationships. 
+
+%\paragraph{Approach} 
+
+ %(e.g., $\it{gpa}(\S) = \it{lo}, \it{gpa}(\S) = \it{medium}, \it{gpa}(\S) = \hi$, etc.). 
+%Thus descriptive attributes define a large search space of clauses. 
+
+%and applying the log-linear definition of a distribution over ground facts. 
+Our approach is to learn a (parametrized) Bayes net (BN)  that defines connections between {\em predicates} or {\em functions} \cite{Poole2003}. Associations between predicates constitute a smaller model space than clauses that can be searched more efficiently (cf. \cite[10.7]{Kersting2007}). Our algorithm learns a model of the joint distribution of descriptive attributes given the links between entities in a database, which is in a sense the complementary problem to link prediction. Applying a standard moralization technique to the BN produces an MLN that we refer to as a moralized Bayes net (MBN).
+
+%Our algorithm employs Bayes net (BN) learning techniques that define connections between {\em predicates} or {\em functions}. The predicate level defines a smaller model space that can be searched more efficiently for descriptive attributes. Our algorithm learns a model of the joint distribution of descriptive attributes given the links between entities in a database, which is in a sense the complementary problem to link prediction. It has three phases.
+
+%\begin{enumerate}
+%\item Learn the structure of a parametrized Bayes network [Poole]. This is a basic directed graphical SRL model whose nodes are functors (relationship predicates or function symbols) containing first-order variables. The syntax of parametrized Bayes networks is similar to that of other directed models, such as PRMs and BLPs \cite{Getoorprm2001,Kersting2007}.
+
+%\item Moralize the parametrized BN structure to obtain an undirected graphical model $U$: connect the parents of each node and make all edges undirected.
+%\label{clause:moralize}
+%\item Translate $U$ into a set of ground formulas for an MLN $M$: For each clique $\clique$ in $U$, and for each assignment of values to the nodes in $c$, there is a formula in $M$ corresponding to the assignment. \label{clause:mln}
+%\end{enumerate}
+
+%We refer to this algorithm as a {\em moralization method}. Steps~\ref{clause:moralize} and~\ref{clause:mln} are computationally straightforward. 
+
+The main technical contribution of the paper is a new algorithm for learning the structure of a parametrized BN.  The algorithm upgrades a single table BN learner, which can be chosen by the user,
+by decomposing the learning problem for the entire database into learning problems for smaller tables. The basic idea is to apply the BN learner repeatedly to tables and join tables from the database, and combine the resulting graphs into a single graphical model for the entire database. As the computational cost of the merge step is negligible, the run-time of this learn-and-join algorithm is essentially determined by the cost of applying the BN learner to each (join) table separately. Thus our algorithm leverages the scalability of single-table BN learning to achieve scalability for MLN structure learning.
+
+We evaluated the MBN structures using one synthetic dataset and two public domain datasets (MovieLens and Mutagenesis). The learn-and-join algorithm constructs an MLN in reasonable time in cases where Alchemy produces no result. When both methods terminate, we observe a speedup factor of 200-1000.
+%In our experiments on small datasets, the run-time of the learn-and-join algorithm is about 200-1000 times faster than the benchmark Alchemy program  \cite{Kok2009} for learning MLN structure. On medium-size datasets, such as the Movielens database, Alchemy does not return a result given our system resources, whereas the learn-and-join algorithm produces an MLN within 2 hours. 
+%To evaluate the predictive performance of the learned MLN, we use the parameter estimation routines in the Alchemy package. 
+Using standard prediction metrics for MLNs, we found in empirical tests that the predictive accuracy of the moralized BN structures was substantially greater than that of the MLNs found by Alchemy. 
+%In sum, the moralization method scaled to larger datasets than Alchemy and achieved a speed-up of 100 times [check] on smaller datasets, while obtaining greater predictive accuracy. 
+The difficulties we observed for current MLN methods are not surprising as it has been noted that these methods are not suitable for clauses that include function terms \cite[Sec.8]{Mihalkova2007}, which are the most natural representation for descriptive attributes. Our code and datasets are available for anonymous ftp download from ftp://ftp.fas.sfu.ca/pub/cs/oschulte/aaai2010. 
+%Our results provide evidence that the moralization approach is a promising approach for closing this gap.
+
+%\paragraph{Contributions}
+%(1) A new structure learning algorithm for Bayes nets that model the distribution of descriptive attributes given the link structure in a relational database. \\
+%(2) A Markov logic network structure can be obtained by moralizing the Bayes net. We provide a comparison of the moralization approach to current MLN methods.
+
+\paragraph{Paper Organization.}
+
+%Methods to unify the strengths of first-order logic and probabilistic graphical models have become an important aspect of recent research in statistical relational learning \cite{Getoor2007c, blps, RDNs}.	Markov Logic Networks (MLNs) are among the most well known methods proposed for statistical relational learning. Syntactically MLNs extend first-order logic so each formula has a weight attached to it. Semantically, they can represent a probability distribution over possible worlds using formulas and their coressponding weights. 
+
+%Our structure learning algorithm constructs a parametrized Bayes net as defined in \cite{Poole2003}. 
+We review related work, then parametrized BNs and MLNs. Then we present the learn-and-join algorithm for parametrized BNs.
+%, and describe how moralization produces MLNs from such BNs. 
+We compare the moralized Bayes net approach  to standard MLN structure learning methods implemented in the Alchemy system, both in terms of processing speed and in terms of model accuracy.
+
+\section{Related Work} 
+%Another important distinction is between learning statistical associations between atoms vs. learning associations between predicates/functions. Like our directed relational models, such as Bayes Logic Programs and Probabilistic Relational Models, the parametrized belief nets that we learn model the database frequencies in terms of associations between predicates/functions rather than atoms.
+%For instance, our algorithm searches for associations between the functions $\it{gpa}(\S)$ and $\it{difficulty}(\C)$ rather than an association between the literals $\it{gpa}(\S) =\it{hi}$ and $\it{difficulty}(\C) = \hi$.  The efficiency advantages of predicate-level vs. literal-level representations is discussed in \cite[10.7]{Kersting2007}. We compare this approach to work related to learning both MLN structure and relational BN structure.  Kok2009
+
+{\em Nonrelational structure learning methods.} Schmidt {\em et al.} \shortcite{Schmidt2008} compare and contrast structure learning algorithms in directed and undirected graphical methods for nonrelational data, and evaluate them for learning classifiers.
+Tillman {\em et al.} \shortcite{Tillman2008} provide the ION algorithm for merging graph structures learned on different datasets with overlapping variables into a single partially oriented graph. It is similar to the learn-and-join algorithm in that it extends a generic single-table BN learner to produce a BN model for a set of data tables. One difference is that the ION algorithm is not tailored towards relational structures. Another is that the learn-and-join algorithm does not analyze different data tables completely independently and merge the result afterwards. Rather, it recursively constrains the BN search applied to join tables with the adjacencies found in BN search applied to the respective joined tables. 
+
+{\em MLN structure learning methods.} Current methods \cite{Kok2009,Mihalkova2007,Huynh2008,Biba2008} successfully learn MLN models for binary predicates (e.g., link prediction), but do not scale well to larger datasets with descriptive attributes that are numerous and/or have a large domain of values. One reason for this is that the main approaches so far have been derived from Inductive Logic Programming techniques that search the space of clauses, which define connections between {\em atoms}. Descriptive attributes introduce a high number of atoms, one for each combination of attribute and value, and therefore define a large search space of clauses. 
+%Most MLN structure learning methods follow an ILP approach for searching the space of clauses at the atom level. 
+We utilize BN learning methods that search the space of links between predicates/functions, rather than atoms. 
+
+Mihalkova and Mooney \shortcite{Mihalkova2007} distinguish between top-down approaches, that follow a generate-and-test strategy of evaluating clauses against the data, and bottom-up approaches that use the training data and relational pathfinding to construct candidate conjunctions for clauses. Kok and Domingos \shortcite{Kok2009} add constant clustering and hypergraph lifting to refine relational path-finding. Biba {\em et al.} \shortcite{Biba2008} propose stochastic local search methods for the space of candidate clauses. Our approach applies a single BN learner as a subroutine. In principle, the BN learning module may follow a top-down or a bottom-up approach; in practice, most BN learners use a top-down approach. 
+%In our experiments we used GES, which is a local search method. 
+The \textsc{BUSL} algorithm \cite{Mihalkova2007} employs a single-table Markov network learner as a subroutine. The Markov network learner is applied once after a candidate set of conjunctions and a data matrix has been constructed. In contrast, we apply the single-table BN learner repeatedly, where results from earlier applications constrain results of later applications. 
+
+
+{\em Directed graphical models for SRL.} The syntax of other directed SRL models, such as Probabilistic Relational Models (PRMs) \cite{Getoor2007c} and Bayes Logic Programs (BLPs) \cite{Kersting2007}, is similar to that of Parametrized Bayes Nets \cite{Poole2003}. Two key issues for directed SRL models are the following. 
+
+(1) The directed model represents generic statistical relationships found in the database. In the terminology of Halpern \shortcite{Halpern90} and Bacchus \shortcite{Bacchus90}, the model represents type 1 probabilities or domain frequencies. For instance, a PBN may encode the probability that a student is highly intelligent given the properties of a single course they haven taken. But the database may contain information about many courses the student has taken, which needs to be combined; we may refer to this as the {\em combining problem}. To address the combining problem, one needs to use an aggregate function, as in PRMs,  or a combining rule as in BLPs, or the log-linear formula of MLNs, as we do in this paper. In PRMs and BLPs, the aggregate functions respectively combining rules add complexity to structure learning.
+
+(2) Directed SRL models face the {\em cyclicity problem}: there may be cyclic dependencies between the properties of individual entities. For example, if there is generally a correlation between the smoking habits of friends, then we may have a situation where the smoking of Jane predicts the smoking of Jack, which predicts the smoking of Cecile, which predicts the smoking of Jane, where Jack, Jane, and Cecile are all friends with each other. In the presence of such cycles, neither aggregate functions nor combining rules lead to well-defined probabilistic predictions.
+The difficulty of the cyclicity problem has led Neville and Jensen to conclude that ``the acyclicity constraints of directed models severely limit their applicability to relational data" \shortcite[p.241]{bib:jensen-chapter} (see also \cite{Domingos2007,Taskar2002}). Converting the Bayes net to an undirected model avoids the cyclicity problem. Thus the approach of this paper combines advantages of both directed and undirected SRL models: Efficiency and interpretability from directed models, with the solutions to the combining and cyclicity problems from undirected models.
+
+%Classic AI research \cite{Halpern90,Bacchus90} established an important distinction between two kinds of probabilities: domain frequencies vs. individual or instance-level frequencies. Domain frequencies (type 1 probabilities) are the database frequencies of events. They correspond to generic statistical facts about random individuals; an example is ``the probability that a randomly chosen bird flies is greater than .9''. 
+%%Syntactically, domain frequencies assign probabilities to first-order formulas that contain variables. 
+%%The frequency of a first-order formula in a relational database can be defined as the number of instantiations of the variables in the formula that satisfy the formula in the database, divided by the number of all possible instantiations. For short, we refer to such probabilities as {\em database frequencies}. 
+%Instance-level (type 2) probabilities pertain to specific individuals; syntactically, they assign probabilities to ground statements containing constants only. 
+%An example is ``the probability that Tweety flies is greater than .9''. 
+%The learn-and-join algorithm  constructs a directed graphical model for type 1 probabilities. 
+%%Problems with cycles do not arise for type 1 probabilities, only for type 2 probabilities. 
+%Predicting type 1 frequencies is an important SRL task, for which Getoor {\em et al.} developed Statistical Relational Models \cite{Getoor2001}. The parametrized Bayes nets constructed by the learn-and-join algorithm perform very well in predicting type 1 database frequencies \cite{Schulte2009c}. Our evaluation in this paper, however, focuses on predicting type 2 instance-level probabilities, which is the most commonly studied task for MLNs and other SRL formalisms. 
+%Other algorithms for learning directed graphical models, such as Probabilistic Relational Models \cite{Getoor2007c} and Bayes Logic Programs \cite{Kersting2007} include aggregate functions or combining rules to derive type 2 predictions, which add complexity to structure learning. The main issue with deriving type 2 probabilities from directed graphical models is that frequently cyclic dependencies arise between attributes of entities (cf. \cite{bib:jensen-chapter,Domingos2007,Taskar2002}). Converting the learned PBN structure to an MLN allows us to derive type 2 probabilities using the log-linear formalism of MLNs that accommodates cyclic dependencies. Thus our approach combines ideas from directed and undirected graphical models: We use directed model algorithms to learn from type 1 database frequencies, and apply undirected model algorithms to derive and predict type 2 instance-level probabilities.
+
+% Hassan and Bahareh said not to discuss SRMs.
+%Another SRL formalism that learns a Bayes net for type 1 database frequenices are Statistical Relational Models (SRMs), [cite]. The SRM research provides further evidence that learning type 1 associations between is efficient and fast compared to learning type 2 predictions. 
+%%The semantics of SRMs is that tuples are sampled independently from different tables, and a Boolean join indicator variable takes on the value true if the tuples join (i.e., agree on the primary key fields). 
+%SRMs are not as suitable for learning MLNs as parametrized BNs because their syntax is not based on first-order logic. 
+%(The join indicator variable does not correspond to a predicate (relationship or attribute) in the relational schema.) 
+%Also, they do not model the distribution of attributes conditional on the {\em absence} of a relationship, which is necessary for SRL models like MLNs that allow relationship predicates to be false. 
+
+
+
+\section{Background and Notation}
+
+Parametrized Bayes nets are a basic SRL model; we follow the original presentation of Poole \shortcite{Poole2003}. A \textbf{population} is a set of individuals, corresponding to a domain or type in logic. A parametrized random variable is of the form $f(t_{1},\ldots,t_{k})$ where $f$ is a \textbf{functor} (either a function symbol or a predicate symbol) and each $t_{i}$ is a first-order variable or a constant. Each functor has a set of values (constants) called the \textbf{range} of the functor. An assignment of the form $f(t_{1},\ldots,t_{k}) = a$, where $a$ is a constant in the range of $f$ is an \textbf{atom}; if all terms $t_{i}$ are constants, the assignment is a \textbf{ground} atom.
+A \textbf{parametrized Bayes net structure} consists of
+
+(1) a directed acyclic graph (DAG) whose nodes are parametrized random variables.
+
+ (2) a population for each first-order variable.
+
+ (3) an assignment of a range to each functor.
+%\item a set of conditional probabilities for each node given an assignment of values to its parents.
+
+
+%\begin{itemize}
+%\item a directed acyclic graph (DAG) whose nodes are parametrized random variables.
+%\item an assignment of a population to each first-order variable.
+%\item an assignment of a range to each functor.
+%%\item a set of conditional probabilities for each node given an assignment of values to its parents.
+%\end{itemize}
+
+%A (first-order) variable ranges over a population. 
+The functor syntax is rich enough to represent an entity-relation schema \cite{Ullman1982} via the following translation: Entity sets correspond to populations, descriptive attributes to function symbols, relationship tables to predicate symbols, and foreign key constraints to type constraints on the first-order variables.
+% that are the arguments of functors. 
+Table~\ref{fig:university-tables} shows a university relational schema and Figure~\ref{fig:university-tables} a parametrized Bayes net structure for this schema. A \textbf{table join} of two or more tables contains the rows in the Cartesian products of the tables whose values match on common fields.
+
+
+ \begin{table}[tbp] \centering
+{\small
+\begin{tabular}
+[c]{|l|}\hline
+$\student$(\underline{$student\_id$}, $\intelligence$, $ranking$)\\
+$\it{Course}$(\underline{$\it{course}\_id$}, $\diff$, $rating$)\\ 
+$\prof$ (\underline{$professor\_id$}, $teaching\_ability$, $popularity$)\\
+$\reg$ (\underline{$student\_id$, $\it{course}\_id$}, $grade$, $satisfaction$)\\
+$\ra$ (\underline{$student\_id$, $prof\_id$}, $salary$, $capability$)\\
+\hline
+\end{tabular}
+}
+\caption{A relational schema for a university domain. Key fields are underlined. 
+%An instance for this schema is given in Figure \ref{fig:university-tables}
+\label{table:university-schema}} 
+\end{table}
+
+
+%
+\begin{figure}[htbp] %  figure placement: here, top, bottom, or page
+   \centering
+   \includegraphics[width=3.5in]{figures/university-withoutedge.png} 
+%   \caption{(a) An instance of the student table, (b) An instance of the registration table, (c) An instance of the course table, (d) The attribute-relation table is formed in two steps: (1) take the cross product of the student and course table (3 x 3 = 9) rows and extend with the matching attribute and relationship information. (2) Remove the primary entity keys from the cross product of the entities. The grey parts of the tables indicate which tuples are materialized by the dynamic parameter estimation algorithm presented in Section \ref{sec:mle}. The parameters determined by the white parts of the attribute-relation table (corresponding to nonexistent links) can be inferred from the materialized tuples. (e) A Join Bayes Net for the university example} 
+   \caption{A parametrized BN graph for the relational schema of Table~\ref{table:university-schema}. \label{fig:university-tables}}
+\end{figure}
+
+Markov Logic Networks are presented in detail by Domingos and Richardson \shortcite{Domingos2007}. The set of first-order formulas is defined by closing the set of atoms under Boolean combinations and quantification. A \textbf{grounding} of a formula $\formula$ is a substitution of each variable $\X$ in $\formula$ with a constant from the population of $\X$. 
+%The number of possible groundings of $\formula$ is denoted by $\grounds(\formula)$. 
+A database instance $\D$ determines the truth value of each ground formula.
+%; we write $\grounds_{\D}(\formula)$ for the number of true groundings of formula $\formula$. 
+The ratio of the number of groundings that satisfy $\formula$, over the number of possible groundings, is called the %\textbf{instantiation frequency} 
+\textbf{database frequency} of $\formula$.
+%, given by the equation $P_{\D}(\formula) = \grounds_{\D}(\formula)/\grounds(\formula)$.
+
+%\begin{equation}
+%P_{\D}(\formula) = \grounds_{\D}(\formula)/\grounds(\formula).
+%\end{equation}
+
+
+The qualitative component or structure of an MLN is a finite set of formulas or clauses $\{\formula_{i}\}$, and its quantitative component is a set of weights $\{w_{i}\}$, one for each formula. Given an MLN and a database $\D$, let $n_{i}$ be the number of groundings that satisfy $\formula_{i}$ in $\D$. 
+An MLN assigns a log-likelihood to a database according to the equation
+
+\begin{equation}\label{eq:log-linear}
+ln(P(\D)) = \sum_{i} w_{i} n_{i} - ln(\Z)
+\end{equation}
+where $\Z$ is a normalization constant. 
+
+Bayes net DAGs can be converted into MLN structures through the standard \textbf{moralization} method \cite[12.5.3]{Domingos2007}: connect all spouses that share a common child, and make all edges in the resulting graph undirected. In the moralized BN, a child forms a clique with its parents. For each assignment of values to a child and its parents, add a formula to the MLN.
+%; this corresponds to the graphical interpretation of MLNs :. 
+%{\em Examples.} [need maybe half a page for this]
+
+%We employ notation and terminology from \cite{Pearl1988,Spirtes2000} for a Bayesian Network. A {\bf Bayes net structure} is a directed acyclic graph (DAG) $G$, whose nodes comprise a set of random variables denoted by $\V$. When discussing a Bayes net, we refer interchangeably to its nodes or its variables. The parents of a node $\X$ in graph $\G$ are denoted by $\Parents_{\X}^{\G}$, and an assignment of values to the parents is denoted as $\parents_{\X}^{\G}$. A Bayes net is a pair $\langle{G,\theta_G}\rangle$ where $\theta_G$ is a set of parameter values that specify the  probability distributions of children conditional on instantiations of their parents, i.e. all conditional probabilities of the form $P(\X=\x|\parents^{\G}_{\X})$. These conditional probabilities are specified in a \textbf{conditional probability table} (CP-table) for variable $\X$. $\a_{j}$ and $\parents_{i} = \parvalue_{k}$, and 0 otherwise. A BN $\langle{G,\theta_G}\rangle$ defines a joint probability distribution over $\V = \{\node_1,..,\node_n\}$: the joint probability of an assignment is obtained by multiplying the conditional probabilities of each node value assignment given its parent value assignments.
+
+%A Markov network is a model for the joint distribution of a set of variables $X = (X_1,X_2, \ldots X_n)$. It is composed of an undirected graph $G$ and a set of 	 potential functions $\phi_k$. The graph has a node for each variable, and the model has a potential function for each clique in the graph. A potential function is a non-negative real-valued function of the state of the corresponding clique. The joint distribution represented by a Markov network is given by
+%\begin{equation}
+%	P(X=x) = \frac{1}{Z} \prod_{k} \phi_k (x_{\{k \}})
+%\end{equation}
+%where $(x_{\{k \}})$ is the state of the kth clique. Z, known as the partition function, is given by $Z = \sum_{x \in X} \prod_{k}  \phi_k (x_{\{k \}}) $
+
+%
+%Formulas in first order logic are constructed using four types of symbols: constants, variables, functions, and predicates. Constants represent objects in the domain. Variables range over the objects in the domain. Functions, represent mappings from tuples of objects to objects and predicates represent relations among objects in the domain. A term is any expression representing an object in the domain. It can be a constant, a variable, or a function. For example, jack,  $\diff$(X) are terms. A ground term is a term containing no variables like $\intelligence$(Jack). A formula may have different groundings. The number of true groundings for a formula is the possible number of instantiations assignable to the formula. For example in the instance of Figure \ref{fig:instance}, Ranking(X,1) has two groundings; X can take the value of Jack and Kim.
+%%Formulas in our syntax are constructed using three types of symbols: constants, variables, and functions. A \textbf{type} or domain is a set of constants. Each constant and variable is assigned to a type. A predicate is a function whose values are the special truth values constants $\true,\false$. 
+%%A \textbf{term} $\theta$ is any expression that denotes a single object; the notation $\boldsymbol{\theta}$ denotes a vector or list of terms. A term can be a constant, a variable, or a function applied to a tuple of terms. An \textbf{atom} is an equation of the form $\theta = \theta'$ where the  types of $\theta$ and $\theta'$ match. A \textbf{negative literal} is an atom of the form $\P(\bs{\theta}) = \false$; all other atoms are \textbf{positive literals}. 
+%%A database instance $\D$ (possible world, Herbrand interpretation) assigns a denotation constant to each ground function term. 
+%%A \textbf{grounding} $\gamma$ for a set of variables $\X_{1},\ldots,\X_{k}$ assigns a constant of the right type to each variable $\X_{i}$
+%%If $\gamma$ is a grounding for all variables that occur in a conjunction $\C$, we write $\gamma \C$ for the result of replacing each occurrence of a variable $\X$ in $\C$ by the constant $\gamma(\X)$. %If $\C$ is a The number of groundings that satisfy a conjunction $\C$ in $\D$ is defined as
+%%\[
+%%\grounds_{\D} =|\{\gamma: \D \models \gamma \C\}|
+%%\] 
+%%where $\gamma$ is any grounding for the variables in $\C$, and $|S|$ denotes the cardinality of a set $\S$. 
+%%The ratio of the number of groundings that satisfy $\C$, over the number of possible groundings is called the \textbf{instantiation frequency} or the \textbf{database frequency} of $\C$. Formally we define
+%%\begin{equation}
+%%P_{\D}(\C)= 
+%%\frac{\grounds_{\D}(\C)}{|\dom_{\D}(\X_{1})| \times \cdots \times |\dom_{\D}(\X_{k})|} \label{eq:prob}
+%%\end{equation}
+%%where $\X_{1},\ldots,\X_{k}, k>0$, is the set of variables that occur in $\C$. 
+
+%
+%\paragraph{Markov Logic Networks}
+
+%Formally, a Markov Logic Network is a set of pairs of formulas and their corresponding weights $(F_i, w_i)$ where formulas are in first order logic and the weights are any real number. An MLN is a template for the ground Markov network and the size of the model is a function of the number of objects. The ground network has regularities in structure and parameters which are forced by the MLN. The edges are cliques between ground atoms that appear together in a formula and all groundings of a the same formula have the same weight as specified by the MLN. \marginpar{not correct for our setting} All the nodes in the Markov network are binary and take the value of 1 or 0 indicating whether they are true or not. 
+
+%A world is an assignment of truth values to all possible ground atoms. Each state of the Markov network symbolizes a possible world. The probability distribution over possible worlds $x$ specified by the ground network is calculated by 
+
+%\begin{equation}
+%	P(X=x) = \frac{1}{Z} \exp (\sum_i w_i n_i(x))
+%	\label{eq:probability}
+%\end{equation}
+% 
+%where $n_i(x)$ is the number of true groundings for $F_i$ in $x$ and $Z$ is the partition function that is used to make sure the summation of all possible groundings add up to one.
+
+\section{The Learn-And-Join Method for PBN Structure Learning}
+
+We describe our learning algorithm for parametrized Bayes net structures that takes as input a database $\D$.
+% and compare it with other approaches to SRL model construction.
+The algorithm is based on a general schema for upgrading a propositional BN learner to a statistical relational learner. %that performed well in our experiments. 
+By ``upgrading'' we mean that the propositional learner is used as a function call or module in the body of our algorithm. We require that the propositional learner takes as input, in addition to a single table of cases, also a set of {\em edge constraints} that specify required and forbidden directed edges.
+%We use GES \cite{Chickering2002}, as our propositional learner, for this paper. %Our algorithm at its present state, can only handle discrete variables. Any continuous attribute can be discretized in a preprocessing step. 
+%The output of the algorithm is a set of clauses $C$ for a database $\D$. 
+Our approach is to ``learn and join'': we apply the BN learner to single tables and combine the results successively into larger graphs corresponding to larger table joins. Algorithm~\ref{alg:structure} gives pseudocode.
+
+%In principle, a JBN may contain any set of open function terms, depending on the attributes and relationships of interest. 
+%To keep the description of the structure learning algorithm simple, w
+We assume that a parametrized BN contains a default set of nodes as follows: (1) one node for each descriptive attribute, of both entities and relationships, (2) one Boolean node for each relationship table. For each type of entity, we introduce one first-order variable. 
+There are data patterns that require  more  than one variable per entity type to express, notably {\em relational autocorrelation}, where the value of an attribute may depend on other related instances of the same attribute. For instance, there may be a  correlation between the smoking of a person and that of her friends. We model such cases by introducing an additional entity variable for the entity type with corresponding functors for the descriptive attributes, with the following constraints. (1) One of the entity variables is selected as the main variable; the others are auxilliary variables. (2) A functor whose argument is an auxilliary variable has no edges pointing into it. Thus the auxilliary variable serves only to model recursive relationships. For instance the smoking example can be modelled with a JBN structure 
+\[
+\it{Friend}(\X,\Y) \rightarrow \it{Smokes}(\X) \leftarrow \it{Smokes}(\Y)\] where $\X$ is the main variable of type person and $\Y$ is an auxilliary variable.
+
+We list the phases of the algorithm, including two final phases to convert the BN into an MLN. Figure~\ref{fig:structure-learn} illustrates the increasingly large joins built up in Phases 1--3. 
+
+(1) {\em Analyze single tables.} Learn a BN structure for the descriptive attributes of each entity table $\E$ of the database separately (with primary keys removed).
+
+(2) {\em Analyze single join tables.} Each relationship table $\R$ is considered. The input table for the BN learner is the join of $\R$ with the entity tables linked by a foreign key constraint (with primary keys removed). Edges between attributes from the same entity table $\E$ are constrained to agree with the structure learned for $\E$ in phase (1).
+
+3) {\em Analyze double join tables.} The input tables from the second phase are  joined in pairs (if they share a common foreign key)
+%The extended input relationship tables from the second phase are joined in pairs 
+to form the input tables for the BN learner. Edges between variables considered in phases (1) and (2) are constrained to agree with the structures previously learned. 
+
+(4) {\em Satisfy slot chain constraints.} For each link $\A \rightarrow \B$ in $\G$, where $\A$ and $\B$ are functors that correspond to attributes from different tables, arrows from Boolean relationship variables into $\B$ are added if required to satisfy the following constraints: (1) $\A$ and $\B$ share a variable among their arguments, or (2) the parents of $\B$ contain a chain of foreign key links connecting $\A$ and $\B$. 
+
+(5) {\em Moralize to obtain an MLN structure.} 
+%For each node $X$ in $\G$, add a clause for each possible value of $X$ and each combination of values of its parents to MLN.
+%\marginpar{this is parameter estimation, move to evaluation section}
+
+(6) {\em Parameter estimation.} Apply an MLN weight learning procedure. 
+
+In phases (2) and (3), if there is more than one first-order variable for a given entity type (autocorrelation), then the single-table BN learner is constrained such that functor nodes whose arguments are auxilliary variables have no edges pointing into them. 
+
+
+%(1) {\em Analyze single tables.} Learn a BN structure for the descriptive attributes of each entity table $\E$ of the database separately (with primary keys removed). The aim of this phase is to find within-table dependencies among descriptive attributes (e.g., $\it{intelligence}(\S)$ and $\it{ranking}(\S)$).
+%
+%(2) {\em Analyze single join tables.} Each relationship table $\R$ is considered. The input table for each relationship $\R$ is the join of that table with the entity tables linked by a foreign key constraint (with primary keys removed). Edges between attributes from the same entity table $\E$ are constrained to agree with the structure learned for $\E$ in phase (1). Additional edges from variables corresponding to attributes from different tables may be added. The aim of this phase is to find dependencies between descriptive attributes {\em conditional on} the existence of a relationship.
+% This phase also finds dependencies between descriptive attributes of the relationship table $\R$.
+%
+%(3) {\em Analyze double join tables.} 
+%The extended input relationship tables from the second phase are joined in pairs to form the input tables for the BN learner. Edges between variables considered in phases (1) and (2) are constrained to agree with the structures previously learned. The graphs learned for each join pair are merged to produce a DAG $\G$. The aim of this phase is to find dependencies between descriptive attributes {\em conditional on} the existence of a relationship chain of length 2. 
+%  
+%
+%(4) {\em Satisfy slot chain constraints.} For each link $\A \rightarrow \B$ in $\G$, where $\A$ and $\B$ are attributes from different tables, arrows from Boolean relationship variables into $\B$ are added if required to satisfy the following constraints: (1) $\A$ and $\B$ share variable among their arguments, or (2) the parents of $\B$ contain a chain of foreign key links connecting $\A$ and $\B$. 
+%
+%(5) For each node $X$ in $\G$, add a clause for each possible value of $X$ and each combination of values of its parents to MLN.
+%
+%\marginpar{this is parameter estimation, move to evaluation section}
+%
+%(6) Run the weight learning procedure in Alchemy 
+
+
+
+\begin{figure}[htbp]
+\begin{center}
+ \includegraphics[width=3in]{figures/structure-learning.jpg} 
+\caption{To illustrate the	 learn-and-join algorithm. A given BN learner is applied to each table and join tables. The presence or absence of edges at lower levels is inherited at higher levels.}
+\label{fig:structure-learn}
+\end{center}
+\end{figure}
+
+
+%\marginpar{how do we do this with slot chains? Answer: we just make both relationships parents.} 
+% 
+% to find correlations of attributes involving slot chains bigger than one. The input tables are to the 
+%This phase adds edges between attributes of relationship tables that have similar corresponding entity tables. For example $Z(\E_1,\E_2)$ and $W(\E_1,\E_3)$ may be correlated through objects of $E_1$. 
+
+
+%In the case where we two or more variables of the same type, we apply the learn-and-join algorithm by essentially duplicating the relevant entity table. We illustrate the construction with a simple example: suppose we have a binary relation $\it{Friend}(\X,\Y)$, where each argument is of type $\it{Person}$, and one descriptive attribute $\it{smokes}$ that indicates whether a given person smokes. 
+
+%\begin{enumerate}
+%\item For each entity type, designate a variable as the main variable for the type; other variables are auxilliary. For instance, designate $\X$ for $\it{Person}$ and $\Y$ as auxilliary. Learn links among the descriptive attributes for $\X$ from the $\it{Person}$ table as in Phase 1.
+%\item When analyzing a relationship table that involves two foreign key pointers to the same entity table (phase 2), join two different copies of the entity table, each labelled with a different variable. Apply the BN learner to the join table with the constraint that nodes corresponding to attributes of auxilliary variables have zero indegree. For instance, perform the table join corresponding to the conjunction $\it{Friend}(\X,\Y),\it{Person}(\X),\it{Person}(\Y)$. This join table contains one row for each pair $(\x,\y)$ such that $\it{Friend}(\X,\Y)$ holds, and two columns labelled $\it{Smokes}(\X)$ and $\it{Smokes}(\Y)$. The BN learner is constrained not to have any edges pointing into $\it{Smokes}(\Y)$.
+%\end{enumerate}
+%
+%[we assume binary throughout]
+%
+%\begin{floatingfigure}[r]{0.4\textwidth}
+%
+%\end{floatingfigure}
+
+\begin{algorithm}[htb]
+\begin{algorithmic}
+{\footnotesize
+\STATE {\em Input}: Database $\D$ with $E_1,..E_e$ entity tables, $R_1,... R_r$ Relationship tables, %ER Model ,
+\STATE {\em Output}: MLN for $\D$ 
+\STATE {\em Calls}: PBN: Any propositional Bayes net learner that accepts edge constraints and a single table of cases as input. WL: Weight learner in MLN
+\STATE {\em Notation}: PBN$(\T,\mbox{Econstraints})$ denotes the output DAG of PBN. Get-Constraints$(\G)$ specifies a new set of edge constraints, namely that all edges in $\G$ are required, and edges missing between variables in $\G$ are forbidden.
+} %fnsize
+\end{algorithmic}
+\begin{algorithmic}[1]
+{\footnotesize
+	\STATE Add descriptive attributes of all entity and relationship tables as variables to  $G$. Add a boolean indicator for each relationship table to $G$.
+	\STATE Econstraints = $\emptyset$ {[Required and Forbidden edges]} %in the G]}
+\FOR {m=1 to e}
+	\STATE Econstraints += Get-Constraints(PBN($E_m$ , $\emptyset$)) 
+	\ENDFOR	
+%\FOR {m=1 to r}
+%	\STATE Econstraints += Get-Constraints(PBN($R_m$, Econstraints))
+%\ENDFOR
+\FOR {m=1 to r}
+	\STATE $N_m$ :=  %natural 
+	join of $R_m$ and entity tables linked to $R_m$ 
+	\STATE Econstraints += Get-Constraints(PBN($N_m$, Econstraints))
+\ENDFOR
+\FORALL{$N_i$ and $N_j$ with a foreign key in common}
+	\STATE $K_{ij}$ :=  %natural 
+	join of $N_i$ and $N_j$ 
+	\STATE Econstraints += Get-Constraints(PBN($K_{ij}$, Econstraints))
+\ENDFOR
+\FORALL{possible combination of values of a node and its parents} 
+\STATE Add a clause with predicates to MLN input file
+\ENDFOR
+\STATE Run WL on the MLN file
+%\FORALL [A relationship node is a parent of a Entity node]{dependencies of kind $X(R_m) \rightarrow Y(E_i)$}
+%	%\IF {dependency is of kind $X(R_m) \rightarrow Y(E_i)$ } 
+%	\STATE add $R_m \rightarrow Y(E_i)$ to $G$
+%	\ENDFOR	
+		%\STATE Run dynamic programing algorithm
+		} %footnotesize
+\end{algorithmic}
+%\label{alg:cpt}
+\caption{Pseudocode for MBN structure learning \label{alg:structure}}
+\end{algorithm}
+
+\paragraph{Discussion.} For fast computation, Algorithm~\ref{alg:structure} considers foreign key chains of length up to 2. In principle, it can process longer chains. As the algorithm does not assume a bound on the degree of the BN graph, it may produce MLN clauses that are arbitrarily long. 
+
+%{\em Efficiency.} 
+An iterative deepening approach that prioritizes dependencies among attributes from more closely related tables is a common design in SRL. The new feature of the learn-and-join algorithm is the constraint that a BN for a table join must respect the links found for the joined tables. This edge-inheritance constraint reduces the search complexity considerably. For instance, suppose that two entity tables contain $k$ descriptive attributes each. Then in an unconstrained join with a relationship table, the search space of possible adjacencies has size $\binom{2k}{2}$, whereas with the constraint, the search space size is $k^{2}/2$, which is smaller than $\binom{2k}{2}$ because the quadratic $k^{2}$ factor has a smaller coefficient. For example, with $k=6$, we have $\binom{2k}{2} = 66$ and $k^{2}/2=18$. For the learn-and-join algorithm, the main computational challenge in scaling to larger table joins is therefore not the increasing number of columns (attributes) in the join, but only the increasing number of rows (tuples).
+
+In addition to efficiency, a statistical motivation for the edge-inheritance constraint is that the marginal distribution of descriptive attributes may be different in an entity table than in a relationship table.
+For instance, if a highly intelligent student $s$ has taken 10 courses, there will be at least ten satisfying groundings of the conjunction $\it{Registered}(\S,C), \it{intelligence}(\S) = \it{hi}$. If highly intelligent students tend to take more courses than less intelligent ones, then in the $\it{Registered}$ table, the frequency of tuples with intelligent students is higher than in the general student population. 
+In terms of the Halpern-Bacchus database domain frequencies, the distribution of database frequencies conditional on a relationship being true may be different from its unconditional distribution \cite{Halpern90,Bacchus90}.
+%  relationship being true implies that all pairs (groundings) satisfying the relationship are weighted equally, even if they involve the same entity repeatedly.database distribution, we have that $P_{\D}(\it{intelligence}(\S) = \it{hi}| \it{Registered}(\S,\C)) > P_{\D}(\it{intelligence}(\S) = \it{hi})$. 
+The fact that marginal statistics about an entity type $E$ may differ between the entity table for $E$ and a relationship table (or a join table) is another reason why the learn-and-join algorithm constrains edges between attributes of $E$ to be determined only by the result of applying the BN learner to the $E$ table. This ensures that the subgraph of the final parametrized Bayes net whose nodes correspond to the attributes of the $E$ table is exactly the same as the graph that the single-table BN learner constructs for the $E$ table.
+
+After moralization the log-linear formalism of MLNs can be used to derive predictions about the properties of individual entities from a parametrized Bayes net. The next section evaluates the accuracy of these predictions on three databases. 
+%\subsection{Analysis of the learned structure}
+
+%clauses have a specific form \\
+%all the combinations are given but expect weight learning phase to reduce the effect of unrelated clauses\\
+%produces more clauses than normal structure learning algorithms but weight learning is still relatively fast \\
+
+\section{Evaluation}
+All experiments were done on a QUAD CPU Q6700 with a 2.66GHz CPU and 8GB of RAM. For single table BN search we used GES search \cite{Chickering2003} with the BDeu score as implemented in version 4.3.9-0 of CMU's Tetrad package (structure prior uniform, ESS=10; \cite{2008a}). Our code and datasets are available for anonymous ftp download from ftp://ftp.fas.sfu.ca/pub/cs/oschulte/aaai2010. 
+%Default structure learning, weight learning and the MC-SAT inference algorithm \cite{Poon2006} of the Alchemy package were also used.
+
+%don't forget Flavia's idea for subsampling
+\subsection{Datasets}
+We used one synthetic and two benchmark real-world datasets. Because the Alchemy systems returned no result on the real-world datasets, we formed two subdatabases for each by randomly selecting entities for each dataset. We restricted the relationship tuples in each subdatabase to those that involve only the selected entities. Table~\ref{table:datasetsize} lists the resulting databases and their sizes in terms of total number of tuples and number of ground atoms, which is the input format for Alchemy. 
+
+\begin{table}[tbp] \centering
+%\scalebox{0.7in}{
+\begin{tabular}[c]
+{|l|l|l|}\hline
+ \textbf{Dataset} & \textbf{\#tuples} & \textbf{\#Ground atoms} \\\hline
+University&171&513\\\hline
+Movielens &82623&170143\\\hline
+MovieLens1 (subsample)&1468&3485\\\hline
+MovieLens2 (subsample)&12714 &27134 \\\hline
+Mutagenesis &15218& 35973 \\\hline
+Mutagenesis1 (subsample)&3375& 5868 \\\hline
+Mutagenesis2 (subsample)&5675&9058 \\\hline
+\end{tabular}
+%} % end scalebox
+\caption{Size of datasets in total number of table tuples and ground atoms. Each descriptive attribute is represented as a separate function, so the number of ground atoms is larger than that of tuples.\label{table:datasetsize}}
+\end{table}
+
+
+{\em University Database.} We manually created a small dataset, based on the schema given in Table~\ref{table:university-schema}. 
+%The dataset is small and is used as a purpose of proofing the correctness of our algorithms. 
+The entity tables contain 38 students, 10 courses, and 6  Professors. The $\reg$ table has 92 rows and the $\it{RA}$ table has 25 rows. %This dataset is translated into 513 ground atoms. 
+
+{\em MovieLens Database.} The second dataset is the MovieLens dataset from the UC Irvine machine learning repository. %The schema for the dataset is shown in Table \ref{}. 
+It contains two entity tables: $\it{User}$ with 941 tuples and $\it{Item}$ with 1,682 tuples, and one relationship table $\it{Rated}$ with 80,000 ratings. The $\it{User}$ table has %key field $\it{user\_id}$ and 
+3 descriptive attributes $\age, \it{gender}, \it{occupation}$. We discretized the attribute age into three bins with equal frequency. The table $\it{Item}$ represents information about the movies. It has 17 Boolean attributes that indicate the genres of a given movie. We performed a preliminary data analysis and omitted genres that have only weak correlations with the rating or user attributes, leaving a total of three genres.
+
+% The full dataset contains 170143 ground atoms and is too big for MLN to do structure learning or parameter learning on. We made small subsamples to make the experiments feasible. Sub sampling 100 Users and 100 Items transforms to a db file with 2505 number of groundings. takes around 30 min to run. Sub sampling 300 Users and 300 Items transforms to a db file with 18040 number of groundings takes around 2 days to run. 
+%The full table with 100,000 ratings exceeded the memory limits of Tetrad, so we randomly picked 40\% of the ratings of the relationship table as input data. 
+
+{\em Mutagenesis Database.} This dataset is widely used in ILP research \cite{Srinivasan1996}. %It contains 4 tables total to 15218 tuples. 
+Mutagenesis has two entity tables, $\it{Atom}$ with 3 descriptive attributes, and $\it{Mole}$, with %188 entries and 
+5 descriptive attributes, including two attributes that are discretized into ten values each (logp and lumo). It features two relationships $\it{MoleAtom}$ indicating which atoms are parts of which molecules, and $\it{Bond}$ which relates two atoms and has 1 descriptive attribute. %The full dataset, with 35973 ground atoms, crashed while doing either parameter learning or structure learning. A subsample with 5017 ground atoms is used was running for 5 days and did not terminate. weight learning was feasible. another subsample with 
+Representing a relationship between entities from the same table in a parametrized BN requires using two or more variables associated with the same population (e.g., $\it{Bond}(\A_{1},\A_{2}))$.  
+%(Techreport 2009) describes a straightforward extension of Algorithm~\ref{alg:structure} for this case, which we applied to the Mutagenesis dataset.\footnote{Reference omitted for blind review.} 
+We also tested our method on the Financial dataset with similar results, but omit a discussion due to space constraints.
+
+\subsection{Comparison Systems and Performance Metrics}
+
+We refer to the output of our method---Algorithm~\ref{alg:structure}---as MBNs. Weight learning is carried out with Alchemy's default procedure, which currently uses the method of Kok and Domingos \shortcite{Kok2005a}. 
+ %, so that our parametrization method is comparable to that of Alchemy's in terms of runtime and quality.  
+We compared MBN learning with 4 previous MLN structure learning methods implemented in different versions of Alchemy.
+
+\begin{enumerate}
+\item $\MLN$ is the structure learning method described by Kok and Domingos \shortcite{Kok2005a}. 
+%of version ? of the Alchemy package with all the default settings. 
+%$\MLN$ was described in 
+\item $\MLNConst$ is the $\MLN$ algorithm applied to a reformated input file that adds a predicate for each constant of each descriptive attribute to the .db input file. 
+\item $\LHL$ is the state-of-the-art lifted hypergraph learning algorithm of Kok and Domingos \shortcite{Kok2009}.
+\item $\LHLConst$ is the $\LHL$ algorithm applied to the reformated input file. 
+\end{enumerate}
+Data reformatting was used by Kok and Domingos \shortcite{Kok2007}. To illustrate, for instance the predicate $\it{Salary}$ with values(high, medium, low), is represented with a single binary predicate $\it{Salary}(Student, Salary\_Type)$ in the standard Alchemy input format. The reformatted file contains instead three unary predicates $\it{Salary}_{\it{high}}(\it{Student})$, $\it{Salary}_{\it{med}}(\it{Student})$, $\it{Salary}_{\it{low}}(\it{Student})$. The effect is that the arguments to all predicates are primary keys, which tends to yield better results with Alchemy. 
+To evaluate predictions, the MLNs learned with the reformatted data were converted to the format of the original database.
+
+
+ We use 4 main performance metrics: %measures: 
+ Runtime, Accuracy(ACC), Conditional log likelihood(CLL), and Area under Curve(AUC).  
+ACC is the percentage of the descriptive attribute values that are correctly predicted by the MLN.
+% (i.e., the most probable value according to the MLN is the correct one).  
+The conditional log-likelihood (CLL) of a ground atom in a database $\D$ given an MLN is its log-probability given the MLN and $\D$. The CLL directly measures how precise the estimated probabilities are. The AUC curves were computed by changing the CLL threshold above which a ground atom is predicted true (10 tresholds were used). The AUC is insensitive to a large number of true negatives. For ACC and CLL the values we report are averages over all predicates. For AUC, it is the average over all predicates that correspond to descriptive attributes with binary values (e.g. gender). CLL and AUC have been used in previous studies of MLN learning \cite{Mihalkova2007,Kok2009}. 
+As in previous studies, we used the MC-SAT inference algorithm \cite{Poon2006} to compute a probability estimate for each possible value of a descriptive attribute for a given object or tuple of objects.
+
+\subsection{Runtime Comparison}
+
+Table \ref{table:compare} shows the time taken in minutes for learning in each dataset. The Alchemy times include both structure and parameter learning. For the MBN approach, we report both the BN structure learning time and the time required for the subsequent parameter learning carried out by Alchemy. 
+
+\begin{table}[tbp] \centering
+\scalebox{0.85}
+{
+\begin{tabular} [c]
+{|l|l|l|l|l|l|}\hline
+ \textbf{Dataset} & \textbf{MBN} & \textbf{\MLN} & \textbf{\MLNConst} & \textbf{\LHL} &\textbf{\LHLConst} \\\hline
+University& 0.03 + 0.032 & 5.02 &11.44 &3.54& 19.29 \\\hline
+MovieLens &1.2 +120&NT&NT & NT& NT \\\hline
+MovieLens1& 0.05 + 0.33 & 44& 121.5&34.52&126.16\\\hline
+MovieLens2& 0.12 + 5.10 & 2760 & 1286 & 3349& NT\\\hline
+Mutagenesis &0.5 +NT&NT&NT&NT&NT\\\hline
+Mutagenesis1 &0.1 + 5&3360& 900& 3960 &1233\\\hline
+Mutagenesis2 &0.2 +12 &NT&3120&NT& NT\\\hline
+\end{tabular}
+} % end scalebox
+\caption{Runtime to produce a parametrized MLN, in minutes. The MBN column shows structure learning time + weight learning time. \label{table:compare}}
+\end{table}
+
+{\em Structure Learning.} The learn-and-join algorithm returns an MLN structure very quickly (under 2 minutes). This includes single-table BN parameter estimation as a subroutine.
+
+{\em Structure and Weight Learning.} 
+The total runtime for the MBN approach is dominated by the time required by Alchemy to find a parametrization for the moralized BN. On the smaller databases, this takes between 5-12 minutes. On MovieLens, parametrization takes two hours, and on Mutagenesis, it does not terminate. While finding optimal parameters for the MBN structures remains challenging, the combined structure+weight learning system is much faster than the overall structure + weight learning time of the Alchemy methods: They do not scale to the complete datasets, and for the subdatabases, the MBN approach is faster by a factor ranging from 200 to 1000. As reported by Kok and Domingos \shortcite{Kok2009}, the runtimes reported on other smaller databases for other MLN learners
+are also much larger (e.g., \textsc{BUSL} takes about 13 hr on the UW-CSE dataset with 2,112 ground atoms).
+These results are strong evidence that the MBN approach leverages the scalability of Bayes net learning to achieve scalable MLN learning on databases of realistic size.
+
+\subsection{Predictive Accuracy and Data Fit}
+
+Previous work on MLN evaluation has used a ``leave-one-out'' approach that learns MLNs for a number of subdatabases with a small subset omitted \cite{Mihalkova2007}. This is not feasible in our setting 
+%for databases with many descriptive attributes 
+because even on a training set of size about 15\% of the original, finding an MLN structure using Alchemy is barely possible. Given these computational constraints, we investigated the predictive performance by learning an MLN on one randomly selected 2/3 of the subdatabases as a training set, testing predictions on the remaining 1/3. While this does not provide strong evidence about the 
+generalization performance in absolute terms, it gives information about the relative performance of the methods. Table~\ref{results} reports the average ACC, CLL, and AUC of each dataset. Higher numbers indicate better performance and NT indicates that the system was not able to return an MLN for the dataset, either crashing or timing out after 4 days of running. MBN achieved substantially better predictions on all test sets, in the range of 10-20\% for accuracy. 
+
+Where the learning methods return a result on a database, we also measured the 
+predictions 
+%data fit 
+of the different MLN models 
+%by checking how well they predict 
+for the facts in the training database. This indicates how well the MLN summarizes the statistical patterns in the data. %, and does not require selecting a subdatabase. 
+%These metrics have several advantages. (1) They do not require selecting a subdatabase. (2) Because of the complexity of relational databases, a compact summary of the database statistics is valuable. Research has shown that a model trained on the entire database can effectively support applications like query execution planning \cite{Getoor2001}. (3) The learn-and-join method learns a model of type 1 probabilities; even if such a model were to exactly reproduce the database frequencies, there are different ways to derive type 2 instance-level predictions from it. 
+%The most common way for parametrized Bayes nets is to employ combining rules \cite{Poole2003}. 
+These measurements test the power of using the log-linear equation~\eqref{eq:log-linear} to derive instance-level type 2 predictions from a BN model of generic type 1 frequencies. While a small improvement in predictive accuracy may be due to overfitting, the very large improvements we observe are evidence that the MLN models produced by the Alchemy methods underfit and fail to represent statistically significant dependencies in the data.
+The ground atom predictions of the MBNs are always better, e.g. by at least 20\% for accuracy. 
+%In almost all settings, transforming data according to the $\MLNConst$ method  improves predictions.
+
+
+\begin{table*}[tph] \centering
+%{\small
+\scalebox{.82} 
+{
+\begin{tabular} [c]
+%{|l|l|l|l|l|l|l|l|l|l|llllll}\hline
+{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
+ \textbf{Dataset} &  \multicolumn{5}{c|}{\textbf{Accuracy}} &  \multicolumn{5}{c|}{\textbf{CLL}} & \multicolumn{5}{c|}{\textbf{AUC} }\\\hline
+&MBN&\MLN&\MLNConst & \LHL & \LHLConst& MBN&\MLN&\MLNConst & \LHL & \LHLConst & MBN&\MLN&\MLNConst &\LHL & \LHLConst\\\hline
+Movielens11 & \bf{0.63} & 0.39 & 0.45 & 0.42& 0.50& \bf{-0.99} & -3.97 & -3.55 & -4.14& -3.22& \bf{0.64}& 0.46 & 0.60 & 0.49&0.55 \\\hline
+Movielens12 & \bf{0.59} & 0.42 & 0.46 & 0.41& 0.47 &\bf{-1.15} & -3.69 & - 3.56 & -3.68& -3.08& \bf{0.62} & 0.47 &0.54 & 0.50&0.55 \\\hline
+Mutagenesis1  & \bf{0.60} & 0.34 & 0.47 & 0.33 & 0.45 &  \bf{-2.44} & -4.97 & - 3.59 & -4.02& -3.12& \bf{0.69} & 0.56 &0.56 & 0.50 &0.53 \\\hline
+Mutagenesis2 & \bf{0.68} & NT & 0.53 & NT & NT& \bf{-2.36} & NT & - 3.65 & NT& NT & \bf{0.73} & NT & 0.59 & NT & NT \\\hline
+\end{tabular}
+} % end scalebox
+\caption{The table shows predictive performance for our MBN method and structure learning methods implemented in Alchemy. We trained on 2/3 of the database and tested on the other 1/3.   \label{results}}
+\end{table*}
+
+
+\begin{table*}[tph] \centering
+\scalebox{.82}
+{
+\begin{tabular} [c]
+{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}\hline
+ \textbf{Dataset} &  \multicolumn{5}{c|}{\textbf{Accuracy}} &  \multicolumn{5}{c|}{\textbf{CLL}} & \multicolumn{5}{c|}{\textbf{AUC} }\\\hline
+&MBN&\MLN&\MLNConst & \LHL & \LHLConst& MBN&\MLN&\MLNConst & \LHL & \LHLConst & MBN&\MLN&\MLNConst &\LHL & \LHLConst\\\hline
+University& \textbf{0.85} & 0.37 & 0.51 &0.37&0.55 &\textbf{-0.4} & -5.79 & -3.24 &-5.91&-2.66&\textbf{ 0.88} & 0.45 & 0.68 &0.52&0.70\\\hline
+Movielens1 &\textbf{ 0.67} & 0.43 & 0.43 &0.42&0.49&\textbf{ -0.75} & -4.09 & -2.83 &-4.09&-3.42&\textbf{ 0.70}& 0.46 & 0.53 &0.50&0.51\\\hline
+Movielens2&\textbf{ 0.65}& 0.42 & 0.42 &0.43& 0.48& \textbf{-1} & -3.55 & - 3.94 & -3.38 &-3.82&\textbf{0.69} & 0.49 &0.51&0.50& 0.52 \\\hline
+Movielens &0.69 &NT  & NT &NT&NT& - 0.70 & NT & NT &NT &NT&0.73 & NT &NT&NT&NT \\\hline
+Mutagenesis1  &\textbf{0.81} & 0.36 & 0.55 &0.33& 0.52&\textbf{- 0.6} & -4.70 & - 3.38 &-4.33& -3.03& \textbf{0.90} & 0.56 &0.60 &0.52& 0.53\\\hline
+Mutagenesis2 & \textbf{0.81} & NT & 0.35 &NT&NT& \textbf{-0.60} & NT & - 4.65 &NT&NT&\textbf{ 0.90} & NT & 0.56 &NT&NT \\\hline
+\end{tabular}
+} % end scalebox
+\caption{The table shows predictive performance represent the training error measured on the database our MBN method and two Alchemy structure where inference is performed over the training dataset. \label{results-notest}}
+\end{table*}
+
+%These results are strong evidence that the MBN approach is promising for MLN structure learning with many descriptive attributes. 
+%%Previous MLN methods are well-suited to the complementary problem of predicting links represented by binary predicates.
+%
+
+
+
+%\subsubsection*{Learning BN structure.} 
+
+%The syntax of parametrized BNs is similar to that of other graphical models that are inspired by Bayes nets, like PRMs and BLPs, which also represent associations between functors. These SRL models are more complex, however, because in order to define instance-level probabilities, they include a specification of how statistical information from related entities is to be combined to predict the attributes of a target entity. PRMs use aggregate functions for this purpose, BLPs use combining rules. Our learn-and-join algorithm is faster than structure learning algorithms for PRMs and BLPs because it does not include aggregate functions or combining rules, and it does not use them to evaluate how well a candidate model predicts the facts in the database. 
+%%Intuitively, the algorithms learns generic statistical associations that are true at the class-level rather than at the instance-level. 
+%%In our experiments, we combine the generic statistical associations with the log-linear formalism of MLNs to make predictions about the attributes of specific entities in the database. 
+%Another advantage of database frequency learning is that it avoids the problem that a ground parametrized Bayes net (instantiated by substituting individual constants for variables) may contain cycles even if the parametrized Bayes net does not. In that case the parametrized Bayes net does not define a likelihood for the database and so a structure learning algorithm cannot evaluate the quality of the candidate model.
+
+%Another SRL formalism that learns a Bayes net that models database frequenices are Statistical Relational Models (SRMs), cite. The SRM research provides further evidence that learning associations between funtors in terms of generic database frequencies is efficient and fast compared to learning instance-level predictions. 
+%The semantics of SRMs is that tuples are sampled independently from different tables, and a Boolean join indicator variable takes on the value true if the tuples join (i.e., agree on the primary key fields) [so can I join if a relationship is false?]. SRMs are not as suitable for learning MLNs as parametrized BNs because the join indicator variable does not correspond to a predicate (relationship or attribute) in the relational schema. Also, they do not model the distribution of attributes conditional on the {\em absence} of a relationship, which is necessary for SRL models like MLNs that allow relationship predicates to be false. 
+
+%\begin{itemize}
+%	\item Discriminative Structure and Parameter Learning for
+%Markov Logic Networks
+%\end{itemize}
+
+
+\section{Conclusion and Future Work}
+
+This paper considered the task of building a statistical-relational model for databases with many descriptive attributes. We combined Bayes net learning, one of the most successful machine learning techniques, with Markov Logic networks, one of the most successful statistical-relational formalisms. The main algorithmic contribution is an efficient new structure learning algorithm for a parametrized Bayes net that models the joint frequency distribution over attributes in the database, given the links between entities. Moralizing the BN leads to an MLN structure. Our evaluation on two benchmark databases with descriptive attributes shows that compared to current MLN structure learning methods, the approach using moralization improves the scalability and run-time performance by orders of magnitude. With standard parameter estimation algorithms and prediction metrics, the moralized MLN structures make substantially more accurate predictions. 
+
+An important direction for future work are pruning methods that take advantage of local independencies.
+%{\em Combined Systems.} \marginpar{Hassan: do you want to keep this?} Our moralization approach does not directly optimize a model selection score for an MLN. % (e.g., weighted pseudo-likelihood). 
+% An interesting extension would be to use the MBN as a starting point for a score optimization procedure. Combining the MBN approach with the strengths of previous methods could yield a powerful system for a joint model of link structure and attribute dependencies. For instance, we could quickly learn an MBN model of attribute dependencies given link structure, and provide Alchemy with the MBN model as initial input to expand with dependencies between links.
+%We conducted preliminary experiments and found that even with a close-to-optimal MLN as starting point, the local search with current methods took a long time and did not improve the model computed by the moralization method.
+%
+%{\em Parameter Estimation.} In this work we used generic MLN algorithms for parameter estimation implemented in the Alchemy package. While the parameter estimation routines of Alchemy run much faster than the structure learning routines, on some datasets we found that parameter estimation can still take a long time [example]. As MLNs obtained by moralization have a special structure, it may be possible to design fast parameter estimation routines for them.
+%
+%{\em Pruning and Local Independencies.} 
+%A disadvantage of learning at the predicate level rather than the literal level is that the resulting MLNs contain a relatively large number of formulas; basically, 
+Each CP-table row in the parametrized Bayes net becomes a formula in the moralized Bayes net. Often there are local independencies that  allow CP tables to be represented more compactly. SRL research has used decision trees as an effective compact representation for CP-tables \cite{Getoor2001}. This suggests that combining decision trees with parametrized Bayes nets will lead to more parsimonious MLN structures. Another possibility is to use MLN weight estimation procedures to prune uninformative clauses. 
+%We observed that the Alchemy routines assign 0 weight to some uninformative clauses; 
+Huynh and Mooney \shortcite{Huynh2008} show that L1-regularization can be an effective method for pruning a large set of MLN clauses.
+
+%Our results show that the MBN approach is promising for MLN structure learning with many descriptive attributes taking on numerous possible values. 
+%%Previous MLN methods are well-suited to the complementary problem of predicting links represented by binary predicates.
+%Combining our approach with previous methods could yield a powerful system for a joint model of link structure and attribute dependencies. For instance, we could quickly learn an MBN model of attribute dependencies given link structure, and provide Alchemy with the MBN model as initial input to expand with dependencies between links.
+
+%
+%{\em Associations between Relationships.} Our algorithm learns BN structures that represent statistical associations between attributes of related entities, but not associations between links. As current MLN algorithms work well for learning link structure, a promising approach is to use our algorithm to learn an MLN that models the distribution of attributes, and use this as an initial MLN for one of the current methods to capture correlations between links.
+
+%\bibliographystyle{plain}
+\bibliographystyle{aaai}
+\bibliography{master}
+\end{document}
+=======
+MovieLens &51 +120&NT&NT\\\hline
+MovieLens subsample1& 1.06 & 44& 121.5\\\hline
+MovieLens subsample2&8.2 & 2760 & 1286 \\\hline
+Mutagenesis sample1 sub&20 + 5&3360& 900\\\hline
+Mutagenesis sample2 sub&24+12 &NT&\\\hline
+>>>>>>> .r1015
+

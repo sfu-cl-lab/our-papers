@@ -1,0 +1,117 @@
+June 10th 2010
+intuitive meaning for the rules found by Apriori:
+
+%%%%%%%%%%%%%
+movielens
+
+Rule NO. 1: exclusive relations
+Action(item20)=1 84 ==> Drama(item20)=0 Horror(item20)=0 84    acc:(0.995)
+
+Rule NO. 7: deterministic relation
+rating(User0,item20)=1.0 42 ==> a=T 42    acc:(0.99498)
+
+Rule NO. 20: combination of the above two relations
+Gender(User0)=M Drama(item20)=1 Horror(item20)=0 a=F 7 ==> Action(item20)=0 rating(User0,item20)=N/A 7    acc:(0.98475)
+
+%%%%%%%%%%%%
+Muta
+
+
+predicting the mutagenicity of the molecules, that is, determining whether a molecule is mutagenic or non-mutagenic
+Mole.label = 2 means :  negative mutagenicity
+Mole.label = 1 means :  positive mutagenicity
+
+bond(Mole, atom) : a
+Mole, atom: b
+
+btype(Mole0,Atom0) is 2node of bond()
+
+Rule NO. 1:
+ inda(Mole0)=0 btype(Mole0,Atom0)=N/A 1034 ==> b=F 966    conf:(0.93) < lift:(1.53)> lev:(0.21) [335] conv:(5.85)
+inda(Mole0)=0, btype(Mole0,Atom0)=N/A  ==> Mole_Atom(Mole,Atom)=F 
+
+Rule NO. 3. 
+inda(Mole0)=0 a=F 1034 ==> b=F 966    conf:(0.93) < lift:(1.53)> lev:(0.21) [335] conv:(5.85)
+inda(Mole0)=0 bond(Mole, atom)=F 1034 ==> Mole_Atom(Mole,Atom)=F 
+
+%%%%%%%%%%%%%
+Financial 
+acc: account
+order: debt
+loan: loan
+trans: transaction
+
+loan, acc:   a
+loan, tran: b
+loan, order : c
+
+
+cic: cash in credit
+c: loan_order
+
+
+1. operation(trans0)=cic 816516 ==> type(trans0)=Credit c=F 776214    conf:(0.95) < lift:(2.13)> lev:(0.14) [411812] conv:(11.22)
+operation(trans0)= cash in credit  ==> type(trans0)=Credit, loan_order(loan, order)=F  [rule no.1]
+
+13. frequency(acc0)=Monthly 1253530 ==> a=T 603973    conf:(0.48) < lift:(1.36)> lev:(0.05) [161165] conv:(1.25)
+
+frequency(acc0)= frequency of issuance of statements: Monthly  ==> loan_acc(loan, acc)=T   [rule no.13]
+
+
+
+%%%%%%%%%%%%%%
+imdb
+
+movies, actors : a
+movies, directors: b
+movies, users: c
+
+
+ Rule no. 1: deterministic, 2nodes ==> rnodes
+ 
+ cast_num(movies0,actors0)=N/A genre(movies0,directors0)=N/A 5552928 ==> a=F b=F 5552928    conf:(1) < lift:(2.8)> lev:(0.23) [3568492] conv:(3568492.68)
+ Rule no. 10. 
+ isEnglish(movies0)=T a=F 5704092 ==> cast_num(movies0,actors0)=N/A 5704092    conf:(1) < lift:(1.96)> lev:(0.18) [2792222] conv:(2792222.24)
+
+
+
+
+ %%%%%%%%%%%%%%
+ Hep
+
+ bio, dispat  : a
+indis, dispat : b
+inf, dispat : c
+
+
+
+
+
+ %%%%%%%%%%%%%%
+ Mondial
+ 
+ country0, country1: a
+ country0, economy0: b
+ country0, economy1: c
+
+
+
+ %%%%%%%%%%%%%%
+ UW
+
+person0: student
+
+ advidedBy (person0,person1) : a
+ person0,course0 : b
+ person1,course0 : c
+ 
+
+
+Rule No. 1 : exclusive relation
+ professor(person1)=0 1916 ==> student(person1)=1 1916    conf:(1) < lift:(1.48)> lev:(0.22) [617] conv:(617.89)
+
+
+ Rule No. 7 :
+  professor(person1)=0 1916 ==> student(person1)=1 a=F 1916    conf:(1) < lift:(1.48)> lev:(0.22) [617] conv:(617.89)
+  
+  professor(person1)=0  ==> student(person1)=1  advidedBy(person0,person1)=F 
