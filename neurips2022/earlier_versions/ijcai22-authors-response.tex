@@ -1,0 +1,116 @@
+% IJCAI-ECAI 2022 Author's response
+
+% Template file with author's response
+
+\documentclass{article}
+\pdfpagewidth=8.5in
+\pdfpageheight=11in
+\usepackage{ijcai22-authors-response}
+
+
+\usepackage{times}
+\usepackage{soul}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[small]{caption}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{lipsum}
+\usepackage[dvipsnames]{xcolor}
+\urlstyle{same}
+
+\newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
+
+\begin{document}
+We appreciate the reviewers' constructive comments and will carefully consider their suggestions. We respond to the important concerns as follow:
+\vspace{-0.1in}
+\section{Reviewer 1}
+% I noticed that even strength statistics (e.g. EVG/EVP) were omitted from the evaluation. I don't know enough about Ice Hockey but these statistics were found in the site linked and I was curious as to what the data would look like.
+1. \textcolor{blue}{\it "Even strength statistics (e.g. EVG/EVP) were omitted..."}
+
+\noindent Yes, we will include the correlations between evaluation metrics and EVG/EVP in the revised version.
+
+\noindent 2. 
+% In Figure 2, 3 agents are considered but in Section 3.1, only 2 agents (home, away) are defined. Could you clarify on how Figure 2 and Figure 3 should be interpreted? In Figure 3, why are the action-values for Neither scored so high when the game is near ending?
+\textcolor{blue}{\it "Could you clarify Figure 2 and 3? Why are the action-values for Neither scored so high when the game is ending?"}
+
+\noindent Our value function predicts the chance of scoring the {\bf next} goal.
+However, when the game is about to end, there is a high probability that neither the home team nor the away team can score the next goal.
+%so we define a latent agent "Neither" and assign it a +1 reward when the game ends up with nobody scores. The model learns to assign large action values to the agent "neither" for the game-ending events.
+
+\noindent 3.\textcolor{blue}{\it "What is GIM (T1) in Table 4?"}
+\noindent GIM (T1) should be T0-GIM, and we will revise this typo.
+
+
+\vspace{-0.1in}
+\section{Reviewer 2}
+%  In section 4.2, the density estimation is based on the expectation of Z, which is the Q function. Thus, it seems like there is no fundamental difference between this part and the CMAF. I want to know if more quantile information can be used here.
+\noindent 1. \textcolor{red}{\it "In section 4.2... I want to know if more quantile information can be used here."} 
+We utilize the expectation of Z as the condition in CMAF. 
+If we directly use the quantile values as conditions, these  high dimensional conditioning values will be more informative than the input ($x=(s,a)$) and the model will become more sensitive to conditioning values than inputs, which influences the measurement of {\bf input} density. 
+
+% This paper uses NDQFN (Zhou et.al. 2021) to estimate the quantile distribution. However, NDQFN is designed for IQN, while some simple method such as NC-QRDQN can work for the QRDQN which is employed by this paper according to equation (1) of Section 4.1, and may be empirically more efficient. Some explorations about this is required.
+% Reference: Zhou, Fan, Jianing Wang, and Xingdong Feng. "Non-crossing quantile regression for distributional reinforcement learning." Advances in Neural Information Processing Systems 33 (2020): 15909-15919.
+\noindent 2. \textcolor{red}{\it "...NDQFN is designed for IQN, while some simple method such as NC-QRDQN can work for the QRDQN which is employed by this paper according to equation (1) of Section 4.1... Some explorations about this is required..."}
+NDQFN and NC-QRDQN are the works from the same group, and we believe NDQFN is more advanced according to their line of research. Our paper uses a general quantile representation of value functions for the ease of understanding, and we will add a more detailed clarification about the advantages of the non-decreasing structure of NDQFN in the appendix.
+
+\noindent 3. \textcolor{red}{\it "I'd like to see the potential application of this framework in other RL environments other the Ice Hockey in this paper."} 
+Note that this is an application paper focused on ice hockey and IJCAI welcomes application papers.  We address the question of player evaluation in ice hockey and therefore demonstrate the approach with real professional ice hockey data. The framework can be adapted to other RL environments (e.g., other sports or autonomous driving) which we will mention as future work.
+
+%Our paper focuses on agent evaluation. This method can be expanded to evaluate human drivers' performance in the autonomous driving environment or measure the performance of e-sports players. We will discuss these potential applications in the revised version.
+\vspace{-0.1in}
+\section{Reviewer 3}
+% The authors stated in section 3 about the motivation that "a distributional shift between the games in the training and testing dataset," meanwhile offline RL algorithms cannot be used to avoid this problem while evaluating the players' performance.
+% However, in section 5, the authors utilized a density model to measure the uncertainty of the value function, and made the value function avoid the uncertainty based on the density estimation. This methodology is the same as the uncertainty-based offline RL algorithms, such as [O'Donoghue et al., 2018; Agarwal et al., 2020; Kumar et al., 2020].
+1. \textcolor{ForestGreen}{\it 
+"...in section 5, the authors utilized a density model to measure the uncertainty of the value function...This methodology is the same as the uncertainty-based offline RL algorithms."
+}
+A common approach in offline RL consists of penalizing uncertain states in order to lower bound Q-values (e.g., Kumar et al., 2020]).  However, as explained in Section 1, the goal of our paper is not control, but to evaluate players' actions.  Penalizing uncertain states distorts values and therefore this approach cannot be used for policy evaluation.  This explains why it is better to model uncertainty instead of penalizing.  While O'Donoghue et al. (2018) model Q-value uncertainty, they do not address distribution shift.  They model epistemic uncertainty for exploration in online RL.  Note also that Agarwal et al. (2020) do not address distribution shift.  They simply suggest that distribution shift may not arise when there is enough offline data.  
+
+%The goal of offline RL is to control agents, whereas our goal is to evaluate agents. To avoid uncertain states, offline RL intentionally penalizes their values, and the goal of measuring uncertainty is to determine the scale of penalization. However, we argue this penalization influences evaluation, especially when we are computing action impacts (the difference of action values between two consecutive steps). Penalizing the values of some states while leaving other states uninfluenced will reduce the accuracy of evaluation. 
+
+% Besides, to solve the distributional shift between training and testing datasets, it is more natural to think of supervised learning technologies such as importance-weighting for the density-ratio calibration, or the outlier detection to avoid the out-of-distribution data. It is weird to connect it with a risk-averse situation.
+\noindent 2. \textcolor{ForestGreen}{\it "Besides, to solve the distributional shift between training and testing datasets, it is more natural to think of supervised learning technologies ... It is weird to connect it with a risk-averse situation."}
+% We learn a risk-sensitive metric from an "offline" dataset,
+The distributional-shift can be measured by "epistemic" uncertainty while the risk-sensitivity is related to "aleatoric" uncertainty. We build different models (CMAF and NDQFN) to capture these different types of uncertainty.  We are not trying to connect distributional-shift with risk sensitivity. Instead, we measure them independently.
+
+\noindent 3. \textcolor{ForestGreen}{\it "Also, This work only considers the ice hockey dataset. But there exist many mature multi-agent simulators. Why just narrow the method to this environment?"}
+In this work, we focus on learning from human players' trajectories from an offline dataset instead of utilizing sample from simulators. This is to solve a practical player evaluation problem for ice hockey.
+% This work is based on a play-by-play dataset that records only the action of the player controlling the puck. This is consistent with some industrial concerns: collecting a game-tracking dataset that records all the player movements often requires allocating an extra multi-camera system, whereas collecting a play-by-play dataset just needs the computer vision on broadcast video (which often focuses on the player controlling the ball).  Building multi-agent models is an important future direction with the advancement of data collecting systems.
+
+
+\vspace{-0.1in}
+\section*{Reviewer 4}
+1. \textcolor{orange}{\it "Section 3.1 – isn’t the defensive game taken into account? See also Caption of Figure 2, please clarify."}
+Our model does consider the defensive team by modelling history of their movements. We use this design since our work is based on a popular play-by-play dataset that records only the movements of players controlling the puck. To overcome the partial observability, we use the action history of the defensive team (see also Section 3.1). 
+
+% The division of a game into goal-scoring episodes seems to be quite limiting – what about for examples situations where a Home play does not lead to scoring, and is followed by a subsequent Away action, possibly multiple times, until a team scores?
+\noindent 2. \textcolor{orange}{\it "The division of a game into goal-scoring episodes seems to be quite limiting..." }
+The value function can assign values to all actions (for both the home and away team) by measuring their influence on scoring opportunity. For example, in Figure 3, although the home team (in blue) does not eventually score a goal (between 3300 and 3500 seconds), the value function still assigns significant credit to home players.  A goal scored by away team will not cancel the credit of home players as long as they have created scoring opportunities for their team.
+
+\noindent 3. \textcolor{orange}{\it "Is a numerical discount factor sufficient?"}
+The discount factor measures the importance of immediate actions versus previous actions on scoring. To assign considerable credit to the action in the beginning of a scoring episode, we set it to a value very close to 1 (Appendix A.2).
+
+\noindent 4. \textcolor{orange}{\it Would’t a more fine-grained episode decomposition be more informative?}
+Ice hockey is a game with sparse rewards. A more fine-grained episode is likely to end up with zero reward and thus no credits can be assigned.
+
+% Apparently Actions are labeled with the team – however, an action is the result of players moving without ball and possibly fainting movements. Is this aspect of the game disregarded? 6. Is the number of players in the field (e.g. due to expulsions) taken into account?
+\noindent 5. \textcolor{
+orange}{\it "Is the number of players in the field (e.g. due to expulsions) taken into account?"}
+The observations include a manpower feature that indicates the number of players in the field.
+% Due to the limitations of the play-by-play dataset (see our first response and Section 3.1), modelling all the players' actions (including the players without the puck), is impractical, but these important directions, including multi-agent RL settings, could be explored with a game tracking dataset that contains all players' movements.
+
+% Please justify the need for a risk-sensitive player evaluation metric, the motivation is only technical but fails to justify why it is important to better capture relevant aspects of the game itself
+\noindent 6. \textcolor{orange}{\it Please justify the need for a risk-sensitive player evaluation...}
+The risk-sensitive metric can 
+% measure the risk of a player' action. For example, in Figure 5, the two action values have the similar expectations, but different variance (uncertainty)
+identify player's playing styles (risk-seeking or risk averse). This is an important advancement over the metrics based on expected values (e.g., Q values). Even if player movements have the same impact on scoring expectation, they might have significantly different impact on the scoring distribution (Figure 5). Being able to differentiate these differences enables a deeper understanding of a player's type.  
+
+\end{document}
+

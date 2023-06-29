@@ -1,0 +1,239 @@
+\documentclass{article}
+
+\usepackage[final]{neurips_2020}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{subfig}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb,amsfonts}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{soul}
+\usepackage{todonotes}
+\usepackage{lipsum}
+
+
+\newcommand{\context}{c}
+\newcommand{\expect}{\mathbb{E}}
+\newcommand{\expectdiff}{ED}
+\newcommand{\scorediff}{SD}
+\newcommand{\latentvariables}{\mathbf{z}}
+\newcommand{\inference}{q}
+\newcommand{\generation}{p}
+\newcommand{\hiddenstate}{\mathbf{h}}
+\newcommand{\state}{\mathbf{s}}
+\newcommand{\action}{\mathbf{a}}
+\newcommand{\reward}{\boldsymbol{r}}
+\newcommand{\goal}{g}
+\newcommand{\player}{pl}
+\newcommand{\pindex}{i}
+\newcommand{\prior}{p}
+\newcommand{\bin}{\beta}
+\newcommand{\boxscore}{b}
+\newcommand{\home}{\it{Home}}
+\newcommand{\away}{\it{Away}}
+\newcommand{\none}{\it{Neither}}
+\newcommand{\team}{\it{team}}
+\newcommand{\egoal}{\it{goal}}
+\newcommand{\Qobs}[2]{Q_{#1}^{\it{obs}}(#2)}
+\newcommand{\Qmodel}[3]{\hat{Q}_{#1}(#2,#3)}
+\newcommand{\Qbin}[2]{\hat{Q}_{#1}(#2)}
+% \newcommand{\observation}{\boldsymbol{x}}
+\newcommand{\softmax}{\boldsymbol{\phi}}
+\newcommand{\sigmoid}{\boldsymbol{\sigma}}
+\newcommand{\observation}{\boldsymbol{o}}
+\newcommand{\GaussianParameters}{\boldsymbol{\omega}}
+\newcommand{\BernoulliParameters}{\theta}
+\newcommand{\system}{VaRLAE\;}
+% for Variational Recurrent Ladder Agent Encoder
+
+\setcounter{table}{3}
+\setcounter{figure}{3}
+
+\title{Appendix}
+
+\begin{document}
+
+\maketitle
+\appendix
+\section{Experiment Details}
+We provide an introduction to the dataset, the implementation details, and the comparison methods.
+\subsection{Dataset Details}
+In this paper, we apply a play-by-play dataset constructed by Sportlogiq~\footnote{\url{https://sportlogiq.com}}. They capture the information of an on-puck player (player possessing the puck) from broadcast videos with computer version techniques. Table~\ref{table:feature-of-dataset} shows a complete set of features.
+
+\begin{table}[htbp]
+\begin{center}
+\caption{The complete list of features. 
+% ES, SH and PP respectively denote Even Strength, Shorted Handed and Power Play. 
+The table utilizes adjusted spatial coordinates where negative numbers denote the defensive zone of the acting player and positive numbers denote his offensive zone. Adjusted X-coordinates run from -100 to +100 and Adjusted Y-coordinates from 42.5 to -42.5, where the origin is at the ice center. 
+}
+\label{table:feature-of-dataset}
+\begin{tabular}{c|c|l}
+\toprule
+Type & Name & Range \\ \hline\hline
+\multirow{5}{*}{\begin{tabular}[c]{@{}c@{}}Spatial Features\end{tabular}} & X Coordinate of Puck & {[}-100, 100{]} \\
+ & Y Coordinate of Puck & {[}-42.5, 42.5{]} \\
+ & Velocity of Puck & $(-\infty,+\infty)$ \\
+ & Angle between & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}[$-3.14$, $3.14$] \end{tabular}}\\ 
+ & the puck and the goal & \\
+ \hline
+\multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Temporal Features\end{tabular}} & Game Time Left & {[}0, 3,600{]} \\
+ & Event Duration & (0, $+\infty$) \\ \hline
+\multirow{6}{*}{\begin{tabular}[c]{@{}c@{}} In-Game Features\end{tabular}} & Score Differential & $(-\infty,+\infty)$ \\
+ & \multirow{1}{*}{\begin{tabular}[c]{@{}c@{}} Manpower Situation \end{tabular}} & \{Even Strength,
+ Shorted Handed, Power Play\} \\
+ & Home or Away Team & \{Home, Away\} \\
+% \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Action\\ Type\end{tabular}} & Action Name & One-hot-vector \\
+ & Action Outcome & \{successful, failure\} \\ \bottomrule
+% Pre-game & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Box Score\end{tabular}} &\multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}$(-\infty,+\infty)$\end{tabular}}\\  Statistics &  & \\
+% \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Implementation Details.}
+\paragraph{Running settings.} All the models (including our \system and other comparison models) are implemented by Tensorflow 1.15 (the source code has been uploaded as supplementary materials). The models are trained by mini-batch stochastic gradient descent (with batch size 32) applying Adam optimizer. The learning rate is set to 1E-5. To validate our model, we randomly divide the NHL dataset containing 1,196 games into a training set (80\%), a validation set (10\%), and a testing set(10\%) and implement 5 independent runs. In each run, the models are trained for a total of 10 epochs (over 40M events), and testing is implemented by the hold-out validation. In this paper, we report the results in the format of mean $\pm$ variance computed across these 5 runs. All the experiments are run on a local machine with 32 GB main memory, a TITAN X GPU (12 GB memory), and a GeForce GTX 1080 GPU (12 GB memory). 
+
+\paragraph{Model settings.} 
+% We set the dimension of the one-hot player vector $\player_{t}$ is 1,003 (the number of recorded players). 
+Within our \system, the dimensions of latent variables $\latentvariables_{\state}$, $\latentvariables_{\action}$ and $\latentvariables_{\reward}$ are set to 64, 64 and 32 respectively (following~\cite{SonderbyLadderVAE16}). The sizes of other hidden layers (in both LSTM and MLP) are set to 256. The max trace length of LSTM is set to 10 following previous works~\cite{Liu2018,littlestone}. 
+% Compared to a single layer CVAE, our \system requires to update more parameters in a run, but running time and model complexity do not show 
+
+% \textsf{input(batch\_size, max\_trace\_length, feature\_number)}$\rightarrow$ \textsf{\system}
+% \textsf{Player(batch\_size, player\_dim)}$\rightarrow$\textsf{batch\_norm}$\rightarrow$\textsf{ELU}$\rightarrow$\textsf{fc(256,256)}
+
+% \paragraph{Significance Test.} 
+% To assess whether generations from our \system are significantly different from that of other models, we conduct a paired t-test over the predicted player id computed with the testing dataset. The null hypothesis is rejected with p-values smaller than 1E-5 for all comparison models. Similar tests are also performed on the expected goals and the final score differences to show the embeddings from our \system has a significant influence on application models.
+
+\subsection{A Summary for Comparison methods}
+% In our paper, we have compared our \system with the other 7 methods. 
+Table~\ref{table:comparison-methods} summarizes the differences between these comparison methods and our model. our \system applies a hierarchy of latent variables to embed players. To make fair comparisons, we set the dimension of the embedding vector to 256 for all comparison methods.
+
+{\bf N/A} indicates no player information is applied and {\bf Pids} indicates that we directly input one-hot player ids to the downstream application models.
+
+{\bf Deterministic Encoder (DE)~\cite{ganguly2018problem}:} DE applies a conditional auto-encoder structure. DE maps the current observations ($\observation_{t},\action_{t},\reward_{t},\player_{t}$) to the acting players by minimizing a reconstruction loss. It does not model the game history.
+
+{\bf Conditional Variational Auto-Encoder (CVAE)~\cite{WalkerDGH16}:} Our implementation of CVAE follows our player representation framework (Section 3.2). It learns a player representation conditioning current observations: $q(\latentvariables_{t}|\observation_{t},\action_{t},\reward_{t},\player_{t})$ (without modeling the game history).
+
+{\bf Multi-Agent Behavior Encoder (MA-BE)\cite{GroverRepresent18}:} MA-BE applies a policy embedding framework and models the behavior of players by imitation learning. To identify the embedding for different agents, MA-BE introduces an exponential triple loss to punish the similarity among embeddings for different players. The scale of triple loss is controlled by a hyper-parameter ($\lambda$). A large $\lambda$ produces well-distinguished player embeddings, but it also generates huge loss variance which leads to large gradient and undermines the model convergence. When we apply MA-BE to learn the player representations, we find it hard to determine such a $\lambda$ that can adequately facilitate both the player identification and model convergence, given the large number of players and the unbalanced representation. In the experiment, we examine different $\lambda$ and obtain a reasonable model performance when $\lambda= 0.0001$.
+
+{\bf Conditional Variational RNN (CVRNN):} CVRNN implements a VRNN~\cite{ChungKDGCB15} conditioning on the game context. CVRNN includes a CVAE at each RNN cell. It models the game history with RNN hidden states and learns a contextualized player representation $q(\latentvariables_{t}|\state_{t},\action_{t},\reward_{t},\player_{t})$ following our player representation framework (Section 3.2).
+
+{\bf Conditional Auto-Encoder RNN (CAERNN):} CAERNN applies a similar implementation to CVRNN except, at each RNN cell, it replaces the Variational Auto-Encoder with a deterministic Auto-Encoder.
+
+
+\begin{table}[!htbp]
+    % \addtolength{\tabcolsep}{-2pt} 
+    \caption{A summary of comparison methods. }
+    \label{table:comparison-methods}
+    \centering
+    \resizebox{1\columnwidth}{!}{
+    \begin{tabular}{c|cccccc}
+        \toprule
+         & \begin{tabular}[c]{@{}c@{}}Hierarchical  \\ Embedding\end{tabular} &
+         \begin{tabular}[c]{@{}c@{}}Game \\ History\end{tabular} &  \begin{tabular}[c]{@{}c@{}}Stochastic-\\ Model\end{tabular} & \begin{tabular}[c]{@{}c@{}}Continuous-\\ Value Embedding\end{tabular} &
+         \begin{tabular}[c]{@{}c@{}}Player-\\ Information \end{tabular} &
+         \begin{tabular}[c]{@{}c@{}}Policy-\\ Representation \end{tabular} \\ \hline\hline
+        N/A & No & No & No & No & No & No\\ 
+        Pids & No & No & No & No & Yes & No\\ 
+        DE & No & No & No & Yes & Yes & No\\
+        CVAE & No & No & Yes & Yes & Yes & No\\
+        MA-BE & No & Yes & No & Yes & Yes & Yes\\
+        CAERNN & No & Yes & No & Yes & Yes & No\\
+        % LSTM & Yes & No & No & No & yes  \\
+        CVRNN & No & Yes & Yes & Yes & Yes & No\\ 
+        \system & Yes & Yes & Yes & Yes & Yes & No\\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+
+\section{A Spatial Illustration for the Shot Attempts}
+We randomly sample 20 games from the training data and show a spatial illustration of shots that happened during these games in Figure~\ref{fig:shots-spatial}. This plot is consistent with our description (section 5.3) that the training data is highly imbalanced and only a few shot attempts lead to a goal. The plot also shows that the locations of the successful and the unsuccessful shots are highly overlapped. Without knowing the identity of the acting player, it is hard to determine whether the shot can be made or not.
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/shot_scatter_plot_blend.png}
+    \caption{The spatial illustration of shot attempts on a hockey rink. We apply the adjusted coordinate (see Table~\ref{table:feature-of-dataset}) and the play always flows from left to right. Blue circles represent unsuccessful shots and red stars indicate successful shot.  }
+    \label{fig:shots-spatial}
+\end{figure}
+
+\section{Additional Results}
+% We report some additional results to support our paper conclusions.
+\subsection{Embedding Visualization}
+We visualize the embeddings generated by our \system and CAERNN to compare the difference between a stochastic encoder and a deterministic encoder. In our paper, we label the embedding with players' positions, names, and locations. Here, we complement these visualizations by further labeling the action types of players (the visualization method is explained in our paper.). 
+\begin{figure}[!htbp]
+    \centering
+    {{\includegraphics[width=0.32\columnwidth]{./figures/embedding-visualization-action-o.png} }}%
+    {{\includegraphics[width=0.32\columnwidth]{figures/embedding-visualization-action-n.png} }}%
+    {{\includegraphics[width=0.32\columnwidth]{./figures/embedding-visualization-action-d.png} }}%\\
+    {{\includegraphics[width=0.32\columnwidth]{./figures/embedding-visualization-caernn-action-o.png} }}%
+    {{\includegraphics[width=0.32\columnwidth]{figures/embedding-visualization-caernn-action-n.png} }}%
+    {{\includegraphics[width=0.32\columnwidth]{./figures/embedding-visualization-caernn-action-d.png} }}%
+    \caption{Embedding visualization. Each data point corresponds to a player embedding conditioning on the game context at the current  time step $t$.  
+    The player embeddings are labelled by the action types. The embeddings are computed by \system ({\it top plots}) and CAERNN ({\it bottom plots}).} 
+    \label{fig:embedding-visualization}%
+\end{figure}
+
+\subsection{Layer-by-Layer Latent Representation:}
+Based on the T-SNE visualization, Figure~\ref{fig:layer-visualization} illustrates the testing samples from contextualized approximate posteriors $q(\latentvariables_{\state,t}|\state_{t},\player_{t})$ and $q(\latentvariables_{\action,t}|\action_{t},\latentvariables_{\state,t}, \player_{t})$ at higher layers (see Figure~1 in our main paper) that encode Pids. 
+%trained under the supervision of Pids. 
+Without knowing the complete game context information (containing $\state_{t}$, $\action_{t}$, and $\reward_{t}$), these samples distinguish player positions less. Compared to plots for our player representation (the top left plot in Figure~\ref{fig:embedding-visualization}), the plots in figure~\ref{fig:layer-visualization} show a smaller shrinkage effect with many samples clustering around the mean. The latent representation becomes progressively more aligned with player positions 
+%clustering in lower layers 
+(consistent with observations in \cite{SonderbyLadderVAE16}). This shows the benefit of utilizing $q(\latentvariables_{\reward,t}|\cdot)$ at the lowest layer of \system as player representation.
+
+
+\begin{figure}[htbp]
+    \begin{minipage}[b]{.5\columnwidth}
+    \centering
+        \includegraphics[width=0.7\columnwidth]{figures/player_enc_z_cluster5_cvrnn_3901_state_position.png}
+    \end{minipage}%
+    \begin{minipage}[b]{.5\columnwidth}
+    \centering
+        \includegraphics[width=0.7\columnwidth]{figures/player_enc_z_cluster5_cvrnn_3901_state_action_position.png}
+    \end{minipage}%
+    \caption{Visualizing samples (labelled by player positions) from $q(\latentvariables_{\state,t}|\state_{t},\player_{t})$ (left) and $q(\latentvariables_{\action,t}|\action_{t},\latentvariables_{\state,t}, \player_{t})$ (right).}
+    \label{fig:layer-visualization}
+    \vspace{-0.2in}
+\end{figure}
+
+\subsection{Temporal Illustrations of the Absolute Error}
+To show more details of the predicted score difference results , we separately illustrate the mean$\pm$variance plot (Figure 3 in Section 5.3) for all the evaluated embedding methods.
+\begin{figure}[!htbp]
+    \centering
+    \subfloat[N/A]{{\includegraphics[width=0.25\columnwidth]{./figures/temporal-absolute-difference-shadow-plot-NA.png}}}
+    \subfloat[Pids]{{\includegraphics[width=0.25\columnwidth]{./figures/temporal-absolute-difference-shadow-plot-pid.png} }}
+    \subfloat[DE]{{\includegraphics[width=0.25\columnwidth]{./figures/temporal-absolute-difference-shadow-plot-DE.png} }}
+    \subfloat[CVAE]{{\includegraphics[width=0.25\columnwidth]{./figures/temporal-absolute-difference-shadow-plot-CVAE.png} }}\\
+    \subfloat[MA-BE]{{\includegraphics[width=0.25\columnwidth]{./figures/temporal-absolute-difference-shadow-plot-MA-BE.png} }}
+    \subfloat[CVRNN]{{\includegraphics[width=0.25\columnwidth]{./figures/temporal-absolute-difference-shadow-plot-CVRNN.png} }}
+    \subfloat[CAERNN]{{\includegraphics[width=0.25\columnwidth]{./figures/temporal-absolute-difference-shadow-plot-CAERNN.png} }}
+    \subfloat[VaRLAE]{{\includegraphics[width=0.25\columnwidth]{./figures/temporal-absolute-difference-shadow-plot-VaRLAE.png} }}
+    \caption{Temporal illustrations of the absolute error between predicted score differences and final score differences. We report mean$\pm$variance of the error at each time step for all compared methods.} 
+\end{figure}
+
+
+\subsection{Posterior Collapse}
+Figure~\ref{fig:kld} shows the Kullback–Leibler Divergence (KLD) between the posterior and the context-specific prior (for the variational encoders) during training. Among the studied methods, CVAE quickly reduces KLD to a small value (around 0.0005) after training on only a few games, but its performance is less unstable without modeling the game history. CVRNN converges slower and the KLD gradually drops to a very small number (around 3E-05) after training, which indicates the prior can replace the posterior and the decoder can generate the distribution of acting player without the player representation. It is consistent without intuition that a high capacity decoder like RNN can lead to posterior collapse~\cite{ZhuBNVAE2020}. Our \system significantly alleviates this problem by applying a hierarchy of latent variables and a deterministic warm-up during training (Section 4). The KLD reduces smoothly until it converges a value around 0.03.
+
+\begin{figure}[!htbp]
+    \centering
+    {{\includegraphics[width=0.32\columnwidth]{figures/kld_clvrnn_plot.png} }}%
+    {{\includegraphics[width=0.32\columnwidth]{figures/kld_cvrnn_plot.png} }}%
+    {{\includegraphics[width=0.32\columnwidth]{figures/kld_cvae_plot.png} }}
+    \caption{The KLD between the posteriors and the priors during training for \system, CVRNN and CVAE (from left to right).}
+    \label{fig:kld}
+\end{figure}
+
+\bibliographystyle{unsrt}
+\bibliography{master}
+\end{document}

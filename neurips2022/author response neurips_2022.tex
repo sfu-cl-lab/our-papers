@@ -1,0 +1,269 @@
+\documentclass{article}
+
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2022
+
+
+% ready for submission
+\usepackage{neurips_2022}
+\usepackage{soul}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2022}
+
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2022}
+
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2022}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+\title{Author Response}
+
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\section{Summary of Updates}
+
+Dear Reviewers, Area Chairs, and Program Chairs, 
+
+We are greatly thankful for the insightful comments and suggestions, which are very helpful for us to further improve this work.
+The major concern is over our experiment section. We agree some clarifications, explanations, and experiments should be added (**highlighted in blue**). To clarify our modifications and prevent misunderstanding, we summarize our major updates in the following:
+
+- **Player Ranking** We expand section 5.2 by providing more explanations for the risk-sensitive ranking results (Table 1 and 2). We show the motivation of rankings under different confidence levels $c$ and a brief explanation of the results from perspective of action frequency.
+
+- **Confidence level** We show the motivation of applying $c$ as a hyper-parameters (Section 6.1) and briefly explain why we set $c$ to some specific values in different empirical studies.
+
+- **Correlation with Success Measures** We add the motivations of applying the correlations with success measures to evaluate the player ranking metrics (Section 6.1). We also expand the explanation of our experiment results according to the comments from our reviewers.
+
+- **Significance Test** In order to show our results are significantly different from comparison methods, we add a Wilcoxon test to the experiment results in Section 6.3.
+
+
+Apart from the academic contributions in the paper, our risk-measuring method has **realistic contribution**: we presented our ideas to some experts from the sports industry. They agreed on the value of computing the risk of player movements and suggested ranking players or teams according to their risk. Their intuition is **stronger teams or players take more risks**. This intuition is consistent with our findings in the risk-sensitive experiment (Section 6.2). 
+Sports, as a sequential-decision game and an important part of the entertainment industry, often admires risk.
+On the other hand,  most RL algorithms (typically offline RL) prefer a **conservative policy** to handle risk and uncertainty. We believe this difference requires more study in the following work. 
+
+\section{Reviewer 1}
+
+\begin{itemize}
+    \item "{\it Can you give some intuitions for the case study results in Table 1/2. The only comment is that there are more defensemen in the higher confidence top 10 -- although this is true empirically -- why is this a prediction of higher confidence? It doesn't seem to clearly correlate with the other metrics shown. Tyler Seguin and Connor McDavid have similar stats and play in the same position so what accounts for them being in the different top 10 lists? The authors mention a couple of qualitative findings e.g., "low confidence favors centers, strong scoring ability) but its not clear what is driving these predictions. How would a layperson use this tool?}"
+    
+    Our paper shows that the risk-averse ranking includes more defensemen. This illustrates how a layperson could use our method to gain insight into which types of players exhibit different risk-taking behavior. Our intuitive explanation for this finding is that the riGIM risk metric is correlated with the action types a player performs. Intuitively, in ice-hockey, some actions are more risk-seeking (shot) in terms of scoring while other actions are risk-averse (carry or pass). In general, players on the backcourt (e.g., defensemen) are more likely to perform risk-averse actions that have smaller variance and are not directly related to shooting and scoring.
+    In terms of the rankings for Tyler Seguin and Connor McDavid, stats are based only on goals and assists, whereas the RiGIM metric uses all the play-by-play data so it is context-aware and 
+    takes into account much more information. So we would not expect RiGIM to always agree with the conventional stats. We provide the stats to provide some context for readers who may not be familiar with who these players are. Also it shows that our ranking passes the ``eye test" in that well-known stars that are big goal scores/contributors stand out.
+
+    \item "{\it For tables 4/5/6, why was c set to 0.5 instead of fit on the validation set? How would one decide on a value for c in practice?}"
+    
+    This is because the comparison methods are expectation-based metrics. For a fair comparison, in section 6.1, we set $c$ to 0.5 for a risk-neutral version of RiGIM. The risk-sensitive results are shown in Section 6.2. Setting $c$ to the value that maximizes the RiGIM correlations in the validation set could be an alternative approach. Intuitively, it will further improve the RiGIM performance, although the comparison could be a little biased. In practice, the coaches or managers should pick a confidence value depending on whether they want to find the risk-seeking players (with a small $c$) or the risk-averse ones (with a large $c$). This is similar to determining the confidence value in the Value-at-Risk (VaR) or Conditional VAR (CVaR) measures.
+
+    \item "{\it In table 6, many of the bolded numbers are not different at a level of statistical significance. Ideally, the algorithm can be run more times for the camera ready to reduce the uncertainty about performance."}
+    
+    Table 6 reports MAE at each bin constructed by discretizing the game context. The differences between the estimated scoring chances and real scoring chances are averaged over all the state-action pairs in a bin. The difference is significant based on a wilcoxon test and results for all samples, but the difference might be less significant if we look at the averaged numbers. 
+    
+    % We will increase number of runs on the revised version.
+
+    \item "{\it Why is the correlation with traditional metrics a good way of measuring success? The "success measures" are very simplistic features of the game so it could be that a better correlation with these measures is actually a signal that the algorithm is doing something naive rather than sophisticated.}
+    
+    We study the correlation to success measures because 1) Unlike the supervised learning task or the RL controlling task, the player (or agent) evaluation task has no ground-truth labels or rewards to maximize, so we follow previous studies [2,4] and use the correlation. 2) In the experiment, we study the correlation to all measures (including some penalty measures) instead of one. In this way, we can know whether these player evaluation metric can form a comprehensive evaluation to a player's overall performance. 
+    
+    \item "{\it Why do traditional metrics better correlate with risk-seeking versions of (smaller values of c)?}
+    
+    We assume the reviewer is asking for an explanation of the results about the risk-sensitive experiment in Section 6.2. In this experiment, we find that when c becomes smaller, RiGIM becomes risk-seeking, and thus achieves a higher correlation with success measures. Firstly, we want to clarify that the curve is not monotonically decreasing (see lines 296-298). The curve often reaches its maximum with a small $c$. This is because, in general, a risk-seeking metric assigns larger values to risk-seeking actions like shot. Compared to other actions, risk-seeking actions are more correlated to success measures like a goal. However, when $c=0$, the metric becomes overly risk-seeking and the correlation will drop.
+    
+    \item "{\it Will the post-hoc calibration techniques developed in this work also apply to the offline RL control setting? Might this be a better approach than constraining the actions that the agent can take?"}
+    
+    Our work is based on some settings in Offline RL (see "learning from offline data" in Section 3.2). Although we solve an agent-evaluation task instead of a controlling task, we believe the approach of measuring aleatoric and epistemic risks can be adapted to Offline RL. With the risk measure, the offline RL agent can prevent state-action pairs with large uncertainty during testing.
+    
+\end{itemize}
+
+\subsection{Round 2}
+
+Dear reviewer, we are greatly thankful for your reply. We hope the following response can solve your concerns.
+
+"*Wouldn't these actions have different expected values and not just be different in terms of risk-seeking? I don't understand why a defenseman would be lower variance. Or is that an emergent finding of this study?*"
+
+Yes, it is true that the expected values of shots should be larger, but we also observe that the variance of the shot distribution is larger than that of carry and pass. To better illustrate this point, **we have added 5 visualizations of the distributions of shots, carry and pass in appendix C.3**. Shots are more risk-seeking, but defenseman performs shot less frequently, so they have a lower ranking based on the risk-seeking estimation.
+
+
+"*Does this reveal that their EV is just so high that they are included regardless of risk preferences? I feel that there is a real missed opportunity to explain what the metric is doing in terms that could be useful to a practitioner.*"
+
+Connor McDavid appears in our top-10 risk-averse ranking (Table 2), but he is **not** included in the risk-seeking one (Table 1). Tyler Seguin, on the other hand, is highly ranked by both of our rankings, although his RiGIM values are significantly different (13.71 v.s., 1.78) and the rating has changed (6th v.s., 9th). Risk preference does influence evaluation, but this influence has not dominated the ranking. The practitioner can use our model to analyze a player's performance by observing how his or her rating is influenced by risk levels. 
+
+"*I think the missing explanation is that I'm having a hard time reasoning about what a risk-averse but highly successful action should look like. Everything that is positive seems to qualify as "risk-seeking" to some extent. Is there some way that this metric might lead to a more nuanced understanding of defensive behavior (which don't seem to have as strong traditional metrics associated with them).*"
+
+A general intuition we receive from our experiment and the sport experts is "stronger teams or players take more risks" (we introduce in our summary of update), but we believe the intuition must depend on the game context. 
+Let's use the shots in Figure 1 as an example, where the shot (b) is more risk-seeking than the shot (a) (since the estimated value distribution of action (b) has larger uncertainty, please check the updated version of our paper). In general, shot (b) is preferred since its distribution has a mode on the high scoring chance (0.8). However, in some cases, when the game is tied and about to end, players might prefer (a) since they cannot afford the loss of next-goal scoring chance (which indicates their opponent will have higher chance of scoring the next goal, see Figure 3).
+
+
+*"Why would it be biased? There is no reason to think that the conventional metrics represent a risk-neutral measure of play. If you tune the hyper-parameter on a validation set that is unlikely to introduce bias."*
+
+We are aware of your concerns and will add the results after hyper-parameters fine-tuning (The experiments are still running on our machine, and we will update the results as soon as possible.) .
+
+
+\section{Reviewer 2}
+
+We thanks again for the prompt update and clarification of the review. We appreciate the reviewer for raising some points that require more explanations and clarification. We have significantly improved our paper as per your feedback. We hope these updates can more or less resolve your concerns.
+
+- "*Section 4 is a technical section, that is missing an intuitive description of their method, and that is missing a high level explanation. Can the authors please add to their technical description a high level explanation of the problems of related work that is addressed by their method. What is different, and why does it work better?*"
+
+Section 4 introduces a detailed implementation of the "Uncertainty-Aware RL framework" (introduced in Section 3), where we show the risk-sensitive player evaluation requests modeling both the epistemic and aleatoric uncertainty inherent to the environment dynamic. Ignoring any of these uncertainties will cause inaccurate estimation, which we show in the experiment (by comparing with GIM and Na-RiGIM). In Section 4, we introduce a distributional-RL model and a feature-space density estimator to estimate the aforementioned epistemic and aleatoric uncertainties. To the best of our knowledge, none of the previous RL works are based on the direct estimation of both uncertainties.
+Since estimating the epistemic and aleatoric uncertainty together is very challenging in practice, the technical details are included to demonstrate why our model (distributional RL + SP-CNF) is a proper uncertainty estimator from both an intuitive and theoretical perspectives. We have added the clarification to our revised version (see lines 129-130 and lines 170-172).  
+
+- "*Examples of where the explanations can be improved; In Section 6.1 the authors write: “If we remove SP-CNF or replace it with other uncertainty estimators, most correlations become weaker except for the correlations with the SHP and SHG measures.” Can you please explain or speculate why this is the case?*"
+
+This is because SHP and SHG rarely happen in a season (since scoring with fewer players on ice is difficult). Since SP-CNF is a density estimator, it assigns a small density to these rarely-occurring events. According to equation (5), the events with a small density ($p(\cdot|{z}_{E})$) will be filtered. This filtering is necessary since events with negligible probability are considered to have large epistemic uncertainty (see Section 4.2), but the filtering sometimes causes a loss of information. This is the main reason why RiGIM does not have a leading correlation with SHP and SHG. Capturing the correct values for these out-of-distribution events is generally difficult (check [Gal2016]). We have expanded the explanation in the revised version (lines 297-305).
+
+[Gal2016] Gal, Yarin. "Uncertainty in deep learning." PhD thesis, 2016.
+
+- "*Section 6, and Table 4 and 5 show correlations that are rather low, yet section 6.2 and section 6.3 fail to address this issue.*"
+
+We have measured the correlations with both **success** measures and **penalty** measures, i.e., the correlations in the columns on the right-hand side of the dashed line (in Tables 4 and 5) should be as low as possible since the metrics refer to penalties.  In the terms of the scale of correlations, we study the correlation to **all** measures (including some penalty measures) instead of one. Having perfect correlations or anti-correlations to all these measures is impossible since they measure different aspects of a player. We on the other hand study which player evaluation metric can better correlate with these measures and thus forms a comprehensive evaluation of a player's overall performance.  We have clarified it in the revised version (see lines 281-285).
+
+- " *The authors write: “RiGIM(c) becomes risk-seeking, and thus achieves a higher correlation with success measures. However, the correlations drop when c approaches 0. This observation is consistent with the fact that an overly risk-seeking estimate cannot reflect the real contributions of players.” Why is that so, why can it not reflect the real contributions?*"
+
+This is because when c approaches 0, RiGIM will focus on the quantile level 1 (since 1-c=1, check the line after equation (5)), which corresponds to the largest value in the support of a distribution. In our case, this is the most optimistic estimation of the value that an action can achieve. For example, in the value distribution of shots, $Z^{1}(\cdot,shot)$ will be close to 1 most of the time, since the best outcome of a shot is scoring. However, in fact, only a few shots can turn into goals for both soccer and ice-hockey. The overly risk-seeking estimation can induce the mismatch between estimated values and game facts. We have expanded the explanation in the revised version (see lines 320-323).
+
+- "*The authors may also consider adding an explicit problem statement and revising their contributions to address questions of the field...*"
+
+**Response:**  Our work involves interdisciplinary study from both sports analytics and Reinforcement Learning (RL). From the perspective of sports analytics, player evaluation is an important topic that has been studied by many previous works(see our related work Section 2). Assigning values to players' actions is a common approach for player evaluation, but none of the previous works has considered risk or uncertainty during evaluation. Our work extends the action-value approach by adding the dimension of risk to evaluation. This extension is **fundamental** since sports games (especially team sports) have **inherent risk and uncertainty**, which should not be ignored during evaluation. When it comes to RL, some recent works (i.e., offline RL) have studied the approach of adjusting action values according to uncertainty estimates, but these works often **do not explicitly model the epistemic and aleatoric uncertainties** (in most cases, the estimation can not be disentangled into epistemic and aleatoric uncertainties, see [Mavrin2019]). Our work proposes a framework that enables this estimation. We have clarified it in the revised version (see line 55-63).
+
+[Mavrin2019] Borislav Mavrin, Hengshuai Yao, Linglong Kong, Kaiwen Wu, and Yaoliang Yu. Distributional reinforcement learning for efficient exploration. In International Conference on Machine Learning (ICML), volume 97, pages 4424–4434, 2019.
+
+- "*The method is called RIGIM Distributional methods previously used in Atari and Mujoco are now used to evaluate real games.*"
+
+Our method RIGIM is new and proposed for agent evaluation. It is novel and has not been applied to solve the control problems in Atari and Mujoco.
+
+- "*What is the problem that is addressed?*"
+
+We explain the problem in the first paragraph (from lines 17 to 23) of the introduction. The last sentence of this paragraph explains that the paper tackles the problem of player evaluation. To be more specific, we are considering a problem of assigning proper credits to players' actions by conditioning on a risk level. This is a fundamental challenge in sports analytics.
+
+% "What is the contribution to the field?"
+
+% Regarding the contributions, the paragraph from lines 55 to 60 (labeled "contributions") summarizes the contributions.  Overall, the main message of the paper is described throughout the introduction where we advocate the design and use of evaluation techniques that take into account risk (i.e., variance in action outcomes) since player rankings change depending on the amount of risk desired. We have presented our ideas to some experts from sport industry. They agreed on the value of computing the risk of player movements. They also suggested rank players or team according to their risk. Their intuition is stronger teams or players take more risks. This message is consistent with our finding is in risk-sensitive experiment (Section 6.2).
+
+- "*How it builds on other work, how it compares to other work, what the strengths and weaknesses compared to other work are,*"
+
+Our empirical evaluation follows an ablation design: We iteratively remove parts from RiGIM, and we show these simplifications degrade RiGIM to risk-neural or tabular-based baselines. This ablation study allow us to analyse the influence of each component in RiGIM, including the risk-sensitivity and uncertainty estimation models. The results in section 6.1-6.3 are presented by following the structure of the ablation study. We have expanded the explanation about experiments results, including the strengths and weaknesses compared to comparison methods in the revised version.
+
+% "The overall correlations to standard measures are quite low, why is that? What can be done to improve?"
+
+% We have measured the correlations with both **success** measures and **penalty** measures, i.e., the correlations in the columns on the right hand side of the dashed line (in table 4 and 5) should be as low as possible since the metrics refer to penalties.  In the terms of scale of correlations, we study the correlation to **all** measures (including some penalty measures) instead of one. Having perfect correlations or anti-correlations to all these measures is impossible since they measure difference aspects of a player. We, on the other hand, study which player evaluation metric can better correlated with these measures and thus forms a comprehensive evaluation to a player's overall performance.  
+
+% Furthermore, the goal is not to have perfect correlation for the columns on the left or perfect anti-correlation for the columns on the right since this would mean that our metric does not capture anything more than existing metrics that are often simplistic.  This point was made by reviewer kCNJ. 
+
+================
+
+Dear area chair,
+
+We appreciate the fast turn around in deleting the wrong review from reviewer tcWQ and getting this reviewer to post a new review about our paper.  However, we are now writing to express ***serious concerns about the lack of content*** of this new review and would like to suggest that this reviewer be replaced by a new reviewer who is familiar with RL and ideally risk-sensitive RL.  
+
+The new review is short and consists of many generic criticisms without any reference to the content of the paper.  It seems the reviewer rushed to submit this review **without really reading our paper**.  
+
+The second sentence of the review says "The method is called RIGIM Distributional methods previously used in Atari and Mujoco are now used to evaluate real games."  However our method RIGIM is new and was never applied to Atari and Mujoco.  
+
+The reviewer wrote "My main problems with the paper are the clarity of the message... what is the problem that is addressed? What is the contribution to the field? ..."
+
+The problem that we tackle is clearly stated in the first paragraph from lines 17 to 23.  In fact the last sentence of this paragraph clearly explains that the paper tackles the problem of player evaluation, which is a fundamental challenge in sports analytics.  Regarding the contributions, the paragraph from lines 55 to 60 is clearly labeled "contributions" and summarizes the contributions.  Overall, the main message of the paper is described throughout the introduction where we advocate the design and use of evaluation techniques that take into account risk (i.e., variance in action outcomes) since player rankings change depending on the amount of risk desired. 
+
+The review says: "The description is quite technical and does not provide intuition how it works."
+
+Figure 1 provides intuitions by illustrating how the method works. 
+
+The review says "The method has a low correlation to standard measures, but appears to perform somewhat better than other methods."
+
+It seems the reviewer did not realize that the correlations in the columns on the right hand side of the dashed vertical line should be as low as possible since the metrics refer to penalties.  Furthermore, the goal is not to have perfect correlation for the columns on the left and perfect anti-correlation for the columns on the right since this would mean that our metric does not capture anything more than existing metrics that are often simplistic.  This point was made by reviewer kCNJ. 
+
+The reviewer clearly indicates throughout the review that he/she had trouble understanding the paper.  However there is no reference to any specific concepts or parts of the paper.  Without any reference to specific concepts or parts of the paper, we can't clarify much and this suggests that the reviewer simply lacks familiarity with RL. Hence we recommend to replace this reviewer by a reviewer familiar with RL and ideally risk sensitive RL.
+
+
+================
+
+The review submitted seems to pertain to a different paper than our paper.  Can reviewer tcWQ double check his/her review and submit a review for the right paper?
+
+The content of the current review does not match our paper for the following reasons:
+
+1. **This review criticizes sentences that do not appear in our paper**. This review criticizes two sentences 1) "This study aims to help soccer managers make decisions based on data when they formulate their team tactics." 2) "However, very few use data science and artificial intelligence for soccer tactics."  But, we cannot find these sentences in our paper.
+
+2. **The references discussed in the review do match those from our paper**. The review claims "Reference [4] is supposed to be about transfer fees and the use of data. Reference [5] is about ‘the internet of things’. Reference number [6] is about how difficult it is to analyze tactics in soccer." On the other hand, references [4,5,6] in our paper are about inverse RL and distributional RL. They have no relation to soccer.
+
+3. **The review lists a section that is not part of our paper.** The review claims " Section 5.4 contains a summation of comparisons that were made", but our paper do not have section 5.4.
+
+4. **The main criticism does not match the topic of  our paper.** The main criticism in this review is about "soccer tactics". While our paper is about player evaluation in team sports, there is no discussion of soccer tactics in our paper.
+
+Dear Area Chairs / Senior Area Chairs,
+
+We are writing to inform you that reviewer tcWQ has posted a review for another paper to our article. None of his or her comments match our paper as shown below.  Can you ask the reviewer to post a review that is about our paper or simply remove this review?
+
+1. **This review criticizes sentences that do not appear in our paper**. This review criticizes two sentences 1) "This study aims to help soccer managers make decisions based on data when they formulate their team tactics." 2) "However, very few use data science and artificial intelligence for soccer tactics."  But, we cannot find these sentences in our paper.
+
+2. **The references discussed in the review do match those from our paper**. The review claims "Reference [4] is supposed to be about transfer fees and the use of data. Reference [5] is about ‘the internet of things’. Reference number [6] is about how difficult it is to analyze tactics in soccer." On the other hand, references [4,5,6] in our paper are about inverse RL and distributional RL. They have no relation to soccer.
+
+3. **The review lists a section that is not part of our paper.** The review claims " Section 5.4 contains a summation of comparisons that were made", but our paper do not have section 5.4.
+
+4. **The main criticism does not match the topic of  our paper.** The main criticism in this review is about "soccer tactics". While our paper is about player evaluation in team sports, there is no discussion of soccer tactics in our paper.
+
+
+
+\section{Reviewer3}
+
+\begin{itemize}
+    \item "{\it What does employing a risk-based cutoff add to the existing analyst techniques? Having a variety of cut-off thresholds (like all hyperparameters) makes assessment more complex, begging the question: what are the benefits for these additional complexity costs? The empirical results make one useful case about better calibration, but the text would benefit from clarifying the impact and significance to how analysts (or players or coaches) would use this new information.}"
+    
+    The cut-off, determined by confidence value $c$, is proposed to differentiate risk-seeking players from risk-averse ones. Following the designs of popular risk-measures like Conditional Value at Risk (CVaR), we treat $c$ as a hyper-parameter.  In practice, we allow the coaches or managers to pick a confidence value depending on whether they want to find the risk-seeking players (with a small $c$) or the risk-averse ones (with a large $c$). Figure 1 shows an example: if we set $c=0.8$, the action (a) will have larger values and the corresponding player could be assigned more credits. However, when we set $c=0.2$, the player who performs action (b) should be ranked higher, although these two actions (a and b) have the same expected value.
+    
+    \item "{\it What new insights can be obtained from the rankings provided? How are these of interest to those with domain expertise? Practitioners?}"
+    
+    Table 1 shows a risk-averse ranking (with confidence 0.2) that favors offensive players (e.g., Centres (C)) with strong scoring ability. Table 2 shows a risk-sensitive ranking that highlights players in defensive positions. We use Aleksander Barkov and John Klingberg as two examples. These tables illustrates how a domain expert could use our method to gain insight into which types of players exhibit different risk-taking behavior. Also Figures 5 and 6 indicate which action types are riskier. In practice, team and managers are encouraged to use our method for predictive estimation for players' performance.   
+    
+    \item "{\it How does RiGIM scale? and How does model training scale in terms of compute resources needed?}"
+    
+    We believe RiGIM can be easily extended to offline RL and other learning-from-demonstration applications given a trajectory dataset (see Section 6.4 and Appendix A.1). In this work, since the input to the models are symbolic features (i.e., features with physical meaning like x-y coordinates and velocities), we simply use a fully-connected neural layer as feature extractor. However, if the data is in the format of images and text, stronger feature extractors will be required. We report the Computational Resources and Running Time in Appendix A.4.
+    
+    \item "{\it How much does the model improve as the number of matches observed increases?}"
+    RiGIM is uncertainty-aware. Intuitively, increasing the number of training games reduces the scale of epistemic uncertainty, but the scale of aleatoric uncertainty will not decrease ([8] explores this phenomenon), so our uncertainty-aware method should still out-perform risk-neural (or expectation-based) methods. 
+    
+    \item "{\it How effective is the model for evaluating new players (presumably since the player is not a feature of the model cold start problems should be lesser)?}"
+    
+    The inputs of our model are state-action pairs without including the identities of players. Thanks to the generalization ability of neural models, we can assign a proper value to the movements of unknown players if his or her playing style is similar to that of players in the training dataset.
+    
+    \item "{\it  (Table 4) Why might SI do so well at predicting Goals and Game Winning Goals compared to the alternatives? There is a substantial gap between the performance of SI and the runner up for Goals (0.596 vs 0.477) and GWG (0.409 vs 0.266). What is RiGIM failing to capture that SI does?}"
+    Table 4 is for player evaluation instead of predicting goals. In other words, the model knows the scoring states (with reward 1)  during a game. The goal is not to predict whether a goal will be scored after performing an action in a state but to assign all the state-action pairs (mostly with reward 0) some proper credits. If the credits are correctly assigned, the corresponding metric should be well correlated with most of the well-known success measures.
+    When it comes to SI, this is a model based on discretizing the continuous state features (time and space), then applying dynamic programming to a tabular state representation (See citation [1]).
+    It correlates well with goal measures (Goals and Game Winning Goals) but has relatively poor correlations with other measures. \textcolor{blue}{This is because assigning an adequate value for {\em all} actions, including those with only intermediate effects on goal scoring, requires credit propagation over longer sequences (up to 13 steps).} For continuous spatio-temporal processes like ice hockey, neural nets are better at credit propagation than discretizing and using a tabular representation.
+    This finding is consistent with  previous works [4] and [33].
+    
+\subsection{Round 2}
+
+Dear reviewer, we are greatly thankful for your reply. We hope the following response can solve your concerns.
+
+- "*My question around scalability was intended to ask about the big-O scalability of runtime or memory of the algorithm. Or an empirical estimate of it such as running the model on 20\%, 40\%, 60\%, 80\%, 100\% of the data and assessing the runtime and GPU memory needs.*"
+
+We apologize for our misunderstanding. We include an analysis of the computational complexity and memory complexity in appendix A.4.
+
+- "*Is there any empirical validation of this for the model (even if only the full RiGIM model)? Practitioners would presumably want some validation that the model with more data will better support their decision-making through more accurate assessments. I believe the scaling explanation, but given the task (separating aleatory & epistemic uncertainty) is novel it would help to demonstrate this holds empirically.*"
+
+We will add an experiment to validate our claim. As [8] shows, the scale of epistemic uncertainty will reduce as more data are observed. In our work, epistemic uncertainty is measured by the feature-space density estimator. We will add an experiment to compute the scale of the density of a testing game as more games are observed during training. We will report the results and notify the reviewer as soon as our experiment is done.  
+\end{itemize}
+
+
+
+
+\end{document}
+

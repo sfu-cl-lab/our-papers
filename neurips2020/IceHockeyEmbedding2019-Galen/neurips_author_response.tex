@@ -1,0 +1,120 @@
+\documentclass{article}
+
+\usepackage{neurips_2020_author_response}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb,amsfonts}
+\usepackage{lipsum}
+\usepackage[dvipsnames]{xcolor}
+
+\newcommand{\context}{c}
+\newcommand{\expect}{\mathbb{E}}
+\newcommand{\expectdiff}{ED}
+\newcommand{\scorediff}{\it{SD}}
+\newcommand{\latentvariables}{\mathbf{z}}
+\newcommand{\inference}{q}
+\newcommand{\generation}{p}
+\newcommand{\hiddenstate}{\mathbf{h}}
+\newcommand{\state}{\mathbf{s}}
+\newcommand{\action}{\mathbf{a}}
+\newcommand{\reward}{\boldsymbol{r}}
+\newcommand{\goal}{g}
+\newcommand{\player}{pl}
+\newcommand{\pindex}{i}
+\newcommand{\prior}{p}
+\newcommand{\bin}{\beta}
+\newcommand{\boxscore}{b}
+\newcommand{\home}{\it{Home}}
+\newcommand{\away}{\it{Away}}
+\newcommand{\none}{\it{Neither}}
+\newcommand{\team}{\it{team}}
+\newcommand{\egoal}{\it{goal}}
+\newcommand{\Qobs}[2]{Q_{#1}^{\it{obs}}(#2)}
+\newcommand{\Qmodel}[3]{\hat{Q}_{#1}(#2,#3)}
+\newcommand{\Qbin}[2]{\hat{Q}_{#1}(#2)}
+% \newcommand{\observation}{\boldsymbol{x}}
+\newcommand{\softmax}{\boldsymbol{\phi}}
+\newcommand{\sigmoid}{\boldsymbol{\sigma}}
+\newcommand{\observation}{\boldsymbol{o}}
+\newcommand{\GaussianParameters}{\boldsymbol{\omega}}
+\newcommand{\BernoulliParameters}{\theta}
+\newcommand{\system}{VaRLAE\;}
+
+
+\begin{document}
+We appreciate the reviewers for reading our paper and their constructive comments. This response letter is to clarify our major claims according to the comments from \textcolor{Blue}{reviewer 1}, \textcolor{Red}{reviewer 2}, \textcolor{ForestGreen}{reviewer 3} and \textcolor{orange}{reviewer 4}. To save space, we first answer some shared concerns from reviewers and then answer their specific questions separately. 
+% It worth spending more efforts explaining for each of their points, but unfortunately we are allowed to use only one page.
+
+{\bf Shared Concerns:}\\
+1) \textcolor{red}{\bf Reviewer 2:}\textcolor{red}{\it  "I would have liked to have seen comparisons to more fundamental baselines that didn't make the same assumptions, such as other recurrent models and other models meant for multi-agent modelling"}\\
+% While the authors clearly demonstrate the strength of their approach compared to its variations (which is appreciated) there are still a limited set of comparisons being made here. I would have liked to have seen comparisons to more fundamental baselines that didn't make the same assumptions, such as other recurrent models and other models meant for multi-agent modelling.
+\textcolor{ForestGreen}{\bf Reviewer 3:}\textcolor{ForestGreen}{\it "socialGAN, SoPHie and other multi-agent representation learning approaches should be added..."}\\
+% socialGAN, SoPHie and other multi-agent representation learning approaches should be added as comparison metrics or a reason for not using them should be added as they explicitly learn individual representations with group context. Contextual information was added into these types of models in prior work (e.g. Tensor fusion) which would serve as a nice comparison for event prediction.
+\textcolor{orange}{\bf Reviewer 4:}\textcolor{orange}{"The paper mentions other approaches and it might be useful to see a comparison to other papers..."}\\ 
+Our comparison method includes MA-BE, which is a recently proposed multi-agent embedding model applied to sequential data  (Line 226 in submission). SocialGAN and other multi-agent methods are designed for trajectory data and therefore not directly applicable to our event data. For example, SocialGAN describes a model to discriminate fake from real trajectories. %implements a discriminator to judge whether the generated trajectory is real, but we
+% are predicting acting player and it is less rational to judge whether the player id is real. 
+We mentioned modelling player interactions for play-by-play data as a topic for future work in our conclusion.
+
+2) \textcolor{ForestGreen}{\bf Reviewer 3:}\textcolor{ForestGreen}{\it “The shot quality prediction is similar to the results reported in "“Quality vs Quantity”... Can the authors provide some key insights from the proposed approach that was missing in this and other prior work on ..."}\\
+% The shot quality prediction is similar to the results reported in "“Quality vs Quantity”: Improved Shot Prediction in Soccer using Strategic Features from Spatio temporal Data". Can the authors provide some key insights from the proposed approach that was missing in this and other prior work on shot prediction.
+\textcolor{orange}{\bf Reviewer 4:}\textcolor{orange}{\it "It is unclear that the ladder aspect of the architecture is providing an improvement on this application."}\\
+% empirical evaluation: There are number of weaknesses with regard to the empirical evaluation. Most directly, the expected goal results (fig 2) are not conclusive. It is unclear that the ladder aspect of the architecture is providing an improvement on this application task.
+Prior work on ice hockey shot prediction does not take into account the identity of the shooter. Certainly not as part of a general player representation framework.
+For instance, the scoring chance is higher for a top player v.s., an average player under similar game context. Table 1 shows the benefits of modelling shooter-specific effects.
+%A player's preference (e.g., left/right hand) can also influence his performance, so the representation should be able to identify players under different game context, where \system performs better (see Table 1). 
+%The leading performance is because 
+
+The ladder structure mitigates posterior collapse during training (Lines 148-156). We provide a detailed discussion and results is in C.3 of our Appendix. 
+
+
+{\bf Comments from \textcolor{Blue}{Reviewer 1}}\\
+1) \textcolor{Blue}{\it "I would have liked to see some analysis of all the latent variables, not just ones at the lowest level."}\\
+% 1) The technical contribution is incremental, as it seems like the model described is a fairly straightforward combination of VRNNs with ladder network structure for latent variables. The hierarchical latent variables are what distinguishes VaRLAE from other baselines presented in the paper, so I would have liked to see some analysis of all the latent variables, not just ones at the lowest level.
+We visualize only $\latentvariables_{\reward,t}$ (at the lower level of ladder structure) because it conditions on $\state_{t},\action_{t},\reward_{t}$ and contains the most complete information about each player. The latent variables at higher levels, for example $\latentvariables_{\state,t}$, have no access to $\reward_{t}$ or $\action_{t}$ (This is where our contextualized model differs from the traditional ladder structure). We have visualized the $\latentvariables_{\state,t}$ and $\latentvariables_{\action,t}$, but found them less informative so we did not include them. Specifically,  latent values from the higher levels distinguish players less, and show a smaller shrinkage effect:  many points are smoothly distributed around the mean. (Similar results were observed in the ladder VAE paper [16]). We can discuss the higher levels in the final version.
+
+
+2)\textcolor{Blue}{\it "The main takeaway for the embedding visualization in Figure 2 is also unclear...How do the embeddings compare with those from CVRNN, the best baseline? I suspect they might look similar to VaRLAE"}\\
+% The main takeaway for the embedding visualization in Figure 2 is also unclear. I can see that the embeddings from VaRLAE are “shrunk” together due to optimizing the KL-divergence towards a Guassian prior. On the other hand, the CAERNN embeddings don’t look as clean, but the clusters are still distinguishable from each other and they don’t perform much worse in downstream tasks (the biggest difference is F1-score for expected goal estimation). Figure 2 looks like it’s mainly highlighting the difference between variational and non-variational models. How do the embeddings compare with those from CVRNN, the best baseline? I suspect they might look similar to VaRLAE.
+Our main contribution is the idea of Player representation through Player Generation (Section 3). CVRNN and \system are different architectures for implementing this fundamental idea. Since both methods use the same general idea, we expected their visualization to look similar. In particular, both exhibit a shrinkage effect leading to similar T-SNE projections. 
+The key point of Figure 2 is to show the difference of a model without a shrinkage effect, namely traditional auto-encoder (CAERNN). 
+% is to illustrate the shrinkage effect, so it is rational to compare a shrinkage encoder (\system) and a , which have the {\it same} format of input and output but a different encoder design.
+
+3)\textcolor{Blue}{\it "The performance using VaRLAE player representations is on par with CVRNN player representations ... The effectiveness of the learned representations is unclear some more experiments (or domains)".}\\
+% The experimental results on the downstream tasks show marginal improvements over the best baseline. The performance using VaRLAE player representations is on par with CVRNN player representations for both expected goal estimation (comparable F2-score and AUC) and score difference prediction (lower mean, but larger variance within range). The effectiveness of the learned representations is unclear some more experiments (or domains)
+Our paper covered three popular tasks in the Ice hockey domain.
+CVRNN is indeed the strongest 
+%baseline according to our 
+ablation method implementing Representation-Through-Generation (Section 5.1). Our \system  beats it by an average of 8\% (over 12\% for players with sparse participation) in player identification. Expected goals results are mixed: CVRNN has higher precision, \system has the second-best precision, and achieves overall best performance (Recall and F1-score). 
+
+
+
+{\bf Comments from \textcolor{red}{Reviewer 2}}\\
+1) \textcolor{Red}{\it "The paper is very dense and at times lacking in clarity... The paper is well-written at a local level. However,..."}.\\
+% The paper is very dense and at times lacking in clarity. In particular, the end of the introduction essentially walks the reader through the whole approach, but leaves out a number of important details. This was confusing to me, as a reader, as it was unclear to me when or where I might find these missing details. In addition, a large portion of the content of the back half of the introduction is repeated in the later sections, which further adds to this confusion. 
+Thank you for your suggestions which will help us improve clarity. 
+% We admit it worth spending more effort working on the structure of this paper, but we also have another three reviewers believing this paper is generally easy to follow and well written. 
+
+
+2) \textcolor{Red}{\it "I was somewhat disappointed by the broader impacts section..."}\\
+% The authors focus almost entirely on positive outcomes. It seems to me that a model like this is likely only usable by teams with substantial technical resources or the ability to acquire those resources. As such, it may lead to an increased inequality between the top and bottom teams. In addition, given that models like this can only draw inferences from within a learned distribution there's little room for players to grow or change, meaning that a model like this may also increase inequality between players.
+We will make our code available, to help level the analytics playing field. While technical skills do require resources, professional scouts are even more expensive. 
+% The computing resource is relatively cheaper than hiring professional analytics. 
+Our model focuses only on a player's professional skills without considering race, gender, or age, which encourages fairness and reduces bias. Extending the model to capture player development over time is a great idea, thank you for the suggestion.
+
+{\bf Comments from \textcolor{orange}{Reviewer 4}} (also Reviewer 1)\\
+1) \textcolor{orange}{"There is reason to believe that the VaRLAE architecture is applicable to more domains than just hockey..."}. \\
+% There is reason to believe that the VaRLAE architecture is applicable to more domains than just hockey. It would strengthen the paper to see this applied to more sports datasets or even non-sports datasets that share similarities with respect to individual tracking (eSports for example?) with a large number of entities. The hockey dataset is fairly unique, however, with features (e.g. puck data), and this type of experimentation will tell readers how much the particular architecture is tuned to the particularities of this one dataset.
+It is true that our \system can be applied to other team sports, as we mention in our conclusion. We thought it was important to provide a thorough in-depth evaluation of several tasks in one domain. 
+% However, play-by-play data is not readily available for other sports (???). 
+% the sports dataset is confidential and we have only match records for Ice Hockey (examples will be published for experiments).  but this is beyond our scope.
+
+\end{document}
